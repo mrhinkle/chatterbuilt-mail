@@ -249,6 +249,29 @@ body.ro [data-mut] { opacity: 0.4; }
 .palette .opt:last-child { border-bottom: 0; }
 .palette .opt.on, .palette .opt:hover { background: var(--accent-soft); }
 .palette .opt .note { font-family: var(--font-mono); font-size: 11px; }
+.ctx { background: rgba(255, 255, 255, 0.86); border: 1px solid var(--line); border-left: 3px solid var(--violet); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
+.ctxhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ctxhead .lbl { color: var(--violet); }
+.ctxlines { display: flex; flex-direction: column; gap: 3px; }
+.srctag { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 650; padding: 1px 6px; border-radius: 5px; background: var(--violet-soft); color: var(--violet); }
+.srcs2 { display: flex; gap: 4px; flex-wrap: wrap; }
+.src { font-size: 10.5px; padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.src.hit { border-color: rgba(109, 40, 217, 0.35); color: var(--violet); }
+.src.none { opacity: 0.6; }
+.src.bad { border-color: rgba(217, 72, 15, 0.4); color: var(--warm); }
+.reading .banner, .draftready { margin: 0; }
+.draftready { display: flex; flex-direction: column; gap: 6px; }
+.attlist { display: flex; gap: 6px; flex-wrap: wrap; }
+.att1 { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; padding: 2px 4px 2px 9px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.8); }
+.att1 button { border: 0; background: transparent; font-size: 14px; line-height: 1; color: var(--muted); padding: 0 4px; }
+.msg .body.html { white-space: normal; }
+.htmlbody { overflow-x: auto; }
+.htmlbody table { border-collapse: collapse; max-width: 100%; }
+.htmlbody td, .htmlbody th { padding: 2px 6px; vertical-align: top; }
+.htmlbody p { margin: 0 0 10px; }
+.htmlbody blockquote { margin: 6px 0; padding-left: 10px; border-left: 2px solid var(--line-2); color: var(--muted); }
+.htmlbody .imgalt { color: var(--faint); font-size: 12px; }
+.htmlbody details { margin-top: 8px; }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .field > span { font-size: 11.5px; font-weight: 600; color: var(--muted); }
@@ -345,6 +368,7 @@ body.ro [data-mut] { opacity: 0.4; }
         <h2 id="subject">Pick a thread</h2>
         <div class="acts" id="acts" hidden>
           <button class="btn sm" id="sumBtn" type="button">Summarize</button>
+          <button class="btn sm" id="routeBtn" type="button" data-feat="route" title="Suggests where this thread should go across your systems">Route</button>
           <button class="btn sm" id="contactBtn" type="button" data-feat="contacts" title="Save this person to your contacts">+ Contact</button>
           <button class="btn sm" id="taskBtn" type="button" data-feat="tasks" data-mut>→ Task</button>
           <button class="btn sm" id="moveBtn" type="button" data-feat="move" data-mut>Move / Copy</button>
@@ -352,6 +376,8 @@ body.ro [data-mut] { opacity: 0.4; }
           <button class="btn sm" id="starBtn" type="button" data-mut>Star</button>
           <button class="btn sm" id="readBtn" type="button" data-mut>Mark read</button>
           <button class="btn sm" id="archiveBtn" type="button" data-mut>Archive</button>
+          <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" title="Snooze, or remind me if no reply (b)">Snooze</button>
+          <button class="btn sm" id="htmlBtn" type="button" data-feat="html" aria-pressed="false" title="Show messages with their formatting, cleaned up">Formatted</button>
           <a class="btn sm ghost" id="openLink" href="#" target="_blank" rel="noopener">Open in Gmail ↗</a>
         </div>
       </div>
@@ -383,13 +409,20 @@ body.ro [data-mut] { opacity: 0.4; }
         </div>
         <div class="row">
           <label class="note" data-feat="tone"><input type="checkbox" id="toneChk" checked> Match how I write to this person</label>
+          <label class="note" data-feat="context"><input type="checkbox" id="ctxChk" checked> Use what my other systems know</label>
           <label class="note" data-feat="calendar"><input type="checkbox" id="calChk"> Offer open times from my calendar</label>
+        </div>
+        <div class="row">
+          <button class="btn sm" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
+          <label class="btn sm" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
+          <span class="attlist" id="attList"></span>
         </div>
         <textarea id="body" placeholder="Your reply. Type here, or hit a button above for a first draft."></textarea>
         <div class="row">
           <button class="btn" id="saveDraftBtn" type="button" data-mut>Save to Gmail drafts</button>
           <button class="btn primary" id="sendBtn" type="button" data-mut>Send</button>
           <label class="note"><input type="checkbox" id="replyAll"> Reply all</label>
+          <label class="note" data-feat="snooze"><input type="checkbox" id="remindChk"> Remind me in <select id="remindDays" aria-label="Days"><option>2</option><option selected>3</option><option>5</option><option>7</option></select> days if no reply</label>
           <span class="note" id="composeNote"></span>
         </div>
         <div class="confirmbox" id="confirmBox" hidden>
@@ -459,6 +492,10 @@ body.ro [data-mut] { opacity: 0.4; }
     lessons: "",              // lessons learned from your edits; the chatterbuilt-mail-improve skill writes these
     mailRules: [],            // durable rules, e.g. [{ text: "Receipts and invoices", op: "move", labelName: "Finance" }, { text: "Email from Stripe", from: "stripe.com", op: "archive" }]
     features: {},             // default on/off per feature for the Skills picker, e.g. { sweep: false }
+    context: [],              // read-only lookups on the person you're emailing: [{ label, server, tool, input with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}} }]
+    actions: [],              // extra Route actions: [{ key, label, server, tool, input with {{placeholders}}, ai: { field: "what the AI writes" }, when: "when it applies" }]
+    snippets: [],             // [{ name, text }]; {{firstName}} and {{myName}} are filled in
+    labelPrefix: "CB",        // Gmail label prefix for snooze, remind-me and morning-run drafts (CB/Snooze/2026-11-05)
     repoUrl: "https://github.com/mrhinkle/chatterbuilt-mail",
     supportUrl: "https://github.com/mrhinkle/chatterbuilt-mail/issues"
   };
@@ -500,6 +537,13 @@ body.ro [data-mut] { opacity: 0.4; }
     { key: "move", name: "Move and copy", desc: "File a thread into a folder, or forward a copy to another account.", how: "More on a row, or Move / Copy in the thread header." },
     { key: "unsub", name: "Unsubscribe", desc: "Finds the sender's unsubscribe link or address in the message headers.", how: "Unsubscribe in the thread header." },
     { key: "precheck", name: "Pre-send check", desc: "When you press Send, AI rereads your reply against the thread and flags unanswered questions, wrong names, dates or numbers, risky commitments, missing attachments, reply-all risks and tone, with a fixed version you can take or ignore.", how: "Automatic on Send. Send anyway skips it." },
+    { key: "context", name: "Context from your systems", desc: "When you open a thread, checks your connected systems (meetings, calendar, tasks, pipeline, contacts, newsletters, memory) for that person and topic, and shows what matters: open commitments, the last meeting, pipeline status. Drafts and the pre-send check use it too.", how: "Automatic when you open a thread. Untick \u2018Use what my other systems know\u2019 to leave it out of a draft.", needs: () => (CONFIG.context || []).length > 0, need: "Ask Claude to run chatterbuilt-mail-setup and name the systems to check." },
+    { key: "route", name: "Route", desc: "Suggests where a thread should go across your systems (a task, a Slack handoff, a contact, a snooze, a reminder) with the text already written. You edit and approve; nothing runs on its own.", how: "Route in the thread header, or press o." },
+    { key: "snooze", name: "Snooze and remind-me", desc: "Snooze a thread until a date, or get it back if nobody replies. Both are Gmail labels, so the morning run and Gmail itself see them.", how: "Snooze in the thread header (b), or tick Remind me under the reply box." },
+    { key: "drafts", name: "Drafts waiting in Gmail", desc: "Threads with a draft in Gmail (from the morning run or your own) get a tag. Open one and load the draft in a click; sending replaces it.", how: "Set up the morning run, or write drafts in Gmail." },
+    { key: "snippets", name: "Snippets", desc: "Reusable text with the person's first name filled in.", how: "Snippets under the reply buttons." },
+    { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons." },
+    { key: "html", name: "Formatted view", desc: "Shows messages with their links, lists and tables, cleaned of scripts, styles and tracking images.", how: "Formatted in the thread header." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
   let featState = {}; try { featState = JSON.parse(ls.get("cm.features") || "{}") || {}; } catch { featState = {}; }
@@ -516,7 +560,7 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- read-only ----------
-  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "forward", "create_label", "notion-create-pages"]);
+  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "forward", "create_label", "notion-create-pages", "delete_draft"]);
   function setRO(on, persist) {
     state.readOnly = !!on; document.body.classList.toggle("ro", state.readOnly);
     const b = $("roToggle"); b.setAttribute("aria-pressed", String(state.readOnly)); b.textContent = state.readOnly ? "Read-only on" : "Read-only";
@@ -613,7 +657,8 @@ body.ro [data-mut] { opacity: 0.4; }
     return "Chatterbuilt Mail improvement export, " + new Date().toISOString().slice(0, 10) + ". Ask Claude to run the chatterbuilt-mail-improve skill with this.\n\n" + JSON.stringify({
       app: "chatterbuilt-mail", exportVersion: 1, owner: CONFIG.ownEmail || "",
       voice: ls.get("cm.voice") || "", voiceSource: voiceSrc(), lessons: o.lessons || "",
-      rules: loadRules().map((r) => ({ text: r.text, op: r.op, labelName: r.labelName || null })),
+      rules: loadRules().map((r) => Object.assign({ text: r.text, op: r.op, labelName: r.labelName || null }, r.from ? { from: r.from } : {})),
+      snippets: ls.get("cm.snippets") ? loadSnippets() : null,
       features: featState, stats: { editedDrafts: o.edits.length, sentAsWritten: o.accepts || 0, rejectedSuggestions: o.rejects.length },
       recentEdits: o.edits.slice(-8), recentRejects: o.rejects.slice(-15)
     }, null, 2);
@@ -696,6 +741,7 @@ body.ro [data-mut] { opacity: 0.4; }
       const vs = state.variants[t.id]; const pv = state.preview[t.id]; const snip = m.snippet ? decodeEnt(m.snippet) : "";
       const tags = (t.waiting ? '<span class="pill wait">waiting ' + Math.max(1, Math.floor(state.age[t.id] || 0)) + 'd</span>' : "")
         + (vs && vs.length ? '<span class="pill drafted">drafted</span>' : "")
+        + (state.draftMap && state.draftMap[t.id] ? '<span class="pill drafted">draft in Gmail</span>' : "")
         + (tri ? '<span class="pill ' + esc(tri.priority) + '">' + esc(tri.priority) + '</span><span class="why">' + esc(tri.why) + '</span>' : "");
       return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + '" data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
         + '<span class="from">' + esc(who) + '</span>'
@@ -754,7 +800,7 @@ body.ro [data-mut] { opacity: 0.4; }
       renderList();
       loadPreviews();
       setStatus("connected", "live");
-      if (!append) maybeAutoRules();
+      if (!append) { maybeAutoRules(); loadDraftsMap(); }
     } catch (e) {
       if (token !== state.loadToken) return;
       list.innerHTML = '<div class="empty"><h2>Couldn\'t load threads</h2><p>' + esc(mcpCopy(e, GMAIL)) + '</p></div>';
@@ -787,7 +833,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const anyStar = ms.some((m) => (m.labelIds || []).includes("STARRED"));
     $("readBtn").hidden = !anyUnread;
     $("starBtn").textContent = anyStar ? "Unstar" : "Star";
-    reading.innerHTML = '<div id="sumBox" hidden></div>' + ms.map((m, i) => {
+    reading.innerHTML = '<div id="draftBox"></div><div id="ctxBox"></div><div id="sumBox" hidden></div>' + ms.map((m, i) => {
       const collapsed = ms.length > 2 && i < ms.length - 2;
       const body = String(m.plaintextBody || m.snippet || "").replace(/\r/g, "");
       const parts = splitQuoted(body);
@@ -801,6 +847,9 @@ body.ro [data-mut] { opacity: 0.4; }
     $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = "";
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
+    state.loadedDraftId = null; state.attachments = []; renderAtt();
+    const hb = $("htmlBtn"); hb.setAttribute("aria-pressed", "false"); hb.textContent = "Formatted";
+    showDraftBox(); loadContext(false);
   }
   async function fetchThread(id) {
     return call(GMAIL, "get_thread", { threadId: id, messageFormat: "PLAIN_TEXT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
@@ -846,7 +895,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const rows = state.threads.slice(0, 40).map((t) => { const m = (t.messages && t.messages[0]) || {}; return { id: t.id, from: m.sender || "", subject: m.subject || "", preview: (state.preview[t.id] || decodeEnt(m.snippet) || "").slice(0, 120), msgs: t.messageCount || 1 }; });
     const wantActs = featOn("review") && state.mode !== "waiting";
     let folders = [];
-    if (wantActs) { try { folders = (await loadLabels()).map((l) => l.name).slice(0, 150); } catch {} }
+    if (wantActs) { try { folders = (await loadLabels()).filter((l) => !isCbLabel(l.name)).map((l) => l.name).slice(0, 150); } catch {} }
     const tl = lessonsFor("TRIAGE");
     try {
       const text = await ask(MARK + " You triage their inbox. Reply with JSON only.",
@@ -924,7 +973,7 @@ body.ro [data-mut] { opacity: 0.4; }
       return m ? m[0] : "";
     } catch { return ""; }
   }
-  async function createTask(threadId, messageId) {
+  async function createTask(threadId, messageId, extra) {
     if (!threadId) return;
     const A = taskAdapter();
     if (!A) { toast("Tasks aren't set up yet. Ask Claude to run chatterbuilt-mail-setup and name your task app: Notion, Asana, Basecamp, Linear, Todoist, anything with a connector.", "err", 9000); return; }
@@ -946,16 +995,19 @@ body.ro [data-mut] { opacity: 0.4; }
         body: "From: " + (m.sender || "") + "\nSubject: " + (m.subject || "") + (when ? "\nDate: " + when : "") + "\n\n" + (excerpt ? excerpt.split("\n").map((l) => "> " + l).join("\n") : "> (no text body)") + "\n\n" + (url ? "[Open in Gmail](" + url + ")" : ""),
         text: "From: " + (m.sender || "") + (when ? " (" + when + ")" : "") + "\n\n" + excerpt + (url ? "\n\nOpen in Gmail: " + url : "")
       };
+      Object.assign(vals, extra || {});
       const p = await call(A.server, A.tool, fillTemplate(A.input, vals), { cache: false });
       const link = urlFrom(p) || deepFind(p, /^(permalink_url|permalink|url|app_url|web_url|html_url|link)$/i, /^https?:\/\//);
       taskdrop.classList.remove("busy"); taskdrop.classList.add("done");
       taskdrop.querySelector(".hint").textContent = "filed ✓";
       toast("Task created in " + esc(A.label || "your task app") + ": <strong>" + esc(vals.title) + "</strong>" + (link ? ' · <a href="' + esc(link) + '" target="_blank" rel="noopener">Open</a>' : ""), "ok", 8000);
       setTimeout(() => { taskdrop.classList.remove("done"); taskdrop.querySelector(".hint").textContent = "drop a message here"; }, 2500);
+      return true;
     } catch (e) {
       taskdrop.classList.remove("busy"); taskdrop.querySelector(".hint").textContent = "drop a message here";
       const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
       toast(esc(mcpCopy(e, A.server)) + (amb ? " Check " + esc(A.label || "your task app") + " before filing it again." : ""), "err", 9000);
+      return false;
     }
   }
 
@@ -968,7 +1020,7 @@ body.ro [data-mut] { opacity: 0.4; }
     try {
       const subj = /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || "");
       const to = isOwn(last) ? counterpart(last) : [emailOf(last.sender)];
-      const p = await call(GMAIL, "create_draft", { replyToMessageId: last.id, to: to, subject: subj, body: body }, { cache: false });
+      const p = await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]);
       note("Saved to Gmail drafts.", "ok");
       if (p && p.viewUrl) { const a = document.createElement("a"); a.href = p.viewUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open draft"; $("composeNote").append(" ", a); }
@@ -983,10 +1035,11 @@ body.ro [data-mut] { opacity: 0.4; }
       const own = isOwn(last); const to = own ? counterpart(last) : [emailOf(last.sender)];
       if (own) {
         if (!to.length) throw { code: "tool_error", message: "there's no one to follow up with on this thread" };
-        await call(GMAIL, "send_message", { to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id }, { cache: false });
-      } else await call(GMAIL, "reply", { messageId: last.id, body: body, replyAll: $("replyAll").checked }, { cache: false });
+        await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]); delete state.variants[state.selectedId];
-      note("Sent.", "ok"); $("body").value = "";
+      const after = await afterSend(state.selectedId);
+      note("Sent" + (after.length ? "; " + after.join(", ") : "") + ".", "ok"); $("body").value = "";
       try { await state.mcp.invalidate(GMAIL, "get_thread"); } catch {}
       openThread(state.selectedId);
     } catch (e) {
@@ -1065,7 +1118,7 @@ body.ro [data-mut] { opacity: 0.4; }
     if (!state.labels) box.innerHTML = '<div class="note" style="padding:8px"><span class="spin"></span>Loading folders…</div>';
     try { await loadLabels(); } catch (e) { box.innerHTML = '<div class="note err" style="padding:8px">' + esc(mcpCopy(e, GMAIL)) + '</div>'; return; }
     const raw = $("labelQ").value.trim(); const q = raw.toLowerCase();
-    const hits = state.labels.filter((l) => !q || l.name.toLowerCase().includes(q)).slice(0, 80);
+    const hits = state.labels.filter((l) => !isCbLabel(l.name) && (!q || l.name.toLowerCase().includes(q))).slice(0, 80);
     let h = hits.map((l) => '<button type="button" class="opt" data-lid="' + esc(l.labelId) + '" data-lname="' + esc(l.name) + '">' + esc(l.name) + '</button>').join("");
     if (q && !state.labels.some((l) => l.name.toLowerCase() === q)) h += '<button type="button" class="opt create" data-create="' + esc(raw) + '">+ Create folder “' + esc(raw) + '”</button>';
     box.innerHTML = h || '<div class="note" style="padding:8px">No folders.</div>';
@@ -1319,6 +1372,8 @@ body.ro [data-mut] { opacity: 0.4; }
         else notes.push("no open times in the next week");
       } catch (e) { toast(esc(mcpCopy(e, CAL)), "err", 7000); }
     }
+    const cx = state.ctx[(t && (t._id || t.id)) || state.selectedId] || state.ctx[state.selectedId];
+    if (featOn("context") && $("ctxChk").checked && cx && cx.text && !/^(Nothing relevant|Couldn't)/i.test(cx.text)) { parts.push("What " + OWNER + "'s other systems say about this person and topic. Use it to be accurate and specific (dates, commitments, who is doing what). Don't mention the tools or that you looked anything up:\n" + cx.text); notes.push("used " + cx.used.join(", ")); }
     return { text: parts.length ? "\n\n" + parts.join("\n\n") : "", notes: notes };
   }
 
@@ -1387,10 +1442,11 @@ body.ro [data-mut] { opacity: 0.4; }
     const own = isOwn(last);
     const goingTo = own ? counterpart(last).join(", ") : ($("replyAll").checked ? "everyone on the thread (reply all)" : (last.sender || ""));
     const local = [];
-    if (/\b(attach(ed|ing|ment)|enclosed)\b/i.test(body)) local.push({ severity: "medium", note: "The reply mentions an attachment, but replies sent from here can't carry files. Attach it in Gmail, or save this as a draft and add it there." });
+    if (!state.attachments.length && /\b(attach(ed|ing|ment)|enclosed)\b/i.test(body)) local.push({ severity: "medium", note: "The reply mentions an attachment, but nothing is attached. Use Attach before sending." });
     const text = await ask(MARK + " You review an email reply right before " + OWNER + " sends it. Be a sharp, brief second pair of eyes, not an editor. Reply with JSON only.",
       "Check the reply against the thread. Look for: questions or requests in their latest message the reply doesn't address; names, dates, times, numbers or prices that don't match the thread; commitments " + OWNER + " might not mean to make; wrong recipient or reply-all risk; something confidential going to the wrong person; tone that could land badly; typos or broken sentences" + (CONFIG.rules ? "; breaks of these writing rules: " + CONFIG.rules : "") + ". Skip style nitpicks and anything about attachments.\n"
       + "Reply with {\"ok\": boolean, \"issues\": [{\"severity\": \"high\"|\"medium\"|\"low\", \"note\": string}], \"revised\": string|null}. 'revised' is the full corrected reply only when a change is worth making, keeping " + OWNER + "'s own wording wherever possible; otherwise null. At most 5 issues, most important first. If nothing is wrong: {\"ok\": true, \"issues\": [], \"revised\": null}.\n\n"
+      + (featOn("context") && state.ctx[state.selectedId] && !/^Nothing relevant/i.test(state.ctx[state.selectedId].text) ? "WHAT " + OWNER.toUpperCase() + "'S OTHER SYSTEMS SAY (flag a reply that contradicts this or forgets a commitment in it):\n" + state.ctx[state.selectedId].text + "\n\n" : "")
       + "GOING TO: " + goingTo + "\n\nREPLY:\n" + body + "\n\nTHREAD (newest message last):\n" + threadText(state.thread, 12000),
       { max_tokens: 4000 });
     const o = parseJsonObject(text);
@@ -1541,7 +1597,7 @@ body.ro [data-mut] { opacity: 0.4; }
       + '<h3>Add a rule</h3>'
       + '<input type="text" id="ruleText" placeholder="When an email is… e.g. a receipt, invoice or payment confirmation" data-focus>'
       + '<div class="mrow"><select id="ruleOp" style="width:auto"><option value="move">Move to folder</option><option value="archive">Archive</option><option value="star">Star</option><option value="read">Mark read</option></select>'
-      + '<select id="ruleFolder" style="flex:1;width:auto;min-width:0">' + labels.map((l) => '<option value="' + esc(l.labelId) + '">' + esc(l.name) + '</option>').join("") + '</select>'
+      + '<select id="ruleFolder" style="flex:1;width:auto;min-width:0">' + labels.filter((l) => !isCbLabel(l.name)).map((l) => '<option value="' + esc(l.labelId) + '">' + esc(l.name) + '</option>').join("") + '</select>'
       + '<button type="button" class="btn" id="ruleAdd">Add rule</button></div>'
       + '<span class="note" id="ruleAddNote">' + (labels.length ? "" : "No folders yet. Make one from More, Move first, or pick another action.") + '</span>'
       + '<div class="mrow"><button type="button" class="btn primary" id="ruleRun"' + (rules.length && state.threads.length ? "" : " disabled") + '>Run rules on the ' + state.threads.length + ' threads in the list</button><span class="note" id="ruleNote"></span></div>');
@@ -1583,7 +1639,7 @@ body.ro [data-mut] { opacity: 0.4; }
       const text = await ask(MARK + " You suggest email rules from what " + OWNER + " does by hand. Reply with JSON only.",
         "Actions " + OWNER + " took (op, folder, sender, subject):\n" + acts.map((a) => "- " + a.op + (a.labelName ? " → " + a.labelName : "") + " | " + (a.name ? a.name + " " : "") + "<" + a.addr + "> | " + a.subject).join("\n")
         + "\n\nExisting rules (don't repeat them):\n" + (loadRules().map((r) => "- " + r.text + " → " + opName(r)).join("\n") || "(none)")
-        + "\n\nExisting folders: " + JSON.stringify(labels.map((l) => l.name))
+        + "\n\nExisting folders: " + JSON.stringify(labels.filter((l) => !isCbLabel(l.name)).map((l) => l.name))
         + "\n\nPropose up to 5 rules that would have handled several of these actions. Use a sender rule (\"from\" = an email address, or a company domain like stripe.com) when one sender clearly dominates; otherwise describe the kind of email in plain words and set \"from\" to null. Only suggest a pattern seen at least 3 times. Reply with a JSON array of {\"text\": string, \"op\": \"move\"|\"archive\"|\"star\"|\"read\", \"folder\": existing folder name or null, \"from\": string|null, \"count\": number, \"why\": at most 10 words}.",
         { max_tokens: 3000 });
       const out = parseJsonArray(text) || [];
@@ -1839,7 +1895,7 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- skills picker ----------
-  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last archive or move"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
+  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["o", "route to your systems"], ["b", "snooze or remind me"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last archive or move"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
   const keysHtml = () => '<div class="keys">' + KEYS.map((k) => '<span><span class="kbd">' + esc(k[0]) + '</span></span><span>' + esc(k[1]) + '</span>').join("") + '</div>';
   function openSkills(focusKeys) {
     const rows = FEATURES.map((f) => {
@@ -1873,7 +1929,7 @@ body.ro [data-mut] { opacity: 0.4; }
       ["Rules", "", openRules, "rules"], ["Unsubscribe sweep", "", openSweep, "sweep"], ["Ask your inbox", "", openAsk, "ask"], ["Voice and lessons", "", () => openVoice(false), "voice"],
       ["Skills and help", "?", () => openSkills(false)], ["Toggle read-only", "", toggleRO], ["Refresh", "", () => $("refreshBtn").click()], ["Undo last change", "z", undoLast]
     ];
-    if (state.thread) c.push(["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
+    if (state.thread) c.push(["Route to my systems", "o", openRoute, "route"], ["Snooze or remind me", "b", openSnooze, "snooze"], ["Formatted view", "", toggleFormatted, "html"], ["Insert a snippet", "", openSnippets, "snippets"], ["Refresh context", "", () => loadContext(true), "context"], ["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
     return c.filter((x) => !x[3] || featOn(x[3]));
   }
   function openPalette() {
@@ -1906,7 +1962,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const act = {
       j: () => moveSel(1), k: () => moveSel(-1), e: () => { if (state.selectedId && state.thread) $("archiveBtn").click(); }, s: () => { if (state.thread) $("starBtn").click(); },
       m: () => { if (state.selectedId && featOn("move")) openPop(state.selectedId, $("moveBtn"), "move"); }, t: () => { if (state.selectedId && featOn("tasks")) createTask(state.selectedId); },
-      c: () => { if (state.thread && featOn("contacts")) openContact(); }, r: () => { if (!compose.hidden) $("body").focus(); }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true)
+      c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) $("body").focus(); }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true)
     }[ev.key];
     if (act) { ev.preventDefault(); act(); }
   });
@@ -2161,6 +2217,338 @@ body.ro [data-mut] { opacity: 0.4; }
     copyText(lines.join("\r\n"), $("cSaveNote"), "vCard copied. Paste it into your CRM, or into a .vcf file to import.");
   }
 
+
+  // ---------- context: what your other systems know about this person ----------
+  // CONFIG.context = [{ label, server, tool, input }] with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}}.
+  // Every source is read-only. Raw results are trimmed and handed to the AI, which keeps only what's about this person or thread.
+  state.ctx = {};
+  const TRIM_KEYS = /^(description|conferenceData|htmlLink|joiningNotesText|meetingLink|iconLink|etag|hangoutLink|reminders|defaultReminders|guestPermissions|htmlBody|attachmentIds|historyId|internalDate|sizeEstimate|telemetry|creator|useDefaultReminders|eventType|videoEntryPoint)$/i;
+  function trimForAI(v, depth) {
+    depth = depth || 0;
+    if (typeof v === "string") return v.length > 700 ? v.slice(0, 700) + "…" : v;
+    if (Array.isArray(v)) return v.slice(0, 8).map((x) => trimForAI(x, depth + 1));
+    if (v && typeof v === "object") { if (depth > 6) return "…"; const o = {}; Object.keys(v).forEach((k) => { if (!TRIM_KEYS.test(k)) o[k] = trimForAI(v[k], depth + 1); }); return o; }
+    return v;
+  }
+  const ymd = (d) => { const x = new Date(d); return x.getFullYear() + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + String(x.getDate()).padStart(2, "0"); };
+  function personOf(t) {
+    const last = lastMessage(t); if (!last) return null;
+    const own = isOwn(last);
+    const email = String(own ? (counterpart(last)[0] || "") : emailOf(last.sender)).toLowerCase();
+    if (!email) return null;
+    const raw = own ? ((last.toRecipients || []).find((a) => emailOf(a).toLowerCase() === email) || "") : last.sender;
+    const nm = nameOf(raw); const name = nm && !nm.includes("@") ? nm : "";
+    const domain = email.split("@")[1] || ""; const parts = domain.split(".");
+    const org = FREE_MAIL.test(domain) ? "" : (parts.length >= 3 && /^(co|com|org|net|ac|gov|edu)$/.test(parts[parts.length - 2]) ? parts[parts.length - 3] : (parts[parts.length - 2] || ""));
+    return { email: email, name: name, who: name || email, domain: domain, org: org, orgOrEmail: org || email, subject: cleanSubject(last.subject), today: ymd(Date.now()), since90: ymd(Date.now() - 90 * 864e5) };
+  }
+  const nothingFound = (p) => { if (p == null) return true; if (typeof p === "string") return !p.trim() || /^no (entity|results?|matches?)/i.test(p.trim()); const s = JSON.stringify(p); return s === "{}" || s === "[]" || /"(results|events|subscriptions|threads|items)":\[\]/.test(s) && s.length < 160; };
+  async function loadContext(force) {
+    const box = $("ctxBox"); const t = state.thread; const id = state.selectedId;
+    if (!box || !t || !featOn("context") || !(CONFIG.context || []).length) { if (box) box.innerHTML = ""; return; }
+    const who = personOf(t); if (!who) { box.innerHTML = ""; return; }
+    if (state.ctx[id] && !force) { renderContext(); return; }
+    const srcs = CONFIG.context;
+    box.innerHTML = '<div class="ctx"><div class="ctxhead"><span class="lbl">Context</span><span class="note"><span class="spin"></span>Checking ' + srcs.length + ' systems for ' + esc(who.who) + '…</span></div></div>';
+    const results = await Promise.all(srcs.map(async (s) => {
+      try {
+        const p = await Promise.race([call(s.server, s.tool, fillTemplate(s.input || {}, who), { cache: { staleTime: 300000, gcTime: 600000 } }), new Promise((_, rej) => setTimeout(() => rej({ code: "server_unavailable", message: "timed out" }), 15000))]);
+        return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p };
+      } catch (e) { return { label: s.label || s.server, ok: false, err: mcpCopy(e, s.server) || (e && e.code) || "error" }; }
+    }));
+    if (state.selectedId !== id) return;
+    const usable = results.filter((r) => r.ok && !r.empty);
+    let text = "Nothing relevant in your connected systems.";
+    if (usable.length) {
+      const blocks = usable.map((r) => "### " + r.label + "\n" + JSON.stringify(trimForAI(r.data)).slice(0, 3500)).join("\n\n");
+      const lastMsg = lastMessage(t) || {};
+      try {
+        text = (await ask(MARK + " You brief " + OWNER + " before they reply to an email. Plain text only.",
+          "Person: " + (who.name ? who.name + " " : "") + "<" + who.email + ">\nThread: " + who.subject + "\nLatest message (trimmed): " + splitQuoted(String(lastMsg.plaintextBody || "")).main.slice(0, 1200)
+          + "\n\nWhat " + OWNER + "'s systems returned, one block per source. Search results can include unrelated matches: ignore anything that isn't about this person, their organization or this thread's topic.\n\n" + blocks
+          + "\n\nWrite 2 to 7 short lines, each starting with '• ' and ending with the source in square brackets, like [Fireflies]. Cover what matters for the reply: who they are to " + OWNER + "; open commitments either way, especially action items assigned to " + OWNER + "; recent or upcoming meetings; status in any pipeline, list or task; anything that should change the reply. Include dates. If nothing returned is relevant, write exactly: Nothing relevant in your connected systems.",
+          { max_tokens: 2500 })).trim();
+      } catch (e) { text = "Couldn't summarize: " + (mcpCopy(e, aiLabel()) || "stopped"); }
+    }
+    if (state.selectedId !== id) return;
+    state.ctx[id] = { text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
+    renderContext();
+  }
+  function renderContext() {
+    const box = $("ctxBox"); const c = state.ctx[state.selectedId]; if (!box || !c) return;
+    const lines = c.text.split("\n").map((l) => l.trim()).filter(Boolean);
+    const chips = c.results.map((r) => '<span class="src ' + (!r.ok ? "bad" : r.empty ? "none" : "hit") + '" title="' + esc(r.ok ? (r.empty ? "Nothing found" : "Found something") : r.err) + '">' + esc(r.label) + '</span>').join("");
+    box.innerHTML = '<div class="ctx"><div class="ctxhead"><span class="lbl">Context · ' + esc(c.who.who) + '</span><button type="button" class="btn sm ghost" id="ctxRefresh">Refresh</button></div>'
+      + '<div class="ctxlines">' + lines.map((l) => '<div>' + esc(l).replace(/\[([^\]]{1,40})\]\s*$/, '<span class="srctag">$1</span>') + '</div>').join("") + '</div>'
+      + '<div class="srcs2">' + chips + '</div></div>';
+    $("ctxRefresh").addEventListener("click", () => loadContext(true));
+  }
+
+  // ---------- route: send this thread to the right systems ----------
+  // Built-in actions: task, contact, snooze, remind. CONFIG.actions adds any connector tool:
+  // { key, label, server, tool, input (with {{placeholders}}), ai: { field: "what the AI should write" }, when: "when it applies" }
+  function routeCatalog() {
+    const cat = [];
+    if (featOn("tasks") && taskAdapter()) cat.push({ key: "task", label: "Task in " + (taskAdapter().label || "your task app"), ai: { title: "A short, specific task title starting with a verb, for what " + OWNER + " needs to do" }, when: "There's something " + OWNER + " has to do or deliver" });
+    if (featOn("contacts")) cat.push({ key: "contact", label: "Add to contacts", ai: {}, when: "A new person worth keeping, not already known" });
+    if (featOn("snooze")) {
+      cat.push({ key: "snooze", label: "Snooze", ai: { until: "Date to bring it back, YYYY-MM-DD" }, when: "Nothing to do until a later date" });
+      cat.push({ key: "remind", label: "Remind me if no reply", ai: { until: "Date to check for a reply, YYYY-MM-DD" }, when: OWNER + " sent the last message and is waiting on them" });
+    }
+    (CONFIG.actions || []).forEach((a) => cat.push(Object.assign({ custom: true }, a)));
+    return cat;
+  }
+  async function openRoute() {
+    if (!state.thread) { toast("Open a thread first.", "", 3000); return; }
+    const id = state.selectedId; const t = state.thread; const cat = routeCatalog();
+    if (!cat.length) { openModal("Route", '<p class="note">No systems are set up to route to yet. Ask Claude to run chatterbuilt-mail-setup and name them: task app, Slack, CRM, anything with a connector.</p>'); return; }
+    openModal("Route", '<p class="note"><span class="spin"></span>Working out where this thread should go…</p><div id="rtList"></div>', "wide");
+    const who = personOf(t) || {}; const ctx = state.ctx[id];
+    try {
+      const text = await ask(MARK + " You route email to the right systems. Reply with JSON only.",
+        "Today is " + ymd(Date.now()) + ". Thread (newest last):\n" + threadText(t, 9000)
+        + (ctx && ctx.text ? "\n\nWhat " + OWNER + "'s other systems say:\n" + ctx.text + (ctx.raw ? "\nRaw records (for IDs and exact names):\n" + JSON.stringify(ctx.raw).slice(0, 4000) : "") : "")
+        + "\n\nAvailable actions:\n" + cat.map((a) => "- " + a.key + ": " + a.label + (a.when ? " (use when: " + a.when + ")" : "") + (a.ai && Object.keys(a.ai).length ? " fields: " + JSON.stringify(a.ai) : "")).join("\n")
+        + "\n\nPick only the actions this thread clearly calls for (zero is fine). Fill every field. Reply with {\"actions\": [{\"key\": string, \"why\": at most 12 words, \"fields\": {…}}]}.",
+        { max_tokens: 3000 });
+      if (state.selectedId !== id || !$("rtList")) return;
+      const o = parseJsonObject(text) || {};
+      const picks = (Array.isArray(o.actions) ? o.actions : []).filter((a) => a && cat.some((c) => c.key === a.key));
+      renderRoute(cat, picks, who);
+    } catch (e) { if ($("rtList")) $("modalBody").innerHTML = '<p class="note err">' + esc(mcpCopy(e, aiLabel()) || "Stopped.") + '</p>'; }
+  }
+  function renderRoute(cat, picks, who) {
+    const rows = cat.map((c, i) => {
+      const p = picks.find((x) => x.key === c.key); const on = !!p; const f = (p && p.fields) || {};
+      const fields = Object.keys(c.ai || {}).map((k) => {
+        const v = f[k] != null ? String(f[k]) : "";
+        return '<label class="field"><span>' + esc(k) + '</span>' + (v.length > 70 || /message|note|body|handoff|text/i.test(k) ? '<textarea data-rf="' + i + '" data-k="' + esc(k) + '" style="min-height:70px">' + esc(v) + '</textarea>' : '<input type="text" data-rf="' + i + '" data-k="' + esc(k) + '" value="' + esc(v) + '">') + '</label>';
+      }).join("");
+      return '<div class="mitem rt' + (on ? "" : " off") + '"><input type="checkbox" data-rt="' + i + '"' + (on ? " checked" : "") + '><span class="t">' + esc(c.label) + '</span><span class="note" data-rs="' + i + '">' + (on ? "suggested" : "") + '</span><span class="d">' + esc(on ? p.why || "" : (c.when || "")) + '</span>' + (fields ? '<span class="x" style="display:block;width:100%">' + fields + '</span>' : "") + '</div>';
+    }).join("");
+    $("modalBody").innerHTML = '<p class="note">' + (picks.length ? "Suggested actions are ticked. Edit anything, untick what you don't want, then apply. Nothing happens until you do." : "Nothing here clearly needs routing. Tick anything you want anyway.") + '</p><div class="mlist">' + rows + '</div><div class="mrow"><button class="btn primary" id="rtApply" type="button" data-mut>Apply selected</button><span class="note" id="rtNote"></span></div>';
+    $("modalBody").querySelectorAll("[data-rt]").forEach((cb) => cb.addEventListener("change", () => cb.closest(".mitem").classList.toggle("off", !cb.checked)));
+    $("rtApply").addEventListener("click", () => applyRoute(cat, who));
+  }
+  async function applyRoute(cat, who) {
+    if (state.readOnly) { $("rtNote").className = "note err"; $("rtNote").textContent = mcpCopy({ code: "read_only" }); return; }
+    const picked = [...document.querySelectorAll("[data-rt]")].filter((c) => c.checked).map((c) => +c.dataset.rt);
+    if (!picked.length) { $("rtNote").textContent = "Tick at least one."; return; }
+    $("rtApply").disabled = true; const id = state.selectedId; const t = state.thread; let openContactAfter = false, done = 0;
+    const last = lastMessage(t) || {};
+    for (const i of picked) {
+      const c = cat[i]; const st = document.querySelector('[data-rs="' + i + '"]');
+      const fields = {}; document.querySelectorAll('[data-rf="' + i + '"]').forEach((el) => { fields[el.dataset.k] = el.value.trim(); });
+      st.innerHTML = '<span class="spin"></span>';
+      try {
+        if (c.key === "task") { const ok = await createTask(id, null, fields.title ? { title: fields.title } : {}); if (!ok) throw { code: "tool_error", message: "see the message above" }; }
+        else if (c.key === "contact") openContactAfter = true;
+        else if (c.key === "snooze") await snoozeThread(id, normDate(fields.until, 1));
+        else if (c.key === "remind") await remindThread(id, normDate(fields.until, 3));
+        else {
+          const vals = Object.assign({}, who, { url: last.viewUrl || t.viewUrl || ("https://mail.google.com/mail/#all/" + id), subject: cleanSubject(last.subject), from: last.sender || "", fromEmail: emailOf(last.sender) }, fields);
+          const input = fillTemplate(c.input || {}, vals);
+          Object.keys(input).forEach((k) => { if (typeof input[k] === "string") input[k] = input[k].trim(); });
+          await call(c.server, c.tool, input, { cache: false });
+        }
+        st.className = "note ok"; st.textContent = c.key === "contact" ? "opening…" : "done ✓"; done++;
+      } catch (e) { st.className = "note err"; st.textContent = mcpCopy(e, c.server || GMAIL) || "failed"; }
+    }
+    const n = $("rtNote"); if (n) n.textContent = done + " of " + picked.length + " done.";
+    if (openContactAfter) setTimeout(() => { closeModal(); openContact(); }, 600);
+  }
+  function normDate(v, fallbackDays) {
+    const m = String(v || "").match(/(\d{4})-(\d{2})-(\d{2})/); if (m) return m[0];
+    return ymd(Date.now() + (fallbackDays || 1) * 864e5);
+  }
+
+  // ---------- snooze + remind-me, stored as Gmail labels so the morning run and Gmail itself can see them ----------
+  const LP = () => (CONFIG.labelPrefix || "CB");
+  const isCbLabel = (name) => String(name || "").indexOf(LP() + "/") === 0;
+  async function ensureLabel(name) {
+    let l = (await loadLabels()).find((x) => x.name === name); if (l) return l;
+    await call(GMAIL, "create_label", { displayName: name }, { cache: false });
+    state.labels = null; try { await state.mcp.invalidate(GMAIL, "list_labels"); } catch {}
+    l = (await loadLabels()).find((x) => x.name === name);
+    if (!l) throw { code: "tool_error", message: "couldn't create the label " + name };
+    return l;
+  }
+  const niceDate = (s) => new Date(s + "T09:00:00").toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" });
+  async function snoozeThread(id, date) {
+    const l = await ensureLabel(LP() + "/Snooze/" + date);
+    await threadOp(id, [l.labelId], ["INBOX"]);
+    pushUndo("snooze", [{ threadId: id, add: [l.labelId], remove: ["INBOX"] }]);
+    if (state.selectedId === id) clearDesk("Snoozed until " + niceDate(date));
+    try { await state.mcp.invalidate(GMAIL); } catch {}
+    toast("Snoozed until " + esc(niceDate(date)) + ". It comes back that morning." + undoBtn(), "ok", 7000); loadThreads(false);
+  }
+  async function remindThread(id, date) {
+    const l = await ensureLabel(LP() + "/Remind/" + date);
+    await threadOp(id, [l.labelId], []);
+    toast("Reminder set for " + esc(niceDate(date)) + ". If nobody has replied by then, it comes back to your inbox.", "ok", 6000);
+  }
+  function openSnooze() {
+    if (!state.selectedId) { toast("Open a thread first.", "", 3000); return; }
+    const d = (n) => ymd(Date.now() + n * 864e5);
+    const nextMon = (() => { const x = new Date(); x.setDate(x.getDate() + ((8 - x.getDay()) % 7 || 7)); return ymd(x); })();
+    const opts = [["Tomorrow", d(1)], ["In 2 days", d(2)], ["Next Monday", nextMon], ["In a week", d(7)], ["In 2 weeks", d(14)]];
+    openModal("Snooze or remind",
+      '<h3>Snooze until</h3><p class="note">Takes it out of the inbox and brings it back, unread, on the morning you pick.</p><div class="mrow">' + opts.map((o) => '<button type="button" class="btn sm" data-snz="' + o[1] + '">' + o[0] + ' · ' + esc(niceDate(o[1])) + '</button>').join("") + '</div>'
+      + '<div class="mrow"><input type="date" id="snzDate" min="' + d(1) + '" style="width:auto"><button type="button" class="btn sm primary" id="snzGo" data-mut>Snooze</button></div>'
+      + '<h3>Remind me if no reply</h3><p class="note">Leaves it where it is. If nobody has replied by that morning, it comes back to your inbox.</p><div class="mrow">' + [2, 3, 5, 7].map((n) => '<button type="button" class="btn sm" data-rmd="' + d(n) + '">' + n + ' days · ' + esc(niceDate(d(n))) + '</button>').join("") + '</div>'
+      + '<p class="note">Both are Gmail labels under ' + esc(LP()) + '/, so you can see them in Gmail too. The app and the morning run bring things back.</p><span class="note" id="snzNote"></span>');
+    const id = state.selectedId;
+    const run = async (fn, date) => { if (state.readOnly) { $("snzNote").textContent = mcpCopy({ code: "read_only" }); return; } $("snzNote").innerHTML = '<span class="spin"></span>'; try { closeModal(); await fn(id, date); } catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 8000); } };
+    $("modalBody").querySelectorAll("[data-snz]").forEach((b) => b.addEventListener("click", () => run(snoozeThread, b.dataset.snz)));
+    $("modalBody").querySelectorAll("[data-rmd]").forEach((b) => b.addEventListener("click", () => run(remindThread, b.dataset.rmd)));
+    $("snzGo").addEventListener("click", () => { const v = $("snzDate").value; if (v) run(snoozeThread, v); });
+  }
+  async function wakeDue() {
+    if (state.readOnly || !featOn("snooze")) return { woke: 0, due: 0 };
+    const today = ymd(Date.now()); let woke = 0, due = 0;
+    const re = new RegExp("^" + LP().replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "/(Snooze|Remind)/(\\d{4}-\\d{2}-\\d{2})$");
+    for (const l of await loadLabels()) {
+      const m = l.name.match(re); if (!m || m[2] > today) continue;
+      const p = await call(GMAIL, "search_threads", { query: "label:" + l.name.replace(/[\/ ]/g, "-").toLowerCase(), pageSize: 50, view: "THREAD_VIEW_IDS_ONLY" }, { cache: false });
+      for (const t of ((p && p.threads) || [])) {
+        if (m[1] === "Snooze") { await threadOp(t.id, ["INBOX", "UNREAD"], [l.labelId]); woke++; }
+        else {
+          const full = await fetchThread(t.id); const ms = (full && full.messages) || []; const last = ms[ms.length - 1];
+          if (last && isOwn(last)) { await threadOp(t.id, ["INBOX", "UNREAD"], [l.labelId]); due++; } else await threadOp(t.id, [], [l.labelId]);
+        }
+      }
+    }
+    return { woke: woke, due: due };
+  }
+
+  // ---------- snippets ----------
+  function loadSnippets() { let s = null; try { s = JSON.parse(ls.get("cm.snippets") || "null"); } catch {} return Array.isArray(s) ? s : (CONFIG.snippets || []).slice(); }
+  function saveSnippets(s) { ls.set("cm.snippets", JSON.stringify(s)); }
+  function fillSnippet(text) {
+    const last = lastMessage() || {}; const raw = isOwn(last) ? (last.toRecipients || [])[0] : last.sender;
+    const first = (nameOf(raw) || "").split(/\s+/)[0];
+    return String(text).replace(/\{\{firstName\}\}/g, first && !first.includes("@") ? first : "there").replace(/\{\{myName\}\}/g, CONFIG.signoff || OWNER);
+  }
+  function insertAtCursor(ta, text) { const s = ta.selectionStart != null ? ta.selectionStart : ta.value.length, e = ta.selectionEnd != null ? ta.selectionEnd : s; ta.value = ta.value.slice(0, s) + text + ta.value.slice(e); ta.selectionStart = ta.selectionEnd = s + text.length; ta.focus(); }
+  function openSnippets() {
+    const sn = loadSnippets();
+    openModal("Snippets",
+      '<p class="note">Reusable text. <code>{{firstName}}</code> becomes their first name and <code>{{myName}}</code> your sign-off. Saved in this browser.</p>'
+      + '<div class="mlist">' + (sn.length ? sn.map((s, i) => '<div class="mitem"><span></span><span class="t">' + esc(s.name) + '</span><span class="x" style="grid-column:auto;margin:0"><button type="button" class="btn sm primary" data-sins="' + i + '">Insert</button><button type="button" class="btn sm ghost" data-sdel="' + i + '">Delete</button></span><span class="d" style="white-space:pre-wrap">' + esc(s.text.slice(0, 220)) + (s.text.length > 220 ? "…" : "") + '</span></div>').join("") : '<div class="mitem"><span></span><span class="d">No snippets yet.</span></div>') + '</div>'
+      + '<h3>New snippet</h3><input type="text" id="snName" placeholder="Name, e.g. Sponsor prospectus" data-focus><textarea id="snText" style="min-height:90px" placeholder="Hi {{firstName}}, here is the prospectus…"></textarea><div class="mrow"><button type="button" class="btn" id="snAdd">Save snippet</button></div>');
+    $("modalBody").querySelectorAll("[data-sins]").forEach((b) => b.addEventListener("click", () => { const s = loadSnippets()[+b.dataset.sins]; closeModal(); if (s) insertAtCursor($("body"), fillSnippet(s.text)); }));
+    $("modalBody").querySelectorAll("[data-sdel]").forEach((b) => b.addEventListener("click", () => { const a = loadSnippets(); a.splice(+b.dataset.sdel, 1); saveSnippets(a); openSnippets(); }));
+    $("snAdd").addEventListener("click", () => { const nm = $("snName").value.trim(), tx = $("snText").value; if (!nm || !tx.trim()) return; const a = loadSnippets(); a.push({ name: nm, text: tx }); saveSnippets(a); openSnippets(); });
+  }
+
+  // ---------- attachments ----------
+  state.attachments = [];
+  const ATT_MAX = 18 * 1024 * 1024;
+  const fmtSize = (n) => n > 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB";
+  function renderAtt() {
+    const box = $("attList"); if (!box) return;
+    box.innerHTML = state.attachments.map((a, i) => '<span class="att1">' + esc(a.filename) + ' <span class="note">' + fmtSize(a.size) + '</span><button type="button" data-arm="' + i + '" title="Remove">×</button></span>').join("");
+  }
+  $("fileIn").addEventListener("change", async () => {
+    const files = [...$("fileIn").files]; $("fileIn").value = "";
+    for (const f of files) {
+      const total = state.attachments.reduce((s, a) => s + a.size, 0);
+      if (total + f.size > ATT_MAX) { note("That would go over 18 MB. For bigger files, share a Drive link instead.", "err"); break; }
+      const content = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).replace(/^data:[^,]*,/, "")); r.onerror = rej; r.readAsDataURL(f); });
+      state.attachments.push({ filename: f.name, mimeType: f.type || "application/octet-stream", content: content, size: f.size });
+    }
+    renderAtt();
+  });
+  $("attList").addEventListener("click", (ev) => { const b = ev.target.closest("[data-arm]"); if (b) { state.attachments.splice(+b.dataset.arm, 1); renderAtt(); } });
+  const attPayload = () => state.attachments.map((a) => ({ filename: a.filename, mimeType: a.mimeType, content: a.content }));
+
+  // ---------- formatted (HTML) view, sanitized ----------
+  const OK_TAGS = new Set(["A", "B", "STRONG", "I", "EM", "U", "P", "BR", "DIV", "SPAN", "UL", "OL", "LI", "TABLE", "THEAD", "TBODY", "TFOOT", "TR", "TD", "TH", "BLOCKQUOTE", "H1", "H2", "H3", "H4", "H5", "H6", "HR", "PRE", "CODE", "SMALL", "SUP", "SUB", "FONT", "CENTER"]);
+  const DROP_TAGS = /^(SCRIPT|STYLE|HEAD|TITLE|META|LINK|IFRAME|FRAME|OBJECT|EMBED|FORM|INPUT|BUTTON|SELECT|TEXTAREA|SVG|MATH|NOSCRIPT|TEMPLATE|BASE|AUDIO|VIDEO|CANVAS)$/;
+  function sanitizeHtml(html) {
+    const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
+    const out = document.createElement("div"); out.className = "htmlbody";
+    (function walk(src, dst) {
+      src.childNodes.forEach((n) => {
+        if (n.nodeType === 3) { dst.append(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1) return;
+        const tag = n.tagName;
+        if (DROP_TAGS.test(tag)) return;
+        if (tag === "IMG") { const alt = (n.getAttribute("alt") || "").trim(); if (alt) { const s = document.createElement("span"); s.className = "imgalt"; s.textContent = "[" + alt + "]"; dst.append(s); } return; }
+        const cls = (n.getAttribute("class") || "") + " " + (n.getAttribute("id") || "");
+        if (/gmail_quote|reference-message|divRplyFwdMsg|moz-cite-prefix|yahoo_quoted/i.test(cls) || tag === "BLOCKQUOTE" && /gmail_quote/i.test(cls)) {
+          const d = document.createElement("details"); const sm = document.createElement("summary"); sm.className = "note"; sm.textContent = "Earlier messages"; d.append(sm); walk(n, d); dst.append(d); return;
+        }
+        if (!OK_TAGS.has(tag)) { walk(n, dst); return; }
+        const el = document.createElement(tag === "FONT" || tag === "CENTER" ? "span" : tag.toLowerCase());
+        if (tag === "A") { const h = n.getAttribute("href") || ""; if (/^(https?:|mailto:)/i.test(h)) { el.setAttribute("href", h); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener noreferrer"); } }
+        if ((tag === "TD" || tag === "TH") && n.getAttribute("colspan")) el.setAttribute("colspan", String(Math.min(20, parseInt(n.getAttribute("colspan"), 10) || 1)));
+        walk(n, el); dst.append(el);
+      });
+    })(doc.body, out);
+    return out;
+  }
+  state.full = {};
+  async function toggleFormatted() {
+    const btn = $("htmlBtn"); const id = state.selectedId; if (!id || !state.thread) return;
+    const on = btn.getAttribute("aria-pressed") !== "true";
+    if (!on) { btn.setAttribute("aria-pressed", "false"); renderThreadBodies(null); return; }
+    btn.disabled = true; btn.textContent = "Loading…";
+    try {
+      const full = state.full[id] || (state.full[id] = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
+      if (state.selectedId !== id) return;
+      btn.setAttribute("aria-pressed", "true"); renderThreadBodies(full);
+    } catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 6000); }
+    finally { btn.disabled = false; btn.textContent = "Formatted"; }
+  }
+  function renderThreadBodies(full) {
+    const byId = {}; ((full && full.messages) || []).forEach((m) => { byId[m.id] = m; });
+    reading.querySelectorAll("article.msg").forEach((art) => {
+      const body = art.querySelector(".body"); const m = byId[art.dataset.mid];
+      if (full && m && m.htmlBody) { body.classList.add("html"); body.replaceChildren(sanitizeHtml(m.htmlBody)); }
+      else if (!full) {
+        const pm = ((state.thread && state.thread.messages) || []).find((x) => x.id === art.dataset.mid) || {};
+        const parts = splitQuoted(String(pm.plaintextBody || pm.snippet || "").replace(/\r/g, ""));
+        body.classList.remove("html");
+        body.innerHTML = esc(parts.main) + (parts.quoted ? '<details><summary class="note">Earlier messages</summary><div class="quoted">' + esc(parts.quoted) + '</div></details>' : "");
+      }
+    });
+  }
+
+  // ---------- drafts already waiting in Gmail (the morning run's, or your own) ----------
+  state.draftMap = {}; let draftsAt = 0;
+  async function loadDraftsMap(force) {
+    if (!featOn("drafts")) return;
+    if (!force && Date.now() - draftsAt < 60000) return;
+    try {
+      const p = await call(GMAIL, "list_drafts", { pageSize: 50, view: "DRAFT_VIEW_FULL" }, { cache: false });
+      const map = {}; ((p && p.drafts) || []).forEach((d) => { if (d && d.threadId && !map[d.threadId]) map[d.threadId] = d; });
+      state.draftMap = map; draftsAt = Date.now();
+      const ids = new Set(state.threads.map((t) => t.id));
+      if (Object.keys(map).some((k) => ids.has(k))) renderList();
+      showDraftBox();
+    } catch (e) { /* drafts are a convenience */ }
+  }
+  const htmlToText = (h) => { const el = sanitizeHtml(h); el.querySelectorAll("br").forEach((b) => b.replaceWith("\n")); el.querySelectorAll("p,div,li,tr").forEach((b) => b.append("\n")); return el.textContent.replace(/\n{3,}/g, "\n\n").trim(); };
+  function draftText(d) {
+    let t = d.plaintextBody || (d.htmlBody ? htmlToText(d.htmlBody) : "") || "";
+    const cut = t.search(/\n\[(image|Website|LinkedIn)[^\]]*\]/); if (cut > 0) t = t.slice(0, cut);
+    return t.trim();
+  }
+  function showDraftBox() {
+    const box = $("draftBox"); if (!box) return; const d = state.draftMap[state.selectedId];
+    if (!d || state.loadedDraftId === d.id) { box.innerHTML = ""; return; }
+    box.innerHTML = '<div class="banner ok draftready"><strong>A draft is waiting in Gmail.</strong> <span class="note">' + esc(draftText(d).slice(0, 140)) + '…</span><span class="mrow"><button type="button" class="btn sm primary" id="dLoad">Load it</button>' + (d.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "") + '</span></div>';
+    $("dLoad").addEventListener("click", () => { $("body").value = draftText(d); state.aiDraft[state.selectedId] = $("body").value; state.loadedDraftId = d.id; box.innerHTML = ""; note("Loaded the Gmail draft. Sending replaces it."); $("body").focus(); });
+  }
+  async function afterSend(threadId) {
+    const msgs = [];
+    if (state.loadedDraftId) { try { await call(GMAIL, "delete_draft", { draftId: state.loadedDraftId }, { cache: false }); delete state.draftMap[threadId]; msgs.push("removed the old Gmail draft"); } catch (e) { msgs.push("the old Gmail draft is still there"); } state.loadedDraftId = null; }
+    if (featOn("snooze") && $("remindChk").checked) { try { await remindThread(threadId, ymd(Date.now() + (+$("remindDays").value || 3) * 864e5)); msgs.push("reminder set"); } catch (e) { msgs.push("couldn't set the reminder"); } $("remindChk").checked = false; }
+    state.attachments = []; renderAtt();
+    return msgs;
+  }
+
   // ---------- wiring ----------
   document.querySelectorAll("#chips .chip").forEach((c) => c.addEventListener("click", () => {
     document.querySelectorAll("#chips .chip").forEach((x) => x.classList.toggle("on", x === c));
@@ -2200,6 +2588,10 @@ body.ro [data-mut] { opacity: 0.4; }
   $("paletteBtn").addEventListener("click", openPalette);
   $("variantsBtn").addEventListener("click", threeOptions);
   $("contactBtn").addEventListener("click", openContact);
+  $("routeBtn").addEventListener("click", openRoute);
+  $("snoozeBtn").addEventListener("click", openSnooze);
+  $("htmlBtn").addEventListener("click", toggleFormatted);
+  $("snipBtn").addEventListener("click", openSnippets);
   $("waitDays").addEventListener("change", () => { state.waitDays = +$("waitDays").value || 3; ls.set("cm.waitDays", String(state.waitDays)); if (state.mode === "waiting") loadThreads(false); });
   $("modalClose").addEventListener("click", closeModal);
   modalBack.addEventListener("mousedown", (ev) => { if (ev.target === modalBack) closeModal(); });
@@ -2234,12 +2626,13 @@ body.ro [data-mut] { opacity: 0.4; }
       if (!g) { setStatus("Gmail not connected", "err"); list.innerHTML = '<div class="empty"><h2>Gmail isn\'t connected</h2><p>Add Gmail in claude.ai Settings → Connectors, then refresh this page.</p></div>'; return; }
       if (g.authStatus === "needs_reauth") { setStatus("reconnect Gmail", "err"); list.innerHTML = '<div class="empty"><h2>Reconnect Gmail</h2><p>Your Gmail connection lapsed. Reconnect it in claude.ai Settings → Connectors, then refresh.</p></div>'; return; }
       const TA = taskAdapter(), CA = contactAdapter();
-      const need = new Set([].concat(CONFIG.models.length ? [ROUTER] : [], TA ? [TA.server] : [], CA ? [CA.server] : [], voiceSrc() ? [NOTION] : [], CONFIG.calendar ? [CAL] : [], CONFIG.clay ? [CLAY] : []));
+      const need = new Set([].concat(CONFIG.models.length ? [ROUTER] : [], TA ? [TA.server] : [], CA ? [CA.server] : [], voiceSrc() ? [NOTION] : [], CONFIG.calendar ? [CAL] : [], CONFIG.clay ? [CLAY] : [], (CONFIG.context || []).map((x) => x.server), (CONFIG.actions || []).map((x) => x.server)));
       const missing = [...need].filter((n) => !by[n] || by[n].authStatus === "needs_reauth");
       if (missing.length) toast("Not connected: " + esc(missing.join(", ")) + ". Add or reconnect in claude.ai Settings → Connectors. Reading mail still works.", "err", 9000);
     } catch (e) { /* first real call reports precisely */ }
     setStatus("connected", "live");
     loadThreads(false);
+    wakeDue().then((r) => { if (r.woke || r.due) { toast((r.woke ? r.woke + " snoozed thread" + (r.woke === 1 ? "" : "s") + " came back" : "") + (r.woke && r.due ? ", and " : "") + (r.due ? r.due + " reminder" + (r.due === 1 ? "" : "s") + ": still no reply" : "") + ".", "ok", 8000); loadThreads(false); } }).catch(() => {});
     if (voiceSrc() && featOn("voice")) {
       const at = +(ls.get("cm.voiceSrcAt") || 0);
       if (!voiceSrcText || Date.now() - at > 864e5) loadVoiceSource(voiceSrc()).catch((e) => { if (!voiceSrcText) toast("Couldn't load your voice page from Notion, so drafts use the basic voice for now. " + esc(mcpCopy(e, NOTION)), "err", 8000); });

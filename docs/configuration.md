@@ -37,6 +37,15 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 | `contacts` | Any contacts app: `{ label, server, tool, input, dupCheck }`. Or the Notion shortcut: `{ dataSourceId, nameProp, emailProp, companyProp, titleProp, phoneProp, linkedinProp, xProp, blueskyProp, githubProp, instagramProp, websiteProp, locationProp, metProp, firstContactProp, notesProp, backgroundProp, extra }`. |
 | `clay` | `true` shows **Enrich with Clay** on contacts. Needs the Clay connector; uses Clay credits. |
 
+## Your other systems
+
+| Key | Default | What it is |
+|---|---|---|
+| `context` | `[]` | Read-only lookups run when you open a thread: `[{ label, server, tool, input }]`. Feeds the context card, drafts, the pre-send check, Route and the morning run. See [connectors.md](connectors.md#context-sources). |
+| `actions` | `[]` | Extra Route actions: `[{ key, label, server, tool, input, ai, when }]`. `ai` names the fields the AI writes; `when` tells it when the action fits. See [connectors.md](connectors.md#route-actions). |
+| `snippets` | `[]` | Starting snippets: `[{ name, text }]`. `{{firstName}}` and `{{myName}}` are filled in. |
+| `labelPrefix` | `"CB"` | Gmail label prefix for snooze (`CB/Snooze/YYYY-MM-DD`), remind-me (`CB/Remind/YYYY-MM-DD`) and morning-run drafts (`CB/Drafted`) |
+
 ## Calendar and follow-ups
 
 | Key | Default | What it is |
@@ -50,7 +59,7 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 | Key | What it is |
 |---|---|
 | `mailRules` | Rules built into your copy. A plain-English rule: `{ text: "Receipts and invoices", op: "move", labelName: "Finance" }`. A sender rule: `{ text: "Email from Stripe", from: "stripe.com", op: "archive" }`. `op` is `move`, `archive`, `star` or `read`. Rules you add in the app are saved in your browser and override these until the improve skill writes them back here. |
-| `features` | Default on/off per feature, for example `{ sweep: false, calendar: true }`. Keys: `triage`, `waiting`, `tone`, `review`, `predraft`, `rules`, `sweep`, `ask`, `calendar`, `contacts`, `voice`, `learn`, `tasks`, `move`, `unsub`, `precheck`, `keys`. |
+| `features` | Default on/off per feature, for example `{ sweep: false, calendar: true }`. Keys: `triage`, `waiting`, `tone`, `review`, `predraft`, `rules`, `sweep`, `ask`, `calendar`, `contacts`, `voice`, `learn`, `tasks`, `move`, `unsub`, `precheck`, `context`, `route`, `snooze`, `drafts`, `snippets`, `attach`, `html`, `keys`. |
 | `readOnly` | `true` starts in read-only mode. You can still switch it off in the app. |
 
 ## Other
@@ -67,6 +76,7 @@ The app keeps these in your browser:
 - your voice edits;
 - the linked voice page text;
 - rules you add;
+- snippets you add or delete;
 - feature switches;
 - read-only state;
 - what it has learned (edits, rejections, actions, lessons).

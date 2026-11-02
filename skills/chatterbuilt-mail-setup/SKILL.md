@@ -1,11 +1,11 @@
 ---
 name: chatterbuilt-mail-setup
-description: Sets up, rebuilds or changes Chatterbuilt Mail, a Gmail client published as the user's own Claude artifact. Use when the user says "set up Chatterbuilt Mail", "install my email client", "rebuild my Chatterbuilt Mail", "file my tasks in Asana/Basecamp/Linear", "save contacts to HubSpot", "turn on calendar times", "add GPT", "change my email voice", or asks to customize the inbox artifact.
+description: Sets up, rebuilds or changes Chatterbuilt Mail, a Gmail client published as the user's own Claude artifact. Use when the user says "set up Chatterbuilt Mail", "install my email client", "rebuild my Chatterbuilt Mail", "file my tasks in Asana/Basecamp/Linear", "save contacts to HubSpot", "turn on calendar times", "add GPT", "change my email voice", "check Fireflies/my CRM/my pipeline when I open an email", "add a Route action", "hand off to my assistant in Slack", "set up the morning run", or asks to customize the inbox artifact.
 ---
 
 # Chatterbuilt Mail setup
 
-Chatterbuilt Mail is a single-page Claude artifact. It reads the user's Gmail through their claude.ai connectors. It drafts in their voice, checks replies before sending, tracks unanswered sent mail, suggests and runs rules through a review queue, files tasks and contacts to any connected app, and learns from the user's corrections.
+Chatterbuilt Mail is a single-page Claude artifact: a triage hub that connects the user's Gmail to their other systems through their claude.ai connectors. On each thread it checks read-only sources (meeting notes, calendar, tasks, pipeline, contacts, memory) for context, and Route sends the thread back out to them with the user's approval. It also drafts in their voice, checks replies before sending, tracks unanswered sent mail, snoozes, suggests and runs rules through a review queue, files tasks and contacts, and learns from the user's corrections. A companion skill, `chatterbuilt-mail-morning`, runs as a scheduled task.
 
 The template is at `${CLAUDE_PLUGIN_ROOT}/skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html`. In a fork it's also at `skills/chatterbuilt-mail-setup/assets/` in the repo. Every personal setting lives in one `CONFIG` object. Setup means writing that object and publishing. Never rewrite the page itself.
 
@@ -21,7 +21,7 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 ## 1. Check connectors
 
 - Gmail is required. If it isn't connected, tell the user to add it in claude.ai Settings, Connectors, and stop.
-- Note which optional connectors exist: Notion or another task app, a contacts app or CRM, Google Calendar, Clay, OpenRouter.
+- Note which optional connectors exist: Notion or another task app, a contacts app or CRM, Google Calendar, Clay, OpenRouter, Slack, and anything that knows about people the user emails (meeting notes such as Fireflies, a pipeline, newsletter lists such as Beehiiv, a memory system such as Cortex).
 
 ## 2. Collect the basics (AskUserQuestion, skip what memory answered)
 
@@ -36,6 +36,8 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 - **Copy targets:** other addresses for one-click "copy to account" (`copyTargets`).
 - **Follow-up window:** days before sent mail counts as waiting (`waitingDays`, default 3).
 - **Rules:** any standing rules from memory go in `mailRules` (`{ text, op, labelName }` or `{ text, from, op }`; `op` is move, archive, star or read).
+- **Snippets:** text they paste often (event basics, a booking link) goes in `snippets` as `{ name, text }`. `{{firstName}}` and `{{myName}}` are filled in.
+- **Label prefix:** `labelPrefix` (default `CB`) names the Gmail labels for snooze, remind-me and morning-run drafts. Change it only if `CB/` clashes with labels they already have.
 
 ## 3. Wire tasks and contacts to any app
 
@@ -51,6 +53,24 @@ Tasks and contacts use connector adapters: `{ label, server, tool, input }`. `in
 4. **Contacts on Notion.** You may use the short form `{ dataSourceId, nameProp, emailProp, ... }`. If they have no contacts database, offer to create one with Name, Email, Company, Title, Phone, LinkedIn, X, Bluesky, GitHub, Instagram, Website, Location, How we met, First contact (date), Notes, Background, Source and Tags.
 5. **Contacts elsewhere.** Add a `dupCheck` (a search tool plus `{{email}}`) when the app has one.
 6. **Never create a test task or test contact.** The user's first real one is the test.
+
+## 3b. Context sources and Route actions
+
+These make it a hub rather than a client. Details and placeholders are in `docs/connectors.md`.
+
+**Context (`CONFIG.context`).** Read-only lookups run on every thread the user opens.
+1. For each system the user wants checked, find a **read-only** tool that looks a person up: by email if possible (meeting participants, CRM contact), otherwise by name or company.
+2. Read its schema and use the exact argument names. Typical inputs: `{{email}}` for exact filters, `{{who}}` for name search, `{{orgOrEmail}}` for company search. Search by bare company name (`acme`), never by domain (`acme.com`); domain searches return noise.
+3. Make one read-only call per source with a real address from the user's recent mail, to confirm the shape and that results are relevant. Note any source that returns noise and tighten it (a `data_source_url`, a smaller page size) or drop it.
+4. Never put a tool that creates, updates, sends or deletes in `context`.
+5. Keep it to about eight sources.
+
+**Route (`CONFIG.actions`).** Extra places a thread can go, beyond task, contact, snooze and remind-me.
+1. Ask where threads usually go after the inbox: an assistant, a CRM, a pipeline, a support queue.
+2. For each, pick the connector tool and read its schema. Prefer tools that leave a draft or a note for the user to finish (a Slack draft, a CRM note) over tools that message other people directly.
+3. Write `{ key, label, server, tool, input, ai, when }`. `ai` names the free-text fields the AI writes, with one line on what each should say. `when` says when the action fits.
+4. Respect rules in the user's memory about where things may be written. If a system has to stay in sync with another, don't add a write that bypasses that.
+5. Never apply an action as a test.
 
 ## 4. Build
 
@@ -70,7 +90,7 @@ Declare capabilities from CONFIG, and only what's used:
 
 | When | Server | Tools |
 |---|---|---|
-| Always | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward` |
+| Always | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
 | `tasks` is set | its `server` | its `tool` |
 | `contacts` uses the Notion short form | `Notion` | `notion-create-pages`, `notion-search` |
 | `contacts` is a custom adapter | its `server` (and `dupCheck.server`) | its `tool` (and `dupCheck.tool`) |
@@ -78,12 +98,14 @@ Declare capabilities from CONFIG, and only what's used:
 | `calendar` is true | `Google Calendar` | `list_events` |
 | `clay` is true | `Clay` | `search-contacts-by-name`, `add-contact-data-points`, `get-task-context` |
 | `models` is not empty | `OpenRouter` | `send-message` |
+| each `context` entry | its `server` | its `tool` |
+| each `actions` entry | its `server` | its `tool` |
 
 Merge tools for a server that appears more than once.
 
 ## 6. Verify
 
-- Make one or two read-only calls: a small Gmail search, and Calendar `list_events` if calendar is on.
+- Make one or two read-only calls: a small Gmail search, and Calendar `list_events` if calendar is on. Context sources were already checked in step 3b.
 - Do not send, move, forward, label, file or save anything as a test.
 - Tell the user plainly which integrations were exercised and which stay unverified until first use (sending, moving, tasks, contacts, Clay, other models).
 
@@ -94,6 +116,14 @@ One or two sentences: what the page is, and what to try first (open a thread, pr
 - Read-only is there for a careful first look.
 
 In a repo, commit `my/config.js` and `my/chatterbuilt-mail.html`.
+
+## 8. Offer the morning run
+
+Offer once: a weekday scheduled task that drafts replies into Gmail before they start (see `docs/morning-run.md`). If they want it:
+- Create the scheduled task with the session's scheduling tools. Fill the prompt from `docs/morning-run.md` with their name, email, time zone, voice, rules, sign-off, voice page and context sources.
+- Pick a time a little before their day starts, off the hour (6:43, not 7:00). Turn push notifications on.
+- If creating it needs approval or is refused, tell the user plainly and give them the prompt. Don't look for another way to schedule it.
+- Say which approval setting the task got. If its runs will stop to ask, tell them they can turn on automatic approval in the task's settings, if their organization allows it.
 
 ## Changing it later
 

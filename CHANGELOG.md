@@ -1,5 +1,29 @@
 # Changelog
 
+## 0.3.0 (2026-11-02)
+
+The hub release: Chatterbuilt Mail now connects each thread to the rest of your systems, and works while you're away.
+
+### New
+- **Context card.** When you open a thread, it checks every read-only source in `CONFIG.context` (meeting notes, calendar, tasks, a pipeline, contacts, newsletter lists, a memory system) in parallel. It writes a short, source-tagged briefing: who they are to you, open commitments, the last and next meeting, pipeline status. Drafts and the pre-send check use it.
+- **Route.** The AI suggests where a thread should go, with the text written: a task, a contact, snooze, remind-me, or any connector action in `CONFIG.actions` (for example a Slack handoff draft). You edit and approve.
+- **Morning run.** New `chatterbuilt-mail-morning` skill for a weekday scheduled task. It wakes snoozes, checks reminders, drafts replies into Gmail with context, lists who owes you, and pushes a summary. It can only create drafts and change its own `CB/` labels.
+- **Snooze and remind-me-if-no-reply**, stored as plain Gmail labels (`CB/Snooze/YYYY-MM-DD`, `CB/Remind/YYYY-MM-DD`). The app and the morning run bring threads back.
+- **Drafts waiting in Gmail.** Threads with a Gmail draft are tagged. Load it in one click; sending removes the old draft.
+- **Snippets** with `{{firstName}}` and `{{myName}}`.
+- **Attachments** on replies, follow-ups and drafts, up to 18 MB.
+- **Formatted view.** Sanitized HTML, with images, scripts, styles and forms stripped and quoted history folded.
+- Keyboard: `o` for Route, `b` for Snooze.
+- **Install with a prompt.** [install.md](docs/install.md) has copy-paste setup prompts for Claude (full app) and ChatGPT (the same triage approach as project instructions and a scheduled task), with a table of what works where.
+- Docs: [why.md](docs/why.md) (what people want from AI email and don't get), [morning-run.md](docs/morning-run.md), context sources, Route actions and tested connectors in [connectors.md](docs/connectors.md).
+
+### Changed
+- The pre-send check now flags replies that contradict your systems, and warns when a reply mentions an attachment you haven't added.
+- The Gmail manifest adds `list_drafts` and `delete_draft`. Republish existing copies so their permissions include them.
+- "Copy for Claude" now exports snippets, and keeps the sender on sender rules (it was dropped before). The improve skill folds both in.
+- Rows fill in dates and unread state from the full thread, because Gmail's summary view has neither.
+
+
 ## 0.2.0 (2026-11-02)
 
 ### New

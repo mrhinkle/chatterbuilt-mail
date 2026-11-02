@@ -15,5 +15,12 @@
 | A send or save says "didn't answer in time" | It may still have gone through. Check Sent or Drafts in Gmail before trying again. |
 | Lessons or rules vanished | They live in one browser. Use Copy for Claude and the improve skill to make them permanent. |
 | Everything is greyed out | Read-only is on. Click it in the top bar to turn it off. |
+| A context chip is red | That source failed or took over 15 seconds; hover for the reason. The rest of the card still works. Press Refresh to try again. |
+| The context card mentions the wrong person or company | A search source is too loose. Ask Claude to tighten it: an exact email filter, a specific database, or the bare company name instead of the domain. |
+| No context card | `CONFIG.context` is empty, or Context is off in Skills. |
+| Route suggests nothing | Nothing in the thread clearly called for it. Tick an action anyway and fill in the fields. |
+| A snoozed thread didn't come back | The app brings it back the next time it opens, and the morning run each weekday. It's under the `CB/Snooze/<date>` label in Gmail meanwhile. |
+| No *draft in Gmail* tag on a thread you drafted | Drafts are checked once a minute. Reload the inbox. |
+| The morning run asked for approval and stopped | Its runs need automatic approval. Turn it on in the scheduled task's settings, if your organization allows it. |
 
 Still stuck? Open an issue at https://github.com/mrhinkle/chatterbuilt-mail/issues with what you clicked and the exact message you saw. Leave out email content.

@@ -15,6 +15,33 @@ Every feature can be switched off in **Skills** (top bar), and its buttons disap
 - It reads the top five threads and answers with numbered sources.
 - Click a source to open the thread.
 
+**Formatted view.** Press **Formatted** in the thread header to see a message with its links, lists and tables. Scripts, styles, forms, images (including tracking pixels) and `javascript:` links are stripped first, links open in a new tab, and quoted history folds away. Plain text is the default.
+
+## Connecting your systems
+
+This is what sets Chatterbuilt Mail apart from email clients with AI added: each thread is checked against the rest of your systems, and routed back out to them. Why it matters: [why.md](why.md).
+
+**Context.** When you open a thread, a card above the messages checks every system in `CONFIG.context` for that person and topic, all at once:
+- meeting notes (Fireflies, Zoom, Notion meeting notes);
+- calendar (past and upcoming meetings);
+- tasks and notes;
+- a sales or sponsor pipeline;
+- contacts or CRM;
+- newsletter subscriber lists;
+- your memory system.
+
+The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show which systems found something, came back empty, or failed. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
+
+Drafts and the pre-send check use the card. Untick *Use what my other systems know* in the reply box to leave it out of a draft.
+
+**Route.** Press **Route** (or `o`). The AI reads the thread and the context card and suggests where the thread should go, with the text already written:
+- a task in your task app, with a title starting with a verb;
+- a contact, which opens Add to contacts;
+- snooze until a date, or remind me if nobody replies;
+- any action you add in `CONFIG.actions`: a Slack handoff to an assistant, a CRM note, a pipeline update, a ticket. See [connectors.md](connectors.md#route-actions).
+
+Suggested actions are ticked. Edit any field, untick what you don't want, then **Apply selected**. Each action shows *done* or the reason it failed. Nothing runs until you apply, and read-only mode blocks it.
+
 ## Replying
 
 **One-click intents.** Say yes, Decline, Ask a question, Offer a call, Follow up later. Or type an instruction ("yes, but only if we can do it in December") and press Draft.
@@ -34,12 +61,20 @@ Every feature can be switched off in **Skills** (top bar), and its buttons disap
 - questions or requests you didn't answer;
 - names, dates, times, numbers or prices that don't match the thread;
 - commitments you might not mean;
-- attachments you mention (replies sent from here can't carry files);
+- an attachment you mention but haven't attached;
 - reply-all or wrong-recipient risk;
 - tone that could land badly;
 - typos.
 
+With the context card on, it also flags a reply that contradicts what your systems say: a meeting date that doesn't match your calendar, or a promise from the last call that the reply forgets.
+
 It offers a corrected version you can take, or you can send anyway. If the check fails to run, you can still send. Turn it off in Skills if you prefer.
+
+**Snippets.** Reusable text you insert at the cursor. `{{firstName}}` becomes the other person's first name and `{{myName}}` your sign-off. Start with the ones in `CONFIG.snippets`; add or delete them in the Snippets panel. Changes are saved in your browser until the improve skill writes them into your copy.
+
+**Attachments.** **Attach** adds files to a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link.
+
+**Drafts waiting in Gmail.** Threads that already have a Gmail draft (written by the [morning run](morning-run.md), or by you in Gmail) show a *draft in Gmail* tag. Open one and press **Load it** to put it in the reply box. When you send, the old Gmail draft is removed so you don't end up with a stray copy.
 
 **Save to Gmail drafts** puts the reply in Gmail Drafts. **Send** always asks you to confirm.
 
@@ -49,6 +84,14 @@ It offers a corrected version you can take, or you can send anyway. If the check
 - Open one and press **Nudge** for a short, friendly follow-up.
 - Sending goes to the people you wrote to, threaded under your last message.
 - **3 options** gives a nudge, a shorter nudge, and a graceful "happy to drop this."
+
+**Snooze.** Press **Snooze** (or `b`) and pick tomorrow, in two days, next Monday, in a week, in two weeks, or a date. The thread leaves the inbox and comes back, unread, that morning. Undo works.
+
+**Remind me if no reply.** Tick *Remind me in N days if no reply* under the reply box before you send, or pick it in the Snooze panel. If nobody has answered by that morning, the thread comes back to your inbox. If they have, the reminder quietly clears.
+
+Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so you can see them in Gmail and nothing is stored anywhere else. The app checks for due ones each time it opens, and so does the morning run. The `CB/` labels are hidden from the Move folder list.
+
+**Morning run.** A Claude scheduled task that triages each weekday morning, writes reply drafts into Gmail with context from your systems, and pushes a summary to your phone. See [morning-run.md](morning-run.md).
 
 ## Organizing
 
@@ -111,6 +154,8 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 | `m` | Move |
 | `t` | Task |
 | `c` | Contact |
+| `o` | Route |
+| `b` | Snooze or remind |
 | `r` | Reply box |
 | `/` | Search |
 | `z` | Undo |
@@ -125,9 +170,14 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 
 | Feature | Reads | Writes (only after your click) |
 |---|---|---|
-| Inbox, summaries, triage, Ask | Gmail | nothing |
-| Drafting, 3 options, Pre-draft, pre-send check | Gmail; your sent mail to that person (tone); Calendar free/busy (times) | nothing until Save or Send |
-| Send / Save draft / Nudge | | Gmail send or draft |
+| Inbox, summaries, triage, Ask, formatted view | Gmail | nothing |
+| Context | every system in `CONFIG.context`, read-only | nothing |
+| Drafting, 3 options, Pre-draft, pre-send check | Gmail; your sent mail to that person (tone); Calendar free/busy (times); the context card | nothing until Save or Send |
+| Send / Save draft / Nudge / attachments | | Gmail send or draft; removes a loaded Gmail draft after sending |
+| Route | Gmail; the context card | whatever you tick: your task app, contacts, Gmail labels, or a `CONFIG.actions` tool |
+| Snooze, remind-me | Gmail labels | Gmail labels under `CB/` (undoable) |
+| Morning run | Gmail; every system in `CONFIG.context`, read-only | Gmail drafts and `CB/` labels only |
+| Snippets | | your browser only |
 | Move, archive, star, review, sweep archive | Gmail labels | Gmail labels (undoable) |
 | Unsubscribe | Gmail message headers | an email to the sender's unsubscribe address, if you choose that |
 | Tasks | Gmail | your task app |

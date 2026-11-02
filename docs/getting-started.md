@@ -4,6 +4,8 @@ Chatterbuilt Mail is one HTML page that Claude publishes as a private artifact o
 
 There are three ways to set it up. They all end the same way: a private Chatterbuilt Mail page in your claude.ai artifacts.
 
+The quickest start is a single prompt: see [install.md](install.md). That page also has a ChatGPT version, which sets up the same triage approach as a chat workflow rather than the app.
+
 ## Before you start
 
 - A claude.ai account with the **Gmail** connector added (Settings, Connectors).
@@ -72,7 +74,9 @@ What you give up without a repo: version history and an easy way to pull upstrea
 - Open the artifact from your claude.ai artifacts list. The first time each connector is used, claude.ai asks for your OK.
 - Press **Skills** at the top to see every feature and turn off what you don't need.
 - Turn on **Read-only** for a careful first look; nothing can change in Gmail while it's on.
-- Open a thread and press a reply button to see a draft in your voice.
+- Open a thread from someone you know well. The context card shows what your other systems know about them. Press **Route** to see where it would send the thread.
+- Press a reply button to see a draft in your voice.
+- When you trust the drafts, set up the [morning run](morning-run.md) so they're waiting in Gmail each morning.
 
 ## Changing things later
 
@@ -82,5 +86,8 @@ Ask Claude in plain words. For example:
 - "Turn on calendar times."
 - "My working hours are 8 to 4."
 - "Save contacts to HubSpot."
+- "Check Fireflies and my CRM when I open an email."
+- "Add a Route action that hands threads to my assistant in Slack."
+- "Set up the morning run, weekdays at 6:45."
 
 The setup skill edits your `CONFIG` and republishes to the same link.
