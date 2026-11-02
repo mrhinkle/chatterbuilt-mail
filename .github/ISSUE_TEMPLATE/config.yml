@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://github.com/mrhinkle/chatterbuilt-mail/tree/main/docs
+    about: Guides for every feature, setup, connectors and troubleshooting.

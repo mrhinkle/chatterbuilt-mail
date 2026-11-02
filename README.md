@@ -1,47 +1,68 @@
 # Chatterbuilt Mail
 
-A triage hub that connects your Gmail to the rest of your systems. It runs as your own private Claude artifact.
+**A fun way to triage your Gmail with Claude.** It reads the room before you reply.
 
-Most AI email tools sort and draft inside the inbox. Chatterbuilt Mail also checks each thread against your meeting notes, calendar, tasks, pipeline, contacts and memory before you reply. Then it routes the thread back out to them: a task, a Slack handoff, a contact, a CRM note, a snooze. A morning run checks the same systems while you sleep and leaves reply drafts in Gmail. Why this matters: [docs/why.md](docs/why.md).
+I've had an email address since the BBS days, and I don't think I've been caught up once. Remember when "You've got mail" was good news? These days I run a conference and a handful of AI newsletters, so my inbox is where sponsors, speakers, vendors and every SaaS receipt on earth wait in the same line.
 
-**The context panel is the core of it.** Open a thread and you get a short brief from every system you've connected. Each line names its source, chips show which systems came back empty, and it won't merge a lookalike match or guess at what it doesn't know. Your drafts, the pre-send check and Route all use it. See [docs/context-panel.md](docs/context-panel.md).
+I tried the AI email tools. They sort, they summarize, they draft. Fine. But the stuff I need before I reply, like what I promised on last week's call or where a sponsor is in the pipeline, doesn't live in my inbox. It lives in my meeting notes, my calendar, Notion, my CRM.
 
-It also does the email-client work: drafts in your voice, a check on every reply before it goes out, a tracker for who owes you an answer, and rules that learn from what you do.
-
-Nothing is sent, moved or filed without a click from you. Every AI suggestion waits for approval, and a read-only mode blocks changes outright.
+So I built Chatterbuilt Mail to triage my own email. It's a private Claude artifact that sits on top of Gmail. When I open a thread, it checks my other systems first, writes a draft that sounds like me, and right before I hit Send, it reminds me about the thing I forgot. It started as a side project. It got a little out of hand, in the best way.
 
 ![Chatterbuilt Mail: a thread with context from your systems, a cited web lookup, suggested next steps, and the pre-send check](docs/images/presend.webp)
 
-*A thread with context from your systems and the web beside it, suggested next steps, and the pre-send check catching a promised deck. Made-up data.* **[Watch the 30-second demo](docs/media/demo.mp4)** · [more screenshots](docs/demo.md)
+*A thread with what your systems know beside it, suggested next steps, and the pre-send check catching a promised deck. Made-up data.* **[Watch the 30-second demo](docs/media/demo.mp4)** · [every screenshot](docs/demo.md)
 
 ## What it does
 
-| Area | Features |
-|---|---|
-| Connect | **Context panel** beside every thread, from any read-only connector (Fireflies, Calendar, Notion, a pipeline, a CRM, Beehiiv, a memory system). **More context** looks the person and company up on the public web, with citations, when you ask. **Route** and **Next steps** suggest where the thread goes across your systems, with the text written, for you to approve. **Today** shows drafts waiting, what needs you and your next meeting. **Morning run** drafts replies into Gmail before you wake up |
-| Read | Inbox with previews and unread dots, one-click summaries, triage into reply / read / skip, Ask your inbox (plain-English questions answered with numbered sources), a cleaned formatted view |
-| Reply | Drafts in your voice from one-click intents or your own instruction, three options per thread (best fit, shorter, polite no), pre-drafts for everything that needs a reply, per-recipient tone matching, open times from your calendar, snippets, attachments, drafts waiting in Gmail, **pre-send check** that rereads your reply against the thread and your systems before it goes |
-| Follow up | Waiting-on-reply tracker with a one-click Nudge, snooze, remind-me-if-no-reply (both plain Gmail labels) |
-| Organize | Move to folder, copy to another account, unsubscribe, bulk unsubscribe sweep, plain-English rules, rules suggested from what you do by hand, review queue with undo |
-| Capture | Drag a thread to Tasks (Notion, Asana, Basecamp, Linear, Todoist or anything with a connector), add a person to Contacts with their signature details, social handles, Clay enrichment and a note on how you first met |
-| Learn | Voice panel (paste a prompt, point to a Notion page, or train from sent mail), lessons learned from your edits and rejections, a skill that makes those lessons permanent in your copy |
-| Control | Skills picker to switch features on and off, keyboard shortcuts and a ⌘K command palette, read-only mode, works on phones |
+**It reads the room.** Open a thread and the context panel tells you what your other systems know about this person: what you owe them, where the deal stands, when you last met. Every line names its source, and it tells you what came back empty instead of guessing. **More context** looks them up on the web too, with citations, but only when you ask. → [The context panel](docs/context-panel.md)
 
-Claude does the drafting by default. Other models (GPT, Gemini, GLM and more) plug in through the OpenRouter connector.
+**It sorts the pile.** Triage splits your inbox into Needs you, Worth reading and FYI, with a reason on each thread. **Today** shows drafts waiting, what needs you and your next meeting before you open anything. → [Today](docs/today.md) · [Reading and triage](docs/reading-and-triage.md)
+
+**It shows you who owes you a reply.** The **Waiting** tab lists the things you sent that nobody has answered, oldest first, with how many days it's been. Press **Nudge** and you get a short, friendly follow-up ready to send. Or tick *Remind me* when you send, and if they go quiet, the thread comes back to your inbox on its own. → [Following up](docs/following-up.md)
+
+**It routes the work.** **Route** is the "OK, now what?" button. It reads the thread and what your systems know, then suggests where the thread should go: a task in your task app, a handoff to your assistant in Slack, a new contact, a snooze, or a reminder if nobody answers. Each suggestion shows up with the text already written. You edit what you want, untick what you don't, and press **Apply selected**. Nothing moves until you do. → [Route and next steps](docs/route-and-next-steps.md)
+
+**It writes like you.** Drafts come out in your voice, matched to how you write to each person, with open times from your calendar when someone wants to meet. **3 options** gives you a best fit, a shorter one and a polite no. → [Replying](docs/replying.md)
+
+**It catches you before you hit Send.** The pre-send check rereads your reply against the thread and your systems. Forgot the deck you promised? Wrong date? Reply-all on something you shouldn't? It flags it and offers a fix. → [The pre-send check](docs/replying.md#the-pre-send-check)
+
+**It works while you sleep.** The morning run checks your systems each weekday and leaves reply drafts in Gmail before you're up. → [Morning run](docs/morning-run.md)
+
+**It cleans up.** Plain-English rules, an unsubscribe sweep, folder moves, and a review queue with undo for anything the AI suggests. → [Organizing](docs/organizing.md)
+
+## Train it to sound like you
+
+Out of the box it writes like a polite robot. Give it a few minutes and it writes like you. In **Settings → Voice**, train it from your sent mail, paste a style guide, or point it at a Notion page. After that, every draft you edit teaches it something, and it writes those up as lessons you can read and change. No black box. → [Voice](docs/voice.md) · [Self-improving](docs/self-improving.md)
+
+## Make it yours
+
+Every feature has an off switch in **Settings → Skills**. Everything personal, like your connectors, task app, CRM, rules and voice, lives in one `CONFIG` block. You don't have to edit it yourself: ask Claude to change something and the setup skill does the rest.
+
+Connect your other apps however you like. I use a mix of native claude.ai connectors and [Composio](docs/composio.md), which reaches hundreds of apps through one connector. Native, Composio, or both all work. Claude drafts by default, and GPT, Gemini and other models plug in through OpenRouter. → [Connectors](docs/connectors.md) · [Configuration](docs/configuration.md)
+
+## Built for Gmail. Bring your own inbox.
+
+I built this for Gmail because that's where my mail lives. But the app only talks to a handful of connector tools (search, read, draft, send, label), so there's nothing stopping it from running on Outlook or anything else with a connector. Fork it, swap in your email platform, and send a pull request. That's how open source is supposed to work, right? [CONTRIBUTING.md](CONTRIBUTING.md) has the map of what to change.
+
+## Nothing happens without a click
+
+Nothing is sent, moved or filed until you say so. AI suggestions wait for your OK, there's undo, and read-only mode blocks every change outright, which is handy for demos. → [Safety and privacy](docs/safety-and-privacy.md)
 
 ## Get started
 
-**Fastest:** paste the install prompt from [docs/install.md](docs/install.md) into Claude. There's also a ChatGPT version that sets up the same triage approach as a chat workflow. The full app needs Claude; the page explains why.
+Paste this into Claude:
 
-Or pick the path that fits how you work. The full walkthrough is in [docs/getting-started.md](docs/getting-started.md).
+```text
+Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Gmail is native; use Composio for everything else. Read my email memory file if I have one, ask me only what you can't find, and never send, move or file anything as a test.
+```
 
-1. **Fork it and back it with memory (recommended).** Fork or privately copy this repo, fill in [`memory/EMAIL-MEMORY.md`](memory/EMAIL-MEMORY.example.md) with how you handle email, then ask Claude to run the `chatterbuilt-mail-setup` skill. Your config, voice, rules and lessons live in your own repo and improve over time.
-2. **No GitHub.** Save the template and skills to Google Drive, OneDrive or SharePoint, keep your email memory file next to them, and point Claude at that folder.
-3. **Just the plugin.** Install `chatterbuilt-mail.plugin` and say "Set up Chatterbuilt Mail."
+Rather use native connectors? Swap the Composio part for "use my native connectors." You need the Gmail connector in claude.ai (Settings → Connectors); everything else is optional.
 
-You need the Gmail connector in claude.ai (Settings, Connectors). Everything else is optional, and you can connect it two ways:
-- **Native connectors**, one per app: Notion or another task app, a contacts app or CRM, Google Calendar, meeting notes, Slack, Clay, OpenRouter, a web search tool.
-- **One Composio connector** that reaches all of them. Suggested if you don't want to manage native connectors. See [docs/composio.md](docs/composio.md).
+The full prompt and a ChatGPT version are in [docs/install.md](docs/install.md). The three ways to set it up (fork it and back it with an email memory file, keep it in Google Drive or OneDrive, or just install the plugin) are in [docs/getting-started.md](docs/getting-started.md).
+
+## Found a bug? Got an idea?
+
+Type **chatterbuilt-mail-feedback** in Claude. It pulls together what went wrong (the error, your version, your setup), strips out anything private, shows you the issue, and opens it on GitHub when you say go. Ask it later what happened to your report and it'll check. Or [open an issue](https://github.com/mrhinkle/chatterbuilt-mail/issues/new/choose) yourself. Pull requests are even better.
 
 ## Documentation
 
@@ -49,19 +70,7 @@ The full index is [docs/README.md](docs/README.md). Every guide has screenshots.
 
 **Set up:** [install with a prompt](docs/install.md) · [getting started](docs/getting-started.md) · [Composio](docs/composio.md) · [connectors](docs/connectors.md) · [configuration](docs/configuration.md) · [morning run](docs/morning-run.md)
 
-**Use it:**
-- [Today](docs/today.md): drafts waiting, what needs you, your next meeting
-- [Reading and triage](docs/reading-and-triage.md): the list, Triage, Summarize, Ask, Formatted view
-- [The context panel](docs/context-panel.md): the brief from your systems on every thread, and why it's the core of the app
-- [More context](docs/more-context.md): a cited web lookup, only when you press it
-- [Route and next steps](docs/route-and-next-steps.md): send a thread to your task app, Slack, contacts or a reminder
-- [Replying](docs/replying.md): drafts, open times, 3 options, Pre-draft, the pre-send check
-- [Voice](docs/voice.md): your voice, per-recipient tone, snippets
-- [Following up](docs/following-up.md): Waiting, Nudge, Snooze, Remind me
-- [Organizing](docs/organizing.md): move, copy, unsubscribe, sweep, rules, Review and Undo
-- [Tasks and contacts](docs/tasks-and-contacts.md)
-- [Settings and shortcuts](docs/settings-and-shortcuts.md)
-- [Phone](docs/phone.md)
+**Use it:** [Today](docs/today.md) · [reading and triage](docs/reading-and-triage.md) · [the context panel](docs/context-panel.md) · [More context](docs/more-context.md) · [Route and next steps](docs/route-and-next-steps.md) · [replying](docs/replying.md) · [voice](docs/voice.md) · [following up](docs/following-up.md) · [organizing](docs/organizing.md) · [tasks and contacts](docs/tasks-and-contacts.md) · [settings and shortcuts](docs/settings-and-shortcuts.md) · [phone](docs/phone.md)
 
 **Reference:** [features](docs/features.md) · [self-improving](docs/self-improving.md) · [safety and privacy](docs/safety-and-privacy.md) · [troubleshooting](docs/troubleshooting.md) · [screenshots and video](docs/demo.md) · [why Chatterbuilt Mail](docs/why.md)
 
@@ -73,26 +82,28 @@ The full index is [docs/README.md](docs/README.md). Every guide has screenshots.
 | `chatterbuilt-mail-improve` | Takes the "Copy for Claude" export from the app and folds lessons, voice, rules and snippets into your copy and your memory file |
 | `chatterbuilt-mail-morning` | The morning run: wakes snoozes, drafts replies into Gmail with context, lists who owes you, and sends a short summary |
 | `email-voice-profile` | Learns how you write from your sent mail |
+| `chatterbuilt-mail-feedback` | Turns a bug or an idea into a GitHub issue, privately scrubbed, and checks on issues you've filed |
 
 ## Repository layout
 
 ```
-.claude-plugin/plugin.json         plugin manifest
-skills/chatterbuilt-mail-setup/    setup skill + the page template (assets/)
-skills/chatterbuilt-mail-improve/  improve skill
-skills/chatterbuilt-mail-morning/  morning run skill (for a scheduled task)
-skills/email-voice-profile/        voice profile skill
-memory/EMAIL-MEMORY.example.md     template for your email memory file
-examples/config.example.js         a filled-in CONFIG to copy from
-scripts/build.py                   builds your page from the template + your CONFIG
-scripts/demo/                      records the screenshots and demo video with made-up data
-docs/                              documentation (images/ and media/ hold the screenshots and video)
-CLAUDE.md                          tells Claude how to work in your fork
+.claude-plugin/plugin.json          plugin manifest
+skills/chatterbuilt-mail-setup/     setup skill + the page template (assets/)
+skills/chatterbuilt-mail-improve/   improve skill
+skills/chatterbuilt-mail-morning/   morning run skill (for a scheduled task)
+skills/chatterbuilt-mail-feedback/  feedback skill: bug reports and ideas as GitHub issues
+skills/email-voice-profile/         voice profile skill
+memory/EMAIL-MEMORY.example.md      template for your email memory file
+examples/config.example.js          a filled-in CONFIG to copy from
+scripts/build.py                    builds your page from the template + your CONFIG
+scripts/demo/                       screenshots and the demo video, with made-up data
+docs/                               documentation (images/ and media/ hold the screenshots and video)
+.github/ISSUE_TEMPLATE/             bug report and idea templates
+CONTRIBUTING.md                     how to send a pull request or add another email platform
+CLAUDE.md                           tells Claude how to work in your fork
 ```
 
-## Support
-
-Bugs and requests: [GitHub issues](https://github.com/mrhinkle/chatterbuilt-mail/issues). The app's Skills panel links here too.
+If it saves you twenty minutes a day, great. If it doesn't, you know where the feedback skill is.
 
 ## License
 

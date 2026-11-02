@@ -9,8 +9,10 @@ This repo is a Chatterbuilt Mail plugin, or someone's fork of it.
   - `skills/chatterbuilt-mail-improve` folds the app's "Copy for Claude" export into CONFIG and memory.
   - `skills/email-voice-profile` learns their voice from sent mail.
   - `skills/chatterbuilt-mail-morning` is the morning run, for a scheduled task. It may only create Gmail drafts and change `CB/` labels.
-- **Build.** `python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html`
+  - `skills/chatterbuilt-mail-feedback` turns a bug or idea into a GitHub issue on mrhinkle/chatterbuilt-mail. It files only after the user says yes, and never puts email content in an issue.
+- **Build.** `python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html`. It stamps the version from `.claude-plugin/plugin.json`, which the app shows in Settings → Skills.
 - **Don't edit the template for one person.** Personal changes go in `my/config.js`. Template changes are for everyone, so upstream them.
-- **Never test by acting.** Don't send, move, forward, label, file a task or save a contact as a test. Read-only calls are fine.
+- **Never test by acting.** Don't send, move, forward, label, file a task, save a contact or open an issue as a test. Read-only calls are fine.
+- **Connector reads vs writes.** The page retries a read once when the runtime marks the error retryable. Never add retries to writes: a failed write may still have run.
 - Docs are in `docs/`. Keep them in step with any template change.
 - **Screenshots.** After a UI change, run `node scripts/demo/screenshots.js demo-out/screens`, convert to WebP (see `docs/demo.md`) and replace the matching files in `docs/images/`. They use made-up data from `scripts/demo/fake.js`. Never commit screenshots of real mail.

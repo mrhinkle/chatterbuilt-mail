@@ -23,6 +23,7 @@ module.exports = function fake() {
       [{ id: 'mw1a', sender: 'Jordan Blake <jordan@makerspace.example>', toRecipients: [ME], date: iso(now - 7 * D), subject: 'Space for the March meetup', labelIds: [], plaintextBody: 'Morgan said you might need a room for your meetup. Happy to talk.' }]),
     s1: mine('s1', 'Sam Ortiz <sam@riveralabs.example>', 'Re: Panel', 'Sam, happy to do the panel. Send the run of show and I will block the time. Alex', 20 * D),
     s2: mine('s2', 'Pat Kim <pat@example.org>', 'Re: Intro', 'Thanks for the intro, Pat. Moving you to bcc. Jo, great to meet you. Does Thursday work? Alex', 30 * D),
+    n1: mine('n1', ME, 'Note to self: meetup venues', 'Ask Jordan about the big room. Check the library annex too.', 3 * H),
     s3: mine('s3', 'Dana Ruiz <dana@acmerobotics.example>', 'Re: Fall meetup', 'Dana, good to meet you at the meetup. Short version: yes, let us talk sponsorship in the new year. Alex', 40 * D)
   };
   const order = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8'];
@@ -73,6 +74,7 @@ module.exports = function fake() {
           if (/^in:sent/.test(q)) return P({ threads: ['w1', 's1'].map(summ) });
           if (/^label:/.test(q)) return P({});
           if (/unsubscribe/i.test(q)) return P({ threads: ['t5', 't4', 't7'].map(summ) });
+          if (/note to self/i.test(q)) return P({ threads: [summ('n1')] });
           if (/venue|walkthrough/i.test(q)) return P({ threads: [summ('t2')] });
           if (/stripe/i.test(q)) return P({ threads: [summ('t4'), summ('t7')] });
           if (/dana@|acmerobotics/i.test(q)) return P({ threads: [summ('s3'), summ('t1')] });

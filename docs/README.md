@@ -51,3 +51,6 @@ Each guide has screenshots (made-up data) and says what the feature reads, write
 | `chatterbuilt-mail-improve` | Make what the app learned permanent |
 | `chatterbuilt-mail-morning` | Run the morning triage (from a scheduled task) |
 | `email-voice-profile` | Learn your writing voice from sent mail |
+| `chatterbuilt-mail-feedback` | Report a bug or share an idea as a GitHub issue, scrubbed of anything private; check on issues you've filed |
+
+Want to contribute or add another email platform? See [CONTRIBUTING.md](../CONTRIBUTING.md).

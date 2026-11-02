@@ -15,7 +15,7 @@ Everything that controls the app itself sits in one **Settings** menu in the top
 | **Read-only** | A switch that blocks every change. See below. |
 | **Model** | Which model drafts and sorts. Shows only when your copy lists extra models. |
 | **Keyboard shortcuts** `?` | Opens Skills at the keyboard list. |
-| **Docs and support ↗** | These docs on GitHub. |
+| **Docs and support ↗** | These docs on GitHub. The bottom of **Skills** also shows your version number, which is handy for a bug report, and points to `chatterbuilt-mail-feedback`. |
 
 ## Skills: switch off what you don't use
 

@@ -29,6 +29,7 @@ const scenes = [
   ['triage', DESK, async (pg) => { await pg.click('#triageBtn'); await pg.waitForTimeout(2800); }],
   ['today-triaged', DESK, async (pg) => { await pg.click('#triageBtn'); await pg.waitForTimeout(2800); }],
   ['context-panel', DESK, async (pg) => { await open(pg, 't1'); }],
+  ['panel-hidden', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideHide'); await pg.waitForTimeout(400); }],
   ['receipt-context', DESK, async (pg) => { await open(pg, 't8'); }],
   ['more-context', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="more"]'); await pg.waitForTimeout(3200); }],
   ['next-steps', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="steps"]'); await pg.waitForTimeout(2800); }],

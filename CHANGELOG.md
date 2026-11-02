@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 (2026-11-02)
+
+### New
+- **`chatterbuilt-mail-feedback` skill.** Type it in Claude and it turns a bug or an idea into a GitHub issue: it gathers the error, your version and your setup, removes anything private, shows you the issue and files it when you say so. It also checks on issues you've filed. Bug and idea templates are in `.github/ISSUE_TEMPLATE/`.
+- **Hide or show the context panel.** A button in the panel's corner hides it (context moves to the top of the thread); **Panel** in the thread toolbar brings it back. The choice is remembered.
+- **Version number** in Settings → Skills, stamped at build time from `plugin.json`.
+- **CONTRIBUTING.md**, including how to add another email platform.
+- **A new README.**
+
+### Fixed
+- **"Gmail call failed (upstream_error)" on Today.** Reads now retry once when the connector says a retry may work, for example when the call ran while claude.ai's "allow Gmail" prompt was open. Writes never retry. The message is now plain English, and a failed inbox load has a **Try again** button.
+- **Drafts check pulled about a megabyte on every load.** It listed your last 50 drafts with full bodies. It now lists them without bodies and fetches only the open thread's draft text.
+- **The right panel sat blank.** It showed nothing while a thread loaded, and nothing at all on a thread with no one but you. It now says what it's doing.
+
 ## 0.4.4 (2026-11-02)
 
 ### Fixed

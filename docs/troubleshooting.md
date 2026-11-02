@@ -3,6 +3,7 @@
 | What you see | What to do |
 |---|---|
 | "Open this in claude.ai" | The page only reaches your connectors inside claude.ai. Open it from your artifacts list. |
+| "Gmail couldn't finish that just now" | Usually it ran while claude.ai was asking you to allow Gmail for the page, or Gmail had a short hiccup. Allow it if asked, then press **Try again** (or Refresh). The page already retries a read once on its own when the error says that may work. It never retries a send, a move or a save, because a failure isn't proof it didn't happen. Check Sent or Drafts before trying a write again. |
 | "Gmail isn't connected" or "Reconnect Gmail" | claude.ai Settings, Connectors: add or reconnect Gmail, then refresh the page. |
 | "Not connected: Notion, Google Calendar…" toast | Those features need that connector. Reading mail still works. |
 | "This page isn't allowed to use …" | Allow it in the artifact's Permissions menu, or ask Claude to republish with that tool declared. |
@@ -22,10 +23,11 @@
 | Route suggests nothing | Nothing in the thread clearly called for it. Tick an action anyway and fill in the fields. |
 | A snoozed thread didn't come back | The app brings it back the next time it opens, and the morning run each weekday. It's under the `CB/Snooze/<date>` label in Gmail meanwhile. |
 | No *draft in Gmail* tag on a thread you drafted | Drafts are checked once a minute. Reload the inbox. |
-| No context panel beside the thread | The window is narrower than 1180 px, so context sits at the top of the thread instead. Widen the window, or turn Context, More context and Route on in Settings → Skills. |
+| No context panel beside the thread | You may have hidden it: press **Panel** at the right of the thread toolbar to bring it back. Below 1180 px wide, context sits at the top of the thread instead. If it's missing everywhere, turn Context, More context and Route on in Settings → Skills. |
+| The panel says there's no one to look up | The thread has nobody on it but you (a note to yourself, or a draft you sent yourself). There's no person to check your systems for. |
 | More context says "Nothing relevant on the web" | The search found nothing about this person. Gmail and Outlook addresses have no company domain, so results are thinner. |
 | More context failed | Read the message under the button. A web search connector may need connecting, or (through Composio) the search app may need an active connection inside Composio. |
 | "Composio reported an error: No active connection for toolkit=…" | Connect that app inside Composio. See [composio.md](composio.md). |
 | The morning run asked for approval and stopped | Its runs need automatic approval. Turn it on in the scheduled task's settings, if your organization allows it. |
 
-Still stuck? Open an issue at https://github.com/mrhinkle/chatterbuilt-mail/issues with what you clicked and the exact message you saw. Leave out email content.
+Still stuck? Type **chatterbuilt-mail-feedback** in Claude. It writes up the issue with your version and setup, removes anything private, and files it when you say so. Or open one yourself at https://github.com/mrhinkle/chatterbuilt-mail/issues with what you clicked and the exact message you saw. Leave out email content.

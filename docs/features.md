@@ -31,7 +31,7 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 | Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter; switch on **Ask** inside it to ask a question instead), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. After Triage, the list is grouped into **Needs you**, **Worth reading** and **FYI**. |
 | No thread open | **Today**: drafts waiting in Gmail, what needs you, suggestions in Review, who owes you a reply, and your next meeting. |
 | Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact**, then **More** (Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
-| Beside a thread (wide screens) | The **context panel**: who it is, what your systems know, **More context** from the web, and **Next steps**. On narrower screens the same panel sits at the top of the thread. |
+| Beside a thread (wide screens) | The **context panel**: who it is, what your systems know, **More context** from the web, and **Next steps**. Hide it with the button in its top corner and bring it back with **Panel** in the thread toolbar. On narrower screens the same panel sits at the top of the thread. |
 | Reply box | Reply buttons, your own instruction, **Draft with** switches (My tone with them, Context, Open times), the reply, then Snippets, Attach, Reply all, Remind me, **Save draft** and **Send**. |
 
 ## Reading
