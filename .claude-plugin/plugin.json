@@ -1,8 +1,22 @@
 {
   "name": "chatterbuilt-mail",
-  "version": "0.1.0",
-  "description": "A Gmail reader and reply desk you publish as your own Claude artifact: AI summaries, triage and drafts in your voice, move to folder, copy to another account, unsubscribe, and drag-to-task into Notion. Includes setup skills to make it yours.",
-  "author": { "name": "Mark R. Hinkle" },
+  "version": "0.2.0",
+  "description": "An AI email client for Gmail that you publish as your own Claude artifact. It drafts in your voice, checks replies before you send them, tracks who owes you a reply, and suggests rules with a review queue. It files tasks and contacts to any connected app and learns from your edits. Includes setup and improve skills.",
+  "author": {
+    "name": "Mark R. Hinkle"
+  },
   "license": "Apache-2.0",
-  "keywords": ["gmail", "email", "inbox", "triage", "notion", "artifact"]
+  "keywords": [
+    "gmail",
+    "email",
+    "inbox",
+    "triage",
+    "tasks",
+    "contacts",
+    "crm",
+    "artifact",
+    "self-improving"
+  ],
+  "homepage": "https://github.com/mrhinkle/chatterbuilt-mail",
+  "repository": "https://github.com/mrhinkle/chatterbuilt-mail"
 }
