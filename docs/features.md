@@ -9,8 +9,10 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 | Place | What's there |
 |---|---|
 | Top bar | **Tasks** drop zone, **Commands** (⌘K), **Settings** (Voice, Skills, Read-only, Model, shortcuts, docs), connection status. A dark **Read-only on** button appears while read-only is on. |
-| Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. |
-| Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact, Summarize**, then **More** (Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
+| Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter; switch on **Ask** inside it to ask a question instead), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. After Triage, the list is grouped into **Needs you**, **Worth reading** and **FYI**. |
+| No thread open | **Today**: drafts waiting in Gmail, what needs you, suggestions in Review, who owes you a reply, and your next meeting. |
+| Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact**, then **More** (Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
+| Beside a thread (wide screens) | The **context panel**: who it is, what your systems know, **More context** from the web, and **Next steps**. On narrower screens the same panel sits at the top of the thread. |
 | Reply box | Reply buttons, your own instruction, **Draft with** switches (My tone with them, Context, Open times), the reply, then Snippets, Attach, Reply all, Remind me, **Save draft** and **Send**. |
 
 ## Reading
@@ -19,9 +21,9 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
-**Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each. With Review on, it also suggests archives and folder moves. Those land in the review queue; nothing moves on its own.
+**Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each, and groups the list under **Needs you**, **Worth reading** and **FYI**. With Review on, it also suggests archives and folder moves. Those land in the review queue; nothing moves on its own.
 
-**Ask your inbox.** **Tools → Ask**. Ask a question in plain English ("When is the venue walkthrough?").
+**Ask your inbox.** Switch on **Ask** inside the search box and type a question, or **Tools → Ask**. Ask a question in plain English ("When is the venue walkthrough?").
 - It writes the Gmail search and shows it to you, so you can edit and re-run.
 - It reads the top five threads and answers with numbered sources.
 - Click a source to open the thread.
@@ -44,6 +46,14 @@ This is what sets Chatterbuilt Mail apart from email clients with AI added: each
 The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show which systems found something, came back empty, or failed. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
 
 Drafts and the pre-send check use the card. Turn off **Context** under *Draft with* in the reply box to leave it out of a draft.
+
+**More context.** The context panel's **More context** button looks the person and their company up on the public web, through a search connector you choose (`CONFIG.lookup`; see [connectors.md](connectors.md#more-context-web-lookups)). It searches the person by name and company, and the company by its domain, then writes two to six cited lines: who they are, what the company does, recent news, and what's worth mentioning. Each line links to its sources.
+- It runs only when you press it, and results are cached for an hour.
+- It stays in its own **From the web** box, apart from what your systems say.
+- It flags results that might be about someone else with the same name (common with Gmail or Outlook addresses, which have no company domain).
+- Drafts leave it out until you switch on **Web context** under *Draft with*.
+
+**Next steps.** **Suggest next steps** in the panel asks Route's question in place: where should this thread go? Suggestions show with their text; **Review and apply** opens Route with them already filled in, so nothing is asked twice.
 
 **Route.** Press **Route** above the thread (or `o`). The AI reads the thread and the context card and suggests where the thread should go, with the text already written:
 - a task in your task app, with a title starting with a verb;
@@ -175,7 +185,7 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 
 **Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, nothing can be sent, moved, labeled, drafted, filed or saved. Reading, summaries, triage, Ask and drafting on the page still work.
 
-**Phones.** One pane at a time. Above a thread you get Archive, Snooze, Route and More; Move, Task, Contact and Summarize move into More. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
+**Phones.** One pane at a time, with a tab bar at the bottom of the list: **Today, Inbox, Waiting, Tools**. In a thread, the actions sit in a bar at the bottom, in thumb reach: **Archive, Snooze, Route, Reply, More**. Reply jumps to the reply box, and the bar hides while you type. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
 
 ## Layout
 
@@ -205,6 +215,8 @@ Sources:
 |---|---|---|
 | Inbox, summaries, triage, Ask, formatted view | Gmail | nothing |
 | Context | every system in `CONFIG.context`, read-only | nothing |
+| More context | your web search connector (`CONFIG.lookup`), only when pressed | nothing |
+| Today | Gmail; Google Calendar (next meeting, shown on the page only) | nothing |
 | Drafting, 3 options, Pre-draft, pre-send check | Gmail; your sent mail to that person (tone); Calendar free/busy (times); the context card | nothing until Save or Send |
 | Send / Save draft / Nudge / attachments | | Gmail send or draft; removes a loaded Gmail draft after sending |
 | Route | Gmail; the context card | whatever you tick: your task app, contacts, Gmail labels, or a `CONFIG.actions` tool |

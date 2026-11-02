@@ -12,7 +12,7 @@ Nothing is sent, moved or filed without a click from you. Every AI suggestion wa
 
 | Area | Features |
 |---|---|
-| Connect | **Context card** on every thread from any read-only connector (Fireflies, Calendar, Notion, a pipeline, a CRM, Beehiiv, a memory system). **Route** suggests where the thread goes across your systems, with the text written, for you to approve. **Morning run** drafts replies into Gmail before you wake up |
+| Connect | **Context panel** beside every thread, from any read-only connector (Fireflies, Calendar, Notion, a pipeline, a CRM, Beehiiv, a memory system). **More context** looks the person and company up on the public web, with citations, when you ask. **Route** and **Next steps** suggest where the thread goes across your systems, with the text written, for you to approve. **Today** shows drafts waiting, what needs you and your next meeting. **Morning run** drafts replies into Gmail before you wake up |
 | Read | Inbox with previews and unread dots, one-click summaries, triage into reply / read / skip, Ask your inbox (plain-English questions answered with numbered sources), a cleaned formatted view |
 | Reply | Drafts in your voice from one-click intents or your own instruction, three options per thread (best fit, shorter, polite no), pre-drafts for everything that needs a reply, per-recipient tone matching, open times from your calendar, snippets, attachments, drafts waiting in Gmail, **pre-send check** that rereads your reply against the thread and your systems before it goes |
 | Follow up | Waiting-on-reply tracker with a one-click Nudge, snooze, remind-me-if-no-reply (both plain Gmail labels) |

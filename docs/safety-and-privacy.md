@@ -27,6 +27,8 @@
 - **Calendar times.** For open times, only free slots reach the model. Event names, people, locations and notes stay on the page.
 - **Context sources.** These are different by design: their results do go to the model, so it can brief you. Event descriptions, meeting links, HTML bodies and similar fields are dropped first, and long text is cut. Choose sources you're comfortable sending to the model you use, and leave out any you're not.
 - **Clay.** Clay is called only when you press Enrich with Clay, and it uses your Clay credits.
+- **More context.** Runs only when you press it. The person's name, company and email domain go to your web search provider; nothing from the email does. The results are kept apart from your systems' context and only go into a draft if you switch on Web context.
+- **Next meeting (Today).** The title and time are shown on the page only; they are never sent to the model.
 - **Your browser.** Voice edits, rules, lessons and switches are stored in that browser's local storage for this artifact. Clearing site data clears them. Copy for Claude is the backup.
 - **Sharing.** The artifact is private to you. If you share it, the other person uses their own connectors and sees their own mail, never yours. Your browser-stored lessons don't travel with the link.
 

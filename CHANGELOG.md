@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0 (2026-11-02)
+
+The interface from the wireframes.
+
+### New
+- **Context panel.** On wide screens (1180 px and up) context moves beside the thread: who it is, what your systems know, More context and Next steps. Narrower screens keep it at the top of the thread, and resizing moves it.
+- **More context.** A web lookup on the person and their company through any search connector (`CONFIG.lookup`), only when you press it. It returns a short briefing where every line links to its sources, kept apart from your own systems' context. **Web context** under *Draft with* puts it in a draft, off by default.
+- **Next steps.** Route's suggestions in the panel; Review and apply opens Route already filled in.
+- **Today.** When no thread is open: drafts waiting in Gmail, what needs you, Review, Waiting, and your next meeting (shown on the page only).
+- **Triage sections.** After Triage the list groups into Needs you, Worth reading and FYI.
+- **Ask in the search box.** Switch on Ask to ask a question instead of searching.
+- **Phone tab bar and action bar.** Today, Inbox, Waiting and Tools at the bottom of the list; Archive, Snooze, Route, Reply and More at the bottom of a thread. The bar hides while you type.
+
+### Changed
+- Summarize moved into More, so the thread toolbar fits beside the panel.
+
+### Fixed
+- Menus opened from two buttons (Tools, More) no longer get two sets of listeners, which made arrow keys skip items and could run a proxied action twice.
+
 ## 0.3.3 (2026-11-02)
 
 ### Fixed

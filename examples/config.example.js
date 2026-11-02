@@ -53,6 +53,9 @@
         when: "Scheduling, invoices, logistics, or anything Sam usually handles" }
     ],
 
+    // More context: public web lookups, only when you press the button. Any search connector works; see docs/connectors.md.
+    lookup: [],
+
     snippets: [
       { name: "Meetup basics", text: "Hi {{firstName}}, our meetup is the first Thursday of each month at 6pm. Details and RSVP are on our Meetup page." }
     ],

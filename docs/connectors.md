@@ -15,6 +15,7 @@ The page reaches your apps only through your claude.ai connectors, using your ow
 | Your task app or CRM | Tasks or contacts outside Notion | that app's create tool (see below) |
 | Any read tool | Context sources | each source's tool (see [Context sources](#context-sources)) |
 | Any write tool | Route actions | each action's tool (see [Route actions](#route-actions)) |
+| A web search tool | More context | each lookup's tool (see [More context](#more-context-web-lookups)) |
 
 Declare only what your copy uses. The setup skill builds this list from your `CONFIG`.
 
@@ -76,6 +77,31 @@ These are the argument names those connectors took in November 2026. Connectors 
 - **Read-only tools only.** Never put a create, update, send or delete tool here. Context runs on every thread you open.
 - Prefer filters that are exact (an email address, a participant list) over free-text search.
 - Six to eight sources is plenty. Each adds a call per thread.
+
+## More context (web lookups)
+
+`CONFIG.lookup` lists the search calls **More context** makes. Any connector that searches the public web and returns results with a URL and a title or snippet works: Exa, Perplexity, Tavily, Firecrawl, SerpApi, or a Composio or Zapier action that wraps one. The page finds the results in whatever shape comes back, keeps up to ten, and asks the model for a short cited briefing.
+
+```js
+lookup: [
+  { label: "Web: person", server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL",
+    input: { tools: [{ tool_slug: "FIRECRAWL_SEARCH", arguments: { q: "{{personQuery}}", limit: 5 } }], sync_response_to_workbench: false } },
+  { label: "Web: company", server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", needs: ["companyQuery"],
+    input: { tools: [{ tool_slug: "FIRECRAWL_SEARCH", arguments: { q: "{{companyQuery}}", limit: 5 } }], sync_response_to_workbench: false } }
+]
+```
+
+| Placeholder | What it fills in |
+|---|---|
+| `{{personQuery}}` | The name in quotes plus the company (`"Dana Ruiz" acme`), or the email address when there's no name |
+| `{{companyQuery}}` | Company and domain plus "company news" (`acme acme.io company news`); empty for Gmail, Outlook and other free mail |
+| `{{name}}`, `{{org}}`, `{{domain}}`, `{{email}}` | As for context sources |
+
+**Things to know:**
+- **Cost.** Each press runs each entry once. Search providers charge per search or per result; Firecrawl used 2 credits for a 3-result search when tested. Results are cached for an hour.
+- **Privacy.** The person's name, company and domain go to the search provider. Nothing from the email itself does.
+- **Composio.** Declaring `COMPOSIO_MULTI_EXECUTE_TOOL` lets the page call any action your Composio account can run, though it only calls the search you configure. A connector that only searches (Exa, Perplexity or Tavily's own) keeps the page's permissions narrower.
+- The results are untrusted text from the web. The prompt tells the model to treat them as data, and they only reach a draft when you switch on **Web context**.
 
 ## Route actions
 

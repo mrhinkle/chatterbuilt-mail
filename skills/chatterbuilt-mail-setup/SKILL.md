@@ -72,6 +72,14 @@ These make it a hub rather than a client. Details and placeholders are in `docs/
 4. Respect rules in the user's memory about where things may be written. If a system has to stay in sync with another, don't add a write that bypasses that.
 5. Never apply an action as a test.
 
+## 3c. More context (web lookups)
+
+Offer it when the user has a web search connector (Exa, Perplexity, Tavily, Firecrawl, SerpApi, or one reached through Composio or Zapier).
+1. Read the search tool's schema; use its exact argument names.
+2. Write `CONFIG.lookup`: one entry searching `{{personQuery}}`, and one searching `{{companyQuery}}` with `needs: ["companyQuery"]`. Ask for 5 results each.
+3. Tell the user what it costs per press in their provider's terms, and that a wrapper like Composio's multi-execute tool gives the page broader permissions than a search-only connector.
+4. One read-only test search on a public topic (not a person from their mail) is fine to confirm the result shape.
+
 ## 4. Build
 
 - **In a repo:** write CONFIG to `my/config.js`, starting from `examples/config.example.js`. The file must start with `  const CONFIG = {` and end with `  };`. Then run:
@@ -100,6 +108,7 @@ Declare capabilities from CONFIG, and only what's used:
 | `models` is not empty | `OpenRouter` | `send-message` |
 | each `context` entry | its `server` | its `tool` |
 | each `actions` entry | its `server` | its `tool` |
+| each `lookup` entry | its `server` | its `tool` |
 
 Merge tools for a server that appears more than once.
 
