@@ -100,23 +100,30 @@ header.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; pad
 body.dragging .taskdrop { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .taskdrop, .btn { transition: none; } .taskdrop.over { transform: none; } }
 
-.main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(300px, 400px) 1fr; gap: 12px; }
-.main.has-side { grid-template-columns: minmax(280px, 350px) minmax(0, 1fr) minmax(260px, 320px); }
+.main { flex: 1; min-height: 0; display: grid; grid-template-columns: var(--rail-w, minmax(300px, 400px)) minmax(0, 1fr); gap: 12px; position: relative; }
+.main.has-side { grid-template-columns: var(--rail-w, minmax(280px, 350px)) minmax(0, 1fr) var(--side-w, minmax(260px, 320px)); }
 .side { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden; }
 .sidebody { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
-@media (max-width: 1179px) { .main.has-side { grid-template-columns: minmax(300px, 400px) 1fr; } .side { display: none !important; } #sideTog { display: none !important; } }
+@media (max-width: 1179px) { .main.has-side { grid-template-columns: var(--rail-w, minmax(300px, 400px)) minmax(0, 1fr); } .side { display: none !important; } #sideTog { display: none !important; } }
 .side { position: relative; }
 .listtog { flex: none; }
 .listtog[aria-expanded="false"] { color: var(--accent); border-color: rgba(37, 99, 235, 0.35); }
 .listtog[aria-expanded="false"] .ic { color: var(--accent); }
 @media (min-width: 861px) {
   .main.no-rail { grid-template-columns: minmax(0, 1fr); }
-  .main.no-rail.has-side { grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); }
+  .main.no-rail.has-side { grid-template-columns: minmax(0, 1fr) var(--side-w, minmax(260px, 320px)); }
   .main.no-rail .rail { display: none; }
 }
 @media (min-width: 861px) and (max-width: 1179px) { .main.no-rail.has-side { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 860px) { .listtog { display: none !important; } }
 .ctx.folded > :not(.ctxhead) { display: none; }
+.splitter { position: absolute; top: 0; bottom: 0; width: 12px; z-index: 6; cursor: col-resize; touch-action: none; display: flex; align-items: center; justify-content: center; }
+.splitter::after { content: ""; width: 4px; height: 36px; border-radius: 999px; background: var(--line-2); opacity: 0.8; transition: background 0.15s, opacity 0.15s, height 0.15s; }
+.splitter:hover::after, .splitter:focus-visible::after, .splitter.drag::after { background: var(--accent); opacity: 1; height: 64px; }
+.splitter:focus-visible { outline: none; }
+body.resizing, body.resizing * { cursor: col-resize !important; user-select: none !important; }
+@media (prefers-reduced-motion: reduce) { .splitter::after { transition: none; } }
+@media (max-width: 860px) { .splitter { display: none !important; } }
 .sidecap { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 10px 0 16px; flex: none; }
 .sidecap .lbl { color: var(--violet); }
 .sidecap .btn { gap: 2px; }
@@ -582,6 +589,8 @@ body.ro [data-mut] { opacity: 0.4; }
       </div>
     </section>
     <aside class="side glass" id="side" aria-label="Context" hidden><div class="sidecap"><span class="lbl">Context</span><button class="btn sm ghost" id="sideHide" type="button" aria-controls="side" title="Hide the context panel (])">Hide<svg class="ic" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="sidebody" id="sideBody"></div></aside>
+    <div class="splitter" id="railSplit" role="separator" aria-orientation="vertical" aria-controls="rail" aria-label="Resize the thread list" title="Drag to resize. Double-click to reset." tabindex="0" hidden></div>
+    <div class="splitter" id="sideSplit" role="separator" aria-orientation="vertical" aria-controls="side" aria-label="Resize the context panel" title="Drag to resize. Double-click to reset." tabindex="0" hidden></div>
   </div>
   <nav class="tabbar" id="tabbar" aria-label="Sections">
     <button type="button" data-tab="today" data-feat="today"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/></svg>Today</button>
@@ -2268,6 +2277,7 @@ body.ro [data-mut] { opacity: 0.4; }
       ["Skills and help", "?", () => openSkills(false)], ["Toggle read-only", "", toggleRO], ["Refresh", "", () => $("refreshBtn").click()], ["Undo last change", "z", undoLast]
     ];
     if (!phoneMQ.matches) c.push([state.railOff ? "Show the thread list" : "Hide the thread list", "[", () => setRailOff(!state.railOff)]);
+    if (!phoneMQ.matches && (state.paneW.rail || state.paneW.side)) c.push(["Reset pane sizes", "", resetPanes]);
     if (state.thread && panelOn()) c.push([(wideMQ.matches ? !state.sideOff : !state.ctxFold) ? "Hide context" : "Show context", "]", toggleContext]);
     if (state.thread) c.push(["Route to my systems", "o", openRoute, "route"], ["Snooze or remind me", "b", openSnooze, "snooze"], ["Formatted view", "", toggleFormatted, "html"], ["Insert a snippet", "", openSnippets, "snippets"], ["Refresh context", "", () => loadContext(true), "context"], ["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
     return c.filter((x) => !x[3] || featOn(x[3]));
@@ -2627,6 +2637,62 @@ body.ro [data-mut] { opacity: 0.4; }
   function setRailOff(off) { state.railOff = off; ls.set("cm.railOff", off ? "1" : "0"); applyRail(); const b = $("listTog"); if (document.activeElement !== b && !phoneMQ.matches) b.focus({ preventScroll: true }); }
   $("listTog").addEventListener("click", () => setRailOff(!state.railOff));
   applyRail();
+  // ---------- resizable panes ----------
+  // Drag a handle between two panes, or focus it and use the arrow keys (Shift for bigger steps, Home and End for
+  // the limits). Double-click resets. Widths are remembered in this browser and squeezed back if the window gets
+  // too narrow, so the thread always keeps at least DESK_MIN pixels. Phones show one pane at a time, so no handles.
+  const mainEl = document.querySelector(".main");
+  const PANE = { rail: { min: 240, max: 600, key: "cm.railW", cssVar: "--rail-w", el: "rail" }, side: { min: 240, max: 520, key: "cm.sideW", cssVar: "--side-w", el: "side" } };
+  const DESK_MIN = 380, PANE_GAP = 12;
+  state.paneW = { rail: +ls.get("cm.railW") || 0, side: +ls.get("cm.sideW") || 0 };
+  const paneShown = (w) => !phoneMQ.matches && $(PANE[w].el).getClientRects().length > 0;
+  function paneMax(w) {
+    const other = w === "rail" ? "side" : "rail";
+    const ow = paneShown(other) ? $(PANE[other].el).getBoundingClientRect().width + PANE_GAP : 0;
+    return Math.max(PANE[w].min, Math.min(PANE[w].max, Math.floor(mainEl.getBoundingClientRect().width - ow - PANE_GAP - DESK_MIN)));
+  }
+  function placeSplitters() {
+    const mr = mainEl.getBoundingClientRect();
+    ["rail", "side"].forEach((w) => {
+      const h = $(w + "Split"); const show = paneShown(w); h.hidden = !show; if (!show) return;
+      const r = $(PANE[w].el).getBoundingClientRect();
+      h.style.left = Math.round((w === "rail" ? r.right : r.left - PANE_GAP) - mr.left) + "px";
+      h.setAttribute("aria-valuenow", String(Math.round(r.width))); h.setAttribute("aria-valuemin", String(PANE[w].min)); h.setAttribute("aria-valuemax", String(paneMax(w)));
+    });
+  }
+  function setPaneW(w, px, save) {
+    const p = PANE[w];
+    if (!px) { state.paneW[w] = 0; mainEl.style.removeProperty(p.cssVar); if (save) ls.del(p.key); placeSplitters(); return; }
+    px = Math.round(Math.max(p.min, Math.min(paneMax(w), px)));
+    state.paneW[w] = px; mainEl.style.setProperty(p.cssVar, px + "px"); if (save) ls.set(p.key, String(px)); placeSplitters();
+  }
+  function fitPanes() {
+    ["rail", "side"].forEach((w) => { const saved = state.paneW[w]; if (!saved || !paneShown(w)) return; const px = Math.max(PANE[w].min, Math.min(saved, paneMax(w))) + "px"; if (mainEl.style.getPropertyValue(PANE[w].cssVar) !== px) mainEl.style.setProperty(PANE[w].cssVar, px); });
+    placeSplitters();
+  }
+  function resetPanes() { setPaneW("rail", 0, true); setPaneW("side", 0, true); }
+  ["rail", "side"].forEach((w) => {
+    const h = $(w + "Split"); const dir = w === "rail" ? 1 : -1;
+    h.addEventListener("pointerdown", (ev) => {
+      if (ev.button !== 0) return; ev.preventDefault();
+      try { h.setPointerCapture(ev.pointerId); } catch {}
+      h.classList.add("drag"); document.body.classList.add("resizing"); h.focus({ preventScroll: true });
+      const x0 = ev.clientX, w0 = $(PANE[w].el).getBoundingClientRect().width;
+      const move = (e) => setPaneW(w, w0 + dir * (e.clientX - x0), false);
+      const up = () => { h.removeEventListener("pointermove", move); h.removeEventListener("pointerup", up); h.removeEventListener("pointercancel", up); h.classList.remove("drag"); document.body.classList.remove("resizing"); if (state.paneW[w]) ls.set(PANE[w].key, String(state.paneW[w])); };
+      h.addEventListener("pointermove", move); h.addEventListener("pointerup", up); h.addEventListener("pointercancel", up);
+    });
+    h.addEventListener("dblclick", () => setPaneW(w, 0, true));
+    h.addEventListener("keydown", (ev) => {
+      const cur = $(PANE[w].el).getBoundingClientRect().width; const step = ev.shiftKey ? 64 : 16; let px = null;
+      if (ev.key === "ArrowRight") px = cur + dir * step; else if (ev.key === "ArrowLeft") px = cur - dir * step;
+      else if (ev.key === "Home") px = PANE[w].min; else if (ev.key === "End") px = paneMax(w);
+      if (px === null) return; ev.preventDefault(); ev.stopPropagation(); setPaneW(w, px, true);
+    });
+  });
+  if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitPanes()); [mainEl, $("rail"), $("side"), $("desk")].forEach((el) => ro.observe(el)); }
+  window.addEventListener("resize", fitPanes);
+  fitPanes();
   // The context card at the top of a thread (narrow screens, phones, or with the side panel hidden) can be folded to one line.
   state.ctxFold = ls.get("cm.ctxFold") === "1";
   function toggleContext() {

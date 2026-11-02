@@ -31,6 +31,7 @@ const scenes = [
   ['context-panel', DESK, async (pg) => { await open(pg, 't1'); }],
   ['panel-hidden', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideHide'); await pg.waitForTimeout(400); }],
   ['list-hidden', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#listTog'); await pg.waitForTimeout(400); }],
+  ['resize', DESK, async (pg) => { await open(pg, 't1'); const b = await pg.$eval('#sideSplit', (h) => { const r = h.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }); await pg.mouse.move(b.x, b.y); await pg.mouse.down(); await pg.mouse.move(b.x - 60, b.y, { steps: 6 }); await pg.mouse.move(b.x - 120, b.y, { steps: 6 }); await pg.mouse.up(); await pg.$eval('#sideSplit', (h) => h.classList.add('drag')); await pg.waitForTimeout(200); }],
   ['receipt-context', DESK, async (pg) => { await open(pg, 't8'); }],
   ['more-context', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="more"]'); await pg.waitForTimeout(3200); }],
   ['next-steps', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="steps"]'); await pg.waitForTimeout(2800); }],

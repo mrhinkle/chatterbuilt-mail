@@ -54,7 +54,7 @@ Claude does the drafting, triage, briefs and checks by default, through your own
 
 Press **⌘K** (Mac) or **Ctrl K** (Windows, Linux), or click **Commands** in the top bar. Type a few letters to filter, use the arrow keys to pick, and press Enter.
 
-It lists every action that's switched on: the views (Inbox, Unread, Waiting on reply, Starred), search, Triage, Review, Pre-draft, Rules, Sweep, Ask, Voice and lessons, Skills and help, Toggle read-only, Refresh, Undo, and showing or hiding the thread list. With a thread open it adds the thread actions too: Route, Snooze, Formatted view, Insert a snippet, Refresh context, Summarize, Archive, Star, Move, Unsubscribe, Three reply options, Add to contacts and File as a task. Each command shows its shortcut when it has one.
+It lists every action that's switched on: the views (Inbox, Unread, Waiting on reply, Starred), search, Triage, Review, Pre-draft, Rules, Sweep, Ask, Voice and lessons, Skills and help, Toggle read-only, Refresh, Undo, showing or hiding the thread list, and **Reset pane sizes** once you've dragged a pane wider or narrower. With a thread open it adds the thread actions too: Route, Snooze, Formatted view, Insert a snippet, Refresh context, Summarize, Archive, Star, Move, Unsubscribe, Three reply options, Add to contacts and File as a task. Each command shows its shortcut when it has one.
 
 ## Keyboard shortcuts
 
@@ -74,6 +74,7 @@ It lists every action that's switched on: the views (Inbox, Unread, Waiting on r
 | `z` | Undo the last change |
 | `[` | Show or hide the thread list |
 | `]` | Show or hide context: the side panel on wide screens, the card at the top of the thread otherwise |
+| Arrow keys on a pane grip | Resize that pane. Shift moves 64 px instead of 16; Home and End go to the limits |
 | `⌘K` / `Ctrl K` | Command palette |
 | `?` | Shortcuts and skills |
 | `Esc` | Close a menu or dialog |

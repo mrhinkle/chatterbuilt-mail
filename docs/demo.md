@@ -23,8 +23,8 @@ Each section links to its guide.
 | Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Formatted view, with scripts and tracking pixels removed |
 | ![Ask in the search box](images/ask-mode.webp) | ![Tools menu](images/tools-menu.webp) |
 | The Ask switch in the search box | Tools: Review, Pre-draft, Rules, Sweep, Ask |
-| ![List hidden](images/list-hidden.webp) | |
-| The thread list hidden (`[`): the thread gets the full width | |
+| ![List hidden](images/list-hidden.webp) | ![Resized](images/resize.webp) |
+| The thread list hidden (`[`): the thread gets the full width | Drag the grip between panes to resize them |
 
 ## Context · [context-panel.md](context-panel.md) · [more-context.md](more-context.md)
 

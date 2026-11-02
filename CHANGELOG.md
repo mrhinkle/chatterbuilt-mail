@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.4 (2026-11-02)
+
+### New
+- **Resizable panes.** Drag the grip between the thread list and the thread, or between the thread and the context panel. Click a grip and the arrow keys work too (Shift for bigger steps, Home and End for the limits). Double-click a grip, or run **Reset pane sizes** from the command palette, to go back to the default. Widths are remembered in this browser. The thread keeps at least 380 px, so a wide list shrinks on a smaller window and grows back on a bigger one. Phones still show one pane at a time.
+
 ## 0.5.3 (2026-11-02)
 
 ### Fixed
