@@ -113,6 +113,40 @@ body.dragging .taskdrop { border-color: var(--accent); }
 .search input { flex: 1; min-width: 0; padding: 7px 11px; border: 1px solid transparent; border-radius: 10px; background: rgba(15, 23, 42, 0.055); font-size: 13px; }
 .search input:focus, .modal-body input:focus, .modal-body textarea:focus, .modal-body select:focus, .compose textarea:focus, .compose input.custom:focus, .pop input:focus { outline: none; border-color: rgba(37, 99, 235, 0.55); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.16); background: #ffffff; }
 .tools { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tools:not(:has(> :not([hidden]))) { display: none; }
+.searchbox { position: relative; flex: 1; min-width: 0; display: flex; }
+.searchbox input { padding-left: 32px !important; }
+.searchbox .go { position: absolute; left: 3px; top: 50%; transform: translateY(-50%); width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: transparent; color: var(--muted); border-radius: 8px; padding: 0; }
+.searchbox .go:hover { color: var(--accent); background: var(--hover); }
+.ic { flex: none; }
+.chev { flex: none; opacity: 0.7; transition: transform 0.15s; }
+[aria-expanded="true"] > .chev { transform: rotate(180deg); }
+.mbtn { position: relative; }
+.mbtn[aria-expanded="true"] { background: #ffffff; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.09); }
+.mbtn .badge { position: absolute; top: -7px; right: -7px; min-width: 16px; height: 16px; font-size: 10px; padding: 0 4px; }
+.menu { position: fixed; z-index: 31; width: 280px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow-y: auto; padding: 6px; border-radius: 14px; display: flex; flex-direction: column; gap: 1px; }
+.menu.narrow { width: 230px; }
+.menu .mhead { font-size: 10.5px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--faint); padding: 6px 10px 4px; }
+.menu .msep { height: 1px; background: var(--line); margin: 5px 8px; }
+.mi { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; width: 100%; text-align: left; border: 0; background: transparent; border-radius: 9px; padding: 8px 10px; color: var(--fg); text-decoration: none; font-size: 13px; }
+.mi.row { flex-direction: row; align-items: center; gap: 9px; font-weight: 550; }
+.mi.row .ic { color: var(--muted); }
+.mi .lbi { display: inline-flex; align-items: center; gap: 9px; }
+.mi .lbi .ic { color: var(--muted); }
+.mi:hover, .mi:focus-visible { background: var(--accent-soft); outline: none; }
+.mi:disabled { opacity: 0.5; cursor: default; }
+.mi .mt { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; font-weight: 600; }
+.mi .md { font-size: 11.5px; line-height: 1.35; color: var(--muted); }
+.mi .kbd { margin-left: auto; }
+.mi[aria-checked] { flex-direction: row; justify-content: space-between; align-items: center; font-weight: 550; }
+.mi[aria-checked]::after { content: ""; width: 30px; height: 18px; border-radius: 999px; background: radial-gradient(circle at 9px 50%, #ffffff 6.5px, transparent 7px) var(--line-2); flex: none; }
+.mi[aria-checked="true"]::after { background: radial-gradient(circle at 21px 50%, #ffffff 6.5px, transparent 7px) var(--accent); }
+.mrowsel { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 10px; font-size: 13px; font-weight: 550; }
+.mrowsel select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); font-size: 12.5px; max-width: 60%; }
+.mclose { display: none; }
+.phone-only { display: none !important; }
+.ro-pill { background: var(--fg) !important; color: #ffffff !important; border-color: var(--fg) !important; }
+@media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 .waitwrap { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
 
 .list { flex: 1; overflow-y: auto; padding: 6px; }
@@ -156,9 +190,17 @@ body.ro [data-mut] { opacity: 0.4; }
 .empty h2 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; margin: 0 0 8px; color: var(--fg); }
 .empty p { margin: 0 0 10px; }
 
-.deskhead { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; padding: 12px 18px; border-bottom: 1px solid var(--line); }
-.deskhead h2 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.016em; flex: 1 1 220px; min-width: 0; text-wrap: balance; }
-.deskhead .acts { display: flex; gap: 6px; flex-wrap: wrap; }
+.deskhead { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
+.deskhead .titlerow { display: flex; gap: 8px; align-items: center; min-width: 0; }
+.deskhead h2 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.016em; flex: 1 1 auto; min-width: 0; text-wrap: balance; }
+.deskhead .acts { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.tgroup { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.tgroup.end { margin-left: auto; }
+.acts .btn .ic { margin-left: -2px; color: var(--muted); }
+.acts .btn:hover .ic { color: var(--fg); }
+.acts .btn.hub { border-color: rgba(37, 99, 235, 0.28); background: var(--accent-soft); color: var(--accent); }
+.acts .btn.hub .ic { color: var(--accent); }
+.acts .btn.hub:hover { background: rgba(37, 99, 235, 0.16); }
 .back { display: none; }
 .reading { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px 28px; display: flex; flex-direction: column; gap: 12px; }
 .summary { background: rgba(255, 255, 255, 0.82); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 12px; padding: 12px 14px; font-size: 13.5px; white-space: pre-wrap; }
@@ -177,6 +219,16 @@ body.ro [data-mut] { opacity: 0.4; }
 
 .compose { border-top: 1px solid var(--line); background: rgba(255, 255, 255, 0.38); padding: 12px 18px 16px; display: flex; flex-direction: column; gap: 9px; }
 .compose .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.compose .foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.compose .foot .spacer { flex: 1 1 auto; }
+.compose .foot .sendgrp { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.tog { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 550; color: var(--muted); background: rgba(255, 255, 255, 0.6); cursor: pointer; user-select: none; }
+.tog input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.tog::before { content: ""; width: 13px; height: 13px; border-radius: 4px; border: 1.5px solid var(--line-2); background: #ffffff; flex: none; }
+.tog:has(input:checked) { color: var(--accent); border-color: rgba(37, 99, 235, 0.35); background: var(--accent-soft); }
+.tog:has(input:checked)::before { border-color: var(--accent); background: var(--accent) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='m3 6.2 2 2 4-4.4' fill='none' stroke='white' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / 11px no-repeat; }
+.tog:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tog select { padding: 1px 4px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; font-size: 12px; }
 .lbl { font-size: 11px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
 .compose textarea { width: 100%; min-height: 130px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--field); line-height: 1.55; font-size: 14px; box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04); }
 .compose input.custom { flex: 1 1 180px; min-width: 0; padding: 7px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); font-size: 13px; }
@@ -297,6 +349,23 @@ body.ro [data-mut] { opacity: 0.4; }
   .deskhead, .reading, .compose, .toolbar, .list-foot { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .list { padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
   .banner { margin-left: max(16px, env(safe-area-inset-left, 0px)); margin-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .menu { left: 0 !important; right: 0; bottom: 0; top: auto !important; width: auto !important; max-width: none; max-height: 80vh; border-radius: 16px 16px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.18); }
+  .mi { padding: 11px 12px; }
+  .taskdrop, .brand h1 a .gh { display: none; }
+  .toast { bottom: auto; top: calc(10px + env(safe-area-inset-top, 0px)); }
+  .phone-only { display: revert !important; }
+  .mi.phone-only { display: flex !important; }
+  .msep.phone-only { display: block !important; }
+  .desk-only { display: none !important; }
+  .mclose { display: flex; margin-top: 6px; }
+  .deskhead { padding-top: 10px; gap: 8px; }
+  .deskhead h2 { font-size: 16.5px; }
+  .deskhead .acts { gap: 6px; flex-wrap: nowrap; }
+  .tgroup { flex-wrap: nowrap; }
+  .tgroup.end { margin-left: auto; }
+  .acts .btn { min-height: 36px; }
+  .compose .foot .sendgrp { width: 100%; }
+  .compose .foot .sendgrp .btn { flex: 1 1 0; }
   .pop { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 72vh; border-radius: 16px 16px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
   .modal-back { align-items: flex-end; padding-block: 0; padding-left: 0; padding-right: 0; }
   .modal, .modal.wide { width: 100%; max-height: 90vh; border-radius: 18px 18px 0 0; }
@@ -318,11 +387,9 @@ body.ro [data-mut] { opacity: 0.4; }
       <span>Tasks</span><span class="hint">drop a message here</span>
     </div>
     <div class="barright">
-      <button class="btn sm ghost" id="paletteBtn" type="button" data-feat="keys" title="Command palette (Ctrl or ⌘ + K)">⌘K</button>
-      <button class="btn sm" id="voiceBtn" type="button" data-feat="voice" title="Set, point to, or train the voice your drafts use">Voice</button>
-      <button class="btn sm" id="skillsBtn" type="button" title="Everything this can do: turn features on or off, shortcuts, help">Skills</button>
-      <button class="btn sm" id="roToggle" type="button" aria-pressed="false" title="Read-only: block every send, move, label change, draft, task and contact">Read-only</button>
-      <label class="model"><span>Model</span><select id="modelSel" aria-label="Model"></select></label>
+      <button class="btn sm ghost" id="paletteBtn" type="button" data-feat="keys" title="Every command, searchable (Ctrl or ⌘ + K)">Commands <span class="kbd">⌘K</span></button>
+      <button class="btn sm ro-pill" id="roPill" type="button" hidden title="Nothing can be sent, moved or changed. Click to turn off.">Read-only on</button>
+      <button class="btn sm mbtn" id="setBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="setMenu">Settings <svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
       <div class="status" id="status"><span class="dot"></span><span id="statusText">connecting</span></div>
     </div>
   </header>
@@ -339,16 +406,14 @@ body.ro [data-mut] { opacity: 0.4; }
           <button class="chip" data-q="in:inbox has:attachment" data-key="files" type="button">Files</button>
         </div>
         <form class="search" id="searchForm">
-          <input id="q" type="search" placeholder="Search mail" aria-label="Gmail search" autocomplete="off">
-          <button class="btn sm" type="submit">Search</button>
+          <div class="searchbox">
+            <button class="go" type="submit" aria-label="Search" title="Search (Enter)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg></button>
+            <input id="q" type="search" placeholder="Search mail" aria-label="Gmail search" autocomplete="off" enterkeyhint="search">
+          </div>
           <button class="btn sm" type="button" id="triageBtn" data-feat="triage" title="AI sorts these threads into reply, read and skip">Triage</button>
+          <button class="btn sm mbtn" type="button" id="toolsBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="toolMenu" aria-label="Tools">Tools <svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="badge" id="toolsCount" hidden>0</span></button>
         </form>
         <div class="tools">
-          <button class="btn sm" id="reviewBtn" type="button" data-feat="review" title="Approve the archive and folder moves that triage and your rules suggest">Review <span class="badge" id="reviewCount" hidden>0</span></button>
-          <button class="btn sm" id="predraftBtn" type="button" data-feat="predraft" title="Write reply options for threads that need one. Nothing is saved or sent.">Pre-draft</button>
-          <button class="btn sm" id="rulesBtn" type="button" data-feat="rules" title="Plain-English rules, like 'receipts go to Finance'">Rules</button>
-          <button class="btn sm" id="sweepBtn" type="button" data-feat="sweep" title="Find bulk senders to unsubscribe from or clear out">Sweep</button>
-          <button class="btn sm" id="askBtn" type="button" data-feat="ask" title="Ask a question and get an answer with sources from your mail">Ask</button>
           <label class="waitwrap" id="waitWrap" hidden>No reply in <select id="waitDays" aria-label="Days without a reply"><option>1</option><option>2</option><option>3</option><option>5</option><option>7</option><option>14</option></select> days</label>
         </div>
       </div>
@@ -364,21 +429,25 @@ body.ro [data-mut] { opacity: 0.4; }
 
     <section class="desk glass" aria-label="Reading pane" id="desk">
       <div class="deskhead">
-        <button class="btn sm back" id="backBtn" type="button">‹ Back</button>
-        <h2 id="subject">Pick a thread</h2>
-        <div class="acts" id="acts" hidden>
-          <button class="btn sm" id="sumBtn" type="button">Summarize</button>
-          <button class="btn sm" id="routeBtn" type="button" data-feat="route" title="Suggests where this thread should go across your systems">Route</button>
-          <button class="btn sm" id="contactBtn" type="button" data-feat="contacts" title="Save this person to your contacts">+ Contact</button>
-          <button class="btn sm" id="taskBtn" type="button" data-feat="tasks" data-mut>→ Task</button>
-          <button class="btn sm" id="moveBtn" type="button" data-feat="move" data-mut>Move / Copy</button>
-          <button class="btn sm" id="unsubBtn" type="button" data-feat="unsub">Unsubscribe</button>
-          <button class="btn sm" id="starBtn" type="button" data-mut>Star</button>
-          <button class="btn sm" id="readBtn" type="button" data-mut>Mark read</button>
-          <button class="btn sm" id="archiveBtn" type="button" data-mut>Archive</button>
-          <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" title="Snooze, or remind me if no reply (b)">Snooze</button>
-          <button class="btn sm" id="htmlBtn" type="button" data-feat="html" aria-pressed="false" title="Show messages with their formatting, cleaned up">Formatted</button>
-          <a class="btn sm ghost" id="openLink" href="#" target="_blank" rel="noopener">Open in Gmail ↗</a>
+        <div class="titlerow">
+          <button class="btn sm back" id="backBtn" type="button">‹ Back</button>
+          <h2 id="subject">Pick a thread</h2>
+        </div>
+        <div class="acts" id="acts" role="toolbar" aria-label="Thread actions" hidden>
+          <div class="tgroup" aria-label="Organize">
+            <button class="btn sm" id="archiveBtn" type="button" data-mut title="Archive (e)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/></svg>Archive</button>
+            <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" title="Snooze, or remind me if no reply (b)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
+            <button class="btn sm desk-only" id="moveBtn" type="button" data-feat="move" data-mut title="Move to a folder, or copy to another account (m)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move</button>
+          </div>
+          <div class="tgroup" aria-label="Connect">
+            <button class="btn sm hub" id="routeBtn" type="button" data-feat="route" title="Suggests where this thread should go across your systems (o)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
+            <button class="btn sm desk-only" id="taskBtn" type="button" data-feat="tasks" data-mut title="File as a task (t)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>Task</button>
+            <button class="btn sm desk-only" id="contactBtn" type="button" data-feat="contacts" title="Save this person to your contacts (c)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Contact</button>
+            <button class="btn sm desk-only" id="sumBtn" type="button" title="The gist and the asks"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
+          </div>
+          <div class="tgroup end">
+            <button class="btn sm mbtn" id="threadMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu" aria-label="More actions"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="currentColor" stroke="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg>More</button>
+          </div>
         </div>
       </div>
       <div id="banner" class="banner" hidden></div>
@@ -386,7 +455,7 @@ body.ro [data-mut] { opacity: 0.4; }
         <div class="empty">
           <h2>Nothing open yet</h2>
           <p>Pick a thread on the left. Summarize gives you the gist and the asks. The reply buttons write a first pass in your voice that you edit before anything goes out.</p>
-          <p>New here? Open <strong>Skills</strong> at the top to see everything it can do and switch off what you don't need. Press <span class="kbd">?</span> for shortcuts.</p>
+          <p>New here? Open <strong>Settings, Skills</strong> at the top to see everything it can do and switch off what you don't need. Press <span class="kbd">?</span> for shortcuts.</p>
           <p>Search takes Gmail syntax: <code>from:alex newer_than:7d</code>, <code>subject:sponsor has:attachment</code>.</p>
         </div>
       </div>
@@ -407,24 +476,26 @@ body.ro [data-mut] { opacity: 0.4; }
           <button class="btn sm primary" id="customBtn" type="button">Draft</button>
           <button class="btn sm ghost" id="stopBtn" type="button" hidden>Stop</button>
         </div>
-        <div class="row">
-          <label class="note" data-feat="tone"><input type="checkbox" id="toneChk" checked> Match how I write to this person</label>
-          <label class="note" data-feat="context"><input type="checkbox" id="ctxChk" checked> Use what my other systems know</label>
-          <label class="note" data-feat="calendar"><input type="checkbox" id="calChk"> Offer open times from my calendar</label>
-        </div>
-        <div class="row">
-          <button class="btn sm" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
-          <label class="btn sm" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
-          <span class="attlist" id="attList"></span>
+        <div class="row" aria-label="Draft with">
+          <span class="lbl">Draft with</span>
+          <label class="tog" data-feat="tone" title="Match the greeting, length and formality of your earlier emails to this person"><input type="checkbox" id="toneChk" checked>My tone with them</label>
+          <label class="tog" data-feat="context" title="Use what your other systems know about this person: meetings, tasks, pipeline, memory"><input type="checkbox" id="ctxChk" checked>Context</label>
+          <label class="tog" data-feat="calendar" title="Offer three open times from your calendar"><input type="checkbox" id="calChk">Open times</label>
         </div>
         <textarea id="body" placeholder="Your reply. Type here, or hit a button above for a first draft."></textarea>
-        <div class="row">
-          <button class="btn" id="saveDraftBtn" type="button" data-mut>Save to Gmail drafts</button>
-          <button class="btn primary" id="sendBtn" type="button" data-mut>Send</button>
-          <label class="note"><input type="checkbox" id="replyAll"> Reply all</label>
-          <label class="note" data-feat="snooze"><input type="checkbox" id="remindChk"> Remind me in <select id="remindDays" aria-label="Days"><option>2</option><option selected>3</option><option>5</option><option>7</option></select> days if no reply</label>
-          <span class="note" id="composeNote"></span>
+        <div class="foot">
+          <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
+          <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
+          <span class="attlist" id="attList"></span>
+          <span class="spacer"></span>
+          <label class="tog"><input type="checkbox" id="replyAll">Reply all</label>
+          <label class="tog" data-feat="snooze" title="If nobody replies, bring the thread back to your inbox"><input type="checkbox" id="remindChk">Remind me in <select id="remindDays" aria-label="Days"><option>2</option><option selected>3</option><option>5</option><option>7</option></select> days</label>
+          <span class="sendgrp">
+            <button class="btn" id="saveDraftBtn" type="button" data-mut>Save draft</button>
+            <button class="btn primary" id="sendBtn" type="button" data-mut>Send</button>
+          </span>
         </div>
+        <span class="note" id="composeNote"></span>
         <div class="confirmbox" id="confirmBox" hidden>
           <div id="checkOut"></div>
           <div class="mrow"><span id="confirmText">Send this reply?</span><button class="btn sm primary" id="confirmSend" type="button">Yes, send it</button><button class="btn sm" id="useFix" type="button" hidden>Use suggested version</button><button class="btn sm ghost" id="cancelSend" type="button">Cancel</button></div>
@@ -434,6 +505,40 @@ body.ro [data-mut] { opacity: 0.4; }
   </div>
 </div>
 
+<div class="menu glass-strong narrow" id="threadMenu" role="menu" aria-label="More thread actions" hidden>
+  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="moveBtn" data-feat="move" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move or copy</button>
+  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="taskBtn" data-feat="tasks" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>File as a task</button>
+  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="contactBtn" data-feat="contacts"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Add to contacts</button>
+  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="sumBtn"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
+  <div class="msep phone-only"></div>
+  <button class="mi row" role="menuitem" id="starBtn" type="button" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4.5 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L4.5 10l5.2-.8z"/></svg><span class="lb">Star</span></button>
+  <button class="mi row" role="menuitem" id="readBtn" type="button" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9.5 12 4l8 5.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="m4.5 10 7.5 5 7.5-5"/></svg>Mark read</button>
+  <button class="mi row" role="menuitem" id="unsubBtn" type="button" data-feat="unsub"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg>Unsubscribe…</button>
+  <button class="mi row" role="menuitemcheckbox" id="htmlBtn" type="button" data-feat="html" aria-checked="false" title="Show messages with their formatting, cleaned up"><span class="lbi"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6h14M5 10h10M5 14h14M5 18h8"/></svg>Formatted view</span></button>
+  <div class="msep"></div>
+  <a class="mi row" role="menuitem" id="openLink" href="#" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 5h5v5"/><path d="m19 5-8 8"/><path d="M17 14v4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H10"/></svg>Open in Gmail</a>
+  <button class="mclose btn" type="button" data-mclose>Close</button>
+</div>
+<div class="menu glass-strong narrow" id="setMenu" role="menu" aria-label="Settings" hidden>
+  <button class="mi" role="menuitem" id="voiceBtn" type="button" data-feat="voice"><span class="mt">Voice</span><span class="md">How drafts sound, and what it has learned</span></button>
+  <button class="mi" role="menuitem" id="skillsBtn" type="button"><span class="mt">Skills</span><span class="md">Every feature, with on/off switches and help</span></button>
+  <div class="msep"></div>
+  <button class="mi" role="menuitemcheckbox" id="roToggle" type="button" aria-checked="false" title="Block every send, move, label change, draft, task and contact">Read-only</button>
+  <label class="mrowsel model">Model<select id="modelSel" aria-label="Model"></select></label>
+  <div class="msep"></div>
+  <button class="mi row" role="menuitem" id="helpBtn" type="button" data-feat="keys">Keyboard shortcuts<span class="kbd">?</span></button>
+  <a class="mi row" role="menuitem" id="docsLink" href="https://github.com/mrhinkle/chatterbuilt-mail" target="_blank" rel="noopener">Docs and support ↗</a>
+  <button class="mclose btn" type="button" data-mclose>Close</button>
+</div>
+<div class="menu glass-strong" id="toolMenu" role="menu" aria-label="Inbox tools" hidden>
+  <div class="mhead" aria-hidden="true">Inbox tools</div>
+  <button class="mi" role="menuitem" id="reviewBtn" type="button" data-feat="review"><span class="mt">Review <span class="badge" id="reviewCount" hidden>0</span></span><span class="md">Approve the archives and moves that triage and rules suggest</span></button>
+  <button class="mi" role="menuitem" id="predraftBtn" type="button" data-feat="predraft"><span class="mt" id="predraftLabel">Pre-draft</span><span class="md">Reply options for every thread that needs one. Nothing is saved or sent.</span></button>
+  <button class="mi" role="menuitem" id="rulesBtn" type="button" data-feat="rules"><span class="mt">Rules</span><span class="md">Plain-English rules, like &ldquo;receipts go to Finance&rdquo;</span></button>
+  <button class="mi" role="menuitem" id="sweepBtn" type="button" data-feat="sweep"><span class="mt">Sweep</span><span class="md">Find bulk senders to unsubscribe from or clear out</span></button>
+  <button class="mi" role="menuitem" id="askBtn" type="button" data-feat="ask"><span class="mt">Ask</span><span class="md">A question about your mail, answered with sources</span></button>
+  <button class="mclose btn" type="button" data-mclose>Close</button>
+</div>
 <div class="pop glass-strong" id="pop" hidden role="dialog" aria-label="Move or copy">
   <div class="tabs"><button type="button" class="on" id="tabMove">Move</button><button type="button" id="tabCopy">Copy</button><button type="button" id="tabUnsub">Unsubscribe</button></div>
   <div id="popMove" style="display:flex;flex-direction:column;gap:8px;min-height:0">
@@ -523,27 +628,27 @@ body.ro [data-mut] { opacity: 0.4; }
   const FEATURES = [
     { key: "triage", name: "Triage", desc: "AI sorts the visible threads into reply, read and skip, with a short reason for each.", how: "Press Triage above the list." },
     { key: "waiting", name: "Waiting on reply", desc: "Sent emails nobody has answered after a few days, oldest first, with a one-click Nudge that drafts a follow-up.", how: "Open the Waiting tab, pick a thread, press Nudge." },
-    { key: "tone", name: "Per-recipient tone", desc: "Before drafting, reads how you've written to this person before and matches the greeting, length and formality.", how: "On by default in the reply box. Untick it to use your general voice." },
-    { key: "review", name: "Review queue", desc: "Triage and rules only suggest archives and folder moves. Nothing changes until you approve, and Undo reverses it.", how: "Triage or Run rules, then press Review." },
-    { key: "predraft", name: "Pre-drafts with options", desc: "Writes three versions (best fit, shorter, a polite no) for threads that need a reply, and skips the ones that don't. Nothing is saved or sent.", how: "Pre-draft above the list, or 3 options in the reply box." },
+    { key: "tone", name: "Per-recipient tone", desc: "Before drafting, reads how you've written to this person before and matches the greeting, length and formality.", how: "On by default: My tone with them, under Draft with. Turn it off to use your general voice." },
+    { key: "review", name: "Review queue", desc: "Triage and rules only suggest archives and folder moves. Nothing changes until you approve, and Undo reverses it.", how: "Triage or Run rules, then Tools, Review." },
+    { key: "predraft", name: "Pre-drafts with options", desc: "Writes three versions (best fit, shorter, a polite no) for threads that need a reply, and skips the ones that don't. Nothing is saved or sent.", how: "Tools, Pre-draft, or 3 options in the reply box." },
     { key: "rules", name: "Plain-English rules", desc: "Rules like “receipts and invoices go to Finance”. It also suggests rules from what you do by hand, and can check new mail against them each time the inbox loads. Matches always wait in Review.", how: "Rules: add one, take a suggestion, or Run rules." },
-    { key: "sweep", name: "Unsubscribe sweep", desc: "Groups your inbox by bulk sender with counts, so you can unsubscribe or clear out a sender in one pass.", how: "Press Sweep." },
-    { key: "ask", name: "Ask your inbox", desc: "Ask a question in plain English. It writes the Gmail search, reads the top threads and answers with numbered sources.", how: "Press Ask." },
-    { key: "calendar", name: "Calendar-aware replies", desc: "Adds three open 30-minute times from your Google Calendar to the draft. Only free times reach the model, never event details.", how: "Tick ‘Offer open times’ in the reply box, or press Offer a call.", needs: () => !!CONFIG.calendar, need: "Set calendar: true in CONFIG (the setup skill does this) and connect Google Calendar." },
-    { key: "contacts", name: "Add to contacts", desc: "Saves the person with details from their signature, a note on how you first met (from your earliest email together) and optional Clay enrichment.", how: "+ Contact in the thread header, or press c." },
-    { key: "voice", name: "Voice", desc: "Point drafts at a voice prompt: paste one, link a Notion page (a voice trainer's output works), or train one from your sent mail.", how: "Press Voice at the top." },
-    { key: "learn", name: "Self-improving", desc: "Notices how you change its drafts and which suggestions you turn down, then writes short lessons that steer future drafts and triage. Read, edit or clear them anytime.", how: "Voice, then What it has learned. Copy for Claude makes the lessons permanent in your copy." },
+    { key: "sweep", name: "Unsubscribe sweep", desc: "Groups your inbox by bulk sender with counts, so you can unsubscribe or clear out a sender in one pass.", how: "Tools, Sweep." },
+    { key: "ask", name: "Ask your inbox", desc: "Ask a question in plain English. It writes the Gmail search, reads the top threads and answers with numbered sources.", how: "Tools, Ask." },
+    { key: "calendar", name: "Calendar-aware replies", desc: "Adds three open 30-minute times from your Google Calendar to the draft. Only free times reach the model, never event details.", how: "Turn on Open times, under Draft with, or press Offer a call.", needs: () => !!CONFIG.calendar, need: "Set calendar: true in CONFIG (the setup skill does this) and connect Google Calendar." },
+    { key: "contacts", name: "Add to contacts", desc: "Saves the person with details from their signature, a note on how you first met (from your earliest email together) and optional Clay enrichment.", how: "Contact above the thread (More on phones), or press c." },
+    { key: "voice", name: "Voice", desc: "Point drafts at a voice prompt: paste one, link a Notion page (a voice trainer's output works), or train one from your sent mail.", how: "Settings, Voice." },
+    { key: "learn", name: "Self-improving", desc: "Notices how you change its drafts and which suggestions you turn down, then writes short lessons that steer future drafts and triage. Read, edit or clear them anytime.", how: "Settings, Voice, then What it has learned. Copy for Claude makes the lessons permanent in your copy." },
     { key: "tasks", name: "Tasks", desc: "Drag a thread onto Tasks to file it in your task app: Notion, Asana, Basecamp, Linear, Todoist or anything else with a connector.", how: "Drag a thread onto Tasks, or press t.", needs: () => !!taskAdapter(), need: "Ask Claude to run chatterbuilt-mail-setup and name your task app." },
-    { key: "move", name: "Move and copy", desc: "File a thread into a folder, or forward a copy to another account.", how: "More on a row, or Move / Copy in the thread header." },
-    { key: "unsub", name: "Unsubscribe", desc: "Finds the sender's unsubscribe link or address in the message headers.", how: "Unsubscribe in the thread header." },
+    { key: "move", name: "Move and copy", desc: "File a thread into a folder, or forward a copy to another account.", how: "More on a row, or Move above the thread (m)." },
+    { key: "unsub", name: "Unsubscribe", desc: "Finds the sender's unsubscribe link or address in the message headers.", how: "More, Unsubscribe, above the thread." },
     { key: "precheck", name: "Pre-send check", desc: "When you press Send, AI rereads your reply against the thread and flags unanswered questions, wrong names, dates or numbers, risky commitments, missing attachments, reply-all risks and tone, with a fixed version you can take or ignore.", how: "Automatic on Send. Send anyway skips it." },
-    { key: "context", name: "Context from your systems", desc: "When you open a thread, checks your connected systems (meetings, calendar, tasks, pipeline, contacts, newsletters, memory) for that person and topic, and shows what matters: open commitments, the last meeting, pipeline status. Drafts and the pre-send check use it too.", how: "Automatic when you open a thread. Untick \u2018Use what my other systems know\u2019 to leave it out of a draft.", needs: () => (CONFIG.context || []).length > 0, need: "Ask Claude to run chatterbuilt-mail-setup and name the systems to check." },
-    { key: "route", name: "Route", desc: "Suggests where a thread should go across your systems (a task, a Slack handoff, a contact, a snooze, a reminder) with the text already written. You edit and approve; nothing runs on its own.", how: "Route in the thread header, or press o." },
-    { key: "snooze", name: "Snooze and remind-me", desc: "Snooze a thread until a date, or get it back if nobody replies. Both are Gmail labels, so the morning run and Gmail itself see them.", how: "Snooze in the thread header (b), or tick Remind me under the reply box." },
+    { key: "context", name: "Context from your systems", desc: "When you open a thread, checks your connected systems (meetings, calendar, tasks, pipeline, contacts, newsletters, memory) for that person and topic, and shows what matters: open commitments, the last meeting, pipeline status. Drafts and the pre-send check use it too.", how: "Automatic when you open a thread. Turn off Context, under Draft with, to leave it out of a draft.", needs: () => (CONFIG.context || []).length > 0, need: "Ask Claude to run chatterbuilt-mail-setup and name the systems to check." },
+    { key: "route", name: "Route", desc: "Suggests where a thread should go across your systems (a task, a Slack handoff, a contact, a snooze, a reminder) with the text already written. You edit and approve; nothing runs on its own.", how: "Route above the thread, or press o." },
+    { key: "snooze", name: "Snooze and remind-me", desc: "Snooze a thread until a date, or get it back if nobody replies. Both are Gmail labels, so the morning run and Gmail itself see them.", how: "Snooze above the thread (b), or tick Remind me under the reply box." },
     { key: "drafts", name: "Drafts waiting in Gmail", desc: "Threads with a draft in Gmail (from the morning run or your own) get a tag. Open one and load the draft in a click; sending replaces it.", how: "Set up the morning run, or write drafts in Gmail." },
     { key: "snippets", name: "Snippets", desc: "Reusable text with the person's first name filled in.", how: "Snippets under the reply buttons." },
     { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons." },
-    { key: "html", name: "Formatted view", desc: "Shows messages with their links, lists and tables, cleaned of scripts, styles and tracking images.", how: "Formatted in the thread header." },
+    { key: "html", name: "Formatted view", desc: "Shows messages with their links, lists and tables, cleaned of scripts, styles and tracking images.", how: "More, Formatted view, above the thread." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
   let featState = {}; try { featState = JSON.parse(ls.get("cm.features") || "{}") || {}; } catch { featState = {}; }
@@ -557,13 +662,15 @@ body.ro [data-mut] { opacity: 0.4; }
   function applyFeatures() {
     document.querySelectorAll("[data-feat]").forEach((el) => el.classList.toggle("feat-off", !featOn(el.dataset.feat)));
     FEATURES.forEach((f) => document.body.classList.toggle("off-" + f.key, !featOn(f.key)));
+    const tm = document.getElementById("toolMenu"), tb = document.getElementById("toolsBtn");
+    if (tm && tb) tb.hidden = ![...tm.querySelectorAll(".mi")].some((b) => !b.classList.contains("feat-off"));
   }
 
   // ---------- read-only ----------
   const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "forward", "create_label", "notion-create-pages", "delete_draft"]);
   function setRO(on, persist) {
     state.readOnly = !!on; document.body.classList.toggle("ro", state.readOnly);
-    const b = $("roToggle"); b.setAttribute("aria-pressed", String(state.readOnly)); b.textContent = state.readOnly ? "Read-only on" : "Read-only";
+    $("roToggle").setAttribute("aria-checked", String(state.readOnly)); $("roPill").hidden = !state.readOnly;
     if (persist) ls.set("cm.ro", state.readOnly ? "1" : "0");
   }
   function toggleRO() { setRO(!state.readOnly, true); toast(state.readOnly ? "Read-only is on. Nothing will be sent, moved or changed. Drafting still works." : "Read-only is off.", "", 4000); }
@@ -832,7 +939,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const anyUnread = ms.some((m) => (m.labelIds || []).includes("UNREAD"));
     const anyStar = ms.some((m) => (m.labelIds || []).includes("STARRED"));
     $("readBtn").hidden = !anyUnread;
-    $("starBtn").textContent = anyStar ? "Unstar" : "Star";
+    $("starBtn").querySelector(".lb").textContent = anyStar ? "Unstar" : "Star";
     reading.innerHTML = '<div id="draftBox"></div><div id="ctxBox"></div><div id="sumBox" hidden></div>' + ms.map((m, i) => {
       const collapsed = ms.length > 2 && i < ms.length - 2;
       const body = String(m.plaintextBody || m.snippet || "").replace(/\r/g, "");
@@ -848,7 +955,7 @@ body.ro [data-mut] { opacity: 0.4; }
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
     state.loadedDraftId = null; state.attachments = []; renderAtt();
-    const hb = $("htmlBtn"); hb.setAttribute("aria-pressed", "false"); hb.textContent = "Formatted";
+    $("htmlBtn").setAttribute("aria-checked", "false");
     showDraftBox(); loadContext(false);
   }
   async function fetchThread(id) {
@@ -1168,7 +1275,7 @@ body.ro [data-mut] { opacity: 0.4; }
       toast(esc(mcpCopy(e, GMAIL)) + (amb ? " Check your Sent folder before forwarding again." : ""), "err", 9000);
     }
   }
-  $("moveBtn").addEventListener("click", () => openPop(state.selectedId, $("moveBtn"), "move"));
+  $("moveBtn").addEventListener("click", () => openPop(state.selectedId, $("moveBtn").offsetParent ? $("moveBtn") : $("threadMoreBtn"), "move"));
   $("tabMove").addEventListener("click", () => setPopTab("move"));
   $("tabCopy").addEventListener("click", () => setPopTab("copy"));
   $("labelQ").addEventListener("input", renderLabelOpts);
@@ -1251,7 +1358,7 @@ body.ro [data-mut] { opacity: 0.4; }
     }
     if (archive) { try { await archiveById(info.threadId); } catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 6000); } }
   }
-  $("unsubBtn").addEventListener("click", () => openPop(state.selectedId, $("unsubBtn"), "unsub"));
+  $("unsubBtn").addEventListener("click", () => openPop(state.selectedId, $("threadMoreBtn"), "unsub"));
   $("tabUnsub").addEventListener("click", () => setPopTab("unsub"));
   $("unsubBox").addEventListener("click", (ev) => {
     if (ev.target.closest("[data-unsub-link]")) { if ($("unsubArchive").checked && unsubInfo) { const id = unsubInfo.threadId; setTimeout(() => { closePop(); archiveById(id).catch((e) => toast(esc(mcpCopy(e, GMAIL)), "err", 6000)); }, 400); } return; }
@@ -1421,7 +1528,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const ids = state.threads.filter((t) => (state.triage[t.id] || {}).priority === "reply" && !state.variants[t.id]).slice(0, 8).map((t) => t.id);
     if (!ids.length) { toast(Object.keys(state.triage).length ? "Nothing marked reply is left to pre-draft." : "Triage didn't finish, so there's nothing to pre-draft yet.", "", 5000); return; }
     btn.disabled = true; let i = 0, done = 0, made = 0, skipped = 0;
-    const tick = () => { btn.textContent = "Drafting " + done + "/" + ids.length; };
+    const tick = () => { $("predraftLabel").textContent = "Drafting " + done + "/" + ids.length; toast('<span class="spin"></span>Pre-drafting ' + done + " of " + ids.length + "…", "", 60000); };
     tick();
     async function w() {
       while (i < ids.length) {
@@ -1432,7 +1539,7 @@ body.ro [data-mut] { opacity: 0.4; }
       }
     }
     await Promise.all([w(), w()]);
-    btn.disabled = false; btn.textContent = "Pre-draft";
+    btn.disabled = false; $("predraftLabel").textContent = "Pre-draft";
     toast("Pre-drafted " + made + " thread" + (made === 1 ? "" : "s") + (skipped ? ", skipped " + skipped + " that don't need a reply" : "") + ". Open one to pick an option. Nothing was saved or sent.", made ? "ok" : "", 8000);
     if (state.selectedId && state.variants[state.selectedId]) renderVariants(true);
   }
@@ -1489,7 +1596,11 @@ body.ro [data-mut] { opacity: 0.4; }
 
   // ---------- review queue ----------
   function mkProp(t, op, label, why, source) { const m = (t.messages && t.messages[0]) || {}; return { threadId: t.id, subject: cleanSubject(m.subject), from: nameOf(m.sender) || "", fromEmail: emailOf(m.sender).toLowerCase(), op: op, labelId: label ? label.labelId : null, labelName: label ? label.name : null, why: String(why || ""), source: source }; }
-  function updateReviewBadge() { const c = $("reviewCount"); c.hidden = !state.queue.length; c.textContent = String(state.queue.length); }
+  function updateReviewBadge() {
+    const n = state.queue.length; const on = n > 0 && featOn("review");
+    [$("reviewCount"), $("toolsCount")].forEach((c) => { c.hidden = !on; c.textContent = String(n); });
+    $("toolsBtn").setAttribute("aria-label", "Tools" + (on ? ", " + n + " waiting in Review" : ""));
+  }
   function addProposals(props) {
     if (!props.length) return;
     const byId = {}; state.queue.forEach((p) => { byId[p.threadId] = p; }); props.forEach((p) => { byId[p.threadId] = p; });
@@ -1956,7 +2067,8 @@ body.ro [data-mut] { opacity: 0.4; }
   }
   document.addEventListener("keydown", (ev) => {
     if ((ev.metaKey || ev.ctrlKey) && (ev.key === "k" || ev.key === "K")) { if (featOn("keys")) { ev.preventDefault(); if (modalBack.hidden) openPalette(); else closeModal(); } return; }
-    if (ev.key === "Escape") { if (!modalBack.hidden) { ev.preventDefault(); closeModal(); } return; }
+    if (ev.key === "Escape") { if (openMenu) { ev.preventDefault(); closeMenus(true); } else if (!modalBack.hidden) { ev.preventDefault(); closeModal(); } return; }
+    if (openMenu) return;
     const typing = ev.target && ev.target.closest && ev.target.closest("input, textarea, select, [contenteditable]");
     if (typing || ev.metaKey || ev.ctrlKey || ev.altKey || !featOn("keys") || !modalBack.hidden || !pop.hidden) return;
     const act = {
@@ -2491,15 +2603,15 @@ body.ro [data-mut] { opacity: 0.4; }
   state.full = {};
   async function toggleFormatted() {
     const btn = $("htmlBtn"); const id = state.selectedId; if (!id || !state.thread) return;
-    const on = btn.getAttribute("aria-pressed") !== "true";
-    if (!on) { btn.setAttribute("aria-pressed", "false"); renderThreadBodies(null); return; }
-    btn.disabled = true; btn.textContent = "Loading…";
+    const on = btn.getAttribute("aria-checked") !== "true";
+    if (!on) { btn.setAttribute("aria-checked", "false"); renderThreadBodies(null); return; }
+    btn.disabled = true; toast('<span class="spin"></span>Loading the formatted view…', "", 15000);
     try {
       const full = state.full[id] || (state.full[id] = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
       if (state.selectedId !== id) return;
-      btn.setAttribute("aria-pressed", "true"); renderThreadBodies(full);
+      btn.setAttribute("aria-checked", "true"); renderThreadBodies(full); const tt = document.querySelector(".toast"); if (tt) tt.remove();
     } catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 6000); }
-    finally { btn.disabled = false; btn.textContent = "Formatted"; }
+    finally { btn.disabled = false; }
   }
   function renderThreadBodies(full) {
     const byId = {}; ((full && full.messages) || []).forEach((m) => { byId[m.id] = m; });
@@ -2577,6 +2689,51 @@ body.ro [data-mut] { opacity: 0.4; }
   $("cancelSend").addEventListener("click", () => { $("confirmBox").hidden = true; checkRun++; });
   $("modelSel").addEventListener("change", () => { state.model = $("modelSel").value; ls.set("ip.model", state.model); });
 
+  // ---------- drop-down menus: Tools (inbox), More (thread), Settings ----------
+  let openMenu = null;
+  function menuItems(menu) { return [...menu.querySelectorAll(".mi")].filter((b) => !b.hidden && !b.disabled && b.getClientRects().length); }
+  function placeMenu(menu, btn) {
+    if (window.innerWidth <= 860) { menu.style.top = menu.style.left = ""; return; }
+    const r = btn.getBoundingClientRect(); const w = menu.offsetWidth; const h = menu.offsetHeight;
+    const below = r.bottom + 6 + h <= window.innerHeight - 8;
+    menu.style.top = Math.max(8, below ? r.bottom + 6 : r.top - 6 - h) + "px";
+    const left = menu.dataset.align === "left" ? r.left : r.right - w;
+    menu.style.left = Math.max(8, Math.min(left, window.innerWidth - w - 8)) + "px";
+  }
+  function closeMenus(refocus) {
+    if (!openMenu) return; const m = openMenu; openMenu = null;
+    m.menu.hidden = true; m.btn.setAttribute("aria-expanded", "false"); if (refocus) m.btn.focus();
+  }
+  function openMenuFor(menu, btn, focusFirst) {
+    closeMenus(); closePop(); applyFeatures();
+    menu.hidden = false; btn.setAttribute("aria-expanded", "true"); openMenu = { menu: menu, btn: btn }; placeMenu(menu, btn);
+    if (focusFirst) { const f = menuItems(menu)[0]; if (f) f.focus(); }
+  }
+  function wireMenu(btn, menu, align) {
+    if (align) menu.dataset.align = align;
+    btn.addEventListener("click", (ev) => { ev.stopPropagation(); if (openMenu && openMenu.menu === menu) closeMenus(); else openMenuFor(menu, btn, ev.detail === 0); });
+    btn.addEventListener("keydown", (ev) => { if (ev.key === "ArrowDown" || ev.key === "ArrowUp") { ev.preventDefault(); openMenuFor(menu, btn, true); } });
+    menu.addEventListener("click", (ev) => {
+      const px = ev.target.closest("[data-proxy]"); if (px) { closeMenus(); $(px.dataset.proxy).click(); return; }
+      if (ev.target.closest("[data-mclose]")) { closeMenus(true); return; }
+      const it = ev.target.closest(".mi"); if (it && !it.matches("[role=menuitemcheckbox]")) closeMenus();
+    });
+    menu.addEventListener("keydown", (ev) => {
+      const items = menuItems(menu); if (!items.length) return; const i = items.indexOf(document.activeElement);
+      const go = (n) => { ev.preventDefault(); items[(n + items.length) % items.length].focus(); };
+      if (ev.key === "ArrowDown") go(i + 1); else if (ev.key === "ArrowUp") go(i < 0 ? -1 : i - 1);
+      else if (ev.key === "Home") go(0); else if (ev.key === "End") go(-1);
+      else if (ev.key === "Tab") closeMenus();
+    });
+  }
+  wireMenu($("toolsBtn"), $("toolMenu"));
+  wireMenu($("threadMoreBtn"), $("threadMenu"));
+  wireMenu($("setBtn"), $("setMenu"));
+  document.addEventListener("click", (ev) => { if (openMenu && !openMenu.menu.contains(ev.target) && !openMenu.btn.contains(ev.target)) closeMenus(); });
+  window.addEventListener("resize", () => closeMenus());
+  $("roPill").addEventListener("click", toggleRO);
+  $("helpBtn").addEventListener("click", () => openSkills(true));
+
   $("reviewBtn").addEventListener("click", openReview);
   $("predraftBtn").addEventListener("click", preDraftBatch);
   $("rulesBtn").addEventListener("click", openRules);
@@ -2601,6 +2758,7 @@ body.ro [data-mut] { opacity: 0.4; }
   const savedModel = ls.get("ip.model"); if (savedModel && [...$("modelSel").options].some((o) => o.value === savedModel)) { state.model = savedModel; } $("modelSel").value = state.model;
   applyFeatures();
   $("repoLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
+  $("docsLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
   if (CONFIG.ownEmail) $("acct").textContent = CONFIG.ownEmail;
   if (CONFIG.searchExample) $("q").placeholder = "Search, e.g. " + CONFIG.searchExample;
   { const ro = ls.get("cm.ro"); setRO(ro === null ? !!CONFIG.readOnly : ro === "1", false); }

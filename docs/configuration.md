@@ -81,4 +81,4 @@ The app keeps these in your browser:
 - read-only state;
 - what it has learned (edits, rejections, actions, lessons).
 
-That data stays on that browser and device. **Copy for Claude** (Voice panel) exports it, and the improve skill writes it into `CONFIG` so it's permanent.
+That data stays on that browser and device. **Copy for Claude** (Settings → Voice) exports it, and the improve skill writes it into `CONFIG` so it's permanent.

@@ -36,7 +36,7 @@ What it learns lives in your browser first. To make lessons, voice, rules and fe
    - rebuilds and republishes your page to the same link;
    - in a fork, commits with a message that summarizes what changed.
 
-Lessons built into your copy show in the Voice panel as "lessons built into this copy." They apply in every browser, even after you clear what one browser learned.
+Lessons built into your copy show in Settings → Voice as "lessons built into this copy." They apply in every browser, even after you clear what one browser learned.
 
 ## Why memory matters
 

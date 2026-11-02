@@ -218,4 +218,4 @@ The setup skill can create a Contacts database with those columns for you.
 
 - Claude is the default and needs nothing extra.
 - To add others, connect OpenRouter. The setup skill looks up the exact model slugs with OpenRouter's `list-models` and adds them to `CONFIG.models`.
-- A model picker appears in the top bar when there's more than one model.
+- A model picker appears in **Settings** when there's more than one model.

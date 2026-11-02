@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1 (2026-11-02)
+
+### Changed
+- **Cleaner navigation**, based on Apple's toolbar guidance and Nielsen Norman Group research (see [features.md, Layout](docs/features.md#layout)):
+  - The thread toolbar went from twelve equal buttons in two rows to three labeled groups: Archive, Snooze, Move; Route, Task, Contact, Summarize; and **More** (Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). Buttons have icons as well as labels.
+  - Review, Pre-draft, Rules, Sweep and Ask moved into a **Tools** menu next to Triage, with a Review count badge. The search box submits on Enter.
+  - Voice, Skills, Read-only and Model moved into **Settings**. A dark **Read-only on** button shows in the top bar whenever read-only is on.
+  - The reply box has *Draft with* switches, Snippets and Attach next to the reply, and **Send** on the trailing edge.
+  - Phones: Archive, Snooze, Route and More above a thread; menus open as bottom sheets with a Close button; notices show at the top so they don't cover Send; the header fits on one line.
+
 ## 0.3.0 (2026-11-02)
 
 The hub release: Chatterbuilt Mail now connects each thread to the rest of your systems, and works while you're away.

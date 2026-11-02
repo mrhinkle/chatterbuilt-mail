@@ -1,21 +1,32 @@
 # Features
 
-Every feature can be switched off in **Skills** (top bar), and its buttons disappear. The table at the end lists what each feature touches.
+Every feature can be switched off in **Settings → Skills**, and its buttons disappear. The table at the end lists what each feature touches.
+
+## Where things are
+
+The layout follows a few common rules: keep the actions you use most visible, with labels; put occasional ones one click away in a labeled menu; and never go deeper than that. See [Layout](#layout) for the reasoning.
+
+| Place | What's there |
+|---|---|
+| Top bar | **Tasks** drop zone, **Commands** (⌘K), **Settings** (Voice, Skills, Read-only, Model, shortcuts, docs), connection status. A dark **Read-only on** button appears while read-only is on. |
+| Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. |
+| Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact, Summarize**, then **More** (Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
+| Reply box | Reply buttons, your own instruction, **Draft with** switches (My tone with them, Context, Open times), the reply, then Snippets, Attach, Reply all, Remind me, **Save draft** and **Send**. |
 
 ## Reading
 
-**Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads.
+**Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box and press Enter (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads.
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
 **Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each. With Review on, it also suggests archives and folder moves. Those land in the review queue; nothing moves on its own.
 
-**Ask your inbox.** Ask a question in plain English ("When is the venue walkthrough?").
+**Ask your inbox.** **Tools → Ask**. Ask a question in plain English ("When is the venue walkthrough?").
 - It writes the Gmail search and shows it to you, so you can edit and re-run.
 - It reads the top five threads and answers with numbered sources.
 - Click a source to open the thread.
 
-**Formatted view.** Press **Formatted** in the thread header to see a message with its links, lists and tables. Scripts, styles, forms, images (including tracking pixels) and `javascript:` links are stripped first, links open in a new tab, and quoted history folds away. Plain text is the default.
+**Formatted view.** **More → Formatted view** above the thread shows a message with its links, lists and tables. Scripts, styles, forms, images (including tracking pixels) and `javascript:` links are stripped first, links open in a new tab, and quoted history folds away. Plain text is the default.
 
 ## Connecting your systems
 
@@ -32,9 +43,9 @@ This is what sets Chatterbuilt Mail apart from email clients with AI added: each
 
 The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show which systems found something, came back empty, or failed. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
 
-Drafts and the pre-send check use the card. Untick *Use what my other systems know* in the reply box to leave it out of a draft.
+Drafts and the pre-send check use the card. Turn off **Context** under *Draft with* in the reply box to leave it out of a draft.
 
-**Route.** Press **Route** (or `o`). The AI reads the thread and the context card and suggests where the thread should go, with the text already written:
+**Route.** Press **Route** above the thread (or `o`). The AI reads the thread and the context card and suggests where the thread should go, with the text already written:
 - a task in your task app, with a title starting with a verb;
 - a contact, which opens Add to contacts;
 - snooze until a date, or remind me if nobody replies;
@@ -48,11 +59,11 @@ Suggested actions are ticked. Edit any field, untick what you don't want, then *
 
 **3 options.** Three versions: best fit, shorter, and a polite no. If the thread doesn't need a reply (a newsletter, a receipt, an FYI), it says so instead of inventing one.
 
-**Pre-draft.** Runs triage if needed, then writes the three options for up to eight threads marked *reply*, two at a time. Threads get a *drafted* tag. Nothing is saved to Gmail or sent.
+**Pre-draft.** **Tools → Pre-draft**. Runs triage if needed, then writes the three options for up to eight threads marked *reply*, two at a time. Threads get a *drafted* tag. Nothing is saved to Gmail or sent.
 
-**Per-recipient tone.** Before drafting, it reads up to three of your earlier sent emails to the same person and matches their register: greeting, length, formality, sign-off. Untick *Match how I write to this person* to skip it.
+**Per-recipient tone.** Before drafting, it reads up to three of your earlier sent emails to the same person and matches their register: greeting, length, formality, sign-off. Turn off *My tone with them* under *Draft with* to skip it.
 
-**Calendar times.** Tick *Offer open times from my calendar*, or press Offer a call.
+**Calendar times.** Turn on *Open times* under *Draft with*, or press Offer a call.
 - It reads the next seven days from Google Calendar and finds three open 30-minute slots inside your working hours, preferring around 10:00 and 2:00 on different days.
 - It skips declined, cancelled and all-day events.
 - Only the free times go to the model, never event names, people or locations.
@@ -76,16 +87,16 @@ It offers a corrected version you can take, or you can send anyway. If the check
 
 **Drafts waiting in Gmail.** Threads that already have a Gmail draft (written by the [morning run](morning-run.md), or by you in Gmail) show a *draft in Gmail* tag. Open one and press **Load it** to put it in the reply box. When you send, the old Gmail draft is removed so you don't end up with a stray copy.
 
-**Save to Gmail drafts** puts the reply in Gmail Drafts. **Send** always asks you to confirm.
+**Save draft** puts the reply in Gmail Drafts. **Send** always asks you to confirm.
 
 ## Following up
 
-**Waiting.** A tab listing sent emails where you had the last word and nobody has answered after N days (3 by default; change it next to the tools). Oldest is listed first, with a *waiting 6d* tag.
+**Waiting.** A tab listing sent emails where you had the last word and nobody has answered after N days (3 by default; change it above the list while the Waiting tab is open). Oldest is listed first, with a *waiting 6d* tag.
 - Open one and press **Nudge** for a short, friendly follow-up.
 - Sending goes to the people you wrote to, threaded under your last message.
 - **3 options** gives a nudge, a shorter nudge, and a graceful "happy to drop this."
 
-**Snooze.** Press **Snooze** (or `b`) and pick tomorrow, in two days, next Monday, in a week, in two weeks, or a date. The thread leaves the inbox and comes back, unread, that morning. Undo works.
+**Snooze.** Press **Snooze** above the thread (or `b`) and pick tomorrow, in two days, next Monday, in a week, in two weeks, or a date. The thread leaves the inbox and comes back, unread, that morning. Undo works.
 
 **Remind me if no reply.** Tick *Remind me in N days if no reply* under the reply box before you send, or pick it in the Snooze panel. If nobody has answered by that morning, the thread comes back to your inbox. If they have, the reminder quietly clears.
 
@@ -95,15 +106,15 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 
 ## Organizing
 
-**Move / Copy.** Move a thread into a folder (or create one), or forward a copy to another account you own. Moves can be undone.
+**Move and copy.** **Move** above the thread (or `m`). Move a thread into a folder (or create one), or forward a copy to another account you own. Moves can be undone.
 
 **Unsubscribe.** Reads the sender's List-Unsubscribe header. It opens their unsubscribe page, or sends their unsubscribe email after you confirm. It can archive the thread afterward.
 
-**Unsubscribe sweep.** Scans your inbox for bulk mail and groups it by sender with counts. Per sender you can:
+**Unsubscribe sweep.** **Tools → Sweep**. Scans your inbox for bulk mail and groups it by sender with counts. Per sender you can:
 - unsubscribe;
 - **Archive all**, which takes up to 100 threads out of the inbox after a confirm click and can be undone.
 
-**Review queue.** Every archive or move suggested by triage or rules waits here.
+**Review queue.** **Tools → Review**. Every archive or move suggested by triage or rules waits here.
 - Untick what you want left alone, then press **Apply selected**.
 - Undo puts it all back.
 - Whatever you untick teaches the app what not to suggest.
@@ -112,7 +123,7 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 - **Plain-English rules** ("receipts, invoices and payment confirmations", then move to Finance). AI matches them.
 - **Sender rules**, which match an address or company domain exactly, with no AI involved.
 
-Rules never act on their own. *Run rules* sends matches to Review. With *Check the inbox against my rules each time it loads* on, they run quietly whenever the inbox loads, and matches show up as a badge on Review.
+Rules never act on their own. *Run rules* sends matches to Review. With *Check the inbox against my rules each time it loads* on, they run quietly whenever the inbox loads, and matches show up as a badge on Tools and Review.
 
 **Suggested rules.** The app watches what you do by hand. Move or archive three emails from the same sender (or four from the same company) the same way, and it offers to make it a rule: *Add rule* or *Not now*. **Suggest rules from my history** asks the AI for broader patterns across your recent actions.
 
@@ -120,11 +131,11 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 
 ## Capturing
 
-**Tasks.** Drag a thread or a single message onto **Tasks** in the top bar, press **→ Task**, or press `t`.
+**Tasks.** Drag a thread or a single message onto **Tasks** in the top bar, press **Task** above the thread, or press `t`.
 - The task gets the subject, sender, a link back to Gmail, and the message quoted.
 - It works with any task app that has a claude.ai connector. See [connectors.md](connectors.md).
 
-**Add to contacts.** Press **+ Contact** or `c`. Pick the person if the thread has several. Then:
+**Add to contacts.** Press **Contact** above the thread, or `c`. Pick the person if the thread has several. Then:
 - **Details from their emails.** It reads every email they've sent you (the current thread plus up to four more) for their signature: title, company, phone, website, location. It also picks up social profiles: LinkedIn, X, Bluesky, GitHub, Instagram.
 - **How we met.** It finds your earliest thread with them and writes a one- or two-sentence note: month and year, who reached out, what it was about, who introduced you. It links that first thread.
 - **Enrich with Clay** (optional). It looks them up in Clay and adds title, LinkedIn, social profiles, location and a work-history summary. This uses Clay credits and only runs when you press it.
@@ -162,9 +173,31 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 | `?` | Help |
 | `⌘K` / `Ctrl K` | Command palette (every action, searchable) |
 
-**Read-only.** One button in the top bar. While it's on, nothing can be sent, moved, labeled, drafted, filed or saved. Reading, summaries, triage, Ask and drafting on the page still work.
+**Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, nothing can be sent, moved, labeled, drafted, filed or saved. Reading, summaries, triage, Ask and drafting on the page still work.
 
-**Phones.** One pane at a time; dialogs become bottom sheets. Row actions move into the thread header on touch screens.
+**Phones.** One pane at a time. Above a thread you get Archive, Snooze, Route and More; Move, Task, Contact and Summarize move into More. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
+
+## Layout
+
+Why it's arranged this way, and the guidance behind it:
+
+- **Fewer, grouped actions.** Apple's toolbar guidance: don't overcrowd, group by function and frequency, aim for no more than three groups, and put less important actions in a More menu [1]. The thread toolbar went from twelve equal buttons in two rows to three groups: organize, connect, More.
+- **One click deep, no deeper.** Progressive disclosure works when the first screen has what people use most and the rest sits one clearly labeled step away; more than two levels gets people lost [2]. Tools, More and Settings are each one menu, with no submenus.
+- **Labels on everything.** Icons alone are ambiguous, and hover-only labels don't work on touch screens, so every toolbar icon has a visible text label [3].
+- **Menus say what they hold.** Hidden navigation is found less often, so each menu button has a specific name and a down arrow ("Tools", "Settings", "More") [4]. A split button would have been wrong here: its menu should hold variations of the button's own action, and the Tools items aren't variations of Search [5].
+- **One primary action.** Send is the only filled button in the reply box, on the trailing edge [1]. Route gets a light accent because it's what makes this a hub.
+- **Thumb reach on phones.** About half of phone use is one-handed [6], so phone menus open as bottom sheets and every item is at least 44 px tall. Bottom sheets get a visible Close button because people miss drag handles [7].
+- **Keyboard and ⌘K for speed.** Every action keeps its shortcut, and the command palette lists them, the way Superhuman teaches shortcuts [8].
+
+Sources:
+1. [Apple Human Interface Guidelines: Toolbars](https://developer.apple.com/design/human-interface-guidelines/toolbars)
+2. [Nielsen Norman Group: Progressive Disclosure](https://www.nngroup.com/articles/progressive-disclosure/)
+3. [Nielsen Norman Group: Icon Usability](https://www.nngroup.com/articles/icon-usability/)
+4. [Nielsen Norman Group: Beyond the Hamburger, desktop navigation](https://www.nngroup.com/articles/find-navigation-desktop-not-hamburger/)
+5. [Nielsen Norman Group: Split Buttons](https://www.nngroup.com/articles/split-buttons/)
+6. [Smashing Magazine: The Thumb Zone](https://smashingmagazine.com/2016/09/the-thumb-zone-designing-for-mobile-users)
+7. [Nielsen Norman Group: Bottom Sheets](https://www.nngroup.com/articles/bottom-sheet/)
+8. [Superhuman design guide (Blake Crosley)](https://blakecrosley.com/guides/design/superhuman)
 
 ## What each feature touches
 
