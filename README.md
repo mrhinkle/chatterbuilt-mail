@@ -4,6 +4,8 @@ A triage hub that connects your Gmail to the rest of your systems. It runs as yo
 
 Most AI email tools sort and draft inside the inbox. Chatterbuilt Mail also checks each thread against your meeting notes, calendar, tasks, pipeline, contacts and memory before you reply. Then it routes the thread back out to them: a task, a Slack handoff, a contact, a CRM note, a snooze. A morning run checks the same systems while you sleep and leaves reply drafts in Gmail. Why this matters: [docs/why.md](docs/why.md).
 
+**The context panel is the core of it.** Open a thread and you get a short brief from every system you've connected. Each line names its source, chips show which systems came back empty, and it won't merge a lookalike match or guess at what it doesn't know. Your drafts, the pre-send check and Route all use it. See [docs/context-panel.md](docs/context-panel.md).
+
 It also does the email-client work: drafts in your voice, a check on every reply before it goes out, a tracker for who owes you an answer, and rules that learn from what you do.
 
 Nothing is sent, moved or filed without a click from you. Every AI suggestion waits for approval, and a read-only mode blocks changes outright.
@@ -49,6 +51,7 @@ The full index is [docs/README.md](docs/README.md).
 - [Install with a prompt](docs/install.md): copy-paste setup prompts for Claude and ChatGPT, and what works where
 - [Getting started](docs/getting-started.md): fork and memory, Google Drive or Microsoft storage, plugin install
 - [Composio](docs/composio.md): every app through one connector
+- [The context panel](docs/context-panel.md): the brief from your systems on every thread, and why it's the core of the app
 - [Screenshots and demo video](docs/demo.md): desktop, phone, and how to record your own
 - [Features](docs/features.md): every feature, how to use it, what it touches
 - [Morning run](docs/morning-run.md): drafts in Gmail before you wake up, as a scheduled task

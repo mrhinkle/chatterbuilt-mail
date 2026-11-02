@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.2 (2026-11-02)
+
+### New
+- **[docs/context-panel.md](docs/context-panel.md):** the context panel explained as the core of the app, with two worked examples, how it works, how to get good briefs, and a sourced comparison with Superhuman Go, Shortwave and Fyxer.
+
+### Changed
+- The context brief now never merges a lookalike match (a different company or person with the same name) into the person you're replying to, and says what's missing when the reply needs something no source has.
+
 ## 0.4.1 (2026-11-02)
 
 ### New

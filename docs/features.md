@@ -47,7 +47,7 @@ This is what sets Chatterbuilt Mail apart from email clients with AI added: each
 
 The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show which systems found something, came back empty, or failed. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
 
-Drafts and the pre-send check use the card. Turn off **Context** under *Draft with* in the reply box to leave it out of a draft.
+Drafts and the pre-send check use the card. Turn off **Context** under *Draft with* in the reply box to leave it out of a draft. The full story, with examples: [context-panel.md](context-panel.md).
 
 **More context.** The context panel's **More context** button looks the person and their company up on the public web, through a search connector you choose (`CONFIG.lookup`; see [connectors.md](connectors.md#more-context-web-lookups)). It searches the person by name and company, and the company by its domain, then writes two to six cited lines: who they are, what the company does, recent news, and what's worth mentioning. Each line links to its sources.
 - It runs only when you press it, and results are cached for an hour.

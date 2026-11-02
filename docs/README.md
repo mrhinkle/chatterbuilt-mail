@@ -7,6 +7,7 @@ Start with **[Install with a prompt](install.md)**: paste one prompt into Claude
 | [Install with a prompt](install.md) | Starter prompts for Claude (the full app) and ChatGPT (the triage workflow), and what works where |
 | [Getting started](getting-started.md) | Three setup paths: fork and memory, Google Drive or Microsoft storage, or the plugin |
 | [Composio](composio.md) | Reach every app through one connector instead of many |
+| [The context panel](context-panel.md) | The brief from your systems on every thread: why it matters, two examples, how it works, how to get good briefs, how it compares |
 | [Screenshots and demo video](demo.md) | What it looks like on desktop and phone, a 30-second video, and how to record your own |
 | [Features](features.md) | Where things are, every feature, what each one touches, and why the layout is the way it is |
 | [Configuration](configuration.md) | Every `CONFIG` setting |

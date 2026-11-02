@@ -72,7 +72,7 @@ These are the argument names those connectors took in November 2026. Connectors 
 **How results are used:**
 - Each source has 15 seconds. A slow or failing one shows as a red chip and the rest carry on.
 - Empty results (`[]`, `{}`, "No results", "No entity") show as grey chips and aren't sent to the AI.
-- The rest are trimmed (long text cut, calendar links, meeting URLs, HTML bodies and similar dropped) and sent to the AI, which writes the card. It's told to ignore matches that aren't about this person, their company or the thread.
+- The rest are trimmed (long text cut, calendar links, meeting URLs, HTML bodies and similar dropped) and sent to the AI, which writes the card. It's told to ignore matches that aren't about this person, their company or the thread, never to merge a lookalike match into this person, and to say what's missing when the reply needs something no source has. More in [context-panel.md](context-panel.md).
 - Results are cached for five minutes. **Refresh** on the card runs them again.
 
 **Rules for context sources:**

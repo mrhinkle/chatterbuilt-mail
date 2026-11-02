@@ -20,7 +20,7 @@ From public threads and reviews in 2026:
 |---|---|
 | Tie email to action | **Route** suggests a task, a Slack handoff, a contact, a snooze or a reminder per thread, with the text written. You edit and approve. It works with any connector, not a fixed list of integrations. |
 | Context beyond your inbox | **More context** looks the person and company up on the public web when you press it, with every line linked to its source, kept apart from what your own systems say. |
-| Context from your systems | The **context panel** checks meeting notes, calendar, tasks, pipeline, contacts, newsletter lists and your memory system for each person. Drafts and the pre-send check use what it finds. |
+| Context from your systems | The **context panel** checks meeting notes, calendar, tasks, pipeline, contacts, newsletter lists and your memory system for each person, on its own, every time you open a thread. Every line names its source, empty and failed systems are shown, and lookalike matches are never merged. Drafts and the pre-send check use what it finds. See [context-panel.md](context-panel.md). |
 | Follow-ups | **Waiting** tab, Nudge, remind-me labels, and the morning run's waiting list. |
 | Trust | Review queue, undo, read-only mode, pre-send check, and visible, editable lessons and rules. Nothing moves on its own. |
 | Stay in Gmail | The **morning run** writes drafts into Gmail Drafts and keeps state in Gmail labels. The app is optional. |
