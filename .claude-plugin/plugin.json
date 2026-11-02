@@ -1,0 +1,8 @@
+{
+  "name": "chatterbuilt-mail",
+  "version": "0.1.0",
+  "description": "A Gmail reader and reply desk you publish as your own Claude artifact: AI summaries, triage and drafts in your voice, move to folder, copy to another account, unsubscribe, and drag-to-task into Notion. Includes setup skills to make it yours.",
+  "author": { "name": "Mark R. Hinkle" },
+  "license": "Apache-2.0",
+  "keywords": ["gmail", "email", "inbox", "triage", "notion", "artifact"]
+}
