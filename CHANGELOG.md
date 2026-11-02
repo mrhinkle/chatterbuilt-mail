@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.1 (2026-11-02)
+
+### New
+- **Close and reopen every pane.** The thread list hides with a button at the left of the thread title (or `[`), on any screen wider than a phone. The context card at the top of a thread folds to one line with **Hide**, which helps most on phones. `]` shows or hides context: the side panel on wide screens, the card everywhere else. The command palette has both, and the app remembers each choice.
+
 ## 0.5.0 (2026-11-02)
 
 ### New

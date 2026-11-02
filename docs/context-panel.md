@@ -81,6 +81,7 @@ That's the loop: your meeting notes caught a promise, the brief put it in front 
 
      ![The panel hidden: the brief at the top of the thread, and a Panel button in the toolbar to bring it back](images/panel-hidden.webp)
 
+   - Where the brief sits at the top of the thread, **Hide** folds it to one line and **Show** opens it again. `]` does the same, or shows and hides the side panel on wide screens. Both choices are remembered.
    - While a thread loads, the panel says so. If there's no one on the thread but you, it says that instead of staying blank.
 
 Every source is a read-only lookup. Nothing is written anywhere when you open a thread.

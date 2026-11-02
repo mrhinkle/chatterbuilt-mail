@@ -106,6 +106,17 @@ body.dragging .taskdrop { border-color: var(--accent); }
 .sidebody { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
 @media (max-width: 1179px) { .main.has-side { grid-template-columns: minmax(300px, 400px) 1fr; } .side { display: none !important; } #sideTog { display: none !important; } }
 .side { position: relative; }
+.listtog { padding: 0 8px; flex: none; }
+.listtog .ic { margin: 0 !important; }
+.listtog[aria-pressed="false"] .ic { color: var(--accent) !important; }
+@media (min-width: 861px) {
+  .main.no-rail { grid-template-columns: minmax(0, 1fr); }
+  .main.no-rail.has-side { grid-template-columns: minmax(0, 1fr) minmax(260px, 320px); }
+  .main.no-rail .rail { display: none; }
+}
+@media (min-width: 861px) and (max-width: 1179px) { .main.no-rail.has-side { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 860px) { .listtog { display: none !important; } }
+.ctx.folded > :not(.ctxhead) { display: none; }
 .sidehide { position: absolute; top: 10px; right: 10px; z-index: 2; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 8px; background: transparent; color: var(--muted); cursor: pointer; }
 .sidehide:hover, .sidehide:focus-visible { background: rgba(15, 23, 42, 0.06); color: var(--fg); }
 .side .who { padding-right: 30px; }
@@ -459,7 +470,7 @@ body.ro [data-mut] { opacity: 0.4; }
   </header>
 
   <div class="main">
-    <section class="rail glass" aria-label="Threads">
+    <section class="rail glass" id="rail" aria-label="Threads">
       <div class="toolbar">
         <div class="chips" id="chips">
           <button class="chip on" data-q="in:inbox" data-key="inbox" type="button">Inbox</button>
@@ -495,6 +506,7 @@ body.ro [data-mut] { opacity: 0.4; }
     <section class="desk glass" aria-label="Reading pane" id="desk">
       <div class="deskhead">
         <div class="titlerow">
+          <button class="btn sm listtog" id="listTog" type="button" aria-controls="rail" aria-pressed="true" aria-label="Hide the thread list" title="Hide the thread list ([)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg></button>
           <button class="btn sm back" id="backBtn" type="button">‹ Back</button>
           <h2 id="subject">Pick a thread</h2>
         </div>
@@ -2221,7 +2233,7 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- skills picker ----------
-  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["o", "route to your systems"], ["b", "snooze or remind me"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last archive or move"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
+  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["o", "route to your systems"], ["b", "snooze or remind me"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last change"], ["[", "show or hide the thread list"], ["]", "show or hide context"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
   const keysHtml = () => '<div class="keys">' + KEYS.map((k) => '<span><span class="kbd">' + esc(k[0]) + '</span></span><span>' + esc(k[1]) + '</span>').join("") + '</div>';
   function openSkills(focusKeys) {
     const rows = FEATURES.map((f) => {
@@ -2255,6 +2267,8 @@ body.ro [data-mut] { opacity: 0.4; }
       ["Rules", "", openRules, "rules"], ["Unsubscribe sweep", "", openSweep, "sweep"], ["Ask your inbox", "", openAsk, "ask"], ["Voice and lessons", "", () => openVoice(false), "voice"],
       ["Skills and help", "?", () => openSkills(false)], ["Toggle read-only", "", toggleRO], ["Refresh", "", () => $("refreshBtn").click()], ["Undo last change", "z", undoLast]
     ];
+    if (!phoneMQ.matches) c.push([state.railOff ? "Show the thread list" : "Hide the thread list", "[", () => setRailOff(!state.railOff)]);
+    if (state.thread && panelOn()) c.push([(wideMQ.matches ? !state.sideOff : !state.ctxFold) ? "Hide context" : "Show context", "]", toggleContext]);
     if (state.thread) c.push(["Route to my systems", "o", openRoute, "route"], ["Snooze or remind me", "b", openSnooze, "snooze"], ["Formatted view", "", toggleFormatted, "html"], ["Insert a snippet", "", openSnippets, "snippets"], ["Refresh context", "", () => loadContext(true), "context"], ["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
     return c.filter((x) => !x[3] || featOn(x[3]));
   }
@@ -2289,7 +2303,8 @@ body.ro [data-mut] { opacity: 0.4; }
     const act = {
       j: () => moveSel(1), k: () => moveSel(-1), e: () => { if (state.selectedId && state.thread) $("archiveBtn").click(); }, s: () => { if (state.thread) $("starBtn").click(); },
       m: () => { if (state.selectedId && featOn("move")) openPop(state.selectedId, $("moveBtn"), "move"); }, t: () => { if (state.selectedId && featOn("tasks")) createTask(state.selectedId); },
-      c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) $("body").focus(); }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true)
+      c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) $("body").focus(); }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true),
+      "[": () => { if (!phoneMQ.matches) setRailOff(!state.railOff); }, "]": toggleContext
     }[ev.key];
     if (act) { ev.preventDefault(); act(); }
   });
@@ -2600,6 +2615,24 @@ body.ro [data-mut] { opacity: 0.4; }
   }
   $("sideTog").addEventListener("click", () => setSideOff(false));
   $("sideHide").addEventListener("click", () => setSideOff(true));
+  // The thread list can be hidden on screens wider than a phone (phones show one pane at a time already).
+  state.railOff = ls.get("cm.railOff") === "1";
+  const phoneMQ = window.matchMedia("(max-width: 860px)");
+  function applyRail() {
+    document.querySelector(".main").classList.toggle("no-rail", state.railOff);
+    const b = $("listTog"); const label = state.railOff ? "Show the thread list" : "Hide the thread list";
+    b.setAttribute("aria-pressed", String(!state.railOff)); b.setAttribute("aria-label", label); b.title = label + " ([)";
+  }
+  function setRailOff(off) { state.railOff = off; ls.set("cm.railOff", off ? "1" : "0"); applyRail(); const b = $("listTog"); if (document.activeElement !== b && !phoneMQ.matches) b.focus({ preventScroll: true }); }
+  $("listTog").addEventListener("click", () => setRailOff(!state.railOff));
+  applyRail();
+  // The context card at the top of a thread (narrow screens, phones, or with the side panel hidden) can be folded to one line.
+  state.ctxFold = ls.get("cm.ctxFold") === "1";
+  function toggleContext() {
+    if (!state.thread || !panelOn()) return;
+    if (wideMQ.matches) { setSideOff(!state.sideOff); return; }
+    state.ctxFold = !state.ctxFold; ls.set("cm.ctxFold", state.ctxFold ? "1" : "0"); renderContext();
+  }
   async function loadContext(force) {
     const t = state.thread; const id = state.selectedId;
     if (!t || !panelOn()) { if ($("ctxBox")) $("ctxBox").innerHTML = ""; $("sideBody").innerHTML = ""; return; }
@@ -2681,12 +2714,13 @@ body.ro [data-mut] { opacity: 0.4; }
       steps = '<div class="sec"><div class="cap">Next steps</div>' + body + '</div>';
     }
     const head = wide ? '<div class="who"><span class="avatar" aria-hidden="true">' + esc(initials(who)) + '</span><div style="min-width:0;display:flex;flex-direction:column;gap:1px"><span class="nm">' + esc(who.name || who.email || "") + '</span>' + (who.org ? '<span class="sub">' + esc(who.org) + (who.domain ? " · " + esc(who.domain) : "") + '</span>' : "") + '<span class="sub">' + esc(who.email || "") + '</span></div></div>' : "";
-    el.innerHTML = wide ? head + sys + web + steps : '<div class="ctx"><div class="ctxhead"><span class="lbl">Context · ' + esc(who.who || "") + '</span></div>' + sys + web + steps + '</div>';
+    el.innerHTML = wide ? head + sys + web + steps : '<div class="ctx' + (state.ctxFold ? " folded" : "") + '"><div class="ctxhead"><span class="lbl">Context · ' + esc(who.who || "") + '</span><button type="button" class="btn sm ghost" data-ctx="fold" aria-expanded="' + !state.ctxFold + '" title="' + (state.ctxFold ? "Show" : "Hide") + ' context (])">' + (state.ctxFold ? "Show" : "Hide") + '</button></div>' + sys + web + steps + '</div>';
     const wc = $("webChk"); if (wc) { const ok = !!(state.web[id] && state.web[id].text && !state.web[id].loading && !/^Nothing relevant/i.test(state.web[id].text)); wc.disabled = !ok; if (!ok) wc.checked = false; }
   }
   document.addEventListener("click", (ev) => {
     const b = ev.target.closest("[data-ctx]"); if (!b || !(b.closest("#sideBody") || b.closest("#ctxBox"))) return;
     const k = b.dataset.ctx;
+    if (k === "fold") { state.ctxFold = !state.ctxFold; ls.set("cm.ctxFold", state.ctxFold ? "1" : "0"); renderContext(); const f = $("ctxBox") && $("ctxBox").querySelector('[data-ctx="fold"]'); if (f) f.focus({ preventScroll: true }); return; }
     if (k === "refresh") loadContext(true);
     else if (k === "more") moreContext(false);
     else if (k === "more-again") moreContext(true);

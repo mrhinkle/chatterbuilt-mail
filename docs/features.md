@@ -28,7 +28,7 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 | Place | What's there |
 |---|---|
 | Top bar | **Tasks** drop zone, **Commands** (⌘K), **Settings** (Voice, Skills, Read-only, Model, shortcuts, docs), connection status. A dark **Read-only on** button appears while read-only is on. |
-| Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter; switch on **Ask** inside it to ask a question instead), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. After Triage, the list is grouped into **Needs you**, **Worth reading** and **FYI**. |
+| Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter; switch on **Ask** inside it to ask a question instead), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. After Triage, the list is grouped into **Needs you**, **Worth reading** and **FYI**. Hide the list with the button at the left of the title (or `[`) to give the thread the full width. |
 | No thread open | **Today**: drafts waiting in Gmail, what needs you, suggestions in Review, who owes you a reply, and your next meeting. |
 | Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact**, then **More** (Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
 | Beside a thread (wide screens) | The **context panel**: who it is, what your systems know, **More context** from the web, and **Next steps**. Hide it with the button in its top corner and bring it back with **Panel** in the thread toolbar. On narrower screens the same panel sits at the top of the thread. |
@@ -236,6 +236,8 @@ Guide: [settings-and-shortcuts.md](settings-and-shortcuts.md).
 | `r` | Reply box |
 | `/` | Search |
 | `z` | Undo |
+| `[` | Show or hide the thread list |
+| `]` | Show or hide context (the side panel on wide screens, the card at the top of the thread otherwise) |
 | `⌘K` / `Ctrl K` | Command palette (every action, searchable) |
 | `?` | This list (opens Skills at Keyboard) |
 | `Esc` | Close a menu or dialog |

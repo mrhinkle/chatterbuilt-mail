@@ -23,6 +23,8 @@ Each section links to its guide.
 | Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Formatted view, with scripts and tracking pixels removed |
 | ![Ask in the search box](images/ask-mode.webp) | ![Tools menu](images/tools-menu.webp) |
 | The Ask switch in the search box | Tools: Review, Pre-draft, Rules, Sweep, Ask |
+| ![List hidden](images/list-hidden.webp) | |
+| The thread list hidden (`[`): the thread gets the full width | |
 
 ## Context · [context-panel.md](context-panel.md) · [more-context.md](more-context.md)
 
@@ -104,6 +106,9 @@ Each section links to its guide.
 <img src="images/phone-tools.webp" alt="Phone Tools sheet" width="220">
 <img src="images/phone-review.webp" alt="Phone Review sheet" width="220">
 <img src="images/phone-contact.webp" alt="Phone Add contact sheet" width="220">
+</p>
+<p>
+<img src="images/phone-context-folded.webp" alt="Phone: context folded to one line" width="220">
 </p>
 
 ## Make your own

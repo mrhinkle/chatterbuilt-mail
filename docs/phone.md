@@ -23,7 +23,10 @@ The phone layout applies at 860 px wide and below, so it also shows on a narrow 
 | **Waiting** | Threads where you sent the last message and nobody has answered. |
 | **Tools** | Review, Pre-draft, Rules, Sweep and Ask. A badge counts what's waiting in Review. |
 
-**A thread.** Tap a thread to open it. The list gives way to the thread, with **‹ Back** at the top. The [context brief](context-panel.md) sits at the top of the thread, above the messages, with **More context** and **Next steps** inside it. The action bar at the bottom holds what you use most:
+**A thread.** Tap a thread to open it. The list gives way to the thread, with **‹ Back** at the top. The [context brief](context-panel.md) sits at the top of the thread, above the messages, with **More context** and **Next steps** inside it. Tap **Hide** to fold it to one line so the message is right there; tap **Show** to open it again. It stays the way you left it.
+
+<img src="images/phone-context-folded.webp" alt="Phone: the context card folded to one line, the message right below it" width="260">
+ The action bar at the bottom holds what you use most:
 
 | Button | What it does |
 |---|---|
