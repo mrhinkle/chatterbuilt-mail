@@ -149,7 +149,9 @@ body.dragging .taskdrop { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { .chev { transition: none; } }
 .waitwrap { font-size: 12px; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
 
-.list { flex: 1; overflow-y: auto; padding: 6px; }
+.list { flex: 1; overflow-y: auto; padding: 6px; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+.loadmore { display: flex; justify-content: center; align-items: center; gap: 8px; padding: 14px 8px 18px; font-size: 12.5px; color: var(--muted); }
+.loadmore .btn { min-width: 160px; }
 .thread { position: relative; display: grid; grid-template-columns: 1fr auto; gap: 1px 10px; width: 100%; text-align: left; padding: 10px 12px 10px 24px; border: 0; border-radius: 12px; background: transparent; }
 .thread + .thread { margin-top: 2px; }
 .thread:hover { background: var(--hover); }
@@ -273,7 +275,9 @@ body.ro [data-mut] { opacity: 0.4; }
 .modal.wide { width: min(820px, 100%); }
 .modal-head { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
 .modal-head h2 { margin: 0; font-size: 16px; font-weight: 650; letter-spacing: -0.012em; flex: 1; }
-.modal-body { overflow-y: auto; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.modal-body { overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; padding: 16px 18px 20px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.modal-body > * { flex-shrink: 0; }
+.modal-body .mfoot { position: sticky; bottom: -20px; z-index: 2; margin: 0 -18px -20px; padding: 12px 18px calc(14px + env(safe-area-inset-bottom, 0px)); background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
 .modal-body h3 { margin: 6px 0 0; font-size: 11px; font-weight: 650; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
 .modal-body p { margin: 0; }
 .modal-body textarea, .modal-body input[type=text], .modal-body input[type=search], .modal-body input[type=email], .modal-body input[type=url], .modal-body input[type=tel], .modal-body select { width: 100%; padding: 8px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); font-size: 13px; }
@@ -370,6 +374,8 @@ body.ro [data-mut] { opacity: 0.4; }
   .modal-back { align-items: flex-end; padding-block: 0; padding-left: 0; padding-right: 0; }
   .modal, .modal.wide { width: 100%; max-height: 90vh; border-radius: 18px 18px 0 0; }
   .modal-body { padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .modal-body .mfoot { bottom: calc(-20px - env(safe-area-inset-bottom, 0px)); margin: 0 calc(-1 * max(16px, env(safe-area-inset-right, 0px))) calc(-20px - env(safe-area-inset-bottom, 0px)) calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .modal-body .mfoot .btn { min-height: 44px; }
 }
 </style>
 
@@ -858,7 +864,7 @@ body.ro [data-mut] { opacity: 0.4; }
         + '<span class="prev' + (pv === undefined && !snip ? " pending" : "") + '" data-prev="' + esc(t.id) + '">' + esc(pv || snip || (pv === undefined ? "Loading preview…" : "(no text)")) + '</span>'
         + (tags ? '<span class="tri">' + tags + '</span>' : "")
         + '</div>';
-    }).join("");
+    }).join("") + (state.hasMore && state.mode !== "waiting" ? '<div class="loadmore">' + (state.loadingMore ? '<span class="spin"></span>Loading older mail…' : '<button class="btn sm" type="button" data-loadmore>Load older mail</button>') + '</div>' : "");
   }
   function makePreview(t) {
     const ms = (t && t.messages) || []; const m = ms[ms.length - 1] || {};
@@ -889,31 +895,67 @@ body.ro [data-mut] { opacity: 0.4; }
     }
     await Promise.all([worker(), worker(), worker()]);
   }
+  // Gmail's connector returns no page token, so later pages walk back by date: the search runs again with
+  // before:<the day after the oldest thread shown> and only threads not already shown are kept.
+  const gDay = (ms) => { const x = new Date(ms); return x.getFullYear() + "/" + String(x.getMonth() + 1).padStart(2, "0") + "/" + String(x.getDate()).padStart(2, "0"); };
+  async function threadDateMs(t) {
+    const ms0 = (t && t.messages) || []; const sm = ms0[ms0.length - 1];
+    const d0 = sm && sm.date ? Date.parse(sm.date) : NaN; if (!isNaN(d0)) return d0;
+    const full = await fetchThread(t.id); const ms = (full && full.messages) || []; const last = ms[ms.length - 1];
+    const d = last && last.date ? Date.parse(last.date) : NaN; return isNaN(d) ? null : d;
+  }
+  async function nextPage(query, have, opts) {
+    opts = opts || {}; const size = opts.pageSize || 50; const seen = new Set(have.map((t) => t.id));
+    const oldest = have[have.length - 1]; const d = oldest ? await threadDateMs(oldest) : null;
+    if (d == null) return { threads: [], more: false };
+    // First include the oldest day, asking for the most Gmail allows so repeats from that day don't crowd out new
+    // threads; if that day alone fills a page, step past it.
+    for (const [cut, n] of [[d + 864e5, 50], [d, size]]) {
+      const p = await call(GMAIL, "search_threads", { query: "(" + query + ") before:" + gDay(cut), pageSize: n, view: opts.view || "THREAD_VIEW_IDS_ONLY" }, { cache: opts.cache || false });
+      const ts = (p && p.threads) || []; const fresh = ts.filter((t) => !seen.has(t.id));
+      if (fresh.length) return { threads: fresh, more: ts.length >= n || (+(p && p.resultCountEstimate) || 0) > ts.length };
+    }
+    return { threads: [], more: false };
+  }
   async function loadThreads(append) {
+    if (append && (state.loadingMore || !state.hasMore || state.mode === "waiting")) return;
     const token = ++state.loadToken;
     if (state.mode === "waiting") return loadWaiting(token);
-    if (!append) { state.threads = []; state.nextToken = null; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
-    $("moreBtn").hidden = true; $("countText").textContent = "loading";
+    if (!append) { state.threads = []; state.nextToken = null; state.hasMore = false; state.estimate = 0; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
+    $("moreBtn").hidden = true; $("countText").textContent = append ? "loading more…" : "loading";
+    if (append) { state.loadingMore = true; const lm = list.querySelector("[data-loadmore]"); if (lm) lm.closest(".loadmore").innerHTML = '<span class="spin"></span>Loading older mail…'; }
     try {
-      const input = { query: state.query, pageSize: 25, view: "THREAD_VIEW_SUMMARY" };
-      if (append && state.nextToken) input.pageToken = state.nextToken;
-      const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 20000, gcTime: 300000 } });
-      if (token !== state.loadToken) return;
-      const threads = (p && p.threads) || [];
+      let threads, more;
+      if (append && !state.nextToken) {
+        const r = await nextPage(state.query, state.threads, { pageSize: 25, view: "THREAD_VIEW_SUMMARY", cache: { staleTime: 20000, gcTime: 300000 } });
+        if (token !== state.loadToken) return;
+        threads = r.threads; more = r.more;
+      } else {
+        const input = { query: state.query, pageSize: 25, view: "THREAD_VIEW_SUMMARY" };
+        if (append) input.pageToken = state.nextToken;
+        const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 20000, gcTime: 300000 } });
+        if (token !== state.loadToken) return;
+        threads = (p && p.threads) || [];
+        if (append) { const seen = new Set(state.threads.map((t) => t.id)); threads = threads.filter((t) => !seen.has(t.id)); }
+        else state.estimate = +(p && p.resultCountEstimate) || 0;
+        state.nextToken = (p && p.nextPageToken) || null;
+        more = !!state.nextToken || ((p && p.threads) || []).length >= input.pageSize || (!append && state.estimate > threads.length);
+      }
       state.threads = append ? state.threads.concat(threads) : threads;
-      state.nextToken = (p && p.nextPageToken) || null;
-      $("moreBtn").hidden = !state.nextToken;
-      $("countText").textContent = state.threads.length + (p && p.resultCountEstimate ? " of ~" + p.resultCountEstimate : "");
+      state.hasMore = !!more;
+      $("moreBtn").hidden = !state.hasMore;
+      $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate, state.threads.length) : "");
       renderList();
       loadPreviews();
       setStatus("connected", "live");
       if (!append) { maybeAutoRules(); loadDraftsMap(); }
     } catch (e) {
       if (token !== state.loadToken) return;
+      if (append) { toast("Couldn't load older mail: " + esc(mcpCopy(e, GMAIL)), "err", 6000); $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + state.estimate : ""); $("moreBtn").hidden = !state.hasMore; return; }
       list.innerHTML = '<div class="empty"><h2>Couldn\'t load threads</h2><p>' + esc(mcpCopy(e, GMAIL)) + '</p></div>';
       $("countText").textContent = "error";
       setStatus(e && e.code ? e.code : "error", "err");
-    }
+    } finally { if (append) { state.loadingMore = false; if (token === state.loadToken) renderList(); } }
   }
 
   // ---------- reading pane ----------
@@ -1370,7 +1412,7 @@ body.ro [data-mut] { opacity: 0.4; }
 
   // ---------- waiting on reply ----------
   async function loadWaiting(token) {
-    state.threads = []; state.nextToken = null; $("moreBtn").hidden = true; $("countText").textContent = "checking";
+    state.threads = []; state.nextToken = null; state.hasMore = false; $("moreBtn").hidden = true; $("countText").textContent = "checking";
     list.innerHTML = '<div class="empty"><span class="spin"></span><span class="progress" id="waitProg">Finding sent mail…</span></div>';
     try {
       const days = Math.max(30, state.waitDays * 4);
@@ -1614,7 +1656,7 @@ body.ro [data-mut] { opacity: 0.4; }
       '<p class="note">Nothing has changed yet. Untick anything you want left alone, then apply. Undo puts it all back. What you untick teaches it what not to suggest.</p>'
       + '<div class="mrow"><button class="btn sm" id="rvAll" type="button">Select all</button><button class="btn sm" id="rvNone" type="button">Select none</button></div>'
       + '<div class="mlist">' + state.queue.map((p, i) => '<label class="mitem"><input type="checkbox" data-rv="' + i + '" checked><span class="t">' + esc(opLabel(p)) + ' \u00b7 ' + esc(p.subject) + '</span><span class="pill">' + esc(p.source) + '</span><span class="d">' + esc(p.from) + (p.why ? " \u00b7 " + esc(p.why) : "") + '</span></label>').join("") + '</div>'
-      + '<div class="mrow"><button class="btn primary" id="rvApply" type="button" data-mut>Apply selected</button><button class="btn ghost" id="rvClear" type="button">Discard all</button><span class="note" id="rvNote"></span></div>', "wide");
+      + '<div class="mrow mfoot"><button class="btn primary" id="rvApply" type="button" data-mut>Apply selected</button><button class="btn ghost" id="rvClear" type="button">Discard all</button><span class="note" id="rvNote"></span></div>', "wide");
     $("rvAll").addEventListener("click", () => document.querySelectorAll("[data-rv]").forEach((c) => { c.checked = true; }));
     $("rvNone").addEventListener("click", () => document.querySelectorAll("[data-rv]").forEach((c) => { c.checked = false; }));
     $("rvApply").addEventListener("click", applyReview);
@@ -1829,20 +1871,17 @@ body.ro [data-mut] { opacity: 0.4; }
   async function scanSweep() {
     const btn = $("swScan"), n = $("swNote"); btn.disabled = true; n.className = "note"; n.innerHTML = '<span class="spin"></span>Scanning…';
     try {
-      const groups = {}; let token = null;
-      for (let page = 0; page < 2; page++) {
-        const input = { query: 'in:inbox (unsubscribe OR "view in browser" OR "manage preferences" OR "email preferences")', pageSize: 50, view: "THREAD_VIEW_SUMMARY" };
-        if (token) input.pageToken = token;
-        const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 60000, gcTime: 300000 } });
-        ((p && p.threads) || []).forEach((t) => {
-          const m = (t.messages && t.messages[0]) || {}; const a = emailOf(m.sender).toLowerCase(); if (!a || a === OWN) return;
-          const g = groups[a] || (groups[a] = { addr: a, name: nameOf(m.sender), count: 0, sample: t.id, subject: m.subject || "" }); g.count++;
-        });
-        token = p && p.nextPageToken; if (!token) break;
-      }
+      const groups = {}; const q = 'in:inbox (unsubscribe OR "view in browser" OR "manage preferences" OR "email preferences")';
+      const p = await call(GMAIL, "search_threads", { query: q, pageSize: 50, view: "THREAD_VIEW_SUMMARY" }, { cache: { staleTime: 60000, gcTime: 300000 } });
+      let all = (p && p.threads) || [];
+      if (all.length >= 50) { try { all = all.concat((await nextPage(q, all, { pageSize: 50, view: "THREAD_VIEW_SUMMARY" })).threads); } catch {} }
+      all.forEach((t) => {
+        const m = (t.messages && t.messages[0]) || {}; const a = emailOf(m.sender).toLowerCase(); if (!a || a === OWN) return;
+        const g = groups[a] || (groups[a] = { addr: a, name: nameOf(m.sender), count: 0, sample: t.id, subject: m.subject || "" }); g.count++;
+      });
       sweep = Object.values(groups).sort((a, b) => b.count - a.count);
       if (!$("swNote")) return;
-      n.textContent = sweep.length + " senders across " + sweep.reduce((s, g) => s + g.count, 0) + " threads" + (token ? " (first 100 threads scanned)" : "");
+      n.textContent = sweep.length + " senders across " + sweep.reduce((s, g) => s + g.count, 0) + " threads" + (all.length >= 100 ? " (first 100 threads scanned)" : "");
       renderSweep();
     } catch (e) { if ($("swNote")) { n.className = "note err"; n.textContent = mcpCopy(e, GMAIL); } }
     finally { if ($("swScan")) $("swScan").disabled = false; }
@@ -1882,8 +1921,11 @@ body.ro [data-mut] { opacity: 0.4; }
     if (!btn.dataset.armed) { btn.dataset.armed = "1"; btn.classList.add("primary"); btn.textContent = "Confirm: archive all from " + (g.name || g.addr); return; }
     btn.disabled = true; btn.textContent = "Archiving…"; const ops = []; let err = null;
     try {
-      let token = null, ids = [];
-      for (let page = 0; page < 2; page++) { const input = { query: "from:" + g.addr + " in:inbox", pageSize: 50, view: "THREAD_VIEW_IDS_ONLY" }; if (token) input.pageToken = token; const p = await call(GMAIL, "search_threads", input, { cache: false }); ids = ids.concat(((p && p.threads) || []).map((t) => t.id)); token = p && p.nextPageToken; if (!token) break; }
+      const q = "from:" + g.addr + " in:inbox";
+      const p = await call(GMAIL, "search_threads", { query: q, pageSize: 50, view: "THREAD_VIEW_IDS_ONLY" }, { cache: false });
+      let found = (p && p.threads) || [];
+      if (found.length >= 50) found = found.concat((await nextPage(q, found, { pageSize: 50 })).threads);
+      let ids = found.slice(0, 100).map((t) => t.id);
       let k = 0;
       async function w() { while (k < ids.length && !err) { const id = ids[k++]; try { await threadOp(id, [], ["INBOX"]); ops.push({ threadId: id, add: [], remove: ["INBOX"] }); btn.textContent = "Archived " + ops.length + " of " + ids.length; } catch (e) { err = e; } } }
       await Promise.all([w(), w(), w()]);
@@ -2204,21 +2246,18 @@ body.ro [data-mut] { opacity: 0.4; }
   async function findFirstMeeting() {
     const ctx = contactCtx; if (!ctx || !ctx.who) return; const who = ctx.who;
     try {
-      let token = null, oldest = null, pages = 0;
-      do {
-        const input = { query: "from:" + who.email + " OR to:" + who.email + " OR cc:" + who.email, pageSize: 50, view: "THREAD_VIEW_IDS_ONLY" };
-        if (token) input.pageToken = token;
-        const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 600000, gcTime: 900000 } });
-        const ts = (p && p.threads) || []; if (ts.length) oldest = ts[ts.length - 1].id;
-        token = p && p.nextPageToken; pages++;
-      } while (token && pages < 4);
+      const q = "from:" + who.email + " OR to:" + who.email + " OR cc:" + who.email;
+      const p = await call(GMAIL, "search_threads", { query: q, pageSize: 50, view: "THREAD_VIEW_IDS_ONLY" }, { cache: { staleTime: 600000, gcTime: 900000 } });
+      let all = (p && p.threads) || []; let more = all.length >= 50, pages = 1;
+      while (more && pages < 4) { const r = await nextPage(q, all, { pageSize: 50 }); all = all.concat(r.threads); more = r.more; pages++; }
+      const oldest = all.length ? all[all.length - 1].id : null;
       if (!stillOn(ctx, who)) return;
       if (!oldest) { $("cMet").placeholder = "No earlier email found. Add how you met."; return; }
       const t = await fetchThread(oldest); const ms = (t && t.messages) || [];
       const first = ms.find((m) => [m.sender].concat(m.toRecipients || []).some((a) => emailOf(a).toLowerCase() === who.email)) || ms[0];
       if (!first || !stillOn(ctx, who)) return;
       ctx.firstDate = first.date || null; ctx.firstUrl = first.viewUrl || t.viewUrl || ""; ctx.firstThreadId = oldest;
-      $("cFirst").innerHTML = 'First thread together: <button type="button" class="btn sm ghost" data-src="' + esc(oldest) + '">' + esc(cleanSubject(first.subject)) + (first.date ? " \u00b7 " + esc(new Date(first.date).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })) : "") + '</button>' + (token ? " (earliest of the first 200 threads you share)" : "");
+      $("cFirst").innerHTML = 'First thread together: <button type="button" class="btn sm ghost" data-src="' + esc(oldest) + '">' + esc(cleanSubject(first.subject)) + (first.date ? " \u00b7 " + esc(new Date(first.date).toLocaleDateString([], { month: "short", day: "numeric", year: "numeric" })) : "") + '</button>' + (more ? " (earliest of the first 200 threads you share)" : "");
       const text = await ask(MARK + " Plain text only, one or two sentences.", "Write a short note for " + OWNER + "'s contact record about how they first connected with " + (who.name || who.email) + ", based on the earliest email between them below. Start with the month and year. Say who reached out, what it was about, and who made the introduction if someone did. Don't add anything that isn't in the email.\n\n" + threadText({ messages: [first].concat(ms.filter((m) => m !== first).slice(0, 1)) }, 5000), { max_tokens: 1200 });
       if (!stillOn(ctx, who)) return;
       setIfEmpty("cMet", text);
@@ -2438,7 +2477,7 @@ body.ro [data-mut] { opacity: 0.4; }
       }).join("");
       return '<div class="mitem rt' + (on ? "" : " off") + '"><input type="checkbox" data-rt="' + i + '"' + (on ? " checked" : "") + '><span class="t">' + esc(c.label) + '</span><span class="note" data-rs="' + i + '">' + (on ? "suggested" : "") + '</span><span class="d">' + esc(on ? p.why || "" : (c.when || "")) + '</span>' + (fields ? '<span class="x" style="display:block;width:100%">' + fields + '</span>' : "") + '</div>';
     }).join("");
-    $("modalBody").innerHTML = '<p class="note">' + (picks.length ? "Suggested actions are ticked. Edit anything, untick what you don't want, then apply. Nothing happens until you do." : "Nothing here clearly needs routing. Tick anything you want anyway.") + '</p><div class="mlist">' + rows + '</div><div class="mrow"><button class="btn primary" id="rtApply" type="button" data-mut>Apply selected</button><span class="note" id="rtNote"></span></div>';
+    $("modalBody").innerHTML = '<p class="note">' + (picks.length ? "Suggested actions are ticked. Edit anything, untick what you don't want, then apply. Nothing happens until you do." : "Nothing here clearly needs routing. Tick anything you want anyway.") + '</p><div class="mlist">' + rows + '</div><div class="mrow mfoot"><button class="btn primary" id="rtApply" type="button" data-mut>Apply selected</button><span class="note" id="rtNote"></span></div>';
     $("modalBody").querySelectorAll("[data-rt]").forEach((cb) => cb.addEventListener("change", () => cb.closest(".mitem").classList.toggle("off", !cb.checked)));
     $("rtApply").addEventListener("click", () => applyRoute(cat, who));
   }
@@ -2669,6 +2708,8 @@ body.ro [data-mut] { opacity: 0.4; }
   $("searchForm").addEventListener("submit", (ev) => { ev.preventDefault(); const q = $("q").value.trim(); if (!q) return; document.querySelectorAll("#chips .chip").forEach((x) => x.classList.remove("on")); state.query = q; state.mode = "normal"; $("waitWrap").hidden = true; state.triage = {}; loadThreads(false); });
   $("refreshBtn").addEventListener("click", async () => { try { await state.mcp.invalidate(GMAIL, "search_threads"); } catch {} state.triage = {}; loadThreads(false); });
   $("moreBtn").addEventListener("click", () => loadThreads(true));
+  list.addEventListener("click", (ev) => { if (ev.target.closest("[data-loadmore]")) loadThreads(true); });
+  list.addEventListener("scroll", () => { if (state.hasMore && !state.loadingMore && list.scrollTop > 0 && list.scrollTop + list.clientHeight > list.scrollHeight - 240) loadThreads(true); }, { passive: true });
   $("triageBtn").addEventListener("click", triage);
   list.addEventListener("click", (ev) => { const mv = ev.target.closest(".mvbtn"); if (mv) { ev.stopPropagation(); openPop(mv.dataset.move, mv, "move"); return; } const tb = ev.target.closest(".totask"); if (tb) { ev.stopPropagation(); createTask(tb.dataset.task); return; } const b = ev.target.closest(".thread"); if (b) openThread(b.dataset.id); });
   list.addEventListener("keydown", (ev) => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.classList.contains("thread")) { ev.preventDefault(); openThread(ev.target.dataset.id); } });

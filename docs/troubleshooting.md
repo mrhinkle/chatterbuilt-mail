@@ -14,6 +14,7 @@
 | Waiting is empty | Nothing you sent in the last few weeks has gone unanswered past the day setting. Try a lower number. |
 | A send or save says "didn't answer in time" | It may still have gone through. Check Sent or Drafts in Gmail before trying again. |
 | Lessons or rules vanished | They live in one browser. Use Copy for Claude and the improve skill to make them permanent. |
+| The list stops at 25 | Scroll to the end of the list or press **Load older mail**. Gmail's connector doesn't hand back a next-page marker, so older pages are found by date; on a day with more than 50 threads in one search, a few from that day can be skipped. |
 | Everything is greyed out | Read-only is on. Click the dark **Read-only on** button in the top bar to turn it off. |
 | A context chip is red | That source failed or took over 15 seconds; hover for the reason. The rest of the card still works. Press Refresh to try again. |
 | The context card mentions the wrong person or company | A search source is too loose. Ask Claude to tighten it: an exact email filter, a specific database, or the bare company name instead of the domain. |

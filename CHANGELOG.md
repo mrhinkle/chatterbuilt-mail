@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.2 (2026-11-02)
+
+### Fixed
+- **Paging past 25 threads.** Gmail's connector doesn't return a next-page token, so the list stopped at 25. Older pages now load by date (the search runs again with `before:` the oldest day shown, and repeats are dropped). Scroll to the end or press **Load older mail**. The sweep, Archive all and "how we met" lookups use the same paging, so they're no longer capped at the newest 50.
+- **Long lists in dialogs on phones.** The Review list (and other long dialog lists) was squeezed to fit the sheet and cut off, so items past the fold couldn't be reached. Dialogs now scroll, and Apply stays pinned at the bottom of Review and Route.
+
 ## 0.3.1 (2026-11-02)
 
 ### Changed

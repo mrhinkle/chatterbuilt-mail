@@ -15,7 +15,7 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 
 ## Reading
 
-**Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box and press Enter (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads.
+**Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box and press Enter (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads. The list shows 25 at a time; scroll to the end, or press **Load older mail**, for the next batch.
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
