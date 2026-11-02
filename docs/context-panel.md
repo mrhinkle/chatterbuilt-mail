@@ -77,9 +77,9 @@ That's the loop: your meeting notes caught a promise, the brief put it in front 
 
    It never merges a lookalike match, and it says what's missing. If nothing is relevant, it says exactly that.
 5. On screens 1180 px and wider, the brief sits in a panel beside the thread. On narrower screens and phones, it sits at the top of the thread.
-   - The button in the panel's top corner hides it, and the brief moves to the top of the thread. **Panel** in the thread toolbar brings it back. The page remembers your choice.
+   - **Hide** at the top of the panel closes it, and the brief moves to the top of the thread. **Context** in the thread toolbar opens it again. The page remembers your choice.
 
-     ![The panel hidden: the brief at the top of the thread, and a Panel button in the toolbar to bring it back](images/panel-hidden.webp)
+     ![The panel hidden: the brief at the top of the thread, and a Context button in the toolbar to bring it back](images/panel-hidden.webp)
 
    - Where the brief sits at the top of the thread, **Hide** folds it to one line and **Show** opens it again. `]` does the same, or shows and hides the side panel on wide screens. Both choices are remembered.
    - While a thread loads, the panel says so. If there's no one on the thread but you, it says that instead of staying blank.

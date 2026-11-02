@@ -9,7 +9,7 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 ## The list
 
 - **Tabs.** Inbox, Unread, Waiting, Primary, Starred and Files. Each one is a Gmail search (Files is `in:inbox has:attachment`). Waiting is different: it lists sent mail nobody has answered. See [following-up.md](following-up.md).
-- **Hide the list.** On a computer, the button at the left of the thread title (or `[`) hides the list so the thread or Today gets the full width. Press it again to bring the list back. The app remembers.
+- **Hide the list.** On a computer, **Hide list** at the left of the thread title (or `[`) hides the list so the thread or Today gets the full width. **Show list** brings it back. The app remembers.
 
   ![The thread list hidden: the thread takes the full width, with the context panel still beside it](images/list-hidden.webp)
 

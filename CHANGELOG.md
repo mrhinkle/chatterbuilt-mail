@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.5.3 (2026-11-02)
+
+### Fixed
+- **Half the screen sat empty on tablets and large phones.** Between 600 and 860 px wide (an iPad in portrait, say), an open thread was squeezed into a 400 px column with empty space beside it. The page applied the three-column "side panel" layout at any width; it now does that only on wide screens, and the phone layout is always one column. This had been there since 0.4.0.
+- **A brief line with two sources showed one as raw text,** like "[Sponsor pipeline] Contacts". Every source tag at the end of a line is now a chip.
+
+## 0.5.2 (2026-11-02)
+
+### Changed
+- **The pane controls have words now, not just icons.** The context panel has a **Context** header with a **Hide** button, the thread list button says **Hide list** / **Show list**, and the toolbar button that brings the panel back says **Context**. The icon-only versions were easy to miss.
+
 ## 0.5.1 (2026-11-02)
 
 ### New

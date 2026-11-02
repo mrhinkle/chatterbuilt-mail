@@ -33,7 +33,7 @@ Each section links to its guide.
 | ![Context panel](images/context-panel.webp) | ![Receipt context](images/receipt-context.webp) |
 | A sponsor: what you owe, pipeline status, how you met | A vendor receipt: no reply needed, an unrelated match flagged as unrelated |
 | ![More context](images/more-context.webp) | ![Panel hidden](images/panel-hidden.webp) |
-| More context: a cited web lookup, only when you press it | The panel hidden: the brief moves into the thread, and **Panel** brings it back |
+| More context: a cited web lookup, only when you press it | The panel hidden: the brief moves into the thread, and **Context** brings it back |
 
 ## Routing · [route-and-next-steps.md](route-and-next-steps.md)
 

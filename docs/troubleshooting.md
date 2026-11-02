@@ -23,8 +23,8 @@
 | Route suggests nothing | Nothing in the thread clearly called for it. Tick an action anyway and fill in the fields. |
 | A snoozed thread didn't come back | The app brings it back the next time it opens, and the morning run each weekday. It's under the `CB/Snooze/<date>` label in Gmail meanwhile. |
 | No *draft in Gmail* tag on a thread you drafted | Drafts are checked once a minute. Reload the inbox. |
-| No context panel beside the thread | You may have hidden it: press **Panel** at the right of the thread toolbar to bring it back. Below 1180 px wide, context sits at the top of the thread instead. If it's missing everywhere, turn Context, More context and Route on in Settings → Skills. |
-| The thread list is gone | You hid it. Press the list button at the left of the thread title, or `[`, to bring it back. |
+| No context panel beside the thread | You may have hidden it: press **Context** at the right of the thread toolbar to bring it back. Below 1180 px wide, context sits at the top of the thread instead. If it's missing everywhere, turn Context, More context and Route on in Settings → Skills. |
+| The thread list is gone | You hid it. Press **Show list** at the left of the thread title, or `[`, to bring it back. |
 | The context is just one line | You folded it. Press **Show** on it, or `]`. |
 | The panel says there's no one to look up | The thread has nobody on it but you (a note to yourself, or a draft you sent yourself). There's no person to check your systems for. |
 | More context says "Nothing relevant on the web" | The search found nothing about this person. Gmail and Outlook addresses have no company domain, so results are thinner. |
