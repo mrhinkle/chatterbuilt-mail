@@ -71,7 +71,7 @@ Both use the same adapter shape in `CONFIG.tasks` and `CONFIG.contacts`: a conne
 - **Tasks call:** your task app's create tool (`CONFIG.tasks`), plus Gmail `get_thread` when you drag a thread that isn't open.
 - **Contacts call:** Gmail `search_threads` and `get_thread` to read their emails and find your first thread; Claude or your chosen model to read the signature and write how you met; your contacts app's search (duplicate check) and create tool; Clay only when you press Enrich.
 - **Writes:** one task or one contact, only when you file or save.
-- **Read-only mode** blocks filing and saving. Reading their emails and filling the form still work, and Copy as vCard still works.
+- **Read-only mode** greys out Task and Contact and blocks filing and saving. Contact still opens: reading their emails, filling the form and Copy as vCard still work, and a note at the top says saving is off.
 - **Turn them off:** Settings → Skills → **Tasks** or **Add to contacts**.
 
 ## Related

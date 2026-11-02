@@ -36,7 +36,8 @@ Your switches are saved in this browser. To change the defaults for every browse
 Turn on **Settings → Read-only** for a demo, a screen share, or a careful first run.
 
 - A dark **Read-only on** button appears in the top bar. Click it to turn read-only off.
-- Buttons that change something are greyed out: Archive, Move, Task, Star, Mark read, Save draft, Send, and the apply and save buttons in dialogs.
+- Buttons that change something are greyed out: Archive, Snooze, Move, Route, Task, Contact, Star, Mark read, Save draft, Send, the snooze and remind-me choices, and the apply and save buttons in dialogs. The same goes for the phone's action bar and More sheet.
+- Route and Contact still open. Route shows its suggestions and Contact fills in the form and offers Copy as vCard, and both say at the top that saving is off.
 - If you try one anyway, nothing changes and a banner says so: "Read-only mode is on, so nothing changed."
 - Nothing can be sent, moved, labeled, saved as a draft, filed as a task, saved as a contact or routed.
 - Reading, summaries, Triage, Ask, the context panel, More context and drafting on the page all still work. Drafts just stay on the page.

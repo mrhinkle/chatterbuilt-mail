@@ -163,7 +163,7 @@ Guide: [organizing.md](organizing.md).
 - unsubscribe;
 - **Archive all**, which takes up to 100 threads out of the inbox after a confirm click and can be undone.
 
-The sweep's Unsubscribe uses the List-Unsubscribe header and links in the plain text. If it finds nothing for a sender, open one of their emails and use **More → Unsubscribe**, which also checks the formatted message.
+The sweep's Unsubscribe looks in the same places as **More → Unsubscribe**: the List-Unsubscribe header, the text, then the formatted message.
 
 **Review queue.** **Tools → Review**. Every archive or move suggested by triage or rules waits here.
 - Untick what you want left alone, then press **Apply selected**.
@@ -242,7 +242,7 @@ Guide: [settings-and-shortcuts.md](settings-and-shortcuts.md).
 
 **Model.** Claude drafts by default. If `CONFIG.models` lists other models (through OpenRouter), a **Model** picker appears in Settings; with none listed, it stays hidden.
 
-**Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, nothing can be sent, moved, labeled, drafted, filed or saved. Reading, summaries, triage, Ask and drafting on the page still work.
+**Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, buttons that change something are greyed out, and nothing can be sent, moved, labeled, drafted, filed or saved. Route and Contact still open, so you can see suggestions or copy a vCard, and they say saving is off. Reading, summaries, triage, Ask and drafting on the page still work.
 
 **Phones.** One pane at a time, with a tab bar at the bottom of the list: **Today, Inbox, Waiting, Tools**. In a thread, the actions sit in a bar at the bottom, in thumb reach: **Archive, Snooze, Route, Reply, More**. Reply jumps to the reply box, and the bar hides while you type. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
 

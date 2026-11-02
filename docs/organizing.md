@@ -49,7 +49,7 @@ If there's nothing to unsubscribe from, it says the message may be from a real p
 **How to use it.** **Tools → Sweep**, then **Scan inbox**. It searches your inbox for bulk mail ("unsubscribe", "view in browser", "manage preferences", "email preferences"), up to 100 threads. It groups the results by sender, most threads first.
 
 For each sender:
-- **Unsubscribe** checks the sender's header and email text. It then offers **Open unsubscribe page**, **Email** their unsubscribe address (click twice to confirm), or a link from the email. If it finds none, it says so.
+- **Unsubscribe** checks the sender's header, then the email's text, then the formatted email, the same places **More → Unsubscribe** looks. It then offers **Open unsubscribe page**, **Email** their unsubscribe address (click twice to confirm), or a link from the email. If it finds none, it says so.
 - **Archive all** takes up to 100 of that sender's threads out of your inbox. The first click arms it and the second confirms. Undo puts them back.
 
 The last scan stays in the panel until you scan again.

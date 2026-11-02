@@ -55,7 +55,7 @@ This matters with Composio: its `SLACK_SEND_MESSAGE` **sends** the message. It d
 
 - **Calls:** Claude or your chosen model to suggest; then, for what you tick, your task app (`CONFIG.tasks`), Gmail labels for snooze and remind-me (`create_label`, `label_thread`, `unlabel_thread`), and the connector tools in `CONFIG.actions`.
 - **Writes:** only what you tick, only when you press Apply selected.
-- **Read-only mode** blocks Apply selected. Suggesting still works.
+- **Read-only mode** greys out Route and blocks Apply selected. Route still opens and suggests, with a note at the top that nothing will be applied.
 - **Turn it off:** Settings → Skills → **Route**. That also removes Next steps from the panel.
 
 ## Related

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.4.4 (2026-11-02)
+
+### Fixed
+- **Sweep missed HTML-only unsubscribe links.** The sweep's Unsubscribe now checks the formatted email too, the same places **More → Unsubscribe** looks. Both use one shared lookup.
+- **Read-only didn't grey out Snooze, Route or Contact.** They're greyed now on desktop, in the phone's action bar and in More, and so are the snooze and remind-me choices. Route and Contact still open, for suggestions and Copy as vCard, and say at the top that saving is off.
+
 ## 0.4.3 (2026-11-02)
 
 ### New

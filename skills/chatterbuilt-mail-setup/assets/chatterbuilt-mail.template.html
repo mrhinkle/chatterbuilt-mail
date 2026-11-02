@@ -497,13 +497,13 @@ body.ro [data-mut] { opacity: 0.4; }
         <div class="acts" id="acts" role="toolbar" aria-label="Thread actions" hidden>
           <div class="tgroup" aria-label="Organize">
             <button class="btn sm" id="archiveBtn" type="button" data-mut title="Archive (e)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/></svg>Archive</button>
-            <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" title="Snooze, or remind me if no reply (b)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
+            <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" data-mut title="Snooze, or remind me if no reply (b)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
             <button class="btn sm desk-only" id="moveBtn" type="button" data-feat="move" data-mut title="Move to a folder, or copy to another account (m)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move</button>
           </div>
           <div class="tgroup" aria-label="Connect">
-            <button class="btn sm hub" id="routeBtn" type="button" data-feat="route" title="Suggests where this thread should go across your systems (o)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
+            <button class="btn sm hub" id="routeBtn" type="button" data-feat="route" data-mut title="Suggests where this thread should go across your systems (o)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
             <button class="btn sm desk-only" id="taskBtn" type="button" data-feat="tasks" data-mut title="File as a task (t)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>Task</button>
-            <button class="btn sm desk-only" id="contactBtn" type="button" data-feat="contacts" title="Save this person to your contacts (c)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Contact</button>
+            <button class="btn sm desk-only" id="contactBtn" type="button" data-feat="contacts" data-mut title="Save this person to your contacts (c)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Contact</button>
             <button class="btn sm" id="sumBtn" type="button" hidden title="The gist and the asks"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
           </div>
           <div class="tgroup end">
@@ -575,8 +575,8 @@ body.ro [data-mut] { opacity: 0.4; }
 </div>
 <div class="phonebar" id="phoneBar" role="toolbar" aria-label="Thread actions">
   <button type="button" class="btn" data-proxy="archiveBtn" data-mut><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/></svg>Archive</button>
-  <button type="button" class="btn" data-proxy="snoozeBtn" data-feat="snooze"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
-  <button type="button" class="btn" data-proxy="routeBtn" data-feat="route"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
+  <button type="button" class="btn" data-proxy="snoozeBtn" data-feat="snooze" data-mut><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
+  <button type="button" class="btn" data-proxy="routeBtn" data-feat="route" data-mut><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
   <button type="button" class="btn primary" id="replyJump"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 7 4 12l5 5"/><path d="M4 12h10a6 6 0 0 1 6 6"/></svg>Reply</button>
   <button type="button" class="btn" id="pbMore" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>More</button>
 </div>
@@ -584,7 +584,7 @@ body.ro [data-mut] { opacity: 0.4; }
 <div class="menu glass-strong narrow" id="threadMenu" role="menu" aria-label="More thread actions" hidden>
   <button class="mi row phone-only" role="menuitem" type="button" data-proxy="moveBtn" data-feat="move" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move or copy</button>
   <button class="mi row phone-only" role="menuitem" type="button" data-proxy="taskBtn" data-feat="tasks" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>File as a task</button>
-  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="contactBtn" data-feat="contacts"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Add to contacts</button>
+  <button class="mi row phone-only" role="menuitem" type="button" data-proxy="contactBtn" data-feat="contacts" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Add to contacts</button>
   <button class="mi row" role="menuitem" type="button" data-proxy="sumBtn"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
   <div class="msep phone-only"></div>
   <button class="mi row" role="menuitem" id="starBtn" type="button" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4.5 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L4.5 10l5.2-.8z"/></svg><span class="lb">Star</span></button>
@@ -1461,11 +1461,7 @@ body.ro [data-mut] { opacity: 0.4; }
         info.bodyLinks = unsubLinksFromText(cand.plaintextBody);
         if (!info.bodyLinks.length) {
           box.innerHTML = '<div class="note"><span class="spin"></span>Checking the formatted message for an unsubscribe link…</div>';
-          try {
-            const full = state.full[id] || (state.full[id] = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
-            const fm = ((full && full.messages) || []).find((m) => m.id === cand.id) || {};
-            info.bodyLinks = unsubLinksFromHtml(fm.htmlBody);
-          } catch {}
+          info.bodyLinks = await formattedUnsubLinks(id, cand.id);
           if (popTarget !== id || popTab !== "unsub") return;
         }
       }
@@ -1504,6 +1500,17 @@ body.ro [data-mut] { opacity: 0.4; }
       });
     } catch {}
     return out;
+  }
+  async function formattedUnsubLinks(threadId, msgId) {
+    try {
+      const full = state.full[threadId] || (state.full[threadId] = await call(GMAIL, "get_thread", { threadId: threadId, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
+      const fm = ((full && full.messages) || []).find((m) => m.id === msgId) || {};
+      return unsubLinksFromHtml(fm.htmlBody);
+    } catch { return []; }
+  }
+  async function bodyUnsubLinks(threadId, msg) {
+    const fromText = unsubLinksFromText(msg && msg.plaintextBody);
+    return fromText.length ? fromText : formattedUnsubLinks(threadId, msg && msg.id);
   }
   async function archiveById(id) {
     const who = senderOf(id);
@@ -2039,8 +2046,13 @@ body.ro [data-mut] { opacity: 0.4; }
       let h = "";
       if (info.https[0]) h += '<a class="btn sm primary" target="_blank" rel="noopener" href="' + esc(info.https[0]) + '">Open unsubscribe page</a>';
       if (info.mailto) h += ' <button type="button" class="btn sm" data-swm="' + i + '">Email ' + esc(info.mailto.to) + '</button>';
-      if (!h) { const links = (String(cand.plaintextBody || "").match(/https?:\/\/[^\s<>)"'\]]+/g) || []).filter((x) => /unsubscri|opt[-_]?out|preferences/i.test(x)); if (links[0]) h = '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(links[0]) + '">Open the link in their email</a>'; }
-      el.innerHTML = h || "No unsubscribe option found. Archive all, or filter them in Gmail.";
+      if (!h) {
+        el.innerHTML = '<span class="spin"></span>Checking their email for an unsubscribe link…';
+        const links = await bodyUnsubLinks(g.sample, cand);
+        if (links[0]) h = '<a class="btn sm" target="_blank" rel="noopener" href="' + esc(links[0]) + '">Open the link in their email</a>';
+      }
+      const el2 = document.querySelector('[data-swn="' + i + '"]'); if (!el2) return;
+      el2.innerHTML = h || "No unsubscribe option found. Archive all, or filter them in Gmail.";
     } catch (e) { const el = document.querySelector('[data-swn="' + i + '"]'); if (el) el.textContent = mcpCopy(e, GMAIL); }
   }
   async function sweepMail(i, btn) {
@@ -2328,7 +2340,8 @@ body.ro [data-mut] { opacity: 0.4; }
     contactCtx = { thread: state.thread, cands: cands, who: null };
     const f = (id, label, type, ph) => '<label class="field"><span>' + label + '</span><input type="' + (type || "text") + '" id="' + id + '" placeholder="' + esc(ph || "") + '" autocomplete="off"></label>';
     openModal("Add contact",
-      (cands.length > 1 ? '<div class="mrow"><span class="note">Who</span><select id="cWho" style="flex:1;width:auto;min-width:0">' + cands.map((c, i) => '<option value="' + i + '">' + esc((c.name ? c.name + " \u00b7 " : "") + c.email) + '</option>').join("") + '</select></div>' : "")
+      (state.readOnly ? '<p class="note err">Read-only is on. You can fill this in and copy it as a vCard, but saving is off until you turn it off.</p>' : "")
+      + (cands.length > 1 ? '<div class="mrow"><span class="note">Who</span><select id="cWho" style="flex:1;width:auto;min-width:0">' + cands.map((c, i) => '<option value="' + i + '">' + esc((c.name ? c.name + " \u00b7 " : "") + c.email) + '</option>').join("") + '</select></div>' : "")
       + '<p class="note" id="cStatus"><span class="spin"></span>Reading every email they\'ve sent you for their signature and social handles, and finding your first thread together…</p>'
       + '<div class="fields">' + f("cName", "Name") + f("cEmail", "Email", "email") + f("cCompany", "Company") + f("cTitle", "Title") + f("cPhone", "Phone", "tel") + f("cLocation", "Location") + f("cWebsite", "Website", "url") + f("cLinkedIn", "LinkedIn", "url", "linkedin.com/in/\u2026") + f("cX", "X", "url", "x.com/\u2026") + f("cBluesky", "Bluesky", "url", "bsky.app/profile/\u2026") + f("cGitHub", "GitHub", "url", "github.com/\u2026") + f("cInstagram", "Instagram", "url", "instagram.com/\u2026") + '</div>'
       + '<label class="field"><span>How we met</span><textarea id="cMet" style="min-height:72px" placeholder="Looking up your first email together\u2026"></textarea></label>'
@@ -2791,7 +2804,7 @@ body.ro [data-mut] { opacity: 0.4; }
       }).join("");
       return '<div class="mitem rt' + (on ? "" : " off") + '"><input type="checkbox" data-rt="' + i + '"' + (on ? " checked" : "") + '><span class="t">' + esc(c.label) + '</span><span class="note" data-rs="' + i + '">' + (on ? "suggested" : "") + '</span><span class="d">' + esc(on ? p.why || "" : (c.when || "")) + '</span>' + (fields ? '<span class="x" style="display:block;width:100%">' + fields + '</span>' : "") + '</div>';
     }).join("");
-    $("modalBody").innerHTML = '<p class="note">' + (picks.length ? "Suggested actions are ticked. Edit anything, untick what you don't want, then apply. Nothing happens until you do." : "Nothing here clearly needs routing. Tick anything you want anyway.") + '</p><div class="mlist">' + rows + '</div><div class="mrow mfoot"><button class="btn primary" id="rtApply" type="button" data-mut>Apply selected</button><span class="note" id="rtNote"></span></div>';
+    $("modalBody").innerHTML = (state.readOnly ? '<p class="note err">Read-only is on. You can look at the suggestions, but Apply selected won\'t run until you turn it off.</p>' : "") + '<p class="note">' + (picks.length ? "Suggested actions are ticked. Edit anything, untick what you don't want, then apply. Nothing happens until you do." : "Nothing here clearly needs routing. Tick anything you want anyway.") + '</p><div class="mlist">' + rows + '</div><div class="mrow mfoot"><button class="btn primary" id="rtApply" type="button" data-mut>Apply selected</button><span class="note" id="rtNote"></span></div>';
     $("modalBody").querySelectorAll("[data-rt]").forEach((cb) => cb.addEventListener("change", () => cb.closest(".mitem").classList.toggle("off", !cb.checked)));
     $("rtApply").addEventListener("click", () => applyRoute(cat, who));
   }
@@ -2858,9 +2871,9 @@ body.ro [data-mut] { opacity: 0.4; }
     const nextMon = (() => { const x = new Date(); x.setDate(x.getDate() + ((8 - x.getDay()) % 7 || 7)); return ymd(x); })();
     const opts = [["Tomorrow", d(1)], ["In 2 days", d(2)], ["Next Monday", nextMon], ["In a week", d(7)], ["In 2 weeks", d(14)]];
     openModal("Snooze or remind",
-      '<h3>Snooze until</h3><p class="note">Takes it out of the inbox and brings it back, unread, on the morning you pick.</p><div class="mrow">' + opts.map((o) => '<button type="button" class="btn sm" data-snz="' + o[1] + '">' + o[0] + ' · ' + esc(niceDate(o[1])) + '</button>').join("") + '</div>'
+      '<h3>Snooze until</h3><p class="note">Takes it out of the inbox and brings it back, unread, on the morning you pick.</p><div class="mrow">' + opts.map((o) => '<button type="button" class="btn sm" data-snz="' + o[1] + '" data-mut>' + o[0] + ' · ' + esc(niceDate(o[1])) + '</button>').join("") + '</div>'
       + '<div class="mrow"><input type="date" id="snzDate" min="' + d(1) + '" style="width:auto"><button type="button" class="btn sm primary" id="snzGo" data-mut>Snooze</button></div>'
-      + '<h3>Remind me if no reply</h3><p class="note">Leaves it where it is. If nobody has replied by that morning, it comes back to your inbox.</p><div class="mrow">' + [2, 3, 5, 7].map((n) => '<button type="button" class="btn sm" data-rmd="' + d(n) + '">' + n + ' days · ' + esc(niceDate(d(n))) + '</button>').join("") + '</div>'
+      + '<h3>Remind me if no reply</h3><p class="note">Leaves it where it is. If nobody has replied by that morning, it comes back to your inbox.</p><div class="mrow">' + [2, 3, 5, 7].map((n) => '<button type="button" class="btn sm" data-rmd="' + d(n) + '" data-mut>' + n + ' days · ' + esc(niceDate(d(n))) + '</button>').join("") + '</div>'
       + '<p class="note">Both are Gmail labels under ' + esc(LP()) + '/, so you can see them in Gmail too. The app and the morning run bring things back.</p><span class="note" id="snzNote"></span>');
     const id = state.selectedId;
     const run = async (fn, date) => { if (state.readOnly) { $("snzNote").textContent = mcpCopy({ code: "read_only" }); return; } $("snzNote").innerHTML = '<span class="spin"></span>'; try { closeModal(); await fn(id, date); } catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 8000); } };
