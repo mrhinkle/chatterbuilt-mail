@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3 (2026-11-02)
+
+### Fixed
+- **Unsubscribe always ends in a button that does it.** The panel leads with one primary action: **Unsubscribe** (opens the sender's page), **Unsubscribe by email** (you confirm first), or, when the message has no unsubscribe option, **Archive** and **Archive and add a rule for this sender**. The archive-afterward checkbox only shows when there is something to unsubscribe from.
+- **Finds more unsubscribe links.** Besides the List-Unsubscribe header, it now looks for a link next to words like "unsubscribe" or "manage preferences" in the text, then for an "Unsubscribe" link in the formatted message. Marketing platforms that hide the link behind tracking URLs (Eloqua and similar) are covered.
+
 ## 0.3.2 (2026-11-02)
 
 ### Fixed

@@ -561,7 +561,7 @@ body.ro [data-mut] { opacity: 0.4; }
   </div>
   <div id="popUnsub" style="display:none;flex-direction:column;gap:8px">
     <div id="unsubBox" style="display:flex;flex-direction:column;gap:8px"></div>
-    <label class="note"><input type="checkbox" id="unsubArchive" checked> Archive this thread afterward</label>
+    <label class="note" id="unsubArchiveRow" hidden><input type="checkbox" id="unsubArchive" checked> Archive this thread afterward</label>
     <div class="confirmbox" id="unsubConfirm" hidden><span id="unsubConfirmText"></span><button type="button" class="btn sm primary" id="unsubYes">Yes, send</button><button type="button" class="btn sm ghost" id="unsubNo">Cancel</button></div>
   </div>
   <div class="note" id="popNote"></div>
@@ -1365,19 +1365,52 @@ body.ro [data-mut] { opacity: 0.4; }
       if (popTarget !== id || popTab !== "unsub") return;
       const info = parseListUnsub(p && p.raw); info.bodyLinks = [];
       if (!info.https.length && !info.mailto) {
-        const body = String(cand.plaintextBody || "");
-        info.bodyLinks = (body.match(/https?:\/\/[^\s<>)"'\]]+/g) || []).filter((u) => /unsubscri|opt[-_]?out|email-?preferences/i.test(u)).slice(0, 2);
+        info.bodyLinks = unsubLinksFromText(cand.plaintextBody);
+        if (!info.bodyLinks.length) {
+          box.innerHTML = '<div class="note"><span class="spin"></span>Checking the formatted message for an unsubscribe link…</div>';
+          try {
+            const full = state.full[id] || (state.full[id] = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
+            const fm = ((full && full.messages) || []).find((m) => m.id === cand.id) || {};
+            info.bodyLinks = unsubLinksFromHtml(fm.htmlBody);
+          } catch {}
+          if (popTarget !== id || popTab !== "unsub") return;
+        }
       }
-      info.threadId = id; unsubInfo = info;
+      info.threadId = id; info.sender = emailOf(cand.sender).toLowerCase(); info.senderName = nameOf(cand.sender); unsubInfo = info;
       const host = (u) => { try { return new URL(u).hostname; } catch { return ""; } };
-      let h = '<div class="note">From <strong>' + esc(nameOf(cand.sender)) + '</strong></div>';
-      info.https.slice(0, 2).forEach((u) => { h += '<a class="btn primary" data-unsub-link="1" target="_blank" rel="noopener" href="' + esc(u) + '">Open unsubscribe page</a><div class="note" style="overflow-wrap:anywhere">' + esc(host(u)) + '</div>'; });
-      if (info.https.length && info.oneClick) h += '<div class="note">This sender supports one-click unsubscribe, but a page can\'t send that request, so you finish on their page.</div>';
-      if (info.mailto) h += '<button type="button" class="btn' + (info.https.length ? '' : ' primary') + '" id="unsubMailBtn">Send unsubscribe email</button><div class="note" style="overflow-wrap:anywhere">to ' + esc(info.mailto.to) + '</div>';
-      info.bodyLinks.forEach((u) => { h += '<a class="btn" data-unsub-link="1" target="_blank" rel="noopener" href="' + esc(u) + '">Open link found in message</a><div class="note" style="overflow-wrap:anywhere">' + esc(host(u)) + '</div>'; });
-      if (!info.https.length && !info.mailto && !info.bodyLinks.length) h += '<div class="note">No unsubscribe option in this message. It may be from a real person. Move it to a folder or block the sender in Gmail instead.</div>';
+      const found = info.https.length || info.mailto || info.bodyLinks.length;
+      let h = '<div class="note">From <strong>' + esc(info.senderName || info.sender) + '</strong></div>';
+      if (info.https.length) h += '<a class="btn primary" data-unsub-link="1" target="_blank" rel="noopener" href="' + esc(info.https[0]) + '">Unsubscribe</a><div class="note" style="overflow-wrap:anywhere">Opens ' + esc(host(info.https[0])) + ' to finish' + (info.oneClick ? ". This sender supports one-click unsubscribe, but a page can't send that request, so you finish on their page." : ".") + '</div>';
+      if (info.mailto) h += '<button type="button" class="btn' + (info.https.length ? '' : ' primary') + '" id="unsubMailBtn" data-mut>Unsubscribe by email</button><div class="note" style="overflow-wrap:anywhere">Sends a request to ' + esc(info.mailto.to) + ' from your account. You confirm first.</div>';
+      if (!info.https.length && !info.mailto) info.bodyLinks.forEach((u, i) => { h += '<a class="btn' + (i ? '' : ' primary') + '" data-unsub-link="1" target="_blank" rel="noopener" href="' + esc(u) + '">' + (i ? 'Other unsubscribe link' : 'Unsubscribe') + '</a><div class="note" style="overflow-wrap:anywhere">Link found in the message: ' + esc(host(u)) + '</div>'; });
+      if (!found) h += '<div class="note">This message has no unsubscribe link or header. It may be from a real person.</div>'
+        + '<button type="button" class="btn primary" id="unsubJustArchive" data-mut>Archive</button>'
+        + (info.sender ? '<button type="button" class="btn" id="unsubRuleArchive" data-mut>Archive and add a rule for this sender</button><div class="note">The rule suggests archiving future mail from ' + esc(info.sender) + '. Matches wait in Review.</div>' : '');
+      $("unsubArchiveRow").hidden = !found;
       box.innerHTML = h;
     } catch (e) { box.innerHTML = '<div class="note err">' + esc(mcpCopy(e, GMAIL)) + '</div>'; }
+  }
+  const UNSUB_WORDS = /unsubscri|opt[\s_-]?out|manage (?:your )?(?:email |mail |subscription |communication )?(?:preferences|subscriptions|settings)|email (?:preferences|settings)|subscription (?:center|centre|preferences|settings)|update (?:your )?(?:email )?preferences|stop receiving|remove me/i;
+  function unsubLinksFromText(text) {
+    const t = String(text || ""); const out = [];
+    const re = /https?:\/\/[^\s<>)"'\]]+/g; let m;
+    while ((m = re.exec(t)) && out.length < 2) {
+      const u = m[0].replace(/[.,;]+$/, ""); const before = t.slice(Math.max(0, m.index - 90), m.index);
+      if ((/unsubscri|opt[-_]?out|email-?preferences|preference-?cent|subscriptions?\b/i.test(u) || UNSUB_WORDS.test(before.split(/\n\s*\n/).pop())) && !out.includes(u)) out.push(u);
+    }
+    return out;
+  }
+  function unsubLinksFromHtml(html) {
+    if (!html) return []; const out = [];
+    try {
+      const doc = new DOMParser().parseFromString(String(html), "text/html");
+      doc.querySelectorAll("a[href]").forEach((a) => {
+        const href = (a.getAttribute("href") || "").trim(); if (!/^https?:\/\//i.test(href) || out.includes(href) || out.length >= 2) return;
+        const label = (a.textContent || "") + " " + (a.getAttribute("title") || "") + " " + (a.getAttribute("aria-label") || "");
+        if (UNSUB_WORDS.test(label) || /unsubscri|opt[-_]?out|email-?preferences|preference-?cent/i.test(href)) out.push(href);
+      });
+    } catch {}
+    return out;
   }
   async function archiveById(id) {
     const who = senderOf(id);
@@ -1404,6 +1437,14 @@ body.ro [data-mut] { opacity: 0.4; }
   $("tabUnsub").addEventListener("click", () => setPopTab("unsub"));
   $("unsubBox").addEventListener("click", (ev) => {
     if (ev.target.closest("[data-unsub-link]")) { if ($("unsubArchive").checked && unsubInfo) { const id = unsubInfo.threadId; setTimeout(() => { closePop(); archiveById(id).catch((e) => toast(esc(mcpCopy(e, GMAIL)), "err", 6000)); }, 400); } return; }
+    if (ev.target.closest("#unsubJustArchive, #unsubRuleArchive") && unsubInfo) {
+      if (state.readOnly) { $("popNote").textContent = mcpCopy({ code: "read_only" }); return; }
+      const info = unsubInfo; const withRule = !!ev.target.closest("#unsubRuleArchive");
+      if (withRule && info.sender) { const r = loadRules(); if (!r.some((x) => x.from === info.sender && x.op === "archive")) { r.push({ id: "r" + Date.now().toString(36), text: "Email from " + (info.senderName || info.sender), from: info.sender, op: "archive" }); saveRules(r); } }
+      closePop();
+      archiveById(info.threadId).then(() => toast("Archived" + (withRule ? ", and added a rule for " + esc(info.sender) + ". Its matches wait in Review." : ".") + undoBtn(), "ok", 6000)).catch((e) => toast(esc(mcpCopy(e, GMAIL)), "err", 6000));
+      return;
+    }
     if (ev.target.closest("#unsubMailBtn") && unsubInfo && unsubInfo.mailto) { $("unsubConfirmText").textContent = "Send an unsubscribe email to " + unsubInfo.mailto.to + " from your account?"; $("unsubConfirm").hidden = false; }
   });
   $("unsubYes").addEventListener("click", sendUnsub);

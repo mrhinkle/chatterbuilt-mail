@@ -108,7 +108,7 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 
 **Move and copy.** **Move** above the thread (or `m`). Move a thread into a folder (or create one), or forward a copy to another account you own. Moves can be undone.
 
-**Unsubscribe.** Reads the sender's List-Unsubscribe header. It opens their unsubscribe page, or sends their unsubscribe email after you confirm. It can archive the thread afterward.
+**Unsubscribe.** **More → Unsubscribe** above the thread. It reads the sender's List-Unsubscribe header, then looks for an unsubscribe link in the text and in the formatted message. The panel leads with one button that does the job: **Unsubscribe** (opens their page), **Unsubscribe by email** (you confirm first), or, when there's nothing to unsubscribe from, **Archive** and **Archive and add a rule for this sender**. It can archive the thread afterward.
 
 **Unsubscribe sweep.** **Tools → Sweep**. Scans your inbox for bulk mail and groups it by sender with counts. Per sender you can:
 - unsubscribe;
