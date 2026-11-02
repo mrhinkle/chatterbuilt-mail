@@ -23,6 +23,14 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 - Gmail is required. If it isn't connected, tell the user to add it in claude.ai Settings, Connectors, and stop.
 - Note which optional connectors exist: Notion or another task app, a contacts app or CRM, Google Calendar, Clay, OpenRouter, Slack, and anything that knows about people the user emails (meeting notes such as Fireflies, a pipeline, newsletter lists such as Beehiiv, a memory system such as Cortex).
 
+## 1b. Native connectors or Composio
+
+Gmail must be the native claude.ai Gmail connector. Everything else (context, tasks, contacts, Route actions, More context) can use native connectors, Composio, or a mix. If the user has no preference and doesn't want to manage many connectors, suggest Composio (`docs/composio.md`). Through Composio:
+- every adapter is `{ server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", input: { tools: [{ tool_slug, arguments }], sync_response_to_workbench: false } }`;
+- find each action with Composio's tool search and read its full schema; never guess a slug or argument;
+- check that each app has an active connection in Composio and tell the user which to connect if not;
+- say plainly that `COMPOSIO_MULTI_EXECUTE_TOOL` can run any action on their connected apps, and offer native connectors for writes if they'd rather keep the page's permissions narrow.
+
 ## 2. Collect the basics (AskUserQuestion, skip what memory answered)
 
 - **Who they are:** `ownerName`, `ownEmail`, `about` (one or two sentences).

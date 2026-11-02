@@ -9,11 +9,14 @@ The quickest start is a single prompt: see [install.md](install.md). That page a
 ## Before you start
 
 - A claude.ai account with the **Gmail** connector added (Settings, Connectors).
-- Optional connectors, depending on what you want:
+- For everything else, either native connectors per app or one **Composio** connector that reaches them all ([composio.md](composio.md)). Composio is the easier path if you don't want to manage many connectors.
+- Optional apps, depending on what you want:
   - **Notion**, or another task app (Asana, Basecamp, Linear, Todoist...), for Tasks.
   - **Notion** or a CRM for Contacts, plus **Clay** if you want enrichment.
   - **Google Calendar** for open times in replies.
   - **OpenRouter** for models other than Claude.
+  - A **web search** tool (Firecrawl, Exa, Tavily, Perplexity) for More context.
+  - Meeting notes, a pipeline or CRM, newsletter lists and a memory system for the context panel.
 
 ## Path 1: fork the repo and back it with memory (recommended)
 

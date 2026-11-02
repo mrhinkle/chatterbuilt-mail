@@ -19,6 +19,8 @@ The page reaches your apps only through your claude.ai connectors, using your ow
 
 Declare only what your copy uses. The setup skill builds this list from your `CONFIG`.
 
+**Prefer one connector?** Everything except Gmail can go through [Composio](composio.md): context sources, tasks, contacts, Route actions and More context all accept `server: "Composio"` with the `COMPOSIO_MULTI_EXECUTE_TOOL` tool. The page unwraps Composio's replies and shows its errors.
+
 ## Tested connectors
 
 These were checked live, read-only, against a real account while building the hub features (November 2026). The shapes the page relies on came from those calls.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.4.1 (2026-11-02)
+
+### New
+- **Composio support.** Context sources, tasks, contacts, Route actions and More context can all run through one Composio connector. The page unwraps Composio's replies, so empty results show as "nothing found", and a failed action shows Composio's error instead of reporting success.
+- **Docs:** [composio.md](docs/composio.md), a docs index ([docs/README.md](docs/README.md)), updated starter prompts with a Composio option and a short version, and troubleshooting for the panel, More context and Composio.
+- **Screenshots and a demo video** ([docs/demo.md](docs/demo.md)), made with made-up data, and `scripts/demo/record.js` to record your own.
+
 ## 0.4.0 (2026-11-02)
 
 The interface from the wireframes.

@@ -8,6 +8,10 @@ It also does the email-client work: drafts in your voice, a check on every reply
 
 Nothing is sent, moved or filed without a click from you. Every AI suggestion waits for approval, and a read-only mode blocks changes outright.
 
+![Chatterbuilt Mail: a thread with context from your systems, a cited web lookup, suggested next steps, and the pre-send check](docs/images/presend.png)
+
+*A thread with context from your systems and the web beside it, suggested next steps, and the pre-send check catching a promised deck. Made-up data.* **[Watch the 30-second demo](docs/media/demo.mp4)** · [more screenshots](docs/demo.md)
+
 ## What it does
 
 | Area | Features |
@@ -33,13 +37,19 @@ Or pick the path that fits how you work. The full walkthrough is in [docs/gettin
 2. **No GitHub.** Save the template and skills to Google Drive, OneDrive or SharePoint, keep your email memory file next to them, and point Claude at that folder.
 3. **Just the plugin.** Install `chatterbuilt-mail.plugin` and say "Set up Chatterbuilt Mail."
 
-You need the Gmail connector in claude.ai (Settings, Connectors). Everything else is optional: any connector you want checked for context or routed to, Notion or another task app, a contacts app, Google Calendar, Clay and OpenRouter.
+You need the Gmail connector in claude.ai (Settings, Connectors). Everything else is optional, and you can connect it two ways:
+- **Native connectors**, one per app: Notion or another task app, a contacts app or CRM, Google Calendar, meeting notes, Slack, Clay, OpenRouter, a web search tool.
+- **One Composio connector** that reaches all of them. Suggested if you don't want to manage native connectors. See [docs/composio.md](docs/composio.md).
 
 ## Documentation
+
+The full index is [docs/README.md](docs/README.md).
 
 - [Why Chatterbuilt Mail](docs/why.md): what people want from AI email and don't get, and how this answers it
 - [Install with a prompt](docs/install.md): copy-paste setup prompts for Claude and ChatGPT, and what works where
 - [Getting started](docs/getting-started.md): fork and memory, Google Drive or Microsoft storage, plugin install
+- [Composio](docs/composio.md): every app through one connector
+- [Screenshots and demo video](docs/demo.md): desktop, phone, and how to record your own
 - [Features](docs/features.md): every feature, how to use it, what it touches
 - [Morning run](docs/morning-run.md): drafts in Gmail before you wake up, as a scheduled task
 - [Configuration](docs/configuration.md): every `CONFIG` setting
@@ -68,7 +78,8 @@ skills/email-voice-profile/        voice profile skill
 memory/EMAIL-MEMORY.example.md     template for your email memory file
 examples/config.example.js         a filled-in CONFIG to copy from
 scripts/build.py                   builds your page from the template + your CONFIG
-docs/                              documentation
+scripts/demo/                      records the screenshots and demo video with made-up data
+docs/                              documentation (images/ and media/ hold the screenshots and video)
 CLAUDE.md                          tells Claude how to work in your fork
 ```
 

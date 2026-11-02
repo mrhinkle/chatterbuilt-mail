@@ -886,7 +886,19 @@ body.ro [data-mut] { opacity: 0.4; }
     if (!state.mcp) throw { code: "not_granted", message: "mcp unavailable" };
     if (state.readOnly && MUTATING.has(tool)) throw { code: "read_only", server: server, message: "read-only mode" };
     const r = await state.mcp.callTool(server, tool, input, opts);
-    return r && r.payload !== undefined ? r.payload : r;
+    const p = r && r.payload !== undefined ? r.payload : r;
+    return tool === "COMPOSIO_MULTI_EXECUTE_TOOL" ? unwrapComposio(p) : p;
+  }
+  // Composio's multi-execute wraps each tool: { successful, data: { results: [{ response: { successful, data, error } }] } }.
+  // Hand back the inner data (so "nothing found" checks work) and turn a failed inner call into an error the page shows.
+  function unwrapComposio(p) {
+    if (!p || typeof p !== "object") return p;
+    const rs = p.data && Array.isArray(p.data.results) ? p.data.results : null;
+    if (!rs) { if (p.successful === false) throw { code: "tool_error", message: String(p.error || "the Composio call failed").slice(0, 240) }; return p; }
+    const bad = rs.find((x) => x && ((x.response && x.response.successful === false) || x.error));
+    if (bad) throw { code: "tool_error", message: String((bad.response && (bad.response.error || bad.response.message)) || bad.error || "the Composio call failed").slice(0, 240) };
+    const out = rs.map((x) => (x && x.response && x.response.data !== undefined ? x.response.data : x));
+    return out.length === 1 ? out[0] : out;
   }
   function showBanner(text, cls) { const b = $("banner"); b.hidden = !text; b.textContent = text || ""; b.className = "banner " + (cls || ""); }
 

@@ -4,7 +4,7 @@ Paste one of these prompts into a new chat, fill in the `<…>` parts, and the a
 
 They don't install the same thing.
 
-- **Claude** gets the full app: an inbox you click through, the context card, Route, the review queue, undo, snooze, and the morning run. It runs as a Claude artifact. The page calls your connectors and Claude from inside it, and only Claude offers that.
+- **Claude** gets the full app: an inbox you click through, the context panel, More context, Route and Next steps, Today, the review queue, undo, snooze, and the morning run. It runs as a Claude artifact. The page calls your connectors and Claude from inside it, and only Claude offers that.
 - **ChatGPT** gets the same triage approach as a chat workflow. It covers triage, briefings from your other systems, drafts in your voice, the pre-send check, routing suggestions and a morning task. There's no inbox app, and what it can do in Gmail is limited by ChatGPT's Gmail connector.
 
 ## What works where
@@ -12,7 +12,8 @@ They don't install the same thing.
 | | Claude | ChatGPT |
 |---|---|---|
 | Inbox app with one-click actions, review queue, undo | Yes | No, chat only |
-| Context from your other systems | Automatic card on every thread | When you ask, using the connectors you've turned on |
+| Context from your other systems | Automatic panel beside every thread | When you ask, using the connectors you've turned on |
+| Web lookups on a person and company | **More context**, cited, when you press it | When you ask, if web search is on |
 | Drafts in your voice, three options | Yes | Yes |
 | Pre-send check | Automatic on Send | When you ask ("check this") |
 | Send | One click, with a confirmation | One email at a time, with your approval [1][5] |
@@ -29,27 +30,37 @@ ChatGPT's connectors change often. The ChatGPT details above come from third-par
 ## Claude
 
 **Before you start:**
-- Connect Gmail in claude.ai (Settings, Connectors).
-- Connect anything else you want it to check or route to: Google Calendar, Notion, Fireflies, Slack, your CRM, your task app.
+- Connect **Gmail** in claude.ai (Settings, Connectors). It's the one connector that must be native.
+- For everything else, pick one:
+  - **Native connectors**: add each app you want checked or routed to (Google Calendar, Notion, Fireflies, Slack, your CRM, your task app).
+  - **Composio** (suggested if you don't want to manage a stack of connectors): add the one Composio connector, then connect your apps inside Composio. See [composio.md](composio.md).
 - Optionally, fork this repo and fill in `memory/EMAIL-MEMORY.md` ([getting-started.md](getting-started.md)).
 
-**The prompt:**
+**The starter prompt:**
 
 ```text
-Install Chatterbuilt Mail for me. It's an open source Gmail triage hub that runs as my own private Claude artifact: https://github.com/mrhinkle/chatterbuilt-mail (Apache 2.0).
+Install Chatterbuilt Mail for me: an open source Gmail triage hub that runs as my own private Claude artifact. Repo: https://github.com/mrhinkle/chatterbuilt-mail (Apache 2.0).
 
-1. Get it. If the chatterbuilt-mail plugin or its chatterbuilt-mail-setup skill is installed, use that. Otherwise clone or fetch the repo and read CLAUDE.md and skills/chatterbuilt-mail-setup/SKILL.md. If you can't reach GitHub, say so and I'll attach the repo as a zip.
-2. Follow the setup skill step by step. If I have an email memory file (memory/EMAIL-MEMORY.md in my fork, or one I attach), read it first.
+1. Get it. If the chatterbuilt-mail plugin or its chatterbuilt-mail-setup skill is installed, use that. Otherwise clone or fetch the repo, read CLAUDE.md and skills/chatterbuilt-mail-setup/SKILL.md, and follow the skill step by step. If you can't reach GitHub, say so and I'll attach the repo as a zip.
+2. Memory: if I have an email memory file (memory/EMAIL-MEMORY.md in my fork, or one I attach), read it first and ask only about gaps.
 3. About me: <name>, <Gmail address>. <One or two sentences on what I do.>
-4. Voice: <a line on how I write, or "learn it from my sent mail">. Sign-off: <how I sign>. Hard rules: <words I never use, spelling>.
-5. Tasks go to: <app and list, or "none">. Contacts go to: <app, or "none">.
-6. When I open an email, check these for context: <meeting notes, calendar, notes, pipeline, CRM, newsletter list, memory system>.
-7. Route actions: <for example "hand off to my assistant <name> as a Slack draft", or "none">.
-8. Never send, move, label, file or save anything as a test. Read-only calls only.
-9. Publish it as my artifact. Tell me what you checked live and what stays unverified until I use it. Then offer to set up the morning run.
+4. Voice: <how I write, or "learn it from my sent mail">. Sign-off: <sign-off>. Never use: <words>. <Spelling or other rules.>
+5. Connections: Gmail is native. For everything else use <"my native connectors" | "Composio" | "Composio for lookups, native connectors for anything that writes">.
+6. Tasks go to: <app and list, or "none">. Contacts go to: <app, or "none">.
+7. Context: when I open an email, check <meeting notes, calendar, notes, pipeline, CRM, newsletter list, memory system>.
+8. More context: look people and companies up on the web with <a search tool, for example "Firecrawl through Composio", or "skip">.
+9. Route actions: <for example "hand off to my assistant <name> in Slack", or "none">.
+10. Never send, move, label, file or save anything as a test. Read-only calls only.
+11. Publish it as my artifact. Tell me what you checked live, what stays unverified until I use it, and anything I still need to connect. Then offer to set up the morning run.
 ```
 
 Leave out any line you don't need. The setup skill asks about anything it can't work out from your connectors or memory file.
+
+**The short version**, if you'd rather answer questions as it goes:
+
+```text
+Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Gmail is native; use Composio for everything else. Read my email memory file if I have one, ask me only what you can't find, and never send, move or file anything as a test.
+```
 
 **If you already have the plugin:** say *"Set up Chatterbuilt Mail."*
 

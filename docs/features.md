@@ -1,6 +1,8 @@
 # Features
 
-Every feature can be switched off in **Settings → Skills**, and its buttons disappear. The table at the end lists what each feature touches.
+Every feature can be switched off in **Settings → Skills**, and its buttons disappear. The table at the end lists what each feature touches. To see it first, look at the [screenshots and demo video](demo.md).
+
+![The main window: thread list, a thread, and the context panel](images/context-panel.png)
 
 ## Where things are
 
