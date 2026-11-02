@@ -2,6 +2,10 @@
 
 ## Nothing happens without a click
 
+![Read-only mode: the dark Read-only on button in the top bar, and a notice that nothing changed](images/readonly.webp)
+
+*Read-only mode on, after pressing Archive. Screenshots use made-up data.*
+
 - **Sending.** Send always shows a confirmation. With the pre-send check on, that confirmation includes the check's findings. Forwarding and unsubscribe-by-email confirm too.
 - **Moving.** Archives and folder moves you suggest by hand happen on your click and can be undone. Moves suggested by AI (triage, rules) wait in **Review** until you apply them.
 - **Rules.** Rules never act on their own, even when they check new mail automatically. Matches go to Review.
@@ -10,6 +14,10 @@
 - **Route.** Suggested actions are ticked, never applied. Each one runs only when you press Apply selected.
 - **Snooze and remind-me** are Gmail labels you set. The app and the morning run bring threads back; nothing is deleted.
 - **Morning run.** It can only create Gmail drafts and change its own `CB/` labels. It never sends, archives, deletes or writes to another system. See [morning-run.md](morning-run.md).
+- **Review** holds every AI-suggested archive and move until you apply it, and Undo puts them back:
+
+  ![The Review queue: four suggested moves, each ticked, with Apply selected and Discard all](images/review.webp)
+
 - **Read-only mode** blocks every send, label change, draft, forward, task, contact, snooze and Route action at the code level. Every call that could change something is refused while it's on.
 
 ## What goes where

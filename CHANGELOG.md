@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.4.3 (2026-11-02)
+
+### New
+- **A guide for every feature area, with screenshots:** [Today](docs/today.md), [Reading and triage](docs/reading-and-triage.md), [More context](docs/more-context.md), [Route and next steps](docs/route-and-next-steps.md), [Replying](docs/replying.md), [Voice](docs/voice.md), [Following up](docs/following-up.md), [Organizing](docs/organizing.md), [Tasks and contacts](docs/tasks-and-contacts.md), [Settings and shortcuts](docs/settings-and-shortcuts.md) and [Phone](docs/phone.md). Each one says what the feature reads, writes and sends to the AI.
+- **45 screenshots** (made-up data) across the docs, and a full gallery in [docs/demo.md](docs/demo.md). Screenshots are WebP, about a third the size of PNG.
+- `scripts/demo/screenshots.js` recaptures every screenshot; `scripts/demo/fake.js` holds the shared made-up data for it and the video.
+
+### Fixed
+- **Empty context results showed as "found something."** A source that returned an object with only empty lists, like a meeting-notes search with `{ "transcripts": [] }`, got a purple chip instead of a grey one. Empty now covers any object whose lists are all empty.
+
+### Docs
+- features.md now matches the code on Undo (also star, mark read, snooze and sweep Archive all), rule actions (star and mark read too), rules checking the inbox by default, the five-action minimum for suggested rules, the Waiting window, the sweep's unsubscribe sources, the full keyboard list and when the Model picker shows.
+
 ## 0.4.2 (2026-11-02)
 
 ### New

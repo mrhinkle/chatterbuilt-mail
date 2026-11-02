@@ -10,7 +10,7 @@ It also does the email-client work: drafts in your voice, a check on every reply
 
 Nothing is sent, moved or filed without a click from you. Every AI suggestion waits for approval, and a read-only mode blocks changes outright.
 
-![Chatterbuilt Mail: a thread with context from your systems, a cited web lookup, suggested next steps, and the pre-send check](docs/images/presend.png)
+![Chatterbuilt Mail: a thread with context from your systems, a cited web lookup, suggested next steps, and the pre-send check](docs/images/presend.webp)
 
 *A thread with context from your systems and the web beside it, suggested next steps, and the pre-send check catching a promised deck. Made-up data.* **[Watch the 30-second demo](docs/media/demo.mp4)** · [more screenshots](docs/demo.md)
 
@@ -45,21 +45,25 @@ You need the Gmail connector in claude.ai (Settings, Connectors). Everything els
 
 ## Documentation
 
-The full index is [docs/README.md](docs/README.md).
+The full index is [docs/README.md](docs/README.md). Every guide has screenshots.
 
-- [Why Chatterbuilt Mail](docs/why.md): what people want from AI email and don't get, and how this answers it
-- [Install with a prompt](docs/install.md): copy-paste setup prompts for Claude and ChatGPT, and what works where
-- [Getting started](docs/getting-started.md): fork and memory, Google Drive or Microsoft storage, plugin install
-- [Composio](docs/composio.md): every app through one connector
+**Set up:** [install with a prompt](docs/install.md) · [getting started](docs/getting-started.md) · [Composio](docs/composio.md) · [connectors](docs/connectors.md) · [configuration](docs/configuration.md) · [morning run](docs/morning-run.md)
+
+**Use it:**
+- [Today](docs/today.md): drafts waiting, what needs you, your next meeting
+- [Reading and triage](docs/reading-and-triage.md): the list, Triage, Summarize, Ask, Formatted view
 - [The context panel](docs/context-panel.md): the brief from your systems on every thread, and why it's the core of the app
-- [Screenshots and demo video](docs/demo.md): desktop, phone, and how to record your own
-- [Features](docs/features.md): every feature, how to use it, what it touches
-- [Morning run](docs/morning-run.md): drafts in Gmail before you wake up, as a scheduled task
-- [Configuration](docs/configuration.md): every `CONFIG` setting
-- [Connectors and permissions](docs/connectors.md): which connectors do what, which were tested, context sources, Route actions, any task manager or CRM
-- [Self-improving](docs/self-improving.md): how it learns from you and how lessons become permanent
-- [Safety and privacy](docs/safety-and-privacy.md): what is sent where, what needs a click, read-only mode
-- [Troubleshooting](docs/troubleshooting.md)
+- [More context](docs/more-context.md): a cited web lookup, only when you press it
+- [Route and next steps](docs/route-and-next-steps.md): send a thread to your task app, Slack, contacts or a reminder
+- [Replying](docs/replying.md): drafts, open times, 3 options, Pre-draft, the pre-send check
+- [Voice](docs/voice.md): your voice, per-recipient tone, snippets
+- [Following up](docs/following-up.md): Waiting, Nudge, Snooze, Remind me
+- [Organizing](docs/organizing.md): move, copy, unsubscribe, sweep, rules, Review and Undo
+- [Tasks and contacts](docs/tasks-and-contacts.md)
+- [Settings and shortcuts](docs/settings-and-shortcuts.md)
+- [Phone](docs/phone.md)
+
+**Reference:** [features](docs/features.md) · [self-improving](docs/self-improving.md) · [safety and privacy](docs/safety-and-privacy.md) · [troubleshooting](docs/troubleshooting.md) · [screenshots and video](docs/demo.md) · [why Chatterbuilt Mail](docs/why.md)
 
 ## Skills in this plugin
 

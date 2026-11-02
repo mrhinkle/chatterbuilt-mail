@@ -2,7 +2,24 @@
 
 Every feature can be switched off in **Settings → Skills**, and its buttons disappear. The table at the end lists what each feature touches. To see it first, look at the [screenshots and demo video](demo.md).
 
-![The main window: thread list, a thread, and the context panel](images/context-panel.png)
+This page is the reference. Each area also has a guide with screenshots:
+
+| Guide | Covers |
+|---|---|
+| [Today](today.md) | The start-of-day view: drafts waiting, what needs you, the next meeting |
+| [Reading and triage](reading-and-triage.md) | The list, Triage, Summarize, Ask, Formatted view |
+| [The context panel](context-panel.md) | The brief from your systems on every thread |
+| [More context](more-context.md) | The cited web lookup |
+| [Route and next steps](route-and-next-steps.md) | Sending a thread to your other systems |
+| [Replying](replying.md) | Drafts, 3 options, Pre-draft, open times, the pre-send check |
+| [Voice](voice.md) | Your voice prompt, per-recipient tone, snippets |
+| [Following up](following-up.md) | Waiting, Nudge, Snooze, Remind me |
+| [Organizing](organizing.md) | Move, copy, unsubscribe, sweep, rules, Review and Undo |
+| [Tasks and contacts](tasks-and-contacts.md) | Filing tasks, adding contacts |
+| [Settings and shortcuts](settings-and-shortcuts.md) | Skills, read-only, models, keyboard, the command palette |
+| [Phone](phone.md) | The tab bar, the thumb-reach action bar, bottom sheets |
+
+![The main window: thread list, a thread, and the context panel](images/context-panel.webp)
 
 ## Where things are
 
@@ -19,6 +36,10 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 
 ## Reading
 
+Guide: [reading-and-triage.md](reading-and-triage.md).
+
+![After Triage: Needs you, Worth reading and FYI](images/triage.webp)
+
 **Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box and press Enter (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads. The list shows 25 at a time; scroll to the end, or press **Load older mail**, for the next batch.
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
@@ -33,6 +54,10 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 **Formatted view.** **More → Formatted view** above the thread shows a message with its links, lists and tables. Scripts, styles, forms, images (including tracking pixels) and `javascript:` links are stripped first, links open in a new tab, and quoted history folds away. Plain text is the default.
 
 ## Connecting your systems
+
+Guides: [context-panel.md](context-panel.md), [more-context.md](more-context.md), [route-and-next-steps.md](route-and-next-steps.md).
+
+![Route: suggested actions with their text written, ticked for you to apply](images/route.webp)
 
 This is what sets Chatterbuilt Mail apart from email clients with AI added: each thread is checked against the rest of your systems, and routed back out to them. Why it matters: [why.md](why.md).
 
@@ -66,6 +91,10 @@ Drafts and the pre-send check use the card. Turn off **Context** under *Draft wi
 Suggested actions are ticked. Edit any field, untick what you don't want, then **Apply selected**. Each action shows *done* or the reason it failed. Nothing runs until you apply, and read-only mode blocks it.
 
 ## Replying
+
+Guides: [replying.md](replying.md), [voice.md](voice.md).
+
+![3 options: Best fit, Shorter and Polite no](images/options.webp)
 
 **One-click intents.** Say yes, Decline, Ask a question, Offer a call, Follow up later. Or type an instruction ("yes, but only if we can do it in December") and press Draft.
 
@@ -103,7 +132,11 @@ It offers a corrected version you can take, or you can send anyway. If the check
 
 ## Following up
 
-**Waiting.** A tab listing sent emails where you had the last word and nobody has answered after N days (3 by default; change it above the list while the Waiting tab is open). Oldest is listed first, with a *waiting 6d* tag.
+Guide: [following-up.md](following-up.md).
+
+![The Waiting tab: sent mail nobody has answered, oldest first](images/waiting.webp)
+
+**Waiting.** A tab listing sent emails where you had the last word and nobody has answered after N days (3 by default; change it above the list while the Waiting tab is open). Oldest is listed first, with a *waiting 6d* tag. It checks your 50 most recent sent threads from the last 30 days, or four times the day setting if that's longer.
 - Open one and press **Nudge** for a short, friendly follow-up.
 - Sending goes to the people you wrote to, threaded under your last message.
 - **3 options** gives a nudge, a shorter nudge, and a graceful "happy to drop this."
@@ -118,6 +151,10 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 
 ## Organizing
 
+Guide: [organizing.md](organizing.md).
+
+![The Review queue: suggested moves waiting for your OK](images/review.webp)
+
 **Move and copy.** **Move** above the thread (or `m`). Move a thread into a folder (or create one), or forward a copy to another account you own. Moves can be undone.
 
 **Unsubscribe.** **More → Unsubscribe** above the thread. It reads the sender's List-Unsubscribe header, then looks for an unsubscribe link in the text and in the formatted message. The panel leads with one button that does the job: **Unsubscribe** (opens their page), **Unsubscribe by email** (you confirm first), or, when there's nothing to unsubscribe from, **Archive** and **Archive and add a rule for this sender**. It can archive the thread afterward.
@@ -125,6 +162,8 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 **Unsubscribe sweep.** **Tools → Sweep**. Scans your inbox for bulk mail and groups it by sender with counts. Per sender you can:
 - unsubscribe;
 - **Archive all**, which takes up to 100 threads out of the inbox after a confirm click and can be undone.
+
+The sweep's Unsubscribe uses the List-Unsubscribe header and links in the plain text. If it finds nothing for a sender, open one of their emails and use **More → Unsubscribe**, which also checks the formatted message.
 
 **Review queue.** **Tools → Review**. Every archive or move suggested by triage or rules waits here.
 - Untick what you want left alone, then press **Apply selected**.
@@ -135,13 +174,19 @@ Both are plain Gmail labels (`CB/Snooze/2026-11-05`, `CB/Remind/2026-11-05`), so
 - **Plain-English rules** ("receipts, invoices and payment confirmations", then move to Finance). AI matches them.
 - **Sender rules**, which match an address or company domain exactly, with no AI involved.
 
-Rules never act on their own. *Run rules* sends matches to Review. With *Check the inbox against my rules each time it loads* on, they run quietly whenever the inbox loads, and matches show up as a badge on Tools and Review.
+A rule can move to a folder, archive, star or mark read.
 
-**Suggested rules.** The app watches what you do by hand. Move or archive three emails from the same sender (or four from the same company) the same way, and it offers to make it a rule: *Add rule* or *Not now*. **Suggest rules from my history** asks the AI for broader patterns across your recent actions.
+Rules never act on their own. *Run rules* sends matches to Review. With *Check the inbox against my rules each time it loads* on (the default), they run quietly whenever the inbox loads, and matches show up as a badge on Tools and Review.
 
-**Undo.** `z` or the Undo button on a toast reverses the last archive, move, star or review batch. Sent mail can't be unsent.
+**Suggested rules.** The app watches what you do by hand. Move or archive three emails from the same sender (or four from the same company) the same way, and it offers to make it a rule: *Add rule* or *Not now*. **Suggest rules from my history** asks the AI for broader patterns across your recent actions. It needs at least five actions on file first.
+
+**Undo.** `z` or the Undo button on a toast reverses the last archive, move, star, mark read, snooze, review batch or sweep Archive all. Sent mail can't be unsent.
 
 ## Capturing
+
+Guide: [tasks-and-contacts.md](tasks-and-contacts.md).
+
+![Add contact, filled in from the signature, with how you met](images/contact.webp)
 
 **Tasks.** Drag a thread or a single message onto **Tasks** in the top bar, press **Task** above the thread, or press `t`.
 - The task gets the subject, sender, a link back to Gmail, and the message quoted.
@@ -156,6 +201,10 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 
 ## Learning and voice
 
+Guides: [voice.md](voice.md), [self-improving.md](self-improving.md).
+
+![Settings → Voice: a voice guide trained from sent mail](images/voice.webp)
+
 **Voice.** Three ways to set how drafts sound:
 - type or paste a voice prompt;
 - **point to a prompt**: paste a Notion page link (the output of a voice trainer, a style guide, your brand voice page) and drafts follow it;
@@ -165,6 +214,10 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 
 ## Control
 
+Guide: [settings-and-shortcuts.md](settings-and-shortcuts.md).
+
+![The command palette](images/palette.webp)
+
 **Skills.** Every feature with a description and how to use it, an on/off switch for each, keyboard shortcuts, safety notes, and links to these docs.
 
 **Keyboard.**
@@ -172,8 +225,9 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 | Key | Action |
 |---|---|
 | `j` / `k` | Next / previous thread |
+| `Enter` | Open the selected thread |
 | `e` | Archive |
-| `s` | Star |
+| `s` | Star or unstar |
 | `m` | Move |
 | `t` | Task |
 | `c` | Contact |
@@ -182,14 +236,25 @@ Rules never act on their own. *Run rules* sends matches to Review. With *Check t
 | `r` | Reply box |
 | `/` | Search |
 | `z` | Undo |
-| `?` | Help |
 | `⌘K` / `Ctrl K` | Command palette (every action, searchable) |
+| `?` | This list (opens Skills at Keyboard) |
+| `Esc` | Close a menu or dialog |
+
+**Model.** Claude drafts by default. If `CONFIG.models` lists other models (through OpenRouter), a **Model** picker appears in Settings; with none listed, it stays hidden.
 
 **Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, nothing can be sent, moved, labeled, drafted, filed or saved. Reading, summaries, triage, Ask and drafting on the page still work.
 
 **Phones.** One pane at a time, with a tab bar at the bottom of the list: **Today, Inbox, Waiting, Tools**. In a thread, the actions sit in a bar at the bottom, in thumb reach: **Archive, Snooze, Route, Reply, More**. Reply jumps to the reply box, and the bar hides while you type. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
 
 ## Layout
+
+Phone guide: [phone.md](phone.md).
+
+<p>
+<img src="images/phone-inbox.webp" alt="Phone: the list with the tab bar" width="220">
+<img src="images/phone-thread.webp" alt="Phone: a thread with context and the action bar" width="220">
+<img src="images/phone-more.webp" alt="Phone: the More sheet" width="220">
+</p>
 
 Why it's arranged this way, and the guidance behind it:
 

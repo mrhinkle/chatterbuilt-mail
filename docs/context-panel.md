@@ -4,7 +4,7 @@ When you open a thread, Chatterbuilt Mail checks every system you've connected f
 
 This is the feature the rest of the app is built around. The brief also feeds the draft, the pre-send check, Route and the morning run, so the whole app knows what you know.
 
-![The context panel beside a thread](images/context-panel.png)
+![The context panel beside a thread](images/context-panel.webp)
 
 ## Why it matters
 
@@ -14,7 +14,7 @@ What makes it worth trusting:
 
 - **It runs on its own.** You don't ask; it's there when the thread opens. Every source runs in parallel, so one slow system doesn't hold up the rest.
 - **Every line shows its source.** Each line ends in a tag like `[Meetings]` or `[Pipeline]`. If something looks wrong, you know where to look.
-- **It shows what came back empty.** Grey chips are systems that found nothing, and red chips are ones that failed (hover for the reason). "Not in the pipeline" is useful to know, and you can tell it apart from "the pipeline didn't answer."
+- **It shows what came back empty.** Purple chips are systems that returned something, grey chips found nothing, and red chips failed (hover for the reason). "Not in the pipeline" is useful to know, and you can tell it apart from "the pipeline didn't answer."
 - **It doesn't mix people up.** A search for "Acme" can turn up a different Acme, or a different person with the same name. The brief is told never to merge a match like that into this person: it either leaves it out or says plainly that nothing links it to this thread.
 - **It says what's missing.** If the reply needs a fact no source has, the brief says so rather than guessing.
 - **Your sources, your queries.** Any read-only connector tool can be a source, including your own: a sponsor pipeline in Notion, a newsletter subscriber list, a memory system. For each one you choose what to search with (their email, name or company) and how tightly. See [connectors.md](connectors.md#context-sources).
@@ -25,18 +25,11 @@ The names and details below are made up.
 
 ### A receipt that needs nothing from you
 
-An automated payment confirmation from a software vendor. Six systems checked:
+An automated payment confirmation from a software vendor. Five systems checked:
 
-> **CONTEXT · billing@notify.cloudway.example**
->
-> FROM YOUR SYSTEMS
-> - This is an automated payment confirmation from Cloudway for invoice CW-2026-1142, addressed to Rivera Labs, with the invoice PDF attached. No reply is needed. `Email`
-> - Meetings, the sponsor pipeline and Contacts have nothing on Cloudway: no meetings, no open commitments, no action items for Alex. `Meetings`
-> - The only Cloudway match in Notes is a sponsor-lead page from September naming a Cloudway contact. It's a sales lead, not a billing record, and nothing links it to this invoice. `Notes`
-> - Nothing says what the invoice was for (probably a subscription). If you need it for bookkeeping, file the PDF with your records. `Notes`
-> - Your reply rules don't cover receipts or automated notices. `Notes`
->
-> Chips: **Meetings** · Calendar · **Notes** · **Pipeline** · **Contacts** · Memory *(bold: returned something; plain: nothing found)*
+![The context panel on a vendor's payment confirmation: no reply needed, nothing in meetings or the pipeline, an unrelated sponsor lead flagged as unrelated](images/receipt-context.webp)
+
+The chips at the bottom: Meetings, Notes and Pipeline returned something (purple), and Calendar and Memory came back empty (grey). What came back from Meetings and Pipeline wasn't about this vendor, and the brief says so rather than using it.
 
 What to notice:
 - The first line answers the real question: does this need a reply? No.
@@ -56,7 +49,7 @@ Dana at Acme Robotics asks to lock the gold package and set up a call. The brief
 
 Now draft a quick "yes." The **pre-send check** reads the reply against the thread and this brief before it sends. It catches that you promised the deck on the last call and the reply doesn't mention it, then offers a version that does.
 
-![The pre-send check catching a promised deck](images/presend.png)
+![The pre-send check catching a promised deck](images/presend.webp)
 
 That's the loop: your meeting notes caught a promise, the brief put it in front of you, and the check made sure the reply kept it.
 

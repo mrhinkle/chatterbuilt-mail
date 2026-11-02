@@ -9,7 +9,11 @@ The morning run is Chatterbuilt Mail's background half. Each weekday morning, as
 5. lists who owes you a reply;
 6. pushes a short summary to your phone.
 
-Everything lands in Gmail, so it's useful even if you never open the app. When you do open the app, threads with a waiting draft show **draft in Gmail**. One click loads the draft, and sending replaces it.
+Everything lands in Gmail, so it's useful even if you never open the app. When you do open the app, threads with a waiting draft show **draft in Gmail**, and [Today](today.md) lists them under **Drafts waiting in Gmail**. One click loads the draft, and sending replaces it.
+
+![Today, with a draft waiting in Gmail for Lee Park's venue walkthrough](images/today.webp)
+
+*Made-up data.*
 
 ## What it will and won't do
 

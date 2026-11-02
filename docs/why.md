@@ -2,6 +2,10 @@
 
 Most AI email tools are email clients with AI added: they sort, they draft, they summarize. Chatterbuilt Mail is a **triage hub**. Every thread is checked against the rest of your systems and routed back out to them, under your approval.
 
+![A thread with the context panel beside it: what your systems know about the person, with a source on every line](images/context-panel.webp)
+
+*Made-up data. More in [context-panel.md](context-panel.md).*
+
 ## What people say they want and don't get
 
 From public threads and reviews in 2026:

@@ -26,7 +26,7 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 | Key | What it is |
 |---|---|
 | `defaultModel` | `"claude"` (built in, no setup), or a value from `models` |
-| `models` | Extra models through the OpenRouter connector: `[{ value: "provider/model-slug", label: "Name" }]`. The setup skill looks up real slugs with OpenRouter's `list-models`; don't guess them. |
+| `models` | Extra models through the OpenRouter connector: `[{ value: "provider/model-slug", label: "Name" }]`. The setup skill looks up real slugs with OpenRouter's `list-models`; don't guess them. The **Model** picker in Settings appears only when this list isn't empty. |
 
 ## Tasks and contacts
 
@@ -56,6 +56,11 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 | `waitingDays` | `3` | Days without an answer before a sent email shows under Waiting |
 
 ## Rules and features
+
+`features` sets the defaults for the switches in **Settings → Skills**, where each person can still turn features on and off:
+
+![The Skills picker: every feature with a description, an on/off switch and how to use it](images/skills.webp)
+
 
 | Key | What it is |
 |---|---|

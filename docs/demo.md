@@ -1,57 +1,128 @@
 # Screenshots and demo video
 
-Every image and the video on this page use made-up people and companies (Alex Rivera at Rivera Labs, Dana Ruiz at Acme Robotics). No real inbox, connector or account was touched to make them.
+Every image and the video here use made-up people and companies: Alex Rivera at Rivera Labs, Dana Ruiz at Acme Robotics, Jordan Blake at the makerspace. No real inbox, connector or account was touched to make them. The demo copy reaches everything except Gmail through [Composio](composio.md).
 
-**Video:** [demo.mp4](media/demo.mp4), about 30 seconds: Today, Triage, the context panel, More context, Next steps and Route, a draft, and the pre-send check catching a forgotten promise.
+**Video:** [demo.mp4](media/demo.mp4), about 30 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, and the pre-send check catching a forgotten promise.
 
-## Desktop
+Each section links to its guide.
 
-**Today.** What you see before you open a thread: drafts waiting in Gmail, what needs you, who owes you a reply, and your next meeting.
+## Start of day · [today.md](today.md)
 
-![Today view](images/today.png)
+| | |
+|---|---|
+| ![Today](images/today.webp) | ![Today after Triage](images/today-triaged.webp) |
+| Today: drafts waiting in Gmail, Needs you, Waiting on others, the next meeting | After Triage: what needs you, and suggestions in Review |
 
-**Triage.** The list grouped into Needs you, Worth reading and FYI, with a reason on each thread. Archive and move suggestions wait in Review (the badge on Tools).
+## Reading · [reading-and-triage.md](reading-and-triage.md)
 
-![Triage](images/triage.png)
+| | |
+|---|---|
+| ![Triage](images/triage.webp) | ![Summarize](images/summarize.webp) |
+| Triage groups the list into Needs you, Worth reading and FYI | Summarize: where it stands, then the asks |
+| ![Ask your inbox](images/ask.webp) | ![Formatted view](images/formatted.webp) |
+| Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Formatted view, with scripts and tracking pixels removed |
+| ![Ask in the search box](images/ask-mode.webp) | ![Tools menu](images/tools-menu.webp) |
+| The Ask switch in the search box | Tools: Review, Pre-draft, Rules, Sweep, Ask |
 
-**Context panel.** Open a thread and the panel beside it shows what your systems know about the person, each line tagged with its source. Chips show which systems found something.
+## Context · [context-panel.md](context-panel.md) · [more-context.md](more-context.md)
 
-![Context panel](images/context-panel.png)
+| | |
+|---|---|
+| ![Context panel](images/context-panel.webp) | ![Receipt context](images/receipt-context.webp) |
+| A sponsor: what you owe, pipeline status, how you met | A vendor receipt: no reply needed, an unrelated match flagged as unrelated |
+| ![More context](images/more-context.webp) | |
+| More context: a cited web lookup, only when you press it | |
 
-**More context.** A cited public-web lookup, run only when you press it, kept in its own box.
+## Routing · [route-and-next-steps.md](route-and-next-steps.md)
 
-![More context](images/more-context.png)
+| | |
+|---|---|
+| ![Next steps](images/next-steps.webp) | ![Route](images/route.webp) |
+| Next steps in the panel: a task, a Slack handoff, a reminder | Route: edit, untick, then Apply selected |
 
-**Route.** Next steps opens Route with the suggestions filled in: a task, a Slack handoff, a remind-me. Nothing runs until you apply.
+## Replying · [replying.md](replying.md) · [voice.md](voice.md)
 
-![Route](images/route.png)
+| | |
+|---|---|
+| ![Draft](images/draft.webp) | ![3 options](images/options.webp) |
+| A draft that used your tone with this person and the brief | 3 options: Best fit, Shorter, Polite no |
+| ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
+| Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
+| ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |
+| Pre-draft: options ready for every thread that needs a reply | Snippets |
+| ![Voice](images/voice.webp) | ![Lessons](images/lessons.webp) |
+| Voice: trained from your sent mail | Lessons learned from your edits |
 
-**Draft.** A reply in your voice that uses what the panel found.
+## Following up · [following-up.md](following-up.md)
 
-![Draft](images/draft.png)
+| | |
+|---|---|
+| ![Waiting](images/waiting.webp) | ![Nudge](images/nudge.webp) |
+| Waiting: sent mail nobody has answered | Nudge: a short follow-up, ready to send |
+| ![Snooze](images/snooze.webp) | |
+| Snooze or remind me if no reply | |
 
-**Pre-send check.** Rereads the reply against the thread and your systems before it goes. Here it catches the deck promised on the last call.
+## Organizing · [organizing.md](organizing.md)
 
-![Pre-send check](images/presend.png)
+| | |
+|---|---|
+| ![Review](images/review.webp) | ![Rules](images/rules.webp) |
+| Review: AI suggestions wait for your OK | Rules: plain-English, and suggested from what you do |
+| ![Move](images/move.webp) | ![Copy](images/copy.webp) |
+| Move to a folder | Copy to another account |
+| ![Unsubscribe](images/unsubscribe.webp) | ![Sweep](images/sweep.webp) |
+| Unsubscribe from the header link | The unsubscribe sweep, grouped by sender |
 
-## Phone
+## Tasks and contacts · [tasks-and-contacts.md](tasks-and-contacts.md)
+
+| | |
+|---|---|
+| ![Task](images/task.webp) | ![Contact](images/contact.webp) |
+| A task filed in Asana, with a link | Add contact, filled in from the signature |
+
+## Settings · [settings-and-shortcuts.md](settings-and-shortcuts.md)
+
+| | |
+|---|---|
+| ![Settings](images/settings.webp) | ![Skills](images/skills.webp) |
+| The Settings menu | Skills: switch any feature off |
+| ![Commands](images/palette.webp) | ![Read-only](images/readonly.webp) |
+| The command palette (⌘K) | Read-only mode blocks every change |
+| ![More menu](images/thread-more.webp) | |
+| More, above a thread | |
+
+## Phone · [phone.md](phone.md)
 
 <p>
-<img src="images/phone-inbox.png" alt="Phone inbox" width="260">
-<img src="images/phone-thread.png" alt="Phone thread with context" width="260">
-<img src="images/phone-today.png" alt="Phone Today view" width="260">
+<img src="images/phone-inbox.webp" alt="Phone inbox" width="220">
+<img src="images/phone-today.webp" alt="Phone Today" width="220">
+<img src="images/phone-thread.webp" alt="Phone thread with context" width="220">
+<img src="images/phone-draft.webp" alt="Phone reply box with a draft" width="220">
 </p>
-
-Inbox with the tab bar, a thread with context at the top and the thumb-zone action bar, and Today.
+<p>
+<img src="images/phone-more.webp" alt="Phone More sheet" width="220">
+<img src="images/phone-tools.webp" alt="Phone Tools sheet" width="220">
+<img src="images/phone-review.webp" alt="Phone Review sheet" width="220">
+<img src="images/phone-contact.webp" alt="Phone Add contact sheet" width="220">
+</p>
 
 ## Make your own
 
-The recorder builds the page from the template with a fictional config, fakes every connector inside the browser, and clicks through the app.
+Two scripts build the page from the template with a made-up config, fake every connector and Claude inside the browser, and click through the app.
 
 ```bash
-node scripts/demo/record.js demo-out
+node scripts/demo/screenshots.js demo-out/screens    # every screenshot on this page
+node scripts/demo/screenshots.js docs/images         # refresh the docs' screenshots (PNG; convert to WebP)
+node scripts/demo/screenshots.js demo-out/screens route,presend   # just these
+node scripts/demo/record.js demo-out                 # the video
 ```
 
-It needs Node with Playwright and Chromium, Python 3, and ffmpeg for the video. It writes the screenshots, the frames and `demo.mp4` to `demo-out/` (ignored by git). Edit `scripts/demo/demo.config.js` to change the made-up owner and connectors, or the fake data at the top of `record.js` to change the threads.
+They need Node with Playwright and Chromium, Python 3, and ffmpeg for the video. `demo-out/` is ignored by git. The made-up owner and connectors are in `scripts/demo/demo.config.js`. The threads, context and AI replies are in `scripts/demo/fake.js`.
+
+The docs use WebP at quality 90, about a third the size of PNG. To convert:
+
+```bash
+python3 -c "import sys;from PIL import Image;[Image.open(f).convert('RGB').save(f[:-4]+'.webp','WEBP',quality=90,method=6) for f in sys.argv[1:]]" demo-out/screens/*.png
+```
 
 To record your real inbox for a talk or a private walkthrough, use a screen recorder on your own computer with the artifact open in claude.ai. Don't commit those: they show real mail.

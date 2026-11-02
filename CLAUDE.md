@@ -13,3 +13,4 @@ This repo is a Chatterbuilt Mail plugin, or someone's fork of it.
 - **Don't edit the template for one person.** Personal changes go in `my/config.js`. Template changes are for everyone, so upstream them.
 - **Never test by acting.** Don't send, move, forward, label, file a task or save a contact as a test. Read-only calls are fine.
 - Docs are in `docs/`. Keep them in step with any template change.
+- **Screenshots.** After a UI change, run `node scripts/demo/screenshots.js demo-out/screens`, convert to WebP (see `docs/demo.md`) and replace the matching files in `docs/images/`. They use made-up data from `scripts/demo/fake.js`. Never commit screenshots of real mail.

@@ -2,6 +2,10 @@
 
 Chatterbuilt Mail learns from the corrections you already make: how you change its drafts, what you turn down, and what you file by hand. It writes that up as short lessons and rules you can read and edit. Nothing is a black box, and nothing acts on its own.
 
+![Settings → Voice after Learn now: three edited drafts and one turned-down suggestion became lessons under DRAFTING and TRIAGE](images/lessons.webp)
+
+*Settings → Voice, after **Learn now**. Made-up data.*
+
 ## What it notices
 
 | Signal | Where it comes from | What it's used for |

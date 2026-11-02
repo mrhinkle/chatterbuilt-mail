@@ -74,10 +74,14 @@ What you give up without a repo: version history and an easy way to pull upstrea
 
 ## After setup
 
+![The app on first open: the list on the left and Today on the right](images/today.webp)
+
+*Made-up data.*
+
 - Open the artifact from your claude.ai artifacts list. The first time each connector is used, claude.ai asks for your OK.
 - Open **Settings → Skills** at the top to see every feature and turn off what you don't need.
 - Turn on **Read-only** for a careful first look; nothing can change in Gmail while it's on.
-- Open a thread from someone you know well. The context card shows what your other systems know about them. Press **Route** to see where it would send the thread.
+- Open a thread from someone you know well. The [context panel](context-panel.md) shows what your other systems know about them. Press **Route** to see where it would send the thread.
 - Press a reply button to see a draft in your voice.
 - When you trust the drafts, set up the [morning run](morning-run.md) so they're waiting in Gmail each morning.
 

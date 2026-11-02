@@ -71,7 +71,7 @@ These are the argument names those connectors took in November 2026. Connectors 
 
 **How results are used:**
 - Each source has 15 seconds. A slow or failing one shows as a red chip and the rest carry on.
-- Empty results (`[]`, `{}`, "No results", "No entity") show as grey chips and aren't sent to the AI.
+- Empty results show as grey chips and aren't sent to the AI. Empty means `[]`, `{}`, "No results", "No entity", or an object whose lists are all empty, like `{ "transcripts": [], "total": 0 }`.
 - The rest are trimmed (long text cut, calendar links, meeting URLs, HTML bodies and similar dropped) and sent to the AI, which writes the card. It's told to ignore matches that aren't about this person, their company or the thread, never to merge a lookalike match into this person, and to say what's missing when the reply needs something no source has. More in [context-panel.md](context-panel.md).
 - Results are cached for five minutes. **Refresh** on the card runs them again.
 
@@ -100,7 +100,7 @@ lookup: [
 | `{{name}}`, `{{org}}`, `{{domain}}`, `{{email}}` | As for context sources |
 
 **Things to know:**
-- **Cost.** Each press runs each entry once. Search providers charge per search or per result; Firecrawl used 2 credits for a 3-result search when tested. Results are cached for an hour.
+- **Cost.** Each press runs each entry once. Search providers charge per search or per result; Firecrawl used 2 credits for a 3-result search when tested. Results are cached for an hour. Each lookup gets 45 seconds (context sources get 15).
 - **Privacy.** The person's name, company and domain go to the search provider. Nothing from the email itself does.
 - **Composio.** Declaring `COMPOSIO_MULTI_EXECUTE_TOOL` lets the page call any action your Composio account can run, though it only calls the search you configure. A connector that only searches (Exa, Perplexity or Tavily's own) keeps the page's permissions narrower.
 - The results are untrusted text from the web. The prompt tells the model to treat them as data, and they only reach a draft when you switch on **Web context**.

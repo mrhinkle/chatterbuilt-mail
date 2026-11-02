@@ -2529,7 +2529,19 @@ body.ro [data-mut] { opacity: 0.4; }
     const org = FREE_MAIL.test(domain) ? "" : (parts.length >= 3 && /^(co|com|org|net|ac|gov|edu)$/.test(parts[parts.length - 2]) ? parts[parts.length - 3] : (parts[parts.length - 2] || ""));
     return { email: email, name: name, who: name || email, domain: domain, org: org, orgOrEmail: org || email, subject: cleanSubject(last.subject), today: ymd(Date.now()), since90: ymd(Date.now() - 90 * 864e5) };
   }
-  const nothingFound = (p) => { if (p == null) return true; if (typeof p === "string") return !p.trim() || /^no (entity|results?|matches?)/i.test(p.trim()); const s = JSON.stringify(p); return s === "{}" || s === "[]" || /"(results|events|subscriptions|threads|items)":\[\]/.test(s) && s.length < 160; };
+  // Empty means no records: "", "No results", {}, [], or an object whose lists are all empty and whose other fields are
+  // only counts, flags or short strings (e.g. {transcripts: [], total: 0}). Such results show as grey chips.
+  const nothingFound = (p) => {
+    if (p == null) return true;
+    if (typeof p === "string") return !p.trim() || /^no (entity|entities|results?|matches?|records?|transcripts?|meetings?)/i.test(p.trim());
+    if (Array.isArray(p)) return p.length === 0;
+    const s = JSON.stringify(p); if (s === "{}" || s === "[]") return true;
+    if (typeof p === "object") {
+      const vals = Object.values(p); const lists = vals.filter(Array.isArray);
+      if (lists.length && lists.every((a) => a.length === 0) && vals.every((v) => Array.isArray(v) || v == null || typeof v === "number" || typeof v === "boolean" || (typeof v === "string" && v.length < 60))) return true;
+    }
+    return /"(results|events|subscriptions|threads|items|transcripts|pages|records|contacts|entities|matches|web)":\[\]/.test(s) && s.length < 160;
+  };
   state.web = {}; state.steps = {};
   const wideMQ = window.matchMedia("(min-width: 1180px)");
   const panelOn = () => featOn("context") || featOn("more") || featOn("route");

@@ -4,6 +4,10 @@ Chatterbuilt Mail reaches your apps through claude.ai connectors. You can add a 
 
 **Suggested if you don't want to manage a stack of native connectors.** You connect each app once inside Composio, and Chatterbuilt Mail sees all of them through a single claude.ai connector.
 
+Every screenshot in these docs comes from a demo copy set up this way: Gmail native, and context, tasks, contacts, Route actions and More context all through Composio.
+
+![The context panel and a cited web lookup, all through one Composio connector](images/more-context.webp)
+
 ## What stays native
 
 | Part | Connector | Why |
