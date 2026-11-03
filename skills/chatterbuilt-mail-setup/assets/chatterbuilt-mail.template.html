@@ -367,8 +367,18 @@ body:not(.thread-open) .headtog { display: none; }
 .compose .row.first input.custom { flex: 1 1 auto; }
 .compose .ctog { padding-inline: 7px; }
 .compose .ctog .chev, #replyMenuBtn .chev { transition: transform 0.15s; }
-.compose.folded .ctog .chev { transform: rotate(180deg); }
-.compose.folded > :not(.first) { display: none !important; }
+.compose.folded .chead .chev { transform: rotate(180deg); }
+/* The reply box's header: the whole bar opens and closes it. */
+.compose .chead { display: flex; align-items: center; gap: 8px; width: 100%; margin: -2px 0 0; padding: 3px 2px; border: 0; border-radius: 4px; background: none; color: var(--muted); font: inherit; text-align: left; cursor: pointer; }
+.compose .chead:hover { background: var(--hover); color: var(--fg); }
+.compose .chead .cht { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.compose .chead .chto { flex: 1 1 auto; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.compose .chead .chev { flex: none; transition: transform 0.15s; }
+/* With the reply box open, the thread and the reply are one page with one scrollbar, not a frame inside a frame. */
+.desk:has(.compose:not([hidden]):not(.folded)) { overflow-y: auto; }
+.desk:has(.compose:not([hidden]):not(.folded)) > .deskhead { position: sticky; top: 0; z-index: 4; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
+.desk:has(.compose:not([hidden]):not(.folded)) .reading { flex: none; overflow: visible; }
+.compose.folded > :not(.first):not(.chead) { display: none !important; }
 .compose.folded { padding-block: 8px; }
 .compose .row.iter { gap: 4px; }
 .compose .row.iter .lbl { margin-right: 2px; }
@@ -384,7 +394,7 @@ body:not(.thread-open) .headtog { display: none; }
 .tog:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
 .tog select { padding: 1px 4px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; font-size: 12px; }
 .lbl { font-size: 11px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-right: 2px; }
-.compose textarea { width: 100%; min-height: 130px; resize: vertical; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--field); line-height: 1.55; font-size: 14px; box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04); }
+.compose textarea { width: 100%; min-height: 130px; resize: none; overflow-y: hidden; field-sizing: content; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--field); line-height: 1.55; font-size: 14px; box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04); }
 .compose input.custom { flex: 1 1 180px; min-width: 0; padding: 7px 11px; border: 1px solid var(--line); border-radius: 10px; background: var(--field); font-size: 13px; }
 .variants { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .variants .v { border: 1px solid var(--line); background: rgba(255, 255, 255, 0.8); border-radius: 999px; padding: 4px 12px; font-size: 12px; font-weight: 550; }
@@ -723,12 +733,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         </div>
       </div>
       <div class="compose" id="compose" hidden>
+        <button type="button" class="chead" id="composeTog" aria-controls="compose" aria-expanded="true" title="Fold the reply box"><span class="cht">Reply</span><span class="chto" id="composeHeadTo"></span><svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         <div class="row first">
           <button type="button" class="btn sm mbtn" id="replyMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="replyMenu" title="Say yes, decline, ask, offer a call, follow up, or three options">Reply<svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
           <input class="custom" id="custom" type="text" placeholder="Tell it what to say: 'yes, but only if we can do it in December'" aria-label="What the reply should say, or what to change">
           <button class="btn sm primary" id="customBtn" type="button">Draft</button>
           <button class="btn sm ghost" id="stopBtn" type="button" hidden>Stop</button>
-          <button type="button" class="btn sm ghost ctog" id="composeTog" aria-controls="compose" aria-expanded="true" aria-label="Reply box" title="Fold the reply box"><svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
         <div class="variants" id="variants" hidden></div>
         <div class="row iter" id="iterRow" aria-label="Revise the draft" hidden>
@@ -1881,7 +1891,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         + ((m.attachments && m.attachments.length) ? '<div class="att">' + m.attachments.map((a, ai) => '<button type="button" class="attbtn" data-attm="' + esc(m.id) + '" data-atti="' + ai + '" title="Open ' + esc(a.filename || "attachment") + '">' + esc(a.filename || a.mimeType || "attachment") + '</button>').join("") + '</div>' : "")
         + '</article>';
     }).join("");
-    compose.hidden = false; setCompose(ls.get("cm.composeOpen") === "1", false); updateToLine();
+    compose.hidden = false; $("desk").scrollTop = 0; setCompose(ls.get("cm.composeOpen") === "1", false); updateToLine();
     $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = ""; resetSigRow(); resetFrom();
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
@@ -2153,6 +2163,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const seen = new Set(); const names = [];
     to.forEach((a) => { const e = emailOf(a).toLowerCase(); if (!e || isMe(e) || seen.has(e)) return; seen.add(e); const n = nameOf(a); names.push(n && !n.includes("@") ? n : e); });
     el.textContent = names.length ? "To " + names.join(", ") : ""; el.title = [...seen].join(", ");
+    const h = $("composeHeadTo"); if (h) { h.textContent = names.length ? "to " + names.join(", ") : ""; h.title = el.title; }
   }
   function renderRcpt(k) {
     const box = document.querySelector('.rbox[data-rk="' + k + '"]'); if (!box) return; const inp = $(k + "In");
@@ -2283,7 +2294,14 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   // Fold the thread actions, and the reply box (to one line of reply buttons), to give the message room.
   function setHeadFold(on, persist) { $("desk").classList.toggle("headfold", on); const b = $("headTog"); b.setAttribute("aria-expanded", String(!on)); b.title = on ? "Show the thread actions" : "Hide the thread actions"; if (persist) ls.set("cm.headFold", on ? "1" : "0"); }
-  function setCompose(open, persist) { compose.classList.toggle("folded", !open); const b = $("composeTog"); b.setAttribute("aria-expanded", String(open)); b.title = open ? "Fold the reply box" : "Open the reply box"; $("writeBtn").hidden = open; if (persist) ls.set("cm.composeOpen", open ? "1" : "0"); }
+  function setCompose(open, persist) {
+    compose.classList.toggle("folded", !open); const b = $("composeTog"); b.setAttribute("aria-expanded", String(open)); b.title = open ? "Fold the reply box" : "Open the reply box"; $("writeBtn").hidden = open; if (persist) ls.set("cm.composeOpen", open ? "1" : "0");
+    if (open) growBody(); else $("desk").scrollTop = 0;
+  }
+  // The reply text box grows to fit what's in it, whether you type it or a draft fills it in. Browsers with CSS
+  // field-sizing do it on their own; elsewhere the height follows the content here.
+  function growBody() { const ta = $("body"); if (!ta || (window.CSS && CSS.supports && CSS.supports("field-sizing", "content"))) return; ta.style.height = "auto"; ta.style.height = Math.max(130, ta.scrollHeight + 2) + "px"; }
+  (function () { const ta = $("body"), d = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, "value"); if (!ta || !d) return; Object.defineProperty(ta, "value", { configurable: true, get() { return d.get.call(this); }, set(v) { d.set.call(this, v); growBody(); } }); ta.addEventListener("input", growBody); })();
   const openCompose = () => { if (compose.classList.contains("folded")) setCompose(true, false); };
   function clearDesk(word) { state.selectedId = null; state.thread = null; app.dataset.view = "list"; $("acts").hidden = true; document.body.classList.remove("thread-open"); compose.hidden = true; showSide(false); renderToday(word); }
 

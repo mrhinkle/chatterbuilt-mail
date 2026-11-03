@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.8 (2026-11-03)
+
+### Changed
+- **The reply box is an expandable section.** A **Reply** header (with who it's to) opens and closes it with a click anywhere on it. Open, it opens all the way: the thread and the reply scroll together as one page instead of the thread shrinking into its own small scrolling frame, and the text box grows with what you write instead of scrolling inside itself. Folded, it's docked under the thread as before.
+
 ## 0.6.7 (2026-11-03)
 
 ### New
