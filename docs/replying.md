@@ -112,6 +112,8 @@ Read-only mode blocks Save draft and Send. Nothing is sent without your confirma
 
 ## Related
 
+- [Drafts](drafts.md): go through every Gmail draft one at a time, with a rich-text editor and a review checklist
+
 - [Voice](voice.md): your voice prompt, per-recipient tone, snippets
 - [The context panel](context-panel.md): where the brief comes from
 - [Following up](following-up.md): Nudge, Waiting, Remind me

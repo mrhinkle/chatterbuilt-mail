@@ -54,6 +54,8 @@ Each section links to its guide.
 | The Reply menu over the folded reply box | Revising the draft in the box, with Undo |
 | ![Row menu](images/row-menu.webp) | ![Cc and Bcc](images/cc-bcc.webp) |
 | Right-click a row for every thread action | Cc and Bcc, with suggestions from your address book |
+| ![Drafts](images/drafts.webp) | ![Select several](images/select.webp) |
+| The Drafts tab: a checklist of drafts, a rich-text editor and the review checklist | Pick several threads and move them at once |
 | ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
 | Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
 | ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |

@@ -26,13 +26,15 @@ So I built Chatterbuilt Mail to triage my own email. It's a private Claude artif
 
 **It routes the work.** **Route** is the "OK, now what?" button. It reads the thread and what your systems know, then suggests where the thread should go: a task in your task app, a handoff to your assistant in Slack, a new contact, a snooze, or a reminder if nobody answers. Each suggestion shows up with the text already written. You edit what you want, untick what you don't, and press **Apply selected**. Nothing moves until you do. Out of the box it can message anyone in Slack (as a draft you send), and you add your own actions by describing them: *"hand off scheduling to my assistant in Slack"*, *"log sponsor emails in HubSpot."* → [Route and next steps](docs/route-and-next-steps.md)
 
+**It clears your drafts.** The **Drafts** tab lines up every Gmail draft (the morning run's, the ones you worked out in chat, the ones you forgot) and walks you through them one at a time: the message it answers on top, a rich-text editor, a *Before you send* checklist the AI can tick for you, and Save, Send or Next. The list is a checklist too, so you can see how many you've gotten through. → [Drafts](docs/drafts.md)
+
 **It writes like you.** Drafts come out in your voice, matched to how you write to each person, with open times from your calendar when someone wants to meet. **3 options** gives you a best fit, a shorter one and a polite no. Add people on **Cc** or **Bcc** with suggestions from your threads and your address book. → [Replying](docs/replying.md)
 
 **It catches you before you hit Send.** The pre-send check rereads your reply against the thread and your systems. Forgot the deck you promised? Wrong date? Reply-all on something you shouldn't? It flags it and offers a fix. → [The pre-send check](docs/replying.md#the-pre-send-check)
 
 **It works while you sleep.** The morning run checks your systems each weekday and leaves reply drafts in Gmail before you're up. → [Morning run](docs/morning-run.md)
 
-**It cleans up.** Plain-English rules, an unsubscribe sweep, folder moves, and a review queue with undo for anything the AI suggests. → [Organizing](docs/organizing.md)
+**It cleans up.** Pick a handful of threads and move them into a folder in one go. Plain-English rules, an unsubscribe sweep, and a review queue with undo for anything the AI suggests. → [Organizing](docs/organizing.md)
 
 ## Train it to sound like you
 
@@ -80,7 +82,7 @@ The full index is [docs/README.md](docs/README.md). Every guide has screenshots.
 
 **Set up:** [install with a prompt](docs/install.md) · [getting started](docs/getting-started.md) · [Composio](docs/composio.md) · [connectors](docs/connectors.md) · [configuration](docs/configuration.md) · [morning run](docs/morning-run.md)
 
-**Use it:** [Today](docs/today.md) · [reading and triage](docs/reading-and-triage.md) · [the context panel](docs/context-panel.md) · [More context](docs/more-context.md) · [Route and next steps](docs/route-and-next-steps.md) · [replying](docs/replying.md) · [voice](docs/voice.md) · [following up](docs/following-up.md) · [organizing](docs/organizing.md) · [tasks and contacts](docs/tasks-and-contacts.md) · [settings and shortcuts](docs/settings-and-shortcuts.md) · [phone](docs/phone.md)
+**Use it:** [Today](docs/today.md) · [reading and triage](docs/reading-and-triage.md) · [drafts](docs/drafts.md) · [the context panel](docs/context-panel.md) · [More context](docs/more-context.md) · [Route and next steps](docs/route-and-next-steps.md) · [replying](docs/replying.md) · [voice](docs/voice.md) · [following up](docs/following-up.md) · [organizing](docs/organizing.md) · [tasks and contacts](docs/tasks-and-contacts.md) · [settings and shortcuts](docs/settings-and-shortcuts.md) · [phone](docs/phone.md)
 
 **Reference:** [features](docs/features.md) · [self-improving](docs/self-improving.md) · [safety and privacy](docs/safety-and-privacy.md) · [troubleshooting](docs/troubleshooting.md) · [screenshots and video](docs/demo.md) · [why Chatterbuilt Mail](docs/why.md)
 

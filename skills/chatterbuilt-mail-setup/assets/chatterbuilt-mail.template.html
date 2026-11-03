@@ -490,9 +490,8 @@ body:not(.thread-open) .headtog { display: none; }
 .glass { box-shadow: none; border-color: var(--line-2); }
 .glass-strong { box-shadow: var(--shadow-lg); border-color: var(--line-2); }
 .main { gap: 8px; }
-.thread { border-radius: 4px; }
-.thread.sel { box-shadow: none; }
-.thread.acc.sel { box-shadow: inset 4px 0 0 var(--acc); }
+.thread { border-radius: 0; box-shadow: inset 0 -1px 0 var(--line); }
+.thread.sel, .thread.acc, .thread.acc.sel { box-shadow: none; } /* account rows keep only their light tint: no stripe, no shadow */
 .msg, .summary, .ctx, .answer, .banner, .confirmbox, .mlist, .step, .webbox, .today .tcard, .morectx, .attview .attstage, .compose textarea { border-radius: 6px; box-shadow: none; }
 .btn, .chips, .chip, .search input, .compose input.custom, .taskdrop, .pop .tabs, .pop .tabs button, .pop input[type=text], .pop input[type=search], .pop .opts, .rowbar, .rowbar .ra, .mbtn, .lsb, .nx, .appicon { border-radius: 5px; }
 .menu, .pop, .modal { border-radius: 8px; }
@@ -501,6 +500,46 @@ body:not(.thread-open) .headtog { display: none; }
 .rowbar { box-shadow: none; border: 1px solid var(--line-2); }
 .thread.sel .rowbar { border-color: transparent; }
 .rtadd { margin-top: 12px; } .rtadd summary { cursor: pointer; } .rtadd .mrow { margin-top: 8px; }
+/* Select several threads: a box on each row (on hover, or always once something is picked) and a bar over the list */
+.thread .rsel { position: absolute; left: 3px; top: 8px; width: 20px; height: 20px; display: none; place-items: center; z-index: 1; cursor: pointer; }
+.thread .rsel input { width: 14px; height: 14px; margin: 0; cursor: pointer; }
+.thread:hover .rsel, .thread:focus-within .rsel, #list.selecting .thread .rsel { display: grid; }
+.thread:hover::before, #list.selecting .thread::before { visibility: hidden; }
+.thread.picked:not(.sel) { background-color: var(--accent-soft); }
+.selbar { position: sticky; top: 0; z-index: 3; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 8px 10px; background: #ffffff; border-bottom: 1px solid var(--line-2); }
+.selbar .sn { font-weight: 650; font-size: 13px; margin-right: 4px; }
+.pop.multi .tabs { display: none; }
+@media (hover: none) { #list.selecting .thread .rsel { width: 30px; height: 30px; } }
+/* Drafts: a checklist of drafts on the left, one draft at a time on the right */
+.dprog { font-size: 11.5px; letter-spacing: 0; text-transform: none; font-weight: 600; color: var(--muted); }
+.dbar { height: 3px; margin: 0 10px 6px; border-radius: 2px; background: var(--line); overflow: hidden; } .dbar span { display: block; height: 100%; background: var(--ok); }
+.thread.draftrow { padding-left: 34px; }
+.draftrow .dchk { position: absolute; left: 6px; top: 8px; width: 24px; height: 24px; display: grid; place-items: center; cursor: pointer; }
+.draftrow .dchk input { width: 15px; height: 15px; margin: 0; cursor: pointer; }
+.draftrow.done .subj, .draftrow.done .from { opacity: 0.55; } .draftrow.done .subj { text-decoration: line-through; }
+body.drafts-mode #triageBtn { visibility: hidden; }
+@media (max-width: 860px) { body.drafts-mode .phonebar { display: none !important; } }
+.dedit { padding: 16px 20px 28px; display: flex; flex-direction: column; gap: 12px; max-width: 860px; }
+.dctx { border: 1px solid var(--line); border-left: 3px solid var(--violet); border-radius: 6px; background: var(--field); padding: 8px 12px; font-size: 13px; }
+.dctx summary { cursor: pointer; color: var(--muted); }
+.dctx .body { white-space: pre-wrap; margin-top: 6px; max-height: 220px; overflow: auto; }
+.dfields { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 13px; }
+.dfields span { color: var(--muted); font-weight: 600; font-size: 12px; }
+.dfields input { width: 100%; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+.rtbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; background: var(--hover); }
+.rtbar button { min-width: 30px; height: 28px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; color: var(--fg); font-size: 13px; }
+.rtbar button:hover, .rtbar button.on { background: var(--glass-strong); }
+.rte { min-height: 220px; max-height: 52vh; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--line); border-radius: 0 0 6px 6px; background: var(--field); line-height: 1.55; font-size: 14px; outline: none; overflow-wrap: anywhere; }
+.rte:focus { border-color: rgba(37, 99, 235, 0.5); }
+.rte p { margin: 0 0 0.7em; } .rte ul, .rte ol { margin: 0 0 0.7em; padding-left: 1.4em; }
+.rte .gmail_signature, .rte [data-smartmail] { color: var(--muted); }
+.dlink { display: flex; gap: 6px; } .dlink input { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+.dcheck { border: 1px solid var(--line); border-radius: 6px; background: var(--field); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+.dcheck .dchead { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 650; font-size: 13px; }
+.dcheck label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
+.dcheck label input { margin-top: 2px; } .dcheck .dn { display: block; font-size: 12px; color: var(--muted); } .dcheck .dn.warn { color: var(--warm); }
+.dfoot { position: sticky; bottom: 0; background: var(--glass-strong); padding: 8px 0; flex-wrap: wrap; }
+
 /* Cc and Bcc */
 .rcpts { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
 .rcpts .rto { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -607,6 +646,7 @@ body:not(.thread-open) .headtog { display: none; }
           <button class="chip on" data-q="in:inbox" data-key="inbox" type="button">Inbox</button>
           <button class="chip" data-q="in:inbox is:unread" data-key="unread" type="button">Unread</button>
           <button class="chip" data-q="in:sent" data-key="waiting" data-mode="waiting" data-feat="waiting" type="button" title="Sent mail nobody has answered yet">Waiting</button>
+          <button class="chip" data-q="in:drafts" data-key="drafts" data-mode="drafts" data-feat="drafts" type="button" title="Your Gmail drafts, one at a time, with a review checklist">Drafts</button>
           <button class="chip" data-q="in:inbox category:primary" data-key="primary" type="button">Primary</button>
           <button class="chip" data-q="is:starred" data-key="starred" type="button">Starred</button>
           <button class="chip" data-q="in:inbox has:attachment" data-key="files" type="button">Files</button>
@@ -900,7 +940,7 @@ body:not(.thread-open) .headtog { display: none; }
   if (!CONFIG.models.length) document.body.classList.add("no-model-pick");
   const $ = (id) => document.getElementById(id);
   const app = $("app"), list = $("list"), reading = $("reading"), compose = $("compose"), taskdrop = $("taskdrop");
-  const state = { mcp: null, query: "in:inbox", key: "inbox", threads: [], nextToken: null, selectedId: null, thread: null, triage: {}, preview: {}, previewRun: 0, sending: false, ctl: null, loadToken: 0, model: CONFIG.defaultModel || "claude", llmOk: true, notionOk: true, mode: "normal", age: {}, variants: {}, aiDraft: {}, queue: [], undo: [], readOnly: false, waitDays: CONFIG.waitingDays || 3 };
+  const state = { picked: new Set(), mcp: null, query: "in:inbox", key: "inbox", threads: [], nextToken: null, selectedId: null, thread: null, triage: {}, preview: {}, previewRun: 0, sending: false, ctl: null, loadToken: 0, model: CONFIG.defaultModel || "claude", llmOk: true, notionOk: true, mode: "normal", age: {}, variants: {}, aiDraft: {}, queue: [], undo: [], readOnly: false, waitDays: CONFIG.waitingDays || 3 };
 
   // ---------- helpers ----------
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -958,7 +998,7 @@ body:not(.thread-open) .headtog { display: none; }
   }
 
   // ---------- read-only ----------
-  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "forward", "create_label", "notion-create-pages", "delete_draft"]);
+  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "update_draft", "forward", "create_label", "notion-create-pages", "delete_draft"]);
   function setRO(on, persist) {
     state.readOnly = !!on; document.body.classList.toggle("ro", state.readOnly);
     $("roToggle").setAttribute("aria-checked", String(state.readOnly)); $("roPill").hidden = !state.readOnly;
@@ -1386,10 +1426,15 @@ body:not(.thread-open) .headtog { display: none; }
         }) };
       }
       case "get_draft": {
-        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: "full" }, opts, true, A);
+        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: input.messageFormat === "MINIMAL" ? "metadata" : "full" }, opts, true, A);
         const o = gxNorm(d.message || {}, true, A); return Object.assign({}, o, { id: d.id || input.draftId, messageId: o.id });
       }
       case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false, A);
+      case "update_draft": {
+        const to = [].concat(input.to || []);
+        // Composio keeps what's left out; the body is HTML, already carrying any signature, so none is added.
+        return gx("GMAIL_UPDATE_DRAFT", { draft_id: input.draftId, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.htmlBody || input.body, is_html: !!input.htmlBody, thread_id: input.threadId, include_signature: false }, opts, false, A);
+      }
       case "create_draft": {
         gxNoAtt(input);
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
@@ -1398,6 +1443,7 @@ body:not(.thread-open) .headtog { display: none; }
         return { id: did, threadId: tid, viewUrl: gxGmailUrl(A, "drafts") };
       }
       case "send_message": {
+        if (input.draftId) return gx("GMAIL_SEND_DRAFT", { draft_id: input.draftId }, opts, false, A);
         gxNoAtt(input);
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
         if (tid) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
@@ -1469,6 +1515,7 @@ body:not(.thread-open) .headtog { display: none; }
     unsub: '<circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/>',
     open: '<path d="M4 12h12M12 8l4 4-4 4"/><path d="M20 5v14"/>',
     reply: '<path d="M9.5 7 4.5 12l5 5"/><path d="M5 12h9a5.5 5.5 0 0 1 5.5 5.5V19"/>',
+    select: '<rect x="4" y="4" width="16" height="16" rx="3"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
     gmail: '<path d="M14 5h5v5"/><path d="m19 5-8 8"/><path d="M17 14v4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H10"/>'
   };
   const raSvg = (k) => '<svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + RA_ICON[k] + '</svg>';
@@ -1480,7 +1527,8 @@ body:not(.thread-open) .headtog { display: none; }
       featOn("route") && ["route", "Route…", "o", true], featOn("tasks") && taskAdapter() && ["task", "Create task", "t", true], featOn("contacts") && ["contact", "Add contact", "c", true],
       lab.includes("STARRED") ? ["unstar", "Unstar", "s", true] : ["star", "Star", "s", true],
       lab.includes("UNREAD") ? ["read", "Mark read", "", true] : ["unread", "Mark unread", "", true],
-      featOn("unsub") && ["unsub", "Unsubscribe…", "", false]
+      featOn("unsub") && ["unsub", "Unsubscribe…", "", false],
+      ["select", state.picked && state.picked.has(t.id) ? "Deselect" : "Select", "x", false]
     ].filter(Boolean);
   }
   const ROWBAR = ["archive", "move", "route", "task", "contact"];
@@ -1530,6 +1578,7 @@ body:not(.thread-open) .headtog { display: none; }
     return "";
   }
   function renderList() {
+    if (state.mode === "drafts") return renderDrafts();
     if (!state.threads.length) {
       list.innerHTML = state.mode === "waiting"
         ? '<div class="empty"><h2>Nobody owes you a reply</h2><p>Nothing you sent recently has gone ' + esc(state.waitDays) + '+ days without an answer.</p></div>'
@@ -1548,7 +1597,9 @@ body:not(.thread-open) .headtog { display: none; }
         + (vs && vs.length ? '<span class="pill drafted">drafted</span>' : "")
         + (state.draftMap && state.draftMap[t.id] ? '<span class="pill drafted">draft in Gmail</span>' : "")
         + (tri ? '<span class="pill ' + esc(tri.priority) + '">' + esc(tri.priority) + '</span><span class="why">' + esc(tri.why) + '</span>' + nextChip(t, tri.next) : "");
-      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + (tri && tri.next ? " has-nx" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
+      const picked = state.picked.has(t.id);
+      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + (tri && tri.next ? " has-nx" : "") + (picked ? " picked" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
+        + (state.mode === "waiting" ? "" : '<label class="rsel" title="Select (x). Shift-click selects a range."><input type="checkbox" data-pick="' + esc(t.id) + '"' + (picked ? " checked" : "") + ' aria-label="Select ' + esc(who) + '"></label>')
         + '<span class="from">' + esc(who) + '</span>'
         + '<span class="when">' + esc(fmtDate(m.date)) + '</span>'
         + rowBar(t)
@@ -1563,7 +1614,9 @@ body:not(.thread-open) .headtog { display: none; }
       const groups = [["reply", "Needs you"], ["read", "Worth reading"], ["skip", "FYI"], ["", "Not sorted yet"]];
       rowsHtml = groups.map(([k, label]) => { const ts = state.threads.filter((t) => { const p = (state.triage[t.id] || {}).priority || ""; return k ? p === k : !["reply", "read", "skip"].includes(p); }); return ts.length ? '<div class="lsec"><span role="heading" aria-level="3">' + label + '</span><span class="lsx">' + groupBulk(k, ts) + '<span>' + ts.length + '</span></span></div>' + ts.map(rowOf).join("") : ""; }).join("");
     } else rowsHtml = state.threads.map(rowOf).join("");
-    list.innerHTML = rowsHtml + (state.hasMore && state.mode !== "waiting" ? '<div class="loadmore">' + (state.loadingMore ? '<span class="spin"></span>Loading older mail…' : '<button class="btn sm" type="button" data-loadmore>Load older mail</button>') + '</div>' : "");
+    const np = [...state.picked].filter((id) => state.threads.some((t) => t.id === id)).length; list.classList.toggle("selecting", np > 0);
+    const selbar = np ? '<div class="selbar" role="toolbar" aria-label="Selected threads"><span class="sn">' + np + ' selected</span><button type="button" class="btn sm" data-sb="archive" data-mut>Archive</button>' + (featOn("move") ? '<button type="button" class="btn sm primary" data-sb="move" data-mut>Move to…</button>' : "") + '<button type="button" class="btn sm" data-sb="read" data-mut>Mark read</button><button type="button" class="btn sm" data-sb="star" data-mut>Star</button><span class="spacer"></span>' + (np < state.threads.length ? '<button type="button" class="btn sm ghost" data-sb="all">Select all ' + state.threads.length + '</button>' : "") + '<button type="button" class="btn sm ghost" data-sb="none">Clear</button></div>' : "";
+    list.innerHTML = selbar + rowsHtml + (state.hasMore && state.mode !== "waiting" ? '<div class="loadmore">' + (state.loadingMore ? '<span class="spin"></span>Loading older mail…' : '<button class="btn sm" type="button" data-loadmore>Load older mail</button>') + '</div>' : "");
     if (!state.selectedId && !state.thread) renderTodaySoon();
   }
   function makePreview(t) {
@@ -1618,10 +1671,13 @@ body:not(.thread-open) .headtog { display: none; }
     return { threads: [], more: false };
   }
   async function loadThreads(append) {
-    if (append && (state.loadingMore || !state.hasMore || state.mode === "waiting")) return;
+    if (append && (state.loadingMore || !state.hasMore || state.mode === "waiting" || state.mode === "drafts")) return;
     const token = ++state.loadToken;
+    document.body.classList.toggle("drafts-mode", state.mode === "drafts");
+    if (state.mode !== "drafts" && state.dSel) { if (state.dDirty && !state.readOnly) await saveDraftEdit(true); state.dSel = null; state.dCur = null; state.dDirty = false; if (!state.selectedId) clearDesk(); }
     if (state.mode === "waiting") return loadWaiting(token);
-    if (!append) { state.threads = []; state.nextToken = null; state.hasMore = false; state.estimate = 0; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
+    if (state.mode === "drafts") return loadDraftsList(token);
+    if (!append) { state.picked.clear(); state.threads = []; state.nextToken = null; state.hasMore = false; state.estimate = 0; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
     $("moreBtn").hidden = true; $("countText").textContent = append ? "loading more…" : "loading";
     if (append) { state.loadingMore = true; const lm = list.querySelector("[data-loadmore]"); if (lm) lm.closest(".loadmore").innerHTML = '<span class="spin"></span>Loading older mail…'; }
     try {
@@ -2231,7 +2287,7 @@ body:not(.thread-open) .headtog { display: none; }
   function closePop() { pop.hidden = true; }
   function openPop(id, anchor, tab) {
     if (!id) { toast("Open a thread first.", "", 3000); return; }
-    popTarget = id; pop.hidden = false; $("popNote").textContent = ""; $("acctConfirm").hidden = true; $("labelQ").value = "";
+    popTarget = id; pop.hidden = false; $("popNote").textContent = ""; $("acctConfirm").hidden = true; $("labelQ").value = ""; pop.classList.toggle("multi", Array.isArray(id));
     setPopTab(tab || "move");
     if (window.innerWidth > 860) {
       const r = anchor.getBoundingClientRect();
@@ -2251,7 +2307,7 @@ body:not(.thread-open) .headtog { display: none; }
     if (q && !state.labels.some((l) => l.name.toLowerCase() === q)) h += '<button type="button" class="opt create" data-create="' + esc(raw) + '">+ Create folder “' + esc(raw) + '”</button>';
     box.innerHTML = h || '<div class="note" style="padding:8px">No folders.</div>';
   }
-  async function moveTo(labelId, name) { const id = popTarget; closePop(); return moveThread(id, labelId, name); }
+  async function moveTo(labelId, name) { const id = popTarget; closePop(); if (Array.isArray(id)) return bulkPicked("move", { labelId: labelId, name: name }); return moveThread(id, labelId, name); }
   async function moveThread(id, labelId, name) {
     toast('<span class="spin"></span>Moving to <strong>' + esc(name) + '</strong>…', "", 20000);
     try {
@@ -3190,6 +3246,7 @@ body:not(.thread-open) .headtog { display: none; }
   }
   let jkTimer = null;
   function moveSel(delta) {
+    if (state.mode === "drafts") { dMove(delta); return; }
     if (!state.threads.length) return;
     let i = state.threads.findIndex((t) => t.id === state.selectedId);
     i = i === -1 ? (delta > 0 ? 0 : state.threads.length - 1) : Math.max(0, Math.min(state.threads.length - 1, i + delta));
@@ -3204,7 +3261,7 @@ body:not(.thread-open) .headtog { display: none; }
     const typing = ev.target && ev.target.closest && ev.target.closest("input, textarea, select, [contenteditable]");
     if (typing || ev.metaKey || ev.ctrlKey || ev.altKey || !featOn("keys") || !modalBack.hidden || !pop.hidden) return;
     const act = {
-      j: () => moveSel(1), k: () => moveSel(-1), e: () => { if (state.selectedId && state.thread) $("archiveBtn").click(); }, s: () => { if (state.thread) $("starBtn").click(); },
+      j: () => moveSel(1), k: () => moveSel(-1), x: () => { const f = document.activeElement && document.activeElement.closest && document.activeElement.closest(".thread[data-id]"); const id = (f && f.dataset.id) || state.selectedId; if (id && state.mode !== "drafts" && state.mode !== "waiting") togglePick(id); }, e: () => { if (state.selectedId && state.thread) $("archiveBtn").click(); }, s: () => { if (state.thread) $("starBtn").click(); },
       m: () => { if (state.selectedId && featOn("move")) openPop(state.selectedId, $("moveBtn"), "move"); }, t: () => { if (state.selectedId && featOn("tasks")) createTask(state.selectedId); },
       c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) { openCompose(); $("body").focus(); } }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true),
       "[": () => { if (!phoneMQ.matches) setRailOff(!state.railOff); }, "]": toggleContext
@@ -3866,7 +3923,7 @@ body:not(.thread-open) .headtog { display: none; }
     const triaged = Object.keys(state.triage).length > 0;
     const needs = state.threads.filter((t) => (state.triage[t.id] || {}).priority === "reply");
     const cards = [];
-    if (featOn("drafts")) cards.push('<div class="tcard"><div class="thead">Drafts waiting in Gmail<span class="note">' + drafts.length + '</span></div>' + (drafts.length ? drafts.slice(0, 6).map((t) => row(t)).join("") : '<div class="note">None in this view. The morning run can draft replies before you start.</div>') + '</div>');
+    if (featOn("drafts")) cards.push('<div class="tcard"><div class="thead">Drafts waiting in Gmail<span class="note">' + drafts.length + '</span></div>' + (drafts.length ? drafts.slice(0, 6).map((t) => row(t)).join("") + '<div class="mrow"><button type="button" class="btn sm" data-today="drafts">Review drafts one at a time</button></div>' : '<div class="note">None in this view. The morning run can draft replies before you start.</div>') + '</div>');
     if (featOn("triage")) cards.push('<div class="tcard"><div class="thead">Needs you<span class="note">' + (triaged ? needs.length : "") + '</span></div>' + (triaged ? (needs.length ? needs.slice(0, 6).map((t) => row(t, (state.triage[t.id] || {}).next ? '<span class="nxl">' + esc(nextLabel(state.triage[t.id].next)) + '</span>' : "")).join("") : '<div class="note">Nothing in this view is waiting on you.</div>') : '<div class="mrow"><button type="button" class="btn sm primary" data-today="triage">Triage this view</button><span class="note">Sorts it into needs you, read and skip.</span></div>') + '</div>');
     if (featOn("review") && state.queue.length) cards.push('<div class="tcard"><div class="thead">Review<span class="note">' + state.queue.length + '</span></div><div class="mrow"><button type="button" class="btn sm" data-today="review">Review ' + state.queue.length + ' suggested move' + (state.queue.length === 1 ? "" : "s") + '</button></div></div>');
     if (featOn("waiting")) cards.push('<div class="tcard"><div class="thead">Waiting on others</div><div class="mrow"><button type="button" class="btn sm" data-today="waiting">See who owes you a reply</button></div></div>');
@@ -3893,6 +3950,7 @@ body:not(.thread-open) .headtog { display: none; }
     if (k === "triage") { app.dataset.view = "list"; setTab("inbox"); triage(); }
     else if (k === "review") openReview();
     else if (k === "waiting") { setTab("waiting"); clickChip("waiting"); app.dataset.view = "list"; }
+    else if (k === "drafts") { clickChip("drafts"); app.dataset.view = "list"; }
     else if (k === "meet" && nextMeet && nextMeet.who) { $("q").value = "from:" + nextMeet.who + " OR to:" + nextMeet.who; $("searchForm").requestSubmit(); app.dataset.view = "list"; }
   });
 
@@ -4188,6 +4246,256 @@ body:not(.thread-open) .headtog { display: none; }
     return msgs;
   }
 
+  // ---------- Drafts: go through your Gmail drafts one at a time ----------
+  // The Drafts tab lists every Gmail draft with a checkbox, so the list doubles as a checklist. Open one to edit it in a
+  // rich-text editor under the message it answers, work through the review checklist (or let the AI check it), then
+  // Save, Send, or go to the next one. Which drafts you've checked is kept in this browser.
+  const DRAFT_CHECKS = [
+    ["asks", "Answers everything they asked"],
+    ["facts", "Names, dates, times and numbers are right"],
+    ["commit", "Promises only what you mean to"],
+    ["people", "The right people are on To, Cc and Bcc"],
+    ["tone", "The tone fits this person"],
+    ["clean", "No typos, and nothing it mentions is missing"]
+  ];
+  state.drafts = []; state.dSel = null; state.dCur = null; state.dDirty = false; state.dTicks = {};
+  const dChecked = () => lsJson("cm.draftsChecked", {});
+  function setDChecked(id, on) { const o = dChecked(); if (on) o[id] = Date.now(); else delete o[id]; ls.set("cm.draftsChecked", JSON.stringify(o)); }
+  async function loadDraftsList(token) {
+    list.innerHTML = '<div class="empty"><span class="spin"></span>Loading drafts…</div>'; $("moreBtn").hidden = true; $("countText").textContent = "loading";
+    state.threads = []; state.hasMore = false;
+    try {
+      const p = await call(GMAIL, "list_drafts", { pageSize: 50, view: "DRAFT_VIEW_METADATA_ONLY" }, { cache: false });
+      if (token !== state.loadToken) return;
+      state.drafts = ((p && p.drafts) || []).filter((d) => d && d.id).sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+      const ids = new Set(state.drafts.map((d) => d.id)); const ck = dChecked(); let gone = false;
+      Object.keys(ck).forEach((k) => { if (!ids.has(k)) { delete ck[k]; gone = true; } }); if (gone) ls.set("cm.draftsChecked", JSON.stringify(ck));
+      $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
+      renderDrafts(); loadDraftMetas(token);
+    } catch (e) { if (token === state.loadToken) list.innerHTML = '<div class="empty"><h2>Couldn\'t load your drafts</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; }
+  }
+  // The list call carries no subjects, so each row's subject and first line are fetched on their own, three at a time.
+  async function loadDraftMetas(token) {
+    const todo = state.drafts.filter((d) => !d._meta); let i = 0;
+    async function w() { while (i < todo.length && token === state.loadToken) { const d = todo[i++]; try { await draftMeta(d); } catch { d._meta = d._meta || { subject: "", snippet: "", to: d.toRecipients || [] }; } renderDrafts(); } }
+    await Promise.all([w(), w(), w()]);
+  }
+  async function draftMeta(d) {
+    if (d._meta) return d._meta;
+    let m = d.subject !== undefined || d.plaintextBody ? d : null;
+    if (!m) { try { m = await call(GMAIL, "get_draft", { draftId: d.id, messageFormat: "MINIMAL" }, { cache: { staleTime: 60000, gcTime: 300000 } }); } catch (e) { if (GX) throw e; m = await draftFull(d); } }
+    m = m || {};
+    d._meta = { subject: m.subject || "", snippet: decodeEnt(String(m.snippet || draftText(m) || "")).replace(/\s+/g, " ").slice(0, 160), to: m.toRecipients || d.toRecipients || [], date: m.date || d.date };
+    return d._meta;
+  }
+  async function draftWhole(d) {
+    try { const m = await call(GMAIL, "get_draft", { draftId: d.id }, { cache: false }); if (m && (m.plaintextBody || m.htmlBody)) return m; } catch (e) { if (GX) throw e; }
+    d._full = undefined; return draftFull(d);
+  }
+  function renderDrafts() {
+    if (state.mode !== "drafts") return;
+    const ds = state.drafts; const ck = dChecked(); const hide = ls.get("cm.draftsHideChecked") === "1";
+    if (!ds.length) { list.innerHTML = '<div class="empty"><h2>No drafts</h2><p>Nothing is waiting in Gmail drafts. The morning run and <em>Work on it in chat</em> leave drafts here.</p></div>'; return; }
+    const done = ds.filter((d) => ck[d.id]).length;
+    const row = (d) => {
+      const m = d._meta || {}; const to = (m.to || d.toRecipients || []).map(nameOf).join(", ") || "(no recipient)"; const on = !!ck[d.id];
+      const A = isAll() ? acctById(d.acct || ownerOf("d", d.id)) : null; const ac = A ? acctColor(A) : "";
+      return '<div class="thread draftrow' + (d.id === state.dSel ? " sel" : "") + (on ? " done" : "") + (ac ? " acc" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-did="' + esc(d.id) + '" tabindex="0" role="button">'
+        + '<label class="dchk" title="' + (on ? "Checked" : "Not checked yet") + '"><input type="checkbox" data-dchk="' + esc(d.id) + '"' + (on ? " checked" : "") + ' aria-label="Checked: draft to ' + esc(to) + '"></label>'
+        + '<span class="from">To ' + esc(to) + '</span><span class="when">' + esc(fmtDate(m.date || d.date)) + '</span>'
+        + '<span class="subj">' + esc(m.subject || (d._meta ? "(no subject)" : "…")) + '</span>'
+        + '<span class="prev' + (d._meta ? "" : " pending") + '">' + esc(d._meta ? (m.snippet || "(empty)") : "Loading…") + '</span>'
+        + (A ? '<span class="tri"><span class="pill acct"' + (ac ? ' style="--acc:' + ac + '"' : "") + '>' + esc(A.label || A.email) + '</span></span>' : "")
+        + '</div>';
+    };
+    list.innerHTML = '<div class="lsec"><span role="heading" aria-level="3">Drafts</span><span class="lsx"><span class="dprog">' + done + ' of ' + ds.length + ' checked</span><button type="button" class="lsb" data-dhide>' + (hide ? "Show checked" : "Hide checked") + '</button></span></div>'
+      + '<div class="dbar" aria-hidden="true"><span style="width:' + Math.round(done / ds.length * 100) + '%"></span></div>'
+      + ds.filter((d) => !(hide && ck[d.id] && d.id !== state.dSel)).map(row).join("");
+  }
+  function dMove(delta, unchecked) {
+    const ck = dChecked(); const ds = state.drafts.filter((d) => !unchecked || !ck[d.id] || d.id === state.dSel); if (!ds.length) return;
+    let i = ds.findIndex((d) => d.id === state.dSel); i = i === -1 ? (delta > 0 ? 0 : ds.length - 1) : i + delta;
+    if (i < 0 || i >= ds.length) { toast(delta > 0 ? "That was the last draft." : "That's the first draft.", "", 2500); return; }
+    if (unchecked && ds[i].id === state.dSel) { toast("Every draft is checked.", "ok", 3000); return; }
+    openDraft(ds[i].id);
+  }
+  // Rich text the editor keeps: bold, italic, underline, links, lists, paragraphs and line breaks. Everything else becomes plain text.
+  const RTE_KEEP = /^(B|STRONG|I|EM|U|A|UL|OL|LI|P|DIV|BR|SPAN|BLOCKQUOTE)$/;
+  function rteClean(html) {
+    const doc = new DOMParser().parseFromString(String(html || ""), "text/html"); const out = document.createElement("div");
+    (function walk(src, dst) {
+      src.childNodes.forEach((n) => {
+        if (n.nodeType === 3) { dst.append(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1 || /^(SCRIPT|STYLE|HEAD|META|LINK|TITLE|IFRAME|OBJECT|EMBED|SVG|FORM|INPUT|BUTTON|TEMPLATE)$/.test(n.tagName)) return;
+        if (n.tagName === "IMG") { const alt = (n.getAttribute("alt") || "").trim(); if (alt) dst.append(document.createTextNode("[" + alt + "]")); return; }
+        if (!RTE_KEEP.test(n.tagName)) { walk(n, dst); return; }
+        const el = document.createElement(n.tagName === "SPAN" ? "span" : n.tagName.toLowerCase());
+        if (n.tagName === "A") { const h = n.getAttribute("href") || ""; if (/^(https?:|mailto:)/i.test(h)) { el.setAttribute("href", h); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener"); } }
+        const c = n.getAttribute("class") || ""; if (/gmail_signature/.test(c)) el.className = "gmail_signature";
+        walk(n, el); dst.append(el);
+      });
+    })(doc.body, out);
+    return out.innerHTML;
+  }
+  const textToHtml = (t) => String(t || "").split(/\n{2,}/).map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+  function draftHtml(full) {
+    if (full.htmlBody) {
+      const doc = new DOMParser().parseFromString(full.htmlBody, "text/html"); const q = doc.querySelector(".gmail_quote");
+      state.dQuote = q ? q.outerHTML : ""; if (q) q.remove();
+      return rteClean(doc.body.innerHTML);
+    }
+    state.dQuote = ""; return textToHtml(draftText(full));
+  }
+  const addrList = (v) => String(v || "").split(/[,;\n]+/).map((x) => emailOf(x.trim()).toLowerCase()).filter((x) => EMAIL_RE.test(x));
+  async function openDraft(id) {
+    const d = state.drafts.find((x) => x.id === id); if (!d) return;
+    if (state.dDirty && state.dSel && state.dSel !== id && !state.readOnly) { const ok = await saveDraftEdit(true); if (!ok) return; }
+    state.dSel = id; state.dCur = null; state.dDirty = false; state.selectedId = null; state.thread = null; renderDrafts();
+    app.dataset.view = "thread"; $("acts").hidden = true; compose.hidden = true; showSide(false); document.body.classList.add("thread-open");
+    $("subject").textContent = "Draft"; reading.innerHTML = '<div class="empty"><span class="spin"></span>Getting the draft…</div>';
+    let full; try { full = await draftWhole(d); } catch (e) { if (state.dSel === id) reading.innerHTML = '<div class="empty"><h2>Couldn\'t open this draft</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; return; }
+    if (state.dSel !== id) return;
+    if (!full) { reading.innerHTML = '<div class="empty"><h2>Couldn\'t read this draft here</h2>' + (d.viewUrl ? '<p><a href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open it in Gmail</a></p>' : "") + '</div>'; return; }
+    let theirs = null;
+    if (d.threadId) { try { const t = await fetchThread(d.threadId); theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
+    if (state.dSel !== id) return;
+    state.dCur = { d: d, full: full, theirs: theirs, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
+    renderDraftEditor();
+  }
+  function renderDraftEditor() {
+    const c = state.dCur; if (!c) return; const { d, full, theirs } = c; const ticks = state.dTicks[d.id] || (state.dTicks[d.id] = {});
+    const subj = full.subject || ""; $("subject").textContent = subj || "Draft";
+    const ck = dChecked()[d.id]; const ds = state.drafts; const pos = ds.findIndex((x) => x.id === d.id) + 1;
+    const addr = (l) => (l || []).map((a) => emailOf(a)).join(", ");
+    reading.innerHTML = '<div class="dedit">'
+      + (state.readOnly ? '<p class="note err">Read-only is on. You can read and edit here, but Save and Send are off.</p>' : "")
+      + (theirs ? '<details class="dctx"' + (pos <= 1 ? " open" : "") + '><summary>Replying to <strong>' + esc(nameOf(theirs.sender)) + '</strong> · ' + esc(fmtDate(theirs.date)) + '</summary><div class="body">' + esc(splitQuoted(String(theirs.plaintextBody || theirs.snippet || "").replace(/\r/g, "")).main.slice(0, 4000)) + '</div></details>' : (d.threadId ? "" : '<p class="note">A new email, not a reply.</p>'))
+      + '<div class="dfields"><span>To</span><input id="dTo" value="' + esc(addr(full.toRecipients || d.toRecipients)) + '" aria-label="To"><span>Cc</span><input id="dCc" value="' + esc(addr(full.ccRecipients || d.ccRecipients)) + '" aria-label="Cc"><span>Bcc</span><input id="dBcc" value="' + esc(addr(full.bccRecipients || d.bccRecipients)) + '" aria-label="Bcc"><span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
+      + '<div><div class="rtbar" role="toolbar" aria-label="Formatting">'
+      + [["bold", "<b>B</b>", "Bold (Ctrl B)"], ["italic", "<i>I</i>", "Italic (Ctrl I)"], ["underline", "<u>U</u>", "Underline (Ctrl U)"], ["link", "Link", "Add a link"], ["insertUnorderedList", "• List", "Bulleted list"], ["insertOrderedList", "1. List", "Numbered list"], ["removeFormat", "Clear", "Clear formatting"]].map((b) => '<button type="button" data-cmd="' + b[0] + '" title="' + b[2] + '" aria-label="' + b[2] + '">' + b[1] + '</button>').join("")
+      + '</div><div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text"></div></div>'
+      + '<div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
+      + (c.hasAtt ? '<p class="note">This draft has attachments. Saving from here would drop them, so edit and send it in Gmail.</p>' : "")
+      + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
+      + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm" id="dAutoCheck">Check it for me</button></div>'
+      + DRAFT_CHECKS.map(([k, label]) => '<label><input type="checkbox" data-dtick="' + k + '"' + (ticks[k] && ticks[k].on ? " checked" : "") + '><span>' + esc(label) + (ticks[k] && ticks[k].note ? '<span class="dn' + (ticks[k].on ? "" : " warn") + '">' + esc(ticks[k].note) + '</span>' : "") + '</span></label>').join("")
+      + '</div>'
+      + '<div class="mrow dfoot"><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
+      + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
+      + '<button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div>'
+      + '<div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div>'
+      + '<span class="note" id="dNote"></span></div>';
+    const ed = $("dEditor"); ed.innerHTML = draftHtml(full); c.base = ed.innerHTML;
+    const dirty = () => { state.dDirty = true; };
+    ed.addEventListener("input", dirty); ["dTo", "dCc", "dBcc", "dSubj"].forEach((k) => $(k).addEventListener("input", dirty));
+    ed.addEventListener("paste", (ev) => { ev.preventDefault(); const t = (ev.clipboardData || window.clipboardData).getData("text/plain"); document.execCommand("insertText", false, t); });
+    let saved = null;
+    reading.querySelector(".rtbar").addEventListener("mousedown", (ev) => { if (ev.target.closest("button")) ev.preventDefault(); });
+    reading.querySelector(".rtbar").addEventListener("click", (ev) => {
+      const b = ev.target.closest("[data-cmd]"); if (!b || c.hasAtt) return; ed.focus();
+      if (b.dataset.cmd === "link") { const sel = window.getSelection(); saved = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null; $("dLinkRow").hidden = false; $("dLinkUrl").focus(); return; }
+      document.execCommand(b.dataset.cmd, false, null); dirty();
+    });
+    const addLink = () => {
+      const u = $("dLinkUrl").value.trim(); const url = /^mailto:/i.test(u) ? u : normUrl(u); if (!/^(https?:|mailto:)/i.test(url)) { $("dNote").className = "note err"; $("dNote").textContent = "Links need to start with https:// or mailto:"; return; }
+      ed.focus(); if (saved) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(saved); }
+      if (window.getSelection().isCollapsed) document.execCommand("insertText", false, u);
+      document.execCommand("createLink", false, url); ed.querySelectorAll('a[href]').forEach((a) => { a.target = "_blank"; a.rel = "noopener"; });
+      $("dLinkRow").hidden = true; $("dLinkUrl").value = ""; dirty();
+    };
+    $("dLinkAdd").addEventListener("click", addLink); $("dLinkUrl").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); addLink(); } else if (ev.key === "Escape") { $("dLinkRow").hidden = true; ed.focus(); } });
+    reading.querySelectorAll("[data-dtick]").forEach((x) => x.addEventListener("change", () => {
+      const t = state.dTicks[d.id] || (state.dTicks[d.id] = {}); t[x.dataset.dtick] = Object.assign({}, t[x.dataset.dtick], { on: x.checked });
+      if (DRAFT_CHECKS.every(([k]) => t[k] && t[k].on) && !dChecked()[d.id]) { setDChecked(d.id, true); renderDrafts(); $("dDone").textContent = "Checked ✓ · next"; $("dNote").className = "note ok"; $("dNote").textContent = "Every item checked. This draft is marked checked."; }
+    }));
+    reading.querySelectorAll("[data-drev]").forEach((b) => b.addEventListener("click", () => reviseDraft(b.dataset.drev)));
+    $("dReviseGo").addEventListener("click", () => { const v = $("dRevise").value.trim(); if (v) reviseDraft(v); });
+    $("dRevise").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); const v = $("dRevise").value.trim(); if (v) reviseDraft(v); } });
+    $("dUndo").addEventListener("click", () => { if (c.undo == null) return; ed.innerHTML = c.undo; c.undo = null; $("dUndo").disabled = true; dirty(); });
+    $("dAutoCheck").addEventListener("click", checkDraft);
+    $("dPrev").addEventListener("click", () => dMove(-1)); $("dNext").addEventListener("click", () => dMove(1));
+    $("dDone").addEventListener("click", () => { setDChecked(d.id, true); renderDrafts(); dMove(1, true); });
+    $("dSave").addEventListener("click", () => saveDraftEdit(false));
+    $("dSend").addEventListener("click", askSendDraft);
+    $("dConfirmNo").addEventListener("click", () => { $("dConfirm").hidden = true; });
+    $("dConfirmGo").addEventListener("click", sendDraftEdit);
+  }
+  function dNote(text, cls) { const n = $("dNote"); if (n) { n.className = "note " + (cls || ""); n.textContent = text; } }
+  async function saveDraftEdit(quiet) {
+    const c = state.dCur; if (!c) return false; const { d, full } = c;
+    if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return false; }
+    if (c.hasAtt) { dNote("This draft has attachments; edit it in Gmail so they aren't dropped.", "err"); return false; }
+    const to = addrList($("dTo").value); if (!to.length) { dNote("Add at least one person on To.", "err"); return false; }
+    const html = rteClean($("dEditor").innerHTML) + (state.dQuote || ""); const text = htmlToText(html);
+    $("dSave").disabled = true; dNote("Saving…");
+    try {
+      // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
+      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id, to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, addrList($("dCc").value).length ? { cc: addrList($("dCc").value) } : {}, addrList($("dBcc").value).length ? { bcc: addrList($("dBcc").value) } : {}), { cache: false });
+      state.dDirty = false; d._meta = null; full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
+      dNote(quiet ? "" : "Saved to Gmail.", "ok"); if (quiet) toast("Saved your changes to the draft to " + esc(to.join(", ")) + ".", "ok", 4000);
+      draftMeta(d).then(renderDrafts).catch(() => {});
+      return true;
+    } catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check the draft in Gmail before saving again." : ""), "err"); return false; }
+    finally { if ($("dSave")) $("dSave").disabled = c.hasAtt; }
+  }
+  function askSendDraft() {
+    if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
+    const to = addrList($("dTo").value); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
+    const cc = addrList($("dCc").value), bcc = addrList($("dBcc").value); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
+    $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "");
+    $("dConfirm").hidden = false; $("dConfirmGo").focus();
+  }
+  async function sendDraftEdit() {
+    const c = state.dCur; if (!c) return; const { d } = c; $("dConfirm").hidden = true;
+    if (state.dDirty && !(await saveDraftEdit(true))) return;
+    $("dSend").disabled = true; dNote("Sending…");
+    try {
+      await call(GMAIL, "send_message", { draftId: d.id }, { cache: false });
+      setDChecked(d.id, false); delete state.dTicks[d.id];
+      const i = state.drafts.findIndex((x) => x.id === d.id); state.drafts.splice(i, 1); state.dDirty = false; state.dCur = null;
+      try { await invalGmail(); } catch {} draftsAt = 0;
+      toast("Sent.", "ok", 4000);
+      $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
+      const next = state.drafts[Math.min(i, state.drafts.length - 1)];
+      if (next) { state.dSel = null; openDraft(next.id); } else { state.dSel = null; renderDrafts(); clearDesk("Every draft is sent or checked"); }
+    } catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check your Sent folder before sending again." : ""), "err"); if ($("dSend")) $("dSend").disabled = false; }
+  }
+  async function reviseDraft(instr) {
+    const c = state.dCur; if (!c || c.hasAtt) return; const ed = $("dEditor"); const cur = htmlToText(ed.innerHTML); if (!cur.trim()) return;
+    const id = c.d.id; dNote("Revising…"); ed.setAttribute("aria-busy", "true");
+    try {
+      const text = await ask(voicePrompt(), "Here is a draft email " + OWNER + " wrote. Rewrite it: " + instr + ". Keep every fact, name, date, link and commitment, and keep the sign-off. Output only the new email body, plain text." + (c.theirs ? "\n\nThe message it answers:\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 6000) : "") + "\n\nThe draft:\n" + cur, { max_tokens: 3000 });
+      if (!state.dCur || state.dCur.d.id !== id || !text.trim()) return;
+      c.undo = ed.innerHTML; ed.innerHTML = textToHtml(text.trim()); $("dUndo").disabled = false; $("dRevise").value = ""; state.dDirty = true;
+      dNote("Revised. Formatting was reset; Undo puts the old version back. Nothing is saved until you press Save.");
+    } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); } finally { ed.removeAttribute("aria-busy"); }
+  }
+  // The AI goes through the same checklist and ticks what passes, with a short note on anything that doesn't.
+  async function checkDraft() {
+    const c = state.dCur; if (!c) return; const id = c.d.id; const b = $("dAutoCheck"); b.disabled = true; b.textContent = "Checking…";
+    try {
+      const text = await ask(MARK + " You review an email draft before " + OWNER + " sends it. Reply with JSON only.",
+        "Go through this checklist for the draft below. For each key, ok is true only when it clearly passes; note says why in at most 15 words (say what's wrong when it fails).\n"
+        + DRAFT_CHECKS.map(([k, l]) => "- " + k + ": " + l).join("\n")
+        + "\nReply with {" + DRAFT_CHECKS.map(([k]) => "\"" + k + "\": {\"ok\": boolean, \"note\": string}").join(", ") + "}.\n\n"
+        + (CONFIG.rules ? OWNER + "'s writing rules: " + CONFIG.rules + "\n\n" : "")
+        + "TO: " + $("dTo").value + (addrList($("dCc").value).length ? "\nCC: " + $("dCc").value : "") + (addrList($("dBcc").value).length ? "\nBCC: " + $("dBcc").value : "") + "\nSUBJECT: " + $("dSubj").value
+        + "\n\nDRAFT:\n" + htmlToText($("dEditor").innerHTML)
+        + (c.theirs ? "\n\nTHE MESSAGE IT ANSWERS (from " + c.theirs.sender + "):\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 8000) : "\n\n(It's a new email, not a reply.)"),
+        { max_tokens: 2000 });
+      if (!state.dCur || state.dCur.d.id !== id) return;
+      const o = parseJsonObject(text); if (!o) throw { code: "tool_error", message: "the check didn't come back in the expected shape" };
+      const t = state.dTicks[id] || (state.dTicks[id] = {});
+      DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; t[k] = { on: r.ok === true, note: String(r.note || "") }; });
+      const keep = $("dEditor").innerHTML, vals = ["dTo", "dCc", "dBcc", "dSubj"].map((k) => $(k).value), dirty = state.dDirty;
+      renderDraftEditor(); $("dEditor").innerHTML = keep; ["dTo", "dCc", "dBcc", "dSubj"].forEach((k, i) => { $(k).value = vals[i]; }); state.dDirty = dirty;
+      const bad = DRAFT_CHECKS.filter(([k]) => !t[k].on).length;
+      dNote(bad ? bad + " thing" + (bad === 1 ? "" : "s") + " to look at, marked below." : "Everything on the checklist passes.", bad ? "" : "ok");
+      if (!bad && !dChecked()[id]) { setDChecked(id, true); renderDrafts(); }
+    } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); }
+    finally { const x = $("dAutoCheck"); if (x) { x.disabled = false; x.textContent = "Check it for me"; } }
+  }
+
   // ---------- wiring ----------
   document.querySelectorAll("#chips .chip").forEach((c) => c.addEventListener("click", () => {
     document.querySelectorAll("#chips .chip").forEach((x) => x.classList.toggle("on", x === c));
@@ -4203,21 +4511,74 @@ body:not(.thread-open) .headtog { display: none; }
   $("triageBtn").addEventListener("click", triage);
   list.addEventListener("click", (ev) => {
     const bk = ev.target.closest("[data-bulk]"); if (bk) { ev.stopPropagation(); bulkClick(bk); return; }
+    if (ev.target.closest("[data-dhide]")) { ls.set("cm.draftsHideChecked", ls.get("cm.draftsHideChecked") === "1" ? "0" : "1"); renderDrafts(); return; }
+    const dk = ev.target.closest("[data-dchk]"); if (dk) { ev.stopPropagation(); setDChecked(dk.dataset.dchk, dk.checked); renderDrafts(); return; }
+    if (ev.target.closest(".dchk")) { ev.stopPropagation(); return; }
+    const dr = ev.target.closest("[data-did]"); if (dr) { openDraft(dr.dataset.did); return; }
     const nx = ev.target.closest("[data-nx]"); if (nx) { ev.stopPropagation(); if (nx.dataset.nx === "go") runNext(nx.dataset.id, nx); else dismissNext(nx.dataset.id); return; }
+    const sb = ev.target.closest("[data-sb]"); if (sb) { ev.stopPropagation(); selAction(sb.dataset.sb, sb); return; }
+    const pk = ev.target.closest("[data-pick]"); if (pk) { ev.stopPropagation(); togglePick(pk.dataset.pick, ev.shiftKey, pk.checked); return; }
+    if (ev.target.closest(".rsel")) { ev.stopPropagation(); return; }
+    const prow = ev.target.closest(".thread[data-id]");
+    if (prow && state.mode !== "waiting" && (ev.metaKey || ev.ctrlKey || ev.shiftKey || (state.picked.size && !ev.target.closest("[data-ra], [data-nx]")))) { ev.preventDefault(); togglePick(prow.dataset.id, ev.shiftKey); return; }
     const ra = ev.target.closest("[data-ra]"); if (ra) { ev.stopPropagation(); rowAction(ra.dataset.id, ra.dataset.ra, ra); return; } const b = ev.target.closest(".thread"); if (b) openThread(b.dataset.id); });
   list.addEventListener("keydown", (ev) => {
     if (!ev.target.classList.contains("thread")) return;
-    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openThread(ev.target.dataset.id); }
+    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); if (ev.target.dataset.did) openDraft(ev.target.dataset.did); else openThread(ev.target.dataset.id); }
     else if (ev.key === "ContextMenu" || (ev.shiftKey && ev.key === "F10")) { ev.preventDefault(); const r = ev.target.getBoundingClientRect(); openRowMenu(ev.target.dataset.id, r.left + 24, r.top + 28, true); }
   });
   list.addEventListener("contextmenu", (ev) => { const row = ev.target.closest(".thread"); if (!row) return; ev.preventDefault(); openRowMenu(row.dataset.id, ev.clientX, ev.clientY, false); });
   list.addEventListener("scroll", () => { if (openMenu && openMenu.menu === $("rowMenu")) closeMenus(); }, { passive: true });
   const rowEl = (id) => list.querySelector('.thread[data-id="' + CSS.escape(id) + '"]');
+  // ---------- select several threads ----------
+  // Tick a row's box, Cmd/Ctrl-click a row, or press x; Shift-click picks a range. The bar over the list then archives,
+  // moves, marks read or stars them all at once, with one Undo.
+  let lastPick = null;
+  function togglePick(id, range, on) {
+    if (!state.threads.some((t) => t.id === id)) return;
+    const want = on === undefined ? !state.picked.has(id) : !!on;
+    if (range && lastPick && lastPick !== id) {
+      const ids = state.threads.map((t) => t.id); const a = ids.indexOf(lastPick), b = ids.indexOf(id);
+      if (a > -1 && b > -1) ids.slice(Math.min(a, b), Math.max(a, b) + 1).forEach((x) => { if (want) state.picked.add(x); else state.picked.delete(x); });
+    } else if (want) state.picked.add(id); else state.picked.delete(id);
+    lastPick = id; renderList();
+    const r = rowEl(id); if (r) r.focus({ preventScroll: true });
+  }
+  function selAction(k, btn) {
+    if (k === "none") { state.picked.clear(); renderList(); return; }
+    if (k === "all") { state.threads.forEach((t) => state.picked.add(t.id)); renderList(); return; }
+    if (k === "move") { openPop([...state.picked], btn.isConnected ? btn : list, "move"); return; }
+    bulkPicked(k);
+  }
+  async function bulkPicked(kind, label) {
+    if (state.readOnly) { toast(esc(mcpCopy({ code: "read_only" })), "err", 5000); return; }
+    const ids = [...state.picked].filter((id) => state.threads.some((t) => t.id === id)); if (!ids.length) return;
+    const spec = { archive: [[], ["INBOX"], "Archived", "archive"], move: [label ? [label.labelId] : [], ["INBOX"], "Moved to " + (label ? label.name : ""), "move"], read: [[], ["UNREAD"], "Marked read", "read"], star: [["STARRED"], [], "Starred", "star"] }[kind];
+    if (!spec) return;
+    const ops = []; let err = null;
+    for (const id of ids) {
+      toast('<span class="spin"></span>' + esc(spec[2]) + " " + (ops.length + 1) + " of " + ids.length + "…", "", 30000);
+      try { const who = senderOf(id); await threadOp(id, spec[0], spec[1]); ops.push({ threadId: id, add: spec[0], remove: spec[1] }); if (kind !== "read") recordAction(who, spec[3], label ? { labelId: label.labelId, name: label.name } : null, 0.5); }
+      catch (e) { err = e; break; }
+    }
+    if (ops.length) pushUndo((kind === "move" ? "move " + ops.length + " to " + label.name : kind + " " + ops.length), ops);
+    const done = new Set(ops.map((o) => o.threadId)); done.forEach((id) => state.picked.delete(id)); dropProposals([...done]);
+    if (kind === "archive" || kind === "move") {
+      state.threads = state.threads.filter((t) => !done.has(t.id)); if (done.has(state.selectedId)) clearDesk(kind === "move" ? "Moved" : "Archived");
+      $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate - ops.length, state.threads.length) : "");
+    } else state.threads.forEach((t) => { if (done.has(t.id)) (t.messages || []).forEach((m) => { m.labelIds = (m.labelIds || []).filter((l) => !spec[1].includes(l)).concat(spec[0].filter((l) => !(m.labelIds || []).includes(l))); }); });
+    try { await invalGmail(); } catch {}
+    renderList();
+    const what = spec[2] + " " + ops.length + " thread" + (ops.length === 1 ? "" : "s");
+    if (err) toast(esc(mcpCopy(err, GMAIL)) + (ops.length ? " " + esc(what) + " before that." + undoBtn() : ""), "err", 10000);
+    else toast(esc(what) + "." + undoBtn(), "ok", 8000);
+  }
   // Actions from a row, for any thread in the list. Archive, star and read work in place; the rest open the thread first.
   async function rowAction(id, act, anchor) {
     const t = state.threads.find((x) => x.id === id); if (!t) return;
     const open = id === state.selectedId && !!state.thread;
     if (act === "open") { openThread(id); return; }
+    if (act === "select") { togglePick(id); return; }
     if (act === "move") { openPop(id, anchor && anchor.isConnected ? anchor : rowEl(id), "move"); return; }
     if (act === "task") { createTask(id); return; }
     const flip = { archive: [[], ["INBOX"], "Archiving", "archive"], star: [["STARRED"], [], "Starring", "star"], unstar: [[], ["STARRED"], "Unstarring", "unstar"], read: [[], ["UNREAD"], "Marking read", "mark read"], unread: [["UNREAD"], [], "Marking unread", "mark unread"] }[act];
@@ -4244,7 +4605,7 @@ body:not(.thread-open) .headtog { display: none; }
   function openRowMenu(id, x, y, focusFirst) {
     const t = state.threads.find((r) => r.id === id); const row = rowEl(id); if (!t || !row) return;
     const menu = $("rowMenu"); closeMenus(); closePop();
-    const groups = [["open"], ["archive", "snooze", "move"], ["route", "task", "contact"], ["star", "unstar", "read", "unread", "unsub"]];
+    const groups = [["open", "select"], ["archive", "snooze", "move"], ["route", "task", "contact"], ["star", "unstar", "read", "unread", "unsub"]];
     const acts = [["open", "Open", "↵", false]].concat(rowActs(t));
     const item = (a) => '<button class="mi row" role="menuitem" type="button" data-rm="' + a[0] + '"' + (a[3] ? " data-mut" : "") + '>' + raSvg(a[0]) + '<span>' + esc(a[1]) + '</span>' + (a[2] ? '<span class="kbd">' + esc(a[2]) + '</span>' : "") + '</button>';
     const url = t.viewUrl || (((t.messages || [])[0]) || {}).viewUrl || (GX ? gxView(id, ownerOf("t", id) || curAcct()) : "https://mail.google.com/mail/u/0/#all/" + encodeURIComponent(id));

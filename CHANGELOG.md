@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.5 (2026-11-03)
+
+### New
+- **A Drafts tab.** Every Gmail draft in one list that doubles as a checklist: tick each one as you review it, with a count, a progress bar and **Hide checked**. Open a draft and it sits under the message it answers, with To, Cc, Bcc and Subject, in a **rich-text editor** (bold, italic, underline, links, bulleted and numbered lists). **Revise** (Shorter, Warmer, More direct, Polish, or your own words) with Undo. A **Before you send** checklist (answers what they asked, facts right, no stray promises, right people, tone, typos) you tick yourself, or **Check it for me** ticks what passes and notes the rest. **Save** writes back to the Gmail draft, **Send** asks once and moves to the next, **Mark checked · next** skips ahead. Unsaved edits are saved when you move on. Drafts with attachments open read-only so nothing gets dropped. Today links to it. Works on both Gmail paths (`get_draft` and `update_draft` for the Gmail connector; `GMAIL_UPDATE_DRAFT` and `GMAIL_SEND_DRAFT` through Composio).
+- **Select several threads.** Tick a row's box (it appears on hover), Cmd/Ctrl-click, press `x`, or Shift-click for a range. A bar over the list archives, moves to a folder, marks read or stars them all at once, with one Undo. **Select** is in the right-click menu too.
+
+### Changed
+- **Flat rows.** List rows are square, with a hairline between them. Account rows in All inboxes keep their light tint but lose the colored edge.
+- Setup declares `get_draft` and `update_draft` for the Gmail connector.
+
 ## 0.6.4 (2026-11-02)
 
 ### New

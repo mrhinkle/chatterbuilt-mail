@@ -24,7 +24,8 @@ Each guide has screenshots (made-up data) and says what the feature reads, write
 | [The context panel](context-panel.md) | The brief from your systems on every thread: why it matters, two examples, how it works, how it compares |
 | [More context](more-context.md) | The cited web lookup on a person and their company, only when you press it |
 | [Route and next steps](route-and-next-steps.md) | Sending a thread to your task app, Slack, contacts, snooze or a reminder |
-| [Replying](replying.md) | Drafts, Draft with switches, open times, 3 options, Pre-draft, the pre-send check |
+| [Replying](replying.md) | Drafts, Draft with switches, open times, 3 options, Pre-draft, the pre-send check, Cc and Bcc |
+| [Drafts](drafts.md) | The Drafts tab: every Gmail draft one at a time, a rich-text editor, a review checklist |
 | [Voice](voice.md) | Your voice prompt, per-recipient tone, snippets |
 | [Following up](following-up.md) | Waiting, Nudge, Snooze, Remind me if no reply |
 | [Organizing](organizing.md) | Move, copy, unsubscribe, the sweep, rules, Review and Undo |

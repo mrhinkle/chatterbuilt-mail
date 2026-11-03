@@ -42,6 +42,12 @@ module.exports = function fake() {
     return { resultCountEstimate: '8', threads: order.map(summ) };
   };
   const DRAFTS = { drafts: [{ id: 'd1', threadId: 't2', plaintextBody: 'Hi Lee, Tuesday at 10 works. See you there. Alex', viewUrl: 'https://mail.google.com/d1' }] };
+  // The Drafts tab: full drafts by id (get_draft), plus two that aren't replies to anything in the inbox.
+  const DRAFT_FULL = {
+    d1: { id: 'd1', threadId: 't2', subject: 'Re: Venue walkthrough', toRecipients: ['Lee Park <lee@venuehall.example>'], date: iso(now - H), snippet: 'Hi Lee, Tuesday at 10 works. See you there. Alex', plaintextBody: 'Hi Lee,\n\nTuesday at 10 works. See you there.\n\nAlex', htmlBody: '<div dir="ltr">Hi Lee,<br><br>Tuesday at 10 works. See you there.<br><br>Alex</div>', viewUrl: 'https://mail.google.com/d1' },
+    d2: { id: 'd2', subject: 'Keynote at the spring summit?', toRecipients: ['Riley Chen <riley@keynote.example>'], date: iso(now - 2 * H), snippet: 'Riley, your talk on AI agents at the March meetup was the one people kept quoting', plaintextBody: 'Riley,\n\nYour talk on AI agents at the March meetup was the one people kept quoting. Would you keynote the spring summit in April?\n\nAlex', htmlBody: '<p>Riley,</p><p>Your talk on AI agents at the March meetup was the one people kept quoting. Would you keynote the spring summit in <b>April</b>?</p><p>Alex</p>', viewUrl: 'https://mail.google.com/d2' },
+    d3: { id: 'd3', threadId: 's2', subject: 'Re: Intro', toRecipients: ['Jo Park <jo@example.org>'], ccRecipients: ['Pat Kim <pat@example.org>'], date: iso(now - 3 * H), snippet: 'Jo, following up on Thursday. Does 2pm still work?', plaintextBody: 'Jo,\n\nFollowing up on Thursday. Does 2pm still work?\n\nAlex', viewUrl: 'https://mail.google.com/d3' }
+  };
   const env = (data) => ({ successful: true, data: { results: [{ response: { successful: true, data }, tool_slug: 'X' }] } });
   // Context sources answer by who is being looked up: Dana (a sponsor), Cloudway (a vendor invoice), Jordan (waiting on a reply).
   // Everyone else (newsletters, receipts) gets nothing, so their brief says "Nothing relevant".
@@ -144,7 +150,13 @@ module.exports = function fake() {
           return P(t);
         }
         if (tool === 'get_message') return P({ id: input.messageId, raw: input.messageId === 'mt5' ? unsubRaw : input.messageId === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') });
-        if (tool === 'list_drafts') return P(DRAFTS);
+        if (tool === 'list_drafts') {
+          if ((input || {}).view === 'DRAFT_VIEW_METADATA_ONLY' && window.__draftsTab !== false) return P({ drafts: Object.values(DRAFT_FULL).filter((d) => !window.__sentDrafts || !window.__sentDrafts.includes(d.id)).map((d) => ({ id: d.id, threadId: d.threadId, toRecipients: d.toRecipients, ccRecipients: d.ccRecipients, date: d.date, viewUrl: d.viewUrl })) });
+          return P(DRAFTS);
+        }
+        if (tool === 'get_draft') { const d = DRAFT_FULL[(input || {}).draftId]; if (!d) return P({}); if ((input || {}).messageFormat === 'MINIMAL') { const m = Object.assign({}, d); delete m.plaintextBody; delete m.htmlBody; return P(m); } return P(d); }
+        if (tool === 'update_draft') { const d = DRAFT_FULL[(input || {}).draftId]; if (d) { if (input.htmlBody) d.htmlBody = input.htmlBody; if (input.body) d.plaintextBody = input.body; if (input.subject) d.subject = input.subject; if (input.to) d.toRecipients = input.to; } return P({ id: input.draftId }); }
+        if (tool === 'send_message' && (input || {}).draftId) { (window.__sentDrafts = window.__sentDrafts || []).push(input.draftId); return P({ id: 'sent-' + input.draftId, threadId: (DRAFT_FULL[input.draftId] || {}).threadId || 'new', labelIds: ['SENT'] }); }
         if (tool === 'list_labels') return P({ labels: [{ labelId: 'L1', name: 'Finance', labelType: 'USER' }, { labelId: 'L2', name: 'Sponsors', labelType: 'USER' }, { labelId: 'L3', name: 'Meetup', labelType: 'USER' }, { labelId: 'L4', name: 'Newsletters', labelType: 'USER' }] });
         return P({ id: 'ok' });
       }

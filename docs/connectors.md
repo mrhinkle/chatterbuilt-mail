@@ -8,7 +8,7 @@ The page reaches your apps only through those connectors, using your own sign-in
 
 | Connector | Needed for | Tools the page declares |
 |---|---|---|
-| Gmail | Everything | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
+| Gmail | Everything | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft` |
 | Claude (built in) | Summaries, triage, drafts, checks, Ask, context, Route, learning | declared as the `sample` capability, no connector |
 | Google Calendar | Open times in replies; meetings with this person (context) | `list_events`; `search_events` for context |
 | Notion | Notion tasks or contacts, voice page pointer, duplicate check, notes and pipeline lookups (context) | `notion-create-pages`, `notion-fetch`, `notion-search` (only the ones you use) |

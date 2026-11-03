@@ -197,6 +197,10 @@ Guide: [tasks-and-contacts.md](tasks-and-contacts.md).
 - The task gets the subject, sender, a link back to Gmail, and the message quoted.
 - It works with any task app that has a claude.ai connector. See [connectors.md](connectors.md).
 
+**Drafts.** The **Drafts** tab lists every Gmail draft as a checklist (tick each as you review it; **Hide checked**). Open one to edit it in a rich-text editor under the message it answers, revise it, run the **Before you send** checklist yourself or with **Check it for me**, then **Save**, **Send** (it asks once) or **Mark checked · next**. Guide: [drafts.md](drafts.md).
+
+**Select several.** Tick a row's box (on hover), Cmd/Ctrl-click, press `x`, or Shift-click a range; the bar over the list archives, moves, marks read or stars them all, with one Undo.
+
 **Add to contacts.** Press **Contact** above the thread, or `c`. Pick the person if the thread has several. Then:
 - **Details from their emails.** It reads every email they've sent you (the current thread plus up to four more) for their signature: title, company, phone, website, location. It also picks up social profiles: LinkedIn, X, Bluesky, GitHub, Instagram.
 - **How we met.** It finds your earliest thread with them and writes a one- or two-sentence note: month and year, who reached out, what it was about, who introduced you. It links that first thread.

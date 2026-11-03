@@ -61,7 +61,8 @@ It lists every action that's switched on: the views (Inbox, Unread, Waiting on r
 
 | Key | Action |
 |---|---|
-| `j` / `k` | Next / previous thread |
+| `j` / `k` | Next / previous thread (in Drafts, next / previous draft) |
+| `x` | Select the thread, to act on several at once |
 | `Enter` | Open the selected thread |
 | `e` | Archive |
 | `s` | Star or unstar |

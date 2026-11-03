@@ -8,7 +8,9 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 
 ## The list
 
-- **Tabs.** Inbox, Unread, Waiting, Primary, Starred and Files. Each one is a Gmail search (Files is `in:inbox has:attachment`). Waiting is different: it lists sent mail nobody has answered. See [following-up.md](following-up.md).
+- **Tabs.** Inbox, Unread, Waiting, Drafts, Primary, Starred and Files. **Drafts** is its own view: every Gmail draft, one at a time, with a review checklist ([drafts.md](drafts.md)).
+- **Pick several.** Hover a row and tick its box, Cmd/Ctrl-click, or press `x`; Shift-click picks a range. Then archive, move, mark read or star them all at once ([organizing.md](organizing.md#several-at-once)).
+- **Each tab is a search.** Inbox, Unread, Primary, Starred and Files are Gmail searches (Files is `in:inbox has:attachment`). Waiting is different: it lists sent mail nobody has answered. See [following-up.md](following-up.md).
 - **Hide the list.** On a computer, **Hide list** at the left of the thread title (or `[`) hides the list so the thread or Today gets the full width. **Show list** brings it back. The app remembers.
 - **Resize the panes.** Drag the grip between the list and the thread, or between the thread and the context panel, to make either wider. Or click the grip and use the arrow keys: Shift moves farther, Home and End go to the smallest and largest. Double-click a grip to put it back. The app remembers your widths, and the thread never gets narrower than 380 px, so a wide list shrinks back on a small window. Phones show one pane at a time, so they have no grips.
 

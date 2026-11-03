@@ -137,7 +137,7 @@ Declare capabilities from CONFIG, and only what's used:
 
 | When | Server | Tools |
 |---|---|---|
-| `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
+| `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft` |
 | `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline) |
 | `tasks` is set | its `server` | its `tool` |
 | `contacts` uses the Notion short form | `Notion` | `notion-create-pages`, `notion-search` |

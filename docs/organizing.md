@@ -14,6 +14,14 @@ Moving adds the label and takes the thread out of the inbox. Undo with `z` or th
 
 Each move by hand is remembered, so the app can suggest a rule later (see [Suggested rules](#suggested-rules)).
 
+### Several at once
+
+Pick the threads first: tick the box that appears at the left of a row when you hover it, Cmd-click (Ctrl-click on Windows) a row, or press `x` on it. Shift-click picks everything between. Right-click → **Select** works too, and on a phone a long press opens that menu. While anything is picked, a click on a row adds or removes it instead of opening it.
+
+A bar over the list then shows how many are picked, with **Archive**, **Move to…**, **Mark read** and **Star**, plus **Select all** and **Clear**. **Move to…** opens the same folder picker (create a folder there if you need one), files them all and takes them out of the inbox. One **Undo** puts them all back.
+
+![Three threads picked, with the bar over the list: Archive, Move to…, Mark read, Star](images/select.webp)
+
 ## Copy to another account
 
 ![The Copy tab: forward a copy to an account you own](images/copy.webp)
