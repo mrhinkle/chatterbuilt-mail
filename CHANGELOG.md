@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.6.7 (2026-11-03)
+
+### New
+- **Your HTML signature, pulled from Gmail.** Through Composio it's read from Gmail's settings for each account (`GMAIL_LIST_SEND_AS`, read-only), using the From address's own signature when it has one. With the Gmail connector, which has no settings tool, it comes from the newest message you sent that carries one.
+- **Insert signature in Drafts.** A toolbar button adds your signature to a draft that has none (one from the morning run or from chat, say), or swaps an old signature for your current one. **Remove** takes it off. It shows formatted under the editor and goes on when you save.
+- **From: pick the address a reply goes from.** With Gmail through Composio, a menu over the recipients lists every connected account and every alias set up under Gmail's "Send mail as". The thread's own address replies in the thread as before; any other address sends it as a new email ("Re:" and the subject) from there, on that account, since no tool can reply inside a thread from another account or alias. The page says so before you send. Save draft works from another account; an alias can send but not save a draft. The Gmail connector has one account, so it shows no menu.
+- **Signature on or off for a reply.** The line under the reply box is now a **Signature** switch with **Show**, which previews the signature that will go on. Switch it off to leave it off one message.
+
+### Fixed
+- Composio's draft update drops a reply's `In-Reply-To` and `References` headers, so a reply draft saved through Composio can land as a new conversation for the other person. The Drafts editor now says so on reply drafts before you save, and the send confirmation says so after. There's no Composio tool that keeps those headers; the docs say to edit reply drafts in Gmail when threading matters.
+
 ## 0.6.6 (2026-11-03)
 
 ### New

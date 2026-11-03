@@ -346,7 +346,10 @@ body:not(.thread-open) .headtog { display: none; }
 .msg .att .attbtn::before { content: ""; width: 12px; height: 12px; flex: none; background: currentColor; opacity: 0.55; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3'/%3E%3C/svg%3E") center / contain no-repeat; }
 .msg .att .attbtn:hover { border-color: var(--accent); color: var(--accent); }
 .msg .body a, .msg .quoted a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
-.sighint { margin: -2px 2px 2px; font-size: 11.5px; }
+.rfromrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 2px; font-size: 12.5px; } .rfromrow .rl { color: var(--muted); font-weight: 600; } .rfromrow select { max-width: 100%; font: inherit; padding: 3px 6px; border: 1px solid var(--line-2); border-radius: 5px; background: #ffffff; } .rfromrow .note { flex-basis: 100%; color: var(--warm); }
+.sigrow { display: flex; align-items: center; gap: 6px; margin: -2px 2px 2px; font-size: 12px; }
+.sigbox, .dsig .dsigbody { max-height: 14em; overflow: auto; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
+.sigview { font-size: 12px; color: var(--fg); } .sigview table { border-collapse: collapse; } .sigview td { padding: 1px 6px 1px 0; vertical-align: top; } .sigview .imgalt { color: var(--faint); font-size: 11px; }
 .modal.attmodal { width: min(980px, 100%); }
 .attview { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 .attview .attbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -545,7 +548,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dedit { padding-bottom: 0; } .reading:has(> .dedit) { padding-bottom: 0; }
 .dfoot .dnote, .dfoot .confirmbox { flex: 1 1 100%; } .dfoot .dnote:empty { display: none; }
 .dsig { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-left: 2px solid var(--line-2); }
-.dsig .dsigbody { white-space: pre-line; font-size: 12px; color: var(--muted); max-height: 9em; overflow: auto; }
+.dedit .warnline { color: var(--warm); }
+.dsig .dsighead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.rtbar .rtsig { margin-left: auto; font-size: 12px; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--line); background: #ffffff; cursor: pointer; } .rtbar .rtsig:hover { background: var(--hover); }
 
 /* Cc and Bcc */
 .rcpts { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
@@ -741,6 +746,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
           <label class="tog" data-feat="calendar" title="Offer three open times from your calendar"><input type="checkbox" id="calChk">Open times</label>
           <label class="tog" data-feat="more" id="webTog" title="Use what More context found on the public web. Press More context first."><input type="checkbox" id="webChk" disabled>Web context</label>
         </div>
+        <div class="rfromrow" id="fromRow" hidden><span class="rl">From</span><select id="fromSel" aria-label="Send from"></select><span class="note" id="fromNote"></span></div>
         <div class="rcpts" id="rcpts">
           <span class="rto" id="toLine"></span>
           <button class="btn sm ghost" id="ccTog" type="button" aria-expanded="false" aria-controls="ccRow">Cc</button>
@@ -749,7 +755,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         <div class="rfield" id="ccRow" hidden><span class="rl">Cc</span><div class="rbox" data-rk="cc"><input type="text" id="ccIn" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="Cc" aria-autocomplete="list" aria-controls="ccSug"></div><div class="sug" id="ccSug" role="listbox" aria-label="Suggestions" hidden></div></div>
         <div class="rfield" id="bccRow" hidden><span class="rl">Bcc</span><div class="rbox" data-rk="bcc"><input type="text" id="bccIn" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="Bcc" aria-autocomplete="list" aria-controls="bccSug"></div><div class="sug" id="bccSug" role="listbox" aria-label="Suggestions" hidden></div></div>
         <textarea id="body" placeholder="Your reply. Type here, or pick Reply above for a first draft."></textarea>
-        <div class="sighint note" data-feat="signature">Your Gmail signature is added below this when it sends or saves as a draft.</div>
+        <div class="sigrow" data-feat="signature"><label class="tog" title="Add the signature you set in Gmail when this sends or saves as a draft"><input type="checkbox" id="sigChk" checked>Signature</label><button class="btn sm ghost" id="sigPeek" type="button" aria-expanded="false" aria-controls="sigBox">Show</button><span class="note" id="sigNote"></span></div>
+        <div class="sigbox" id="sigBox" data-feat="signature" hidden></div>
         <div class="foot">
           <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
           <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
@@ -984,7 +991,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     { key: "snooze", name: "Snooze and remind-me", desc: "Snooze a thread until a date, or get it back if nobody replies. Both are Gmail labels, so the morning run and Gmail itself see them.", how: "Snooze above the thread (b), or tick Remind me under the reply box." },
     { key: "drafts", name: "Drafts waiting in Gmail", desc: "Threads with a draft in Gmail (from the morning run or your own) get a tag. Open one and load the draft in a click; sending replaces it.", how: "Set up the morning run, or write drafts in Gmail." },
     { key: "snippets", name: "Snippets", desc: "Reusable text with the person's first name filled in.", how: "Snippets under the reply buttons." },
-    { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own.", how: "On by default. Turn it off if your drafts already end with a signature." },
+    { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own. Show previews it under the reply box, where you can leave it off one message, and Insert signature adds it to a draft in the Drafts tab.", how: "On by default. Turn it off if your drafts already end with a signature." },
     { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
     { key: "html", name: "Formatted view", desc: "Shows messages with their links, lists and tables, cleaned of scripts, styles and tracking images.", how: "More, Formatted view, above the thread." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
@@ -1210,7 +1217,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function gxNorm(m, full, A) {
     A = A || curAcct();
     const id = m.messageId || m.id;
-    const o = { id: id, threadId: m.threadId, acct: A && A.id, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")),
+    const o = { id: id, threadId: m.threadId, acct: A && A.id, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")), inReplyTo: gxHdr(m, "in-reply-to"),
       date: m.messageTimestamp || m.date || "", subject: m.subject || (m.preview && m.preview.subject) || gxHdr(m, "subject"), labelIds: Array.isArray(m.labelIds) ? m.labelIds : [],
       snippet: deEnt((m.preview && m.preview.body) || m.snippet || ""), viewUrl: gxView(m.threadId || id, A),
       attachments: (m.attachmentList || []).filter((x) => x && x.filename).map((x) => ({ id: x.attachmentId, filename: x.filename, mimeType: x.mimeType })) };
@@ -1231,7 +1238,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const GX_JQ_DEFS = 'def hp: [.. | objects | select(.mimeType? == "text/html" and ((.body.data? // "") | length) > 0)][0];'
     + ' def tp: [.. | objects | select(.mimeType? == "text/plain" and ((.body.data? // "") | length) > 0)][0];'
     + ' def msg: {messageId, id, threadId, sender, to, subject, messageTimestamp, labelIds, preview, attachmentList: [(.attachmentList // [])[] | {filename, mimeType, attachmentId}],'
-    + ' messageText: ((.messageText // "") | .[0:20000]), payload: {headers: [(.payload.headers // [])[] | select(.name | ascii_downcase | IN("from","to","cc","reply-to","subject","date","list-unsubscribe","list-unsubscribe-post"))],'
+    + ' messageText: ((.messageText // "") | .[0:20000]), payload: {headers: [(.payload.headers // [])[] | select(.name | ascii_downcase | IN("from","to","cc","reply-to","subject","date","in-reply-to","list-unsubscribe","list-unsubscribe-post"))],'
     + ' parts: ([(if $full or ((.messageText // "") == "") then (.payload | hp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:200000])}}) else empty end),'
     + ' (if ((.messageText // "") == "") then (.payload | tp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:40000])}}) else empty end)])}};';
   const GX_JQ = {
@@ -1386,6 +1393,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         return { labelId: "gxname:" + input.displayName, name: input.displayName };
       }
     }
+    if (/^(list_send_as|send_message|create_draft)$/.test(tool) && input.acct && GX.accounts.some((a) => a.id === input.acct)) return gxOne(tool, input, opts, GX.accounts.find((a) => a.id === input.acct));
+    if (tool === "list_send_as") return gxOne(tool, input, opts, gxAcctFor(input));
     return gxOne(tool, input, opts, gxAcctFor(input));
   }
   async function gxOne(tool, input, opts, A) {
@@ -1419,6 +1428,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         return { id: input.messageId, raw: btoa(unescape(encodeURIComponent(head))).replace(/\+/g, "-").replace(/\//g, "_") };
       }
       case "list_labels": return { labels: (await gxLabelsOf(A, opts)).map((l) => ({ labelId: l.id, name: l.name, labelType: String(l.type || "").toUpperCase() })) };
+      // Read-only: the account's send-as addresses, each with the HTML signature set in Gmail.
+      case "list_send_as": { const d = await gx("GMAIL_LIST_SEND_AS", {}, opts, true, A); return { sendAs: (d.sendAs || []).map((x) => ({ email: String(x.sendAsEmail || "").toLowerCase(), signature: String(x.signature || ""), isDefault: !!x.isDefault, isPrimary: !!x.isPrimary, verified: !!x.isPrimary || !x.verificationStatus || x.verificationStatus === "accepted" })) }; }
       case "create_label": {
         const d = await gx("GMAIL_CREATE_LABEL", { label_name: input.displayName }, opts, false, A); gxLabelCache[A.id] = null;
         return { labelId: d.id, name: d.name || input.displayName };
@@ -1458,8 +1469,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         if (input.draftId) return gx("GMAIL_SEND_DRAFT", { draft_id: input.draftId }, opts, false, A);
         gxNoAtt(input);
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
-        if (tid) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
-        return gx("GMAIL_SEND_EMAIL", { recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
+        if (tid && !input.fromEmail) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
+        // From a chosen address (another account, or an alias set up under "Send mail as"): a new message with that From.
+        return gx("GMAIL_SEND_EMAIL", Object.assign({ recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, input.fromEmail ? { from_email: input.fromEmail } : {}), opts, false, A);
       }
       case "reply": {
         gxNoAtt(input);
@@ -1870,7 +1882,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         + '</article>';
     }).join("");
     compose.hidden = false; setCompose(ls.get("cm.composeOpen") === "1", false); updateToLine();
-    $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = "";
+    $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = ""; resetSigRow(); resetFrom();
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
     state.loadedDraftId = null; state.attachments = []; renderAtt();
@@ -2222,7 +2234,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     try {
       const subj = /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || "");
       const to = isOwn(last) ? counterpart(last) : [emailOf(last.sender)];
-      const p = await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body, includeSignature: featOn("signature") }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      // Composio's draft tool has no From, so a draft from another account is made in that account, as a new email.
+      if (state.from && !state.from.isPrimary) { note("A draft can't be saved from an alias here, only sent. Send it, or pick " + ((fromOpts || []).find((o) => o.acct === state.from.acct && o.isPrimary) || { email: "the account's own address" }).email + " to save a draft.", "err"); return; }
+      const p = state.from ? await call(GMAIL, "create_draft", Object.assign(fromRecipients(last), { subject: subj, body: body, includeSignature: featOn("signature") && sigOn(), acct: state.from.acct }), { cache: false }) : await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]);
       note("Saved to Gmail drafts.", "ok");
       if (p && p.viewUrl) { const a = document.createElement("a"); a.href = p.viewUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open draft"; $("composeNote").append(" ", a); }
@@ -2235,10 +2249,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     state.sending = true; $("confirmBox").hidden = true; $("sendBtn").disabled = true; note("Sending…");
     try {
       const own = isOwn(last); const to = own ? counterpart(last) : [emailOf(last.sender)];
-      if (own) {
+      if (state.from) {
+        const r = fromRecipients(last); if (!r.to.length) throw { code: "tool_error", message: "there's no one to send this to" };
+        await call(GMAIL, "send_message", Object.assign(r, { subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, includeSignature: featOn("signature") && sigOn(), fromEmail: state.from.email, acct: state.from.acct }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      } else if (own) {
         if (!to.length) throw { code: "tool_error", message: "there's no one to follow up with on this thread" };
-        await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id, includeSignature: featOn("signature") }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
-      } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked, includeSignature: featOn("signature") }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+        await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]); delete state.variants[state.selectedId];
       const after = await afterSend(state.selectedId);
       note("Sent" + (after.length ? "; " + after.join(", ") : "") + ".", "ok"); $("body").value = ""; resetRcpts();
@@ -2367,7 +2384,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const t = (state.thread && state.thread.id === id) ? state.thread : await fetchThread(id);
       const last = (t.messages || [])[(t.messages || []).length - 1];
       if (!last) throw { code: "tool_error", message: "no message to forward" };
-      await call(GMAIL, "forward", { messageId: last.id, to: [addr], includeSignature: featOn("signature") }, { cache: false });
+      await call(GMAIL, "forward", { messageId: last.id, to: [addr], includeSignature: featOn("signature") && sigOn() }, { cache: false });
       toast('Forwarded a copy to <strong>' + esc(addr) + '</strong>', "ok", 6000);
     } catch (e) {
       const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
@@ -2718,7 +2735,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.readOnly) { note(mcpCopy({ code: "read_only" }), "err"); return; }
     const own = isOwn(last);
     const who = (own ? counterpart(last).map((a) => a).join(", ") : (nameOf(last.sender) || "the sender") + ($("replyAll").checked ? " and everyone on the thread" : "")) + rcptSummary();
-    const verb = own ? "Send this follow-up to " : "Send this reply to ";
+    const verb = (own ? "Send this follow-up" : "Send this reply") + (state.from ? " from " + state.from.email + ", as a new email," : "") + " to ";
     const box = $("confirmBox"), out = $("checkOut"); box.hidden = false; box.className = "confirmbox"; $("useFix").hidden = true;
     if (!featOn("precheck")) { out.innerHTML = ""; $("confirmText").textContent = verb + who + "?"; $("confirmSend").textContent = "Yes, send it"; return; }
     const run = ++checkRun;
@@ -4337,6 +4354,111 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       renderDrafts(); if (!state.dSel) renderDraftsHome(); loadDraftMetas(token);
     } catch (e) { if (token === state.loadToken) list.innerHTML = '<div class="empty"><h2>Couldn\'t load your drafts</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; }
   }
+  // ---------- your signature ----------
+  // The HTML signature you set in Gmail, to preview on a reply and insert into a draft. Through Composio it's read from
+  // Gmail's settings for the account (and the From address, when it has its own). The Gmail connector has no settings
+  // tool, so there it comes from the newest message you sent that carries one. Read-only either way.
+  const sigCache = {};
+  const sigWrap = (h) => /class="gmail_signature"|data-smartmail="gmail_signature"/.test(h) ? h : '<div class="gmail_signature" data-smartmail="gmail_signature">' + h + "</div>";
+  function mySignature(acctId, from) {
+    const key = (acctId || "") + "|" + String(from || "").toLowerCase();
+    if (!sigCache[key]) sigCache[key] = (async () => {
+      if (GX) {
+        const r = await call(GMAIL, "list_send_as", { acct: acctId || (curAcct() || {}).id }, { cache: { staleTime: 600000, gcTime: 3600000 } });
+        const l = (r && r.sendAs) || []; const f = emailOf(from || "").toLowerCase();
+        const pick = (f && l.find((x) => x.email === f && x.signature.trim())) || l.find((x) => x.isDefault && x.signature.trim()) || l.find((x) => x.isPrimary && x.signature.trim()) || l.find((x) => x.signature.trim());
+        return pick ? sigWrap(pick.signature) : "";
+      }
+      const p = await call(GMAIL, "search_threads", { query: "in:sent", pageSize: 6 }, { cache: { staleTime: 600000, gcTime: 3600000 } });
+      for (const t of ((p && p.threads) || []).slice(0, 4)) {
+        let full; try { full = await call(GMAIL, "get_thread", { threadId: t.id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 600000, gcTime: 3600000 } }); } catch { continue; }
+        for (const m of ((full && full.messages) || []).slice().reverse()) {
+          if (!isOwn(m) || !m.htmlBody) continue;
+          const el = new DOMParser().parseFromString(m.htmlBody, "text/html").querySelector('.gmail_signature, [data-smartmail="gmail_signature"]');
+          if (el && el.textContent.trim()) return sigWrap(el.outerHTML);
+        }
+      }
+      return "";
+    })().catch((e) => { delete sigCache[key]; throw e; });
+    return sigCache[key];
+  }
+  // A signature as it looks, minus remote images (shown by their alt text) and styles.
+  const sigPreview = (h) => '<div class="sigview">' + sanitizeHtml(h).innerHTML + '</div>';
+  const acctEmailOf = (id) => { const A = GX && GX.accounts.find((a) => a.id === id); return (A && A.email) || CONFIG.ownEmail || OWN || ""; };
+  // ---------- From: the address a reply goes from ----------
+  // Through Composio the reply box can send from any address on any connected account: each account's own address and
+  // the aliases set up in Gmail under "Send mail as" (read with GMAIL_LIST_SEND_AS). The thread's own address sends a
+  // normal reply in the thread. Any other address sends it as a new email ("Re: …") from there, because no tool can reply
+  // inside a thread from another account or alias. The Gmail connector sends from its one account, so there's no picker.
+  state.from = null; let fromOpts = null;
+  async function loadFromOpts() {
+    if (!GX) return [];
+    if (fromOpts) return fromOpts;
+    const rs = await Promise.allSettled(GX.accounts.map((A) => call(GMAIL, "list_send_as", { acct: A.id }, { cache: { staleTime: 600000, gcTime: 3600000 } })));
+    const out = [];
+    rs.forEach((r, i) => {
+      const A = GX.accounts[i]; const own = String(A.email || "").toLowerCase();
+      const l = r.status === "fulfilled" ? ((r.value && r.value.sendAs) || []).filter((x) => x.email && x.verified) : [];
+      if (!l.length && own) l.push({ email: own, isPrimary: true, isDefault: true });
+      l.forEach((x) => { if (!out.some((o) => o.acct === A.id && o.email === x.email)) out.push({ acct: A.id, email: x.email, isPrimary: !!x.isPrimary || x.email === own, isDefault: !!x.isDefault, label: A.label || A.email || A.id }); });
+    });
+    return (fromOpts = out);
+  }
+  // The address a normal reply on this thread goes from: its account's default.
+  function homeFrom() { const A = (state.selectedId && ownerOf("t", state.selectedId)) || curAcct(); const l = (fromOpts || []).filter((o) => A && o.acct === A.id); return l.find((o) => o.isDefault) || l.find((o) => o.isPrimary) || l[0] || null; }
+  async function resetFrom() {
+    state.from = null; const row = $("fromRow"); if (!row) return; row.hidden = true; $("fromNote").textContent = "";
+    if (!GX) return;
+    const id = state.selectedId; let l; try { l = await loadFromOpts(); } catch { return; }
+    if (state.selectedId !== id || l.length < 2) return;
+    const home = homeFrom(); const sel = $("fromSel"); const groups = [...new Set(l.map((o) => o.acct))];
+    sel.innerHTML = groups.map((a) => { const os = l.filter((o) => o.acct === a); return '<optgroup label="' + esc(os[0].label) + '">' + os.map((o) => '<option value="' + esc(o.acct + "|" + o.email) + '"' + (home && o.acct === home.acct && o.email === home.email ? " selected" : "") + '>' + esc(o.email) + '</option>').join("") + '</optgroup>'; }).join("");
+    row.hidden = false;
+  }
+  function pickFrom() {
+    const v = $("fromSel").value.split("|"); const o = (fromOpts || []).find((x) => x.acct === v[0] && x.email === v[1]); const home = homeFrom();
+    state.from = o && home && (o.acct !== home.acct || o.email !== home.email) ? o : null;
+    $("fromNote").textContent = state.from ? "Goes out as a new email from " + state.from.email + ", not inside this thread: Gmail can't reply in a thread from another " + (state.from.acct !== home.acct ? "account." : "address.") : "";
+    if (!$("sigBox").hidden) { $("sigBox").hidden = true; peekSig(); }
+  }
+  // Who a reply from another address goes to: what Reply or Reply all would pick, plus your Cc and Bcc.
+  function fromRecipients(last) {
+    const me = (a) => isMe(emailOf(a).toLowerCase()); const back = last.replyTo && last.replyTo.length ? last.replyTo : [last.sender];
+    const to = isOwn(last) ? counterpart(last) : back.map(emailOf).filter((a) => a && !me(a));
+    let cc = [];
+    if (!isOwn(last) && $("replyAll").checked) { to.push(...(last.toRecipients || []).map(emailOf).filter((a) => a && !me(a) && !to.includes(a))); cc = (last.ccRecipients || []).map(emailOf).filter((a) => a && !me(a) && !to.includes(a)); }
+    cc = [...new Set(cc.concat(state.rcpt.cc.map((r) => r.email)))].filter((a) => !to.includes(a));
+    return Object.assign({ to: to }, cc.length ? { cc: cc } : {}, state.rcpt.bcc.length ? { bcc: state.rcpt.bcc.map((r) => r.email) } : {});
+  }
+  // The reply box: Signature on or off for this message, and Show to see what will go on.
+  const sigOn = () => !$("sigChk") || $("sigChk").checked;
+  function resetSigRow() { const c = $("sigChk"); if (!c) return; c.checked = true; $("sigBox").hidden = true; $("sigBox").innerHTML = ""; $("sigPeek").setAttribute("aria-expanded", "false"); $("sigPeek").textContent = "Show"; $("sigNote").textContent = ""; }
+  async function peekSig() {
+    const box = $("sigBox"), b = $("sigPeek");
+    if (!box.hidden) { box.hidden = true; b.setAttribute("aria-expanded", "false"); b.textContent = "Show"; return; }
+    const A = curAcct(); const f = state.from; const addr = f ? f.email : (A && A.email) || ""; box.hidden = false; b.setAttribute("aria-expanded", "true"); b.textContent = "Hide"; box.innerHTML = '<span class="note"><span class="spin"></span>Getting your signature…</span>';
+    try {
+      const h = await mySignature(f ? f.acct : A && A.id, f ? f.email : "");
+      box.innerHTML = h ? sigPreview(h) : '<span class="note">No signature is set in Gmail' + (addr ? " for " + esc(addr) : "") + '. Add one in Gmail under Settings → Signature and it shows here.</span>';
+    } catch (e) { box.innerHTML = '<span class="note err">' + esc(mcpCopy(e, GMAIL) || "Couldn't read your signature.") + '</span>'; }
+  }
+  // The Drafts editor: insert your current signature, swap an old one for it, or take it off. Nothing is saved until Save.
+  function renderDraftSig() {
+    const box = $("dSigBox"); if (!box) return;
+    box.innerHTML = state.dSig ? '<div class="dsig"><div class="dsighead"><span class="note">Signature · kept as it is</span><button type="button" class="btn sm ghost" id="dSigX">Remove</button></div><div class="dsigbody">' + sigPreview(state.dSig) + '</div></div>' : "";
+    const x = $("dSigX"); if (x) x.addEventListener("click", () => { state.dSig = ""; state.dDirty = true; renderDraftSig(); dNote("Signature removed. Save to keep the change; Insert signature puts it back."); });
+  }
+  async function insertDraftSig() {
+    const c = state.dCur; if (!c || c.hasAtt) return; const id = c.d.id; dNote("Getting your signature…");
+    try {
+      const h = await mySignature(c.d.acct, c.full.sender);
+      if (!state.dCur || state.dCur.d.id !== id) return;
+      if (!h) { dNote("No signature is set in Gmail for " + (emailOf(c.full.sender || "") || acctEmailOf(c.d.acct) || "this account") + ". Add one in Gmail under Settings → Signature.", "err"); return; }
+      if (state.dSig === h) { dNote("Your signature is already on this draft.", "ok"); return; }
+      const had = !!state.dSig; state.dSig = h; state.dDirty = true; renderDraftSig();
+      dNote(had ? "Swapped in your current signature from Gmail. Save to keep it." : "Signature added under the draft. Save to keep it.", "ok");
+    } catch (e) { dNote(mcpCopy(e, GMAIL) || "Couldn't read your signature.", "err"); }
+  }
   // With no draft open, the desk says how many are left to review and starts you on the first.
   function renderDraftsHome(word) {
     $("subject").textContent = "Drafts";
@@ -4468,17 +4590,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div class="dfields">' + ["dto", "dcc", "dbcc"].map((k) => '<span>' + rcptLabel[k] + '</span><div class="rfwrap"><div class="rbox" data-rk="' + k + '"><input type="text" id="' + k + 'In" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="' + rcptLabel[k] + '" aria-autocomplete="list" aria-controls="' + k + 'Sug"></div><div class="sug" id="' + k + 'Sug" role="listbox" aria-label="Suggestions" hidden></div></div>').join("") + '<span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
       + '<div><div class="rtbar" role="toolbar" aria-label="Formatting">'
       + [["bold", "<b>B</b>", "Bold (Ctrl B)"], ["italic", "<i>I</i>", "Italic (Ctrl I)"], ["underline", "<u>U</u>", "Underline (Ctrl U)"], ["link", "Link", "Add a link"], ["insertUnorderedList", "• List", "Bulleted list"], ["insertOrderedList", "1. List", "Numbered list"], ["removeFormat", "Clear", "Clear formatting"]].map((b) => '<button type="button" data-cmd="' + b[0] + '" title="' + b[2] + '" aria-label="' + b[2] + '">' + b[1] + '</button>').join("")
+      + (featOn("signature") ? '<button type="button" class="rtsig" data-sig title="Add the signature you set in Gmail, or swap an old one for it">Insert signature</button>' : "")
       + '</div><div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text"></div></div>'
-      + (state.dSig ? '<div class="dsig"><span class="note">Signature · kept as it is</span><div class="dsigbody">' + esc(htmlToText(state.dSig).split("\n").map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n")) + '</div></div>' : "")
+      + '<div id="dSigBox"></div>'
       + '<div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
       + (c.hasAtt ? '<p class="note">This draft has attachments. Saving from here would drop them, so edit and send it in Gmail.</p>' : "")
+      + (GX && (full.inReplyTo || c.lostThread) ? '<p class="note warnline" id="dThreadWarn">' + (c.lostThread ? "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation." : "Heads up: Composio can't keep a reply's threading headers when it saves a draft. Gmail keeps it in your thread either way, but if you save here, their mail app may show it as a new conversation. To keep it threaded for them, make your edits in Gmail (Send from here is fine as long as you haven't saved).") + '</p>' : "")
       + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
       + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm primary" id="dAutoCheck">Check it for me</button></div><p class="note dhow">Claude reads the draft against the message it answers, what your systems know about this person and your writing rules. It ticks what passes and says what to fix. It never changes the draft.</p>'
       + '<div id="dChecks">' + dChecksHtml(d.id) + '</div></div>'
       + '<div class="mrow dfoot"><span class="note dnote" id="dNote"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
       + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
       + '<button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
-    const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML;
+    const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML; renderDraftSig();
     const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; };
     ed.addEventListener("input", dirty); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
     ["dto", "dcc", "dbcc"].forEach((k) => { renderRcpt(k); wireRcpt(k, (msg) => dNote(msg, "err")); });
@@ -4486,6 +4610,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     let saved = null;
     reading.querySelector(".rtbar").addEventListener("mousedown", (ev) => { if (ev.target.closest("button")) ev.preventDefault(); });
     reading.querySelector(".rtbar").addEventListener("click", (ev) => {
+      if (ev.target.closest("[data-sig]")) { insertDraftSig(); return; }
       const b = ev.target.closest("[data-cmd]"); if (!b || c.hasAtt) return; ed.focus();
       if (b.dataset.cmd === "link") { const sel = window.getSelection(); saved = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null; $("dLinkRow").hidden = false; $("dLinkUrl").focus(); return; }
       document.execCommand(b.dataset.cmd, false, null); dirty();
@@ -4536,6 +4661,10 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
       await call(GMAIL, "update_draft", Object.assign({ draftId: d.id, to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false });
       state.dDirty = false; d._meta = null; full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
+      // Composio's GMAIL_UPDATE_DRAFT rewrites the message without its In-Reply-To and References headers. Gmail still files
+      // it in your thread, but their mail app may show it as a new conversation.
+      if (GX && full.inReplyTo) { c.lostThread = true; full.inReplyTo = ""; }
+      if (c.lostThread) { const w = $("dThreadWarn"); if (w) w.textContent = "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation."; }
       dNote(quiet ? "" : "Saved to Gmail.", "ok"); if (quiet) toast("Saved your changes to the draft to " + esc(to.join(", ")) + ".", "ok", 4000);
       draftMeta(d).then(renderDrafts).catch(() => {});
       return true;
@@ -4546,7 +4675,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
     const to = dAddrs("dto"); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
     const cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
-    $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "");
+    $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
     $("dConfirm").hidden = false; $("dConfirmGo").focus();
   }
   async function sendDraftEdit() {
@@ -4609,6 +4738,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("askMode").addEventListener("click", () => { const on = $("askMode").getAttribute("aria-pressed") !== "true"; $("askMode").setAttribute("aria-pressed", String(on)); $("q").placeholder = on ? "Ask a question about your mail" : "Search mail"; $("q").focus(); });
   $("searchForm").addEventListener("submit", (ev) => { if ($("askMode").getAttribute("aria-pressed") === "true" && featOn("ask")) { ev.preventDefault(); ev.stopImmediatePropagation(); const qv = $("q").value.trim(); if (!qv) return; openAsk(); $("askQ").value = qv; runAsk(); } }, true);
   $("searchForm").addEventListener("submit", (ev) => { ev.preventDefault(); const q = $("q").value.trim(); if (!q) return; document.querySelectorAll("#chips .chip").forEach((x) => x.classList.remove("on")); state.query = q; state.mode = "normal"; $("waitWrap").hidden = true; state.triage = {}; loadThreads(false); });
+  $("fromSel").addEventListener("change", pickFrom);
+  if ($("sigPeek")) { $("sigPeek").addEventListener("click", peekSig); $("sigChk").addEventListener("change", () => { $("sigNote").textContent = $("sigChk").checked ? "" : "Not added to this one."; }); }
   $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} state.triage = {}; draftsAt = 0; loadThreads(false); });
   $("moreBtn").addEventListener("click", () => loadThreads(true));
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-loadmore]")) loadThreads(true); });

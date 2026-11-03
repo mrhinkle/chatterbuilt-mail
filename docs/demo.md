@@ -56,8 +56,10 @@ Each section links to its guide.
 | Right-click a row for every thread action | Cc and Bcc, with suggestions from your address book |
 | ![Drafts](images/drafts.webp) | ![Check it for me](images/drafts-check.webp) |
 | The Drafts tab: drafts as a checklist, the rich-text editor and the context panel | Check it for me: five pass, one flagged with what to fix |
-| ![Select several](images/select.webp) | |
-| Pick several threads and move them at once | |
+| ![Select several](images/select.webp) | ![Signature](images/signature.webp) |
+| Pick several threads and move them at once | Your Gmail signature under the reply box: on or off, and Show |
+| ![Insert signature](images/drafts-signature.webp) | ![From](images/from.webp) |
+| Insert signature in the Drafts tab, with Remove | From: send from another account or an alias |
 | ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
 | Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
 | ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |

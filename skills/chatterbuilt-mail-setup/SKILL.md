@@ -139,6 +139,8 @@ Declare capabilities from CONFIG, and only what's used:
 |---|---|---|
 | `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft` |
 | `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline) |
+
+Through Composio the page also reads each account's send-as addresses and HTML signatures with `GMAIL_LIST_SEND_AS` (read-only, through `COMPOSIO_MULTI_EXECUTE_TOOL`, so nothing new to declare). It feeds the reply box's **From** menu and the signature preview and **Insert signature**. With the Gmail connector the signature comes from the user's newest signed sent message (`search_threads`, `get_thread`), and there's no From menu.
 | `tasks` is set | its `server` | its `tool` |
 | `contacts` uses the Notion short form | `Notion` | `notion-create-pages`, `notion-search` |
 | `contacts` is a custom adapter | its `server` (and `dupCheck.server`) | its `tool` (and `dupCheck.tool`) |

@@ -54,6 +54,11 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 - **Emptying Cc or Bcc:** Gmail keeps a field's old value when it's saved empty, so to take everyone off Cc, do it in Gmail.
 - **The quoted earlier messages** in a reply draft stay attached; the editor shows only your part.
 - **Signature:** the signature in the draft stays exactly as it is, tables, images and links included. It shows under the editor, stays out of edits, revisions and the check, and goes back on when you save. Saving from here doesn't add a second one.
+- **Insert signature** (in the editor's toolbar) adds the signature you set in Gmail to a draft that has none, such as one written by the morning run or in chat, or swaps an old signature for your current one. It uses the draft's account, and the From address's own signature when it has one. **Remove** takes it off. Nothing changes in Gmail until you **Save**. If no signature is set in Gmail, it says where to add one.
+
+  ![Insert signature: your Gmail signature under the draft, kept as it is, with Remove](images/drafts-signature.webp)
+
+- **Replies saved through Composio lose their threading headers.** Composio's draft update rewrites the message without `In-Reply-To` and `References`. Gmail still keeps the draft in your thread, but the other person's mail app may show it as a new conversation. On a reply draft the editor says so before you save. If threading matters, make your edits in Gmail; sending an unsaved draft from here is fine. The Gmail connector doesn't have this problem.
 
 ## What it touches
 
@@ -65,10 +70,11 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 | Check it for me | | nothing | the draft, its recipients and subject, the message it answers, the context brief, your writing rules |
 | Context panel | your context sources, for the person the draft is to | nothing | what those sources return, to write the brief |
 | To, Cc and Bcc suggestions | the threads you've loaded; your address book's search, when one is connected | nothing | nothing |
+| Insert signature | your signature from Gmail (`GMAIL_LIST_SEND_AS` through Composio; your newest signed sent message with the Gmail connector) | nothing until you Save | nothing |
 | Save | | the Gmail draft (`update_draft`) | |
 | Send | | sends the draft (`send_message` with the draft) | |
 
-Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_UPDATE_DRAFT` and `GMAIL_SEND_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
+Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT` and `GMAIL_SEND_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
 
 ## Related
 

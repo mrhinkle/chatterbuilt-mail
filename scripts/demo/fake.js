@@ -26,6 +26,9 @@ module.exports = function fake() {
     n1: mine('n1', ME, 'Note to self: meetup venues', 'Ask Jordan about the big room. Check the library annex too.', 3 * H),
     s3: mine('s3', 'Dana Ruiz <dana@acmerobotics.example>', 'Re: Fall meetup', 'Dana, good to meet you at the meetup. Short version: yes, let us talk sponsorship in the new year. Alex', 40 * D)
   };
+  // A made-up HTML signature: in Gmail's send-as settings (Composio) and on a sent message (the Gmail connector reads it there).
+  const SIG = '<table cellpadding="0" cellspacing="0" style="margin:0px"><tbody><tr><td style="padding-right:12px"><a href="https://riveralabs.example/"><img src="https://riveralabs.example/logo.png" alt="Rivera Labs" width="40"></a></td><td><b style="font-size:14px">Alex Rivera</b><br><span style="color:#555">Events lead, Rivera Labs</span><br><a href="mailto:alex@riveralabs.example">alex@riveralabs.example</a> · <a href="https://riveralabs.example/">riveralabs.example</a></td></tr></tbody></table>';
+  T.s1.messages[T.s1.messages.length - 1].htmlBody = '<div dir="ltr">Sam, happy to do the panel. Send the run of show and I will block the time.<br><br>Alex<br><br><div class="gmail_signature" data-smartmail="gmail_signature">' + SIG + '</div></div>';
   const order = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8'];
   const summ = (id) => { const t = T[id]; const m = t.messages[t.messages.length - 1]; return { id, messageCount: t.messages.length, messages: [{ id: m.id, sender: m.sender, subject: m.subject, toRecipients: m.toRecipients, threadId: id }] }; };
   const search = (q) => {
@@ -89,7 +92,7 @@ module.exports = function fake() {
   const cmsg = (m, tid, full) => {
     const o = { messageId: m.id, threadId: tid, sender: m.sender, to: (m.toRecipients || []).join(', '), subject: m.subject, messageTimestamp: m.date, labelIds: m.labelIds || [], attachmentList: (m.attachments || []).map((x, i) => ({ attachmentId: 'att' + i, filename: x.filename, mimeType: x.mimeType })),
       preview: { body: String(m.plaintextBody || '').replace(/'/g, '&#39;').slice(0, 200), subject: m.subject }, display_url: 'https://mail.google.com/mail/u/0/#inbox/' + tid, messageText: full ? String(m.plaintextBody || '').replace(/\n/g, '\r\n') : '' };
-    if (full) o.payload = { mimeType: 'multipart/alternative', headers: [{ name: 'From', value: m.sender }, { name: 'To', value: o.to }, { name: 'Subject', value: m.subject }].concat(m.cc ? [{ name: 'Cc', value: m.cc }] : []),
+    if (full) o.payload = { mimeType: 'multipart/alternative', headers: [{ name: 'From', value: m.sender }, { name: 'To', value: o.to }, { name: 'Subject', value: m.subject }].concat(m.cc ? [{ name: 'Cc', value: m.cc }] : []).concat(m.inReplyTo ? [{ name: 'In-Reply-To', value: m.inReplyTo }] : []),
       parts: [{ mimeType: 'text/plain', body: { data: u64(m.plaintextBody || '') } }].concat(m.htmlBody ? [{ mimeType: 'text/html', body: { data: u64(m.htmlBody) } }] : []) };
     return o;
   };
@@ -111,6 +114,7 @@ module.exports = function fake() {
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID' && a.format === 'raw') return { messageId: a.message_id, raw: a.message_id === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') };
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID') return { messageId: a.message_id, payload: { mimeType: 'multipart/alternative', headers: [{ name: 'Subject', value: 'x' }].concat(a.message_id === 'mt5' ? [{ name: 'List-Unsubscribe', value: '<https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>' }] : []) } };
     if (slug === 'GMAIL_LIST_LABELS') return { labels: [{ id: 'INBOX', name: 'INBOX', type: 'system' }].concat((personal ? ['Family', 'Bikes'] : ['Finance', 'Sponsors', 'Meetup', 'Newsletters']).map((n, i) => ({ id: 'L' + (i + 1), name: n, type: 'user' }))) };
+    if (slug === 'GMAIL_LIST_SEND_AS') return { sendAs: personal ? [{ sendAsEmail: 'alex.rivera@mail.example', isPrimary: true, isDefault: true, signature: '' }] : [{ sendAsEmail: 'alex@riveralabs.example', isPrimary: true, isDefault: true, signature: window.__noSig ? '' : SIG }, { sendAsEmail: 'events@riveralabs.example', signature: '' }] };
     if (slug === 'GMAIL_LIST_DRAFTS') return { drafts: personal ? [] : [{ id: 'd1', message: { id: 'md1', threadId: 't2' } }] };
     // window.__htmlOnlyDraft: a draft saved as HTML only, the way Gmail returns many through Composio: one text/html
     // payload, and the same HTML (entities and all) in messageText.
@@ -118,7 +122,7 @@ module.exports = function fake() {
       const html = 'Hi Lee,<br><br>Thanks for the walkthrough. We&#x27;re set for Thursday at 10, and I&#x27;ll bring the floor plan.<br><br>Best,<br>Sam<br><br><div class="gmail_signature" data-smartmail="gmail_signature"><table cellpadding="0" cellspacing="0" style="margin:0px"><tbody><tr><td style="font-family:Inter,sans-serif;font-size:10px">Sam Rivera &middot; Rivera Labs</td></tr></tbody></table></div>';
       return { id: 'd1', message: { messageId: 'md1', threadId: 't2', sender: ME, to: 'Lee Park <lee@venuehall.example>', subject: 'Re: Venue walkthrough', messageTimestamp: iso(now - H), labelIds: ['DRAFT'], attachmentList: [], preview: { body: 'Hi Lee, Thanks for the walkthrough. We&#39;re set for Thursday at 10', subject: 'Re: Venue walkthrough' }, messageText: html, payload: { mimeType: 'text/html', filename: '', partId: '', headers: [{ name: 'From', value: ME }, { name: 'To', value: 'Lee Park <lee@venuehall.example>' }, { name: 'Subject', value: 'Re: Venue walkthrough' }], body: { data: u64(html), size: html.length } } } };
     }
-    if (slug === 'GMAIL_GET_DRAFT') return { id: 'd1', message: cmsg({ id: 'md1', sender: ME, toRecipients: ['Lee Park <lee@venuehall.example>'], date: iso(now - H), subject: 'Re: Venue walkthrough', labelIds: ['DRAFT'], plaintextBody: DRAFTS.drafts[0].plaintextBody }, 't2', true) };
+    if (slug === 'GMAIL_GET_DRAFT') return { id: 'd1', message: cmsg({ id: 'md1', sender: ME, toRecipients: ['Lee Park <lee@venuehall.example>'], date: iso(now - H), subject: 'Re: Venue walkthrough', labelIds: ['DRAFT'], inReplyTo: '<walkthrough-1@venuehall.example>', plaintextBody: DRAFTS.drafts[0].plaintextBody }, 't2', true) };
     return { id: 'ok' };
   };
   // The Cloudway invoice as a raw message with a (made-up) PDF attached, for the attachment viewer.

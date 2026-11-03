@@ -7,8 +7,9 @@
 | "Gmail isn't connected" or "Reconnect Gmail" | claude.ai Settings, Connectors: add or reconnect Gmail, then refresh the page. |
 | "Composio isn't connected" | Your copy reads Gmail through Composio. Add or reconnect Composio in claude.ai Settings, Connectors, and check the Gmail accounts are still connected inside Composio. |
 | An account in the switcher shows an error | That account's connection in Composio lapsed or was removed. Reconnect it in Composio; the other accounts keep working. |
-| Your signature appears twice | Your drafts already end with a signature block and Gmail adds yours too. Turn off **Gmail signature** in Skills, or take the block out of your sign-off. |
-| No signature on sent mail | Set one in Gmail (Settings → Signature, and pick it under "Signature defaults"), and check **Gmail signature** is on in Skills. |
+| Your signature appears twice | Your drafts already end with a signature block and Gmail adds yours too. Switch **Signature** off under the reply box for that message, turn off **Gmail signature** in Skills, or take the block out of your sign-off. |
+| A reply you saved in Drafts arrived as a new conversation | Through Composio, saving a draft drops its threading headers. Edit reply drafts in Gmail when threading matters; see [Drafts](drafts.md#good-to-know). |
+| No signature on sent mail | Set one in Gmail (Settings → Signature, and pick it under "Signature defaults"), and check **Gmail signature** is on in Skills and **Signature** is on under the reply box. **Show** tells you whether the page can read it. |
 | "Couldn't open the PDF viewer here" | The PDF viewer loads from cdnjs.cloudflare.com and that didn't load. Refresh and try again, or use **Open in Gmail**. |
 | No **Save** button on an attachment | The page wasn't given permission to offer downloads. Ask Claude to republish it with the `downloads` capability, or use **Open in Gmail**. |
 | "Not connected: Notion, Google Calendar…" toast | Those features need that connector. Reading mail still works. |

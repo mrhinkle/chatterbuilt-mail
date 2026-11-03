@@ -85,11 +85,30 @@ Then you choose:
 
 If nothing is wrong, it says so and asks you to confirm. If the check can't run, you can still send. While it runs, **Send without checking** skips it. You can turn the check off in **Settings → Skills**.
 
+## From: which address it goes from
+
+With Gmail through Composio, a **From** menu sits over the recipients. It lists every address you can send from: each connected account's own address and the aliases you've set up in Gmail under Settings → Accounts → **Send mail as**, grouped by account.
+
+- It starts on the thread's own address, and **Send** is a normal reply in the thread.
+- Pick another address and the reply goes out from there as a new email, with "Re:" and the thread's subject, to the same people (Reply all and your Cc and Bcc included). The line under the menu says so, and so does the send confirmation. Gmail can't reply inside a thread from another account or alias, so that conversation starts fresh for them.
+- **Show** under the reply box previews the signature of the address you picked.
+- **Save draft** from another account saves the draft in that account. Drafts can't be saved from an alias here; send it, or pick the account's own address.
+- The next thread starts on its own address again.
+
+With the Gmail connector there's one account and no aliases to pick, so the menu doesn't appear.
+
+![From: an alias picked over the recipients, with the note that it goes as a new email](images/from.webp)
+
+*Made-up data.*
+
 ## Everything else in the reply box
 
 - **Work on it in chat:** in **More** above the thread, this copies a short pointer to the thread (subject, sender, account, thread id). Paste it into a Claude chat, work the reply out there, and ask Claude to save it as a Gmail draft in the thread. Back here, open the thread: the **draft waiting in Gmail** banner offers **Load it**, and **Send** sends it (and removes the draft). The page checks for new drafts each time you open a thread.
 - **Snippets:** reusable text you insert at the cursor (the foot of the reply box, or **Reply → Insert a snippet**), with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
-- **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. A line under the reply box says so. Each account uses its own signature. If your drafts already end with a signature block, turn **Gmail signature** off in Skills so you don't get two.
+- **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. Each account uses its own.
+  - **Signature** under the reply box is on by default. Switch it off to leave the signature off one message; the next thread starts with it on again.
+  - **Show** previews the signature that will go on, read from Gmail: through Composio from the account's settings (the From address's own signature when it has one), and with the Gmail connector from the newest message you sent that carries one. Remote images show by their alt text in the preview; the real email gets the real images.
+  - If your drafts already end with a signature block, switch it off for that message, or turn **Gmail signature** off in Skills so you don't get two.
 - **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
 - **Reply all:** off by default. The pre-send check warns when reply-all looks risky. The line above the reply says who it goes to.
 - **Cc and Bcc:** press **Cc** or **Bcc** above the reply and start typing a name. Suggestions come from the people in your threads and, when it's set up, your address book (Google Contacts). **Enter**, **Tab** or a comma adds someone; **×** or Backspace removes them. The confirmation before sending and the pre-send check both name everyone on Cc and Bcc. With reply-all on, the people already on Cc stay on it. Cc and Bcc also go with **Save draft**.
@@ -104,7 +123,10 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 | Step | Reads | Writes | Sent to the AI |
 |---|---|---|---|
 | Drafting | the thread; your sent mail to this person (tone); the context brief; your calendar (open times only) | nothing | the thread, your voice and lessons, the brief, free time slots |
-| Save draft | | a Gmail draft (`create_draft`, with your Gmail signature) | |
+| Save draft | | a Gmail draft (`create_draft`, with your Gmail signature unless it's switched off) | |
+| From | the addresses you can send from (`GMAIL_LIST_SEND_AS` for each account, once per session) | nothing | nothing |
+| Send from another address | | a new email from that address (`GMAIL_SEND_EMAIL` with `from_email`, on that account) | the reply and thread, for the pre-send check |
+| Show signature | your signature: Gmail settings through Composio (`GMAIL_LIST_SEND_AS`), or your newest signed sent message with the Gmail connector (`search_threads`, `get_thread`) | nothing | nothing |
 | Send | | the reply (`reply`), or a new message threaded under your last one when you're following up (`send_message`), with any Cc and Bcc | the reply and thread, for the pre-send check |
 | Cc and Bcc suggestions | the threads you've loaded; your address book's search, when one is set up | nothing | nothing |
 
