@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.1 (2026-11-03)
+
+### Fixed
+- **The bar with Send stays on screen.** With the reply box open, the thread and the reply scroll as one page, and the bar with Snippets, Reply all, Remind me, Save draft and Send now stays pinned to the bottom of the pane. It used to sit below the last message, so on a long thread it was off screen. The reply box remembers being open, so this hit every thread once you'd opened it.
+- **Hide closes the context panel.** On a wide screen, **Hide** used to move the whole brief to the top of the thread, so the panel seemed not to close. Now the thread gets the full width and **Context** in the toolbar (or `]`) brings the panel back. Narrow screens and the Drafts tab still show the brief in the page, since they have nowhere else to put it.
+
 ## 0.7.0 (2026-11-03)
 
 ### Changed

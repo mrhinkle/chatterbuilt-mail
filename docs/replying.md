@@ -9,7 +9,7 @@ Pick a reply from the **Reply** menu or say what you want, and you get a reply i
 ## How to use it
 
 1. Open a thread. The reply box sits under the messages, folded to its **Reply** header (with who it's to) and one line: the **Reply** menu, a box for what to say, and **Draft**. It opens up when you use it, so the message keeps the room while you read. Click anywhere on the **Reply** header to open or close it by hand, and the app remembers which you prefer. On a phone, tap **Reply** in the bottom bar.
-   - Open, the reply box opens all the way: the thread and your reply scroll together as one page, with the thread's title kept at the top, and the text box grows with what you write instead of scrolling inside itself.
+   - Open, the reply box opens all the way: the thread and your reply scroll together as one page, with the thread's title kept at the top and the bar with **Send** kept at the bottom, and the text box grows with what you write instead of scrolling inside itself.
 
    ![The Reply menu open over the folded reply box](images/reply-menu.webp)
 

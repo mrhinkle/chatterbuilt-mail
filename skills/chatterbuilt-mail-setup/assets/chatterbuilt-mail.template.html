@@ -391,9 +391,17 @@ body:not(.thread-open) .headtog { display: none; }
 .compose .row.iter { gap: 4px; }
 .compose .row.iter .lbl { margin-right: 2px; }
 .compose .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.compose .foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-.compose .foot .spacer { flex: 1 1 auto; }
-.compose .foot .sendgrp { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+/* The bar with Send is the reading pane's own child, right after the reply box, so it can stay pinned to the bottom of
+   the pane while the thread and an open reply scroll as one: a sticky bar inside the reply box couldn't leave the box,
+   and on a long thread the box starts below the fold. Folded or hidden reply box, no bar. */
+.cfoot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 4px 14px 14px; background: rgba(255, 255, 255, 0.38); }
+.cfoot .spacer { flex: 1 1 auto; }
+.cfoot .sendgrp { display: flex; gap: 6px; align-items: center; margin-left: auto; }
+.compose:not(.folded) { padding-bottom: 6px; }
+.compose[hidden] + .cfoot, .compose.folded + .cfoot { display: none; }
+@media (min-width: 861px) {
+  .desk:has(.compose:not([hidden]):not(.folded)) > .cfoot { position: sticky; bottom: 0; z-index: 3; padding-top: 9px; padding-bottom: 10px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border-top: 1px solid var(--line); }
+}
 .tog { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 550; color: var(--muted); background: rgba(255, 255, 255, 0.6); cursor: pointer; user-select: none; }
 .tog input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 .tog::before { content: ""; width: 13px; height: 13px; border-radius: 4px; border: 1.5px solid var(--line-2); background: #ffffff; flex: none; }
@@ -603,7 +611,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   .barright { gap: 4px; }
   .model span { display: none; }
   .taskdrop .hint, #paletteBtn, #statusText { display: none; }
-  .deskhead, .reading, .compose, .toolbar, .list-foot { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .deskhead, .reading, .compose, .cfoot, .toolbar, .list-foot { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
   .list { padding-left: max(8px, env(safe-area-inset-left, 0px)); padding-right: max(8px, env(safe-area-inset-right, 0px)); }
   .banner { margin-left: max(16px, env(safe-area-inset-left, 0px)); margin-right: max(16px, env(safe-area-inset-right, 0px)); }
   .menu { left: 0 !important; right: 0; bottom: 0; top: auto !important; width: auto !important; max-width: none; max-height: 80vh; border-radius: 16px 16px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(10px, env(safe-area-inset-left, 0px)); padding-right: max(10px, env(safe-area-inset-right, 0px)); box-shadow: 0 -12px 40px rgba(15, 23, 42, 0.18); }
@@ -623,6 +631,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   .phonebar .btn.primary { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: var(--accent-ink); }
   .phonebar .btn .ic { color: inherit; }
   body.thread-open .compose { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  body.thread-open .compose:not(.folded) { padding-bottom: 6px; }
+  .cfoot { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  body.thread-open .cfoot { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   body.thread-open .reading { padding-bottom: 12px; }
   .today { padding: 16px; }
   .toast { bottom: auto; top: calc(10px + env(safe-area-inset-top, 0px)); }
@@ -637,8 +648,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   .tgroup { flex-wrap: nowrap; }
   .tgroup.end { margin-left: auto; }
   .acts .btn { min-height: 36px; }
-  .compose .foot .sendgrp { width: 100%; }
-  .compose .foot .sendgrp .btn { flex: 1 1 0; }
+  .cfoot .sendgrp { width: 100%; }
+  .cfoot .sendgrp .btn { flex: 1 1 0; }
   .pop { left: 0; right: 0; bottom: 0; top: auto; width: auto; max-height: 72vh; border-radius: 16px 16px 0 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(12px, env(safe-area-inset-left, 0px)); padding-right: max(12px, env(safe-area-inset-right, 0px)); }
   .modal-back { align-items: flex-end; padding-block: 0; padding-left: 0; padding-right: 0; }
   .modal, .modal.wide { width: 100%; max-height: 90vh; border-radius: 18px 18px 0 0; }
@@ -776,24 +787,24 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         <div class="sigrow" data-feat="signature"><label class="tog" title="Add the signature you set in Gmail when this sends or saves as a draft"><input type="checkbox" id="sigChk" checked>Signature</label><button class="btn sm ghost" id="sigPeek" type="button" aria-expanded="false" aria-controls="sigBox">Show</button><span class="note" id="sigNote"></span></div>
         <div class="sigbox" id="sigBox" data-feat="signature" hidden></div>
         <div class="thenrow" id="thenRow" hidden><span class="rl">Then</span><input type="text" id="thenIn" autocomplete="off" placeholder="After it sends: “Slack Christine to book the room”, “add a task to send the deck Friday”" aria-label="What to do after it sends"><span class="note" id="thenNote"></span></div>
-        <div class="foot">
-          <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
-          <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
-          <span class="attlist" id="attList"></span>
-          <span class="spacer"></span>
-          <label class="tog"><input type="checkbox" id="replyAll">Reply all</label>
-          <label class="tog" data-feat="snooze" title="If nobody replies, bring the thread back to your inbox"><input type="checkbox" id="remindChk">Remind me in <select id="remindDays" aria-label="Days"><option>2</option><option selected>3</option><option>5</option><option>7</option></select> days</label>
-          <span class="sendgrp">
-            <button class="btn" id="saveDraftBtn" type="button" data-mut>Save draft</button>
-            <button class="btn primary" id="sendBtn" type="button" data-mut>Send</button>
-          </span>
-        </div>
         <span class="note" id="composeNote"></span>
         <div class="confirmbox" id="confirmBox" hidden>
           <div id="checkOut"></div>
           <div id="thenPlan"></div>
           <div class="mrow"><span id="confirmText">Send this reply?</span><button class="btn sm primary" id="confirmSend" type="button">Yes, send it</button><button class="btn sm" id="useFix" type="button" hidden>Use suggested version</button><button class="btn sm ghost" id="cancelSend" type="button">Cancel</button></div>
         </div>
+      </div>
+      <div class="foot cfoot" id="composeFoot">
+        <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
+        <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
+        <span class="attlist" id="attList"></span>
+        <span class="spacer"></span>
+        <label class="tog"><input type="checkbox" id="replyAll">Reply all</label>
+        <label class="tog" data-feat="snooze" title="If nobody replies, bring the thread back to your inbox"><input type="checkbox" id="remindChk">Remind me in <select id="remindDays" aria-label="Days"><option>2</option><option selected>3</option><option>5</option><option>7</option></select> days</label>
+        <span class="sendgrp">
+          <button class="btn" id="saveDraftBtn" type="button" data-mut>Save draft</button>
+          <button class="btn primary" id="sendBtn" type="button" data-mut>Send</button>
+        </span>
       </div>
     </section>
     <aside class="side glass" id="side" aria-label="Context" hidden><div class="sidecap"><span class="lbl">Context</span><button class="btn sm ghost" id="sideHide" type="button" aria-controls="side" title="Hide the context panel (])">Hide<svg class="ic" viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></div><div class="sidebody" id="sideBody"></div></aside>
@@ -3811,7 +3822,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("side").hidden = !show; document.querySelector(".main").classList.toggle("has-side", show && wideMQ.matches);
     $("sideTog").hidden = !(on && panelOn() && state.sideOff);
   }
-  function ctxTarget() { return sidePanel() ? $("sideBody") : $("ctxBox"); }
+  // Hidden on purpose on a wide screen means hidden: no copy of the context at the top of the thread. The Context button
+  // in the thread's toolbar (or ]) brings the panel back. Narrower screens have no panel, so they keep the card in the thread,
+  // and so does the Drafts editor, which has no thread toolbar to bring the panel back from.
+  const ctxHidden = () => wideMQ.matches && state.sideOff && !inDraftCtx();
+  function ctxTarget() { return sidePanel() ? $("sideBody") : ctxHidden() ? null : $("ctxBox"); }
   function setSideOff(off) {
     state.sideOff = off; ls.set("cm.sideOff", off ? "1" : "0");
     showSide(true); if (state.thread || inDraftCtx()) renderContext();
@@ -3886,7 +3901,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   if (window.ResizeObserver) { const ro = new ResizeObserver(() => fitPanes()); [mainEl, $("rail"), $("side"), $("desk")].forEach((el) => ro.observe(el)); }
   window.addEventListener("resize", fitPanes);
   fitPanes();
-  // The context card at the top of a thread (narrow screens, phones, or with the side panel hidden) can be folded to one line.
+  // The context card at the top of a thread (narrow screens and phones, which have no side panel) can be folded to one line.
   state.ctxFold = ls.get("cm.ctxFold") === "1";
   function toggleContext() {
     if (!state.thread || !panelOn()) return;
@@ -3939,7 +3954,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function renderContext() {
     const id = ctxKey(); const c = state.ctx[id]; const el = ctxTarget(); const other = sidePanel() ? $("ctxBox") : $("sideBody");
     if (other) other.innerHTML = "";
-    if (!el) return;
+    if (!el) { if ($("ctxBox")) $("ctxBox").innerHTML = ""; return; }
     if (!c) { el.innerHTML = ""; return; }
     if (c.nowho) { el.innerHTML = sidePanel() ? '<div class="sec"><div class="cap">Context</div><div class="note">Nothing to look up here: there\'s no one on this thread but you.</div></div>' : ""; return; }
     const wide = sidePanel(); const who = c.who || {};
