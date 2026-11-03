@@ -122,6 +122,7 @@ node scripts/demo/screenshots.js demo-out/screens    # every screenshot on this 
 node scripts/demo/screenshots.js docs/images         # refresh the docs' screenshots (PNG; convert to WebP)
 node scripts/demo/screenshots.js demo-out/screens route,presend   # just these
 node scripts/demo/record.js demo-out                 # the video
+node scripts/demo/record.js demo-out --voice clips  # a narrated cut, one clip per line of scripts/demo/voiceover.md
 ```
 
 They need Node with Playwright and Chromium, Python 3, and ffmpeg for the video. The attachment scenes draw the PDF with pdf.js, which the page loads from cdnjs; if your machine can't reach it, run `npm i pdfjs-dist@3.11.174` in the folder you run the scripts from and they'll serve that copy instead. The video and the `accounts` screenshot use a copy with Gmail through Composio and two made-up accounts (`scripts/demo/build-page.js`). `demo-out/` is ignored by git. The made-up owner and connectors are in `scripts/demo/demo.config.js`. The threads, context and AI replies are in `scripts/demo/fake.js`.
