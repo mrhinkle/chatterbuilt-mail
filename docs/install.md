@@ -36,7 +36,7 @@ ChatGPT's connectors change often. The ChatGPT details above come from third-par
 
 **What it asks you to allow.** A first install uses Gmail and Claude only. claude.ai asks you to allow Gmail the first time the page reads your mail. Each connector you add later asks once, the first time it's used. If you install from a prompt in Claude Code, the session also asks before it clones the repo, runs the build script and publishes; installing the plugin skips the clone.
 
-**Where your settings live.** In the published artifact. You don't need a repo, and the setup never commits to this one: forks of a public repo are public, and your settings hold your addresses.
+**Where your settings live.** In the published artifact. You don't need a repo, and the setup never commits to this one: forks of a public repo are public, and your settings hold your addresses. Want to change the code itself? [Fork it](getting-started.md#path-2-fork-it-to-change-the-code); your settings still stay out of the fork.
 
 **The starter prompt:**
 

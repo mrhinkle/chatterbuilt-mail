@@ -12,7 +12,7 @@ Chatterbuilt Mail learns from the corrections you already make: how you change i
 |---|---|---|
 | Edited drafts | You change an AI draft before you send or save it. It keeps the draft and what you sent, up to 30 pairs. | Drafting lessons |
 | Drafts sent as written | You send an AI draft unchanged | A count, so it knows what's working |
-| Turned-down suggestions | You untick an item in Review, or Discard all | Triage lessons ("don't suggest archiving venue mail") |
+| Turned-down suggestions | You untick an item in Review, Discard all, or dismiss a triaged row's next step (×) | Triage lessons ("don't suggest archiving venue mail") |
 | Hand actions | You move, archive, star or mark read; you approve a review item; you archive a sender in the sweep | Rule suggestions |
 
 ## What it does with them

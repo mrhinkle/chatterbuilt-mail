@@ -24,7 +24,11 @@
 
     // Contacts: Notion short form. For HubSpot or another CRM, use { label, server, tool, input, dupCheck } (see docs/connectors.md).
     contacts: { dataSourceId: "00000000-0000-0000-0000-000000000000", nameProp: "Name", emailProp: "Email", companyProp: "Company", titleProp: "Title", phoneProp: "Phone", linkedinProp: "LinkedIn", xProp: "X", blueskyProp: "Bluesky", githubProp: "GitHub", instagramProp: "Instagram", websiteProp: "Website", locationProp: "Location", metProp: "How we met", firstContactProp: "First contact", notesProp: "Notes", backgroundProp: "Background", extra: { "Source": "Chatterbuilt Mail" } },
+    // Or Google Contacts, through Composio: contacts: { book: "google" }. How we met and Background become custom fields.
     clay: false,
+    // Another enrichment app instead of Clay, e.g. Apollo through Composio (the setup skill reads the real tool schema):
+    enrich: null,             // { label: "Apollo", server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", input: { tools: [{ tool_slug: "APOLLO_PEOPLE_ENRICHMENT", arguments: { email: "{{email}}" } }], sync_response_to_workbench: false } }
+    slack: true,              // Route offers "Message someone in Slack": a draft in Slack, never sent
 
     calendar: true,
     workHours: [9, 17],

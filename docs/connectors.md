@@ -13,6 +13,9 @@ The page reaches your apps only through those connectors, using your own sign-in
 | Google Calendar | Open times in replies; meetings with this person (context) | `list_events`; `search_events` for context |
 | Notion | Notion tasks or contacts, voice page pointer, duplicate check, notes and pipeline lookups (context) | `notion-create-pages`, `notion-fetch`, `notion-search` (only the ones you use) |
 | Clay | Enrich with Clay | `search-contacts-by-name`, `add-contact-data-points`, `get-task-context` |
+| Another enrichment app | Enrich with Apollo, People Data Labs, ZoomInfo, Lusha… (`CONFIG.enrich`) | its person-lookup tool |
+| Composio | Google Contacts (`contacts: { book: "google" }`), or Gmail and other apps through Composio | `COMPOSIO_MULTI_EXECUTE_TOOL` |
+| Slack | **Message someone in Slack** in Route (`slack: true`), or a custom handoff | `slack_search_users`, `slack_search_channels`, `slack_send_message_draft` |
 | OpenRouter | Models other than Claude | `send-message` |
 | Your task app or CRM | Tasks or contacts outside Notion | that app's create tool (see below) |
 | Any read tool | Context sources | each source's tool (see [Context sources](#context-sources)) |
@@ -31,9 +34,9 @@ Any connector with the right kind of tool works: the setup skill reads its tool 
 | Context: meetings with this person | meeting notes or transcripts | Fireflies, Granola, Fathom, tl;dv, Circleback, Zoom, Webex |
 | Context: notes, pipeline, memory | search over notes or records | Notion, Evernote, Roam Research, Google Drive, your CRM |
 | Tasks | a create-task tool | Asana, Todoist, ClickUp, monday.com, TickTick, MeisterTask, Notion |
-| Contacts | a create-contact or create-record tool | HubSpot, Attio, Salesflare, Zoho CRM, Bigin, Nutshell, Notion |
-| Enrich a contact | person or company lookup | Clay, Apollo.io, Lusha, Crustdata |
-| Route: hand a thread off | a send or draft-message tool | Slack, RingCentral |
+| Contacts | a create-contact or create-record tool | Google Contacts (through Composio; the default for Gmail), HubSpot, Attio, Salesflare, Zoho CRM, Bigin, Nutshell, Notion |
+| Enrich a contact | person or company lookup | Clay, Apollo.io, Lusha, ZoomInfo, Crustdata; People Data Labs through Composio |
+| Route: hand a thread off | a send or draft-message tool | Slack (built in as **Message someone in Slack**), RingCentral |
 | More context (web lookups) | web search that returns links | Exa, Parallel Search, AWS Web Search |
 | Other models | an LLM gateway | OpenRouter |
 
@@ -236,7 +239,7 @@ tasks: { label: "Asana", server: "Asana", tool: "<the connector's create-task to
 | `{{instagram}}` | Instagram profile URL |
 | `{{met}}` | The how-we-met note |
 | `{{firstContact}}` | Date of your first email together, YYYY-MM-DD |
-| `{{background}}` | Work-history summary (Clay) |
+| `{{background}}` | Work-history summary, from your enrichment app |
 | `{{notes}}` | Your notes |
 | `{{source}}` | `"Chatterbuilt Mail"` |
 | `{{content}}` | Markdown with links to the first thread and the current thread |
@@ -260,10 +263,20 @@ contacts: { dataSourceId: "…", nameProp: "Name", emailProp: "Email", companyPr
   firstContactProp: "First contact", notesProp: "Notes", backgroundProp: "Background", extra: { "Source": "Chatterbuilt Mail" } }
 ```
 
-The setup skill can create a Contacts database with those columns for you.
+The setup skill can create a Contacts database with those columns for you, or add the ones your database is missing (only after you say yes).
+
+**Google Contacts** has its own short form, `contacts: { book: "google" }`. It goes through Composio's Google Contacts toolkit (`GOOGLECONTACTS_SEARCH_CONTACTS` for the duplicate check and Cc suggestions, `GOOGLECONTACTS_CREATE_CONTACT` to save). Fields Google doesn't have become custom fields: How we met, Background and "Added by". First contact is a dated event, Notes go in the Notes field, and profiles are labeled links. With several Gmail accounts through Composio, `accounts[i].contacts` names each account's own Google Contacts connection. When Gmail goes through Composio and `contacts` isn't set, this is the default. Composio has no ready-made sign-in for Google Contacts (as of November 2, 2026): connect it by adding your own Google OAuth client for Google Contacts in Composio's dashboard.
+
+**Enrichment apps other than Clay** use `CONFIG.enrich`, the same adapter shape with `{{email}}`, `{{name}}`, `{{domain}}`, `{{company}}` and `{{linkedin}}`:
+
+```js
+enrich: { label: "Apollo", server: "Apollo.io", tool: "<its person-enrichment tool>", input: { email: "{{email}}" } }
+```
+
+Whatever comes back, the AI maps it to title, company, location, profiles and Background, and fills only fields that are still empty.
 
 ## Models
 
-- Claude is the default and needs nothing extra.
+- Claude is the default and needs nothing extra. The page calls it without naming a model or tier, so Claude's interface picks the model; it never asks for a bigger one by name.
 - To add others, connect OpenRouter. The setup skill looks up the exact model slugs with OpenRouter's `list-models` and adds them to `CONFIG.models`.
-- A model picker appears in **Settings** when there's more than one model.
+- A model picker appears in **Settings** when there's more than one model. Add other models only if you want them; most people don't need any.

@@ -47,7 +47,7 @@ To start every session in read-only, set `readOnly: true` in your copy.
 
 ## Model
 
-Claude does the drafting, triage, briefs and checks by default, through your own Claude plan. To offer other models (GPT, Gemini, GLM and more), add them to `models` in your copy; they run through the OpenRouter connector. A **Model** picker then appears in Settings. Your choice is saved in this browser. See [configuration.md](configuration.md) and [connectors.md](connectors.md#models).
+The model comes from where the page runs. In Claude, drafting, triage, briefs and checks go to Claude through your own Claude plan, and the page never names a model or asks for a bigger tier: Claude's interface decides. So it won't reach for the most expensive model when an everyday one does the job. If you want a specific other model (GPT, Gemini, GLM and more), ask Claude to add it; it goes in `models` and runs through the OpenRouter connector, and a **Model** picker appears in Settings. Your choice is saved in this browser. See [configuration.md](configuration.md) and [connectors.md](connectors.md#models).
 
 ## Command palette
 

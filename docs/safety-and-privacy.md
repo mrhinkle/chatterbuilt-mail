@@ -34,7 +34,9 @@
     - trimmed results from your context sources (meeting notes, calendar entries, task and pipeline rows, memory), when the context card is on.
 - **Calendar times.** For open times, only free slots reach the model. Event names, people, locations and notes stay on the page.
 - **Context sources.** These are different by design: their results do go to the model, so it can brief you. Event descriptions, meeting links, HTML bodies and similar fields are dropped first, and long text is cut. Choose sources you're comfortable sending to the model you use, and leave out any you're not.
-- **Clay.** Clay is called only when you press Enrich with Clay, and it uses your Clay credits.
+- **Enrichment.** Clay, or the enrichment app you set up, is called only when you press Enrich, and it uses your credits there. The person's name, email and company domain go to that app. Its answer goes to the model so it can fill the contact fields.
+- **Address book.** Saving a contact writes one record to your address book (Google Contacts through Composio, or the app you picked). Cc and Bcc suggestions search it as you type; nothing is written.
+- **Slack.** **Message someone in Slack** looks the person or channel up and leaves a draft in your Slack. It never sends.
 - **More context.** Runs only when you press it. The person's name, company and email domain go to your web search provider; nothing from the email does. The results are kept apart from your systems' context and only go into a draft if you switch on Web context.
 - **Attachments.** Opening one reads the message source through your Gmail connection and shows it in the page. Nothing from it goes to the model. PDFs are drawn with pdf.js, a script loaded from cdnjs.cloudflare.com; the file itself never leaves the page. **Save** asks before it downloads anything.
 - **Next meeting (Today).** The title and time are shown on the page only; they are never sent to the model.

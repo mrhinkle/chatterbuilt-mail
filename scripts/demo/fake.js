@@ -160,7 +160,20 @@ module.exports = function fake() {
         const c = ctx(slug, it.arguments); if (c !== undefined) return P(env(c));
         if (slug === 'ASANA_CREATE_A_TASK') return P(env({ data: { gid: '1200000000000001', permalink_url: 'https://app.asana.com/0/0/1200000000000001' } }));
         if (slug === 'NOTION_INSERT_ROW_DATABASE') return P(env({ id: 'demo-page', url: 'https://www.notion.so/demo-page' }));
+        if (/^GOOGLECONTACTS_/.test(slug) && window.__gcDown) return P({ successful: true, data: { results: [{ response: { successful: false, data: {}, error: 'No Active connection for toolkit=googlecontacts' }, tool_slug: slug }] } });
+        if (slug === 'GOOGLECONTACTS_SEARCH_CONTACTS') {
+          const q = String((it.arguments || {}).query || '').toLowerCase();
+          const book = [['Sam Ortiz', 'sam@riveralabs.example'], ['Taylor Brooks', 'taylor@riveralabs.example'], ['Priya Shah', 'priya@northwind.example'], ['Morgan Lee', 'morgan@cityworks.example']];
+          return P(env({ results: q ? book.filter((b) => b[0].toLowerCase().includes(q) || b[1].includes(q)).map((b, i) => ({ person: { resourceName: 'people/c10' + i, names: [{ displayName: b[0] }], emailAddresses: [{ value: b[1] }] } })) : [] }));
+        }
+        if (slug === 'GOOGLECONTACTS_CREATE_CONTACT') return P(env({ resourceName: 'people/c4242424242', etag: 'demo' }));
+        if (slug === 'APOLLO_PEOPLE_ENRICHMENT') return P(env({ person: { name: 'Dana Ruiz', title: 'VP Marketing', headline: 'VP Marketing at Acme Robotics', linkedin_url: 'https://www.linkedin.com/in/danaruiz-demo', city: 'Raleigh', state: 'North Carolina', organization: { name: 'Acme Robotics', website_url: 'https://acmerobotics.example' }, employment_history: [{ title: 'VP Marketing', organization_name: 'Acme Robotics', start_date: '2023-02-01', current: true }, { title: 'Director of Developer Marketing', organization_name: 'Fieldline Systems', start_date: '2018-05-01', end_date: '2023-01-31' }] } }));
         return P(env({ ok: true }));
+      }
+      if (server === 'Slack') {
+        if (tool === 'slack_search_users') return P({ results: [{ user_id: 'U07SAMORTIZ', name: 'Sam Ortiz', title: 'Events lead' }] });
+        if (tool === 'slack_search_channels') return P({ results: [{ id: 'C07EVENTS01', name: 'events' }] });
+        if (tool === 'slack_send_message_draft') return P({ channel_link: 'https://app.slack.com/client/T000/' + (input || {}).channel_id });
       }
       return P({ ok: true });
     }
@@ -171,7 +184,15 @@ module.exports = function fake() {
     const p = String(prompt);
     if (p.includes('This is a follow-up.')) return t('Hi Jordan,\n\nFloating this back up: could the March meetup use the big room? About 60 people, and we\'ll handle cleanup. A yes or no by Friday helps us plan.\n\nAlex');
     if (p.includes('Check the reply against the thread')) return t({ ok: false, issues: [{ severity: 'medium', note: 'You promised the deck on the last call; the reply doesn\'t attach or mention it.' }], revised: 'Hi Dana,\n\nYes to gold. I\'ll send the deck and terms today. Does Tuesday at 10 or Wednesday at 2 work for a call?\n\nAlex' });
-    if (p.includes('You triage their inbox')) return t([{ id: 't1', priority: 'reply', why: 'sponsor waiting on a date', action: 'keep' }, { id: 't2', priority: 'reply', why: 'venue needs a time', action: 'keep' }, { id: 't3', priority: 'reply', why: 'podcast invite', action: 'keep' }, { id: 't6', priority: 'read', why: 'warm intro', action: 'keep' }, { id: 't5', priority: 'skip', why: 'newsletter', action: 'archive' }, { id: 't4', priority: 'skip', why: 'receipt', action: 'move', folder: 'Finance' }, { id: 't7', priority: 'skip', why: 'receipt', action: 'move', folder: 'Finance' }, { id: 't8', priority: 'skip', why: 'paid invoice', action: 'move', folder: 'Finance' }]);
+    if (p.includes('You triage their inbox')) return t([
+      { id: 't1', priority: 'reply', why: 'sponsor waiting on a date', next: { do: 'reply', intent: 'yes', hint: 'Yes to gold by Friday; offer Tuesday or Wednesday for a call' } },
+      { id: 't2', priority: 'reply', why: 'venue needs a time', next: { do: 'route', route: 'handoff' } },
+      { id: 't3', priority: 'reply', why: 'podcast invite', next: { do: 'reply', intent: 'ask', hint: 'Ask the recording date and who listens' } },
+      { id: 't6', priority: 'read', why: 'warm intro', next: { do: 'contact' } },
+      { id: 't5', priority: 'skip', why: 'newsletter', next: { do: 'unsub' } },
+      { id: 't4', priority: 'skip', why: 'receipt', next: { do: 'move', folder: 'Finance' } },
+      { id: 't7', priority: 'skip', why: 'receipt', next: { do: 'move', folder: 'Finance' } },
+      { id: 't8', priority: 'skip', why: 'paid invoice', next: { do: 'archive' } }]);
     if (p.includes('public web search results')) return t('• VP Marketing at Acme Robotics, which builds warehouse robots for mid-size retailers. [1][2]\n• Acme Robotics is opening a Raleigh office and hiring this year. [3]\n• Worth mentioning: the Raleigh expansion makes the spring summit a good fit for recruiting. [3]');
     if (p.includes('You brief')) {
       if (/cloudway/i.test(p)) return t('• This is an automated payment confirmation from Cloudway for invoice CW-2026-1142, addressed to Rivera Labs. The invoice PDF is attached. No reply is needed. [Email]\n• Meetings and the pipeline have nothing on Cloudway: no meetings, no open commitments, no action items for Alex. [Meetings] [Pipeline]\n• The only Cloudway match in Notes is a sponsor-lead page from 2026-09-05 naming a Cloudway contact. It looks like a sales lead, not a billing record, and nothing links it to this invoice. [Notes]\n• Nothing says what the invoice was for (probably a subscription). If you need it for bookkeeping, file the PDF with your records. [Notes]\n• Your "Email reply rules" note doesn\'t cover receipts or automated notices. [Notes]');
@@ -186,6 +207,7 @@ module.exports = function fake() {
       return t({ needsReply: true, drafts: [{ label: 'Best fit', body: 'Hi Dana,\n\nYes to gold. I\'ll send the deck and terms today. Does Tuesday at 10 or Wednesday at 2 work for a call?\n\nAlex' }, { label: 'Shorter', body: 'Hi Dana, yes to gold. Deck and terms coming today. Tuesday at 10 for a call? Alex' }, { label: 'Polite no', body: 'Hi Dana,\n\nThanks for pushing on this. We can\'t lock gold by Friday, but I can hold it through next week.\n\nAlex' }] });
     }
     if (p.includes('extract contact details')) return t({ name: 'Dana Ruiz', title: 'VP Marketing', company: 'Acme Robotics', phone: '+1 919 555 0142', website: 'https://acmerobotics.example', location: null, linkedin: 'https://www.linkedin.com/in/danaruiz-example/', x: 'https://x.com/danaruiz_example', bluesky: null, github: null, instagram: null });
+    if (p.includes('You map person-enrichment data')) return t({ title: 'VP Marketing', company: 'Acme Robotics', location: 'Raleigh, North Carolina', linkedin: 'https://www.linkedin.com/in/danaruiz-demo', background: 'VP Marketing at Acme Robotics since 2023, leading partnerships and events. Before that, five years running developer marketing at Fieldline Systems.' });
     if (p.includes('first connected with')) return t('Met at the fall meetup in October 2026; Dana followed up about sponsoring the spring summit.');
     if (p.includes('one Gmail search query')) return t('venue walkthrough');
     if (p.includes('Answer questions about')) return t('Lee offered Tuesday or Wednesday morning for the walkthrough [1]. You have a draft in Gmail saying Tuesday at 10 that hasn\'t been sent yet [1].');

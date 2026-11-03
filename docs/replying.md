@@ -91,7 +91,10 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 - **Snippets:** reusable text you insert at the cursor (the foot of the reply box, or **Reply → Insert a snippet**), with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
 - **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. A line under the reply box says so. Each account uses its own signature. If your drafts already end with a signature block, turn **Gmail signature** off in Skills so you don't get two.
 - **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
-- **Reply all:** off by default. The pre-send check warns when reply-all looks risky.
+- **Reply all:** off by default. The pre-send check warns when reply-all looks risky. The line above the reply says who it goes to.
+- **Cc and Bcc:** press **Cc** or **Bcc** above the reply and start typing a name. Suggestions come from the people in your threads and, when it's set up, your address book (Google Contacts). **Enter**, **Tab** or a comma adds someone; **×** or Backspace removes them. The confirmation before sending and the pre-send check both name everyone on Cc and Bcc. With reply-all on, the people already on Cc stay on it. Cc and Bcc also go with **Save draft**.
+
+  ![Cc and Bcc above the reply: two people added, with suggestions from the address book](images/cc-bcc.webp)
 - **Remind me in N days:** if nobody answers by then, the thread comes back to your inbox. See [following-up.md](following-up.md).
 - **Drafts waiting in Gmail:** when a thread already has a Gmail draft, a banner offers **Load it**. Sending then replaces that draft, so you don't end up with a stray copy.
 - **Send** always asks you to confirm.
@@ -102,7 +105,8 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 |---|---|---|---|
 | Drafting | the thread; your sent mail to this person (tone); the context brief; your calendar (open times only) | nothing | the thread, your voice and lessons, the brief, free time slots |
 | Save draft | | a Gmail draft (`create_draft`, with your Gmail signature) | |
-| Send | | the reply (`reply`), or a new message threaded under your last one when you're following up (`send_message`) | the reply and thread, for the pre-send check |
+| Send | | the reply (`reply`), or a new message threaded under your last one when you're following up (`send_message`), with any Cc and Bcc | the reply and thread, for the pre-send check |
+| Cc and Bcc suggestions | the threads you've loaded; your address book's search, when one is set up | nothing | nothing |
 
 Read-only mode blocks Save draft and Send. Nothing is sent without your confirmation.
 

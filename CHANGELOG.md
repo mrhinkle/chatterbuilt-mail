@@ -1,5 +1,22 @@
 # Changelog
 
+## 0.6.4 (2026-11-02)
+
+### New
+- **Triage hands you the next step.** Every triaged row gets one button for what you'll most likely do next: a reply type (Say yes, Decline, Ask a question, Offer a call, Follow up later, Nudge them), Create task, a Route action, Snooze or Remind me on a date, Unsubscribe, Add contact, Star, Mark read, Archive or Move to a folder. Reply buttons open the thread and draft with Triage's hint; nothing is sent. It only offers what your copy can do, and never archives, moves or unsubscribes a thread that needs your reply. **×** dismisses a suggestion and counts as a correction for **Learn now**. Section headers add **Pre-draft**, **Mark N read** and **Clear N** (archive the FYI section, or file each thread where Triage suggested, with one Undo). Archive and move suggestions still wait in Review.
+- **Cc and Bcc.** Add people to a reply, follow-up or draft, with suggestions from your threads and your address book. The send confirmation and the pre-send check name everyone on Cc and Bcc, and reply-all keeps the people already on Cc. Works on both Gmail paths.
+- **Contacts go to your mail account's address book.** `contacts: { book: "google" }` saves to Google Contacts through Composio, with How we met and Background as custom fields, the first email together as a dated First contact event, Notes in the Notes field and labeled profile links. With several Gmail accounts, each saves into its own. It's the default when Gmail runs through Composio. Composio has no ready-made sign-in for Google Contacts, so it needs your own Google OAuth client in Composio once; until then the dialog offers setup and Copy as vCard instead of a Save that would fail.
+- **Enrich with any app.** `CONFIG.enrich` adds **Enrich with Apollo** (or People Data Labs, ZoomInfo, Lusha, anything with a person lookup) beside Clay; the AI maps its answer to the contact fields.
+- **Setup requests from the page.** When enrichment or an address book isn't set up, the button copies a ready-made request to paste into a chat with Claude, which runs setup and republishes your copy.
+- **Message someone in Slack**, built into Route with `slack: true`: name a person or #channel, and it leaves a draft in Slack with a link to the email. It never sends.
+- **Custom actions in your own words.** **Add a custom action…** at the bottom of Route copies a description ("hand off scheduling to Sam in Slack") for Claude to set up.
+- **The contact-cleanup skill** completes the address book you already have, in bulk and without the app: How we met, First contact, Background and missing job details from your mail and an enrichment app, missing fields added after you say yes, and likely duplicates flagged. It writes only after you approve the list and never deletes a contact.
+
+### Changed
+- **A square grid.** Flat panes on hairline borders, small corners and no drop shadows. Floating menus and dialogs keep a light shadow.
+- **The model comes from where the page runs.** In Claude the page never names a model or tier, so Claude's interface decides. Setup no longer adds other models unless you ask for one by name.
+- **Getting started** leads with "Claude does all the work," adds a **Fork it** path for changing the code, and fixes the duplicate Path 3. The setup skill defaults contacts to the mail account's address book, offers to add missing fields (only after a yes), and sets up enrichment and Slack.
+
 ## 0.6.3 (2026-11-02)
 
 Fixes from beta testing: installs were heavier than they needed to be.

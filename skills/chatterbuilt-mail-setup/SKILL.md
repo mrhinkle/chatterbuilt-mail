@@ -1,6 +1,6 @@
 ---
 name: chatterbuilt-mail-setup
-description: Sets up, rebuilds or changes Chatterbuilt Mail, a Gmail client published as the user's own Claude artifact. Use when the user says "set up Chatterbuilt Mail", "install my email client", "rebuild my Chatterbuilt Mail", "file my tasks in Asana/Basecamp/Linear", "save contacts to HubSpot", "turn on calendar times", "add GPT", "change my email voice", "check Fireflies/my CRM/my pipeline when I open an email", "add a Route action", "hand off to my assistant in Slack", "set up the morning run", or asks to customize the inbox artifact.
+description: Sets up, rebuilds or changes Chatterbuilt Mail, a Gmail client published as the user's own Claude artifact. Use when the user says "set up Chatterbuilt Mail", "install my email client", "rebuild my Chatterbuilt Mail", "file my tasks in Asana/Basecamp/Linear", "save contacts to HubSpot", "save contacts to Google Contacts", "set up enrichment", "enrich with Clay/Apollo", "add a custom action", "turn on calendar times", "add GPT", "change my email voice", "check Fireflies/my CRM/my pipeline when I open an email", "add a Route action", "hand off to my assistant in Slack", "set up the morning run", or asks to customize the inbox artifact.
 ---
 
 # Chatterbuilt Mail setup
@@ -55,9 +55,9 @@ On a first install ask only for who they are and their voice (or offer to learn 
 - **Voice:**
   - Run the `email-voice-profile` skill for `voice`, `rules`, `signoff`; or ask for a line on how they write, hard rules and a sign-off.
   - If they keep a voice prompt in Notion (a voice trainer's output, a brand voice page), put its link in `voiceSource`.
-- **Models:** Claude is the default. For other models, use OpenRouter's `list-models` to get exact slugs for `models`. Never invent a slug.
+- **Models:** leave `models` empty and `defaultModel: "claude"`. The model comes from where the page runs: in Claude, the page asks Claude with no model name and no tier, and Claude's interface decides. Never pick a model for the user (no Opus, Fable or Mythos by name). Add OpenRouter models only when the user asks for one by name; use OpenRouter's `list-models` for the exact slug. Never invent a slug.
 - **Tasks:** where they go (step 3).
-- **Contacts:** where they go, and whether to offer Clay enrichment (`clay: true` needs the Clay connector; tell them it uses Clay credits).
+- **Contacts:** where they go (step 3, default: the address book that comes with their mail account), and whether to offer enrichment (step 3).
 - **Calendar:** whether to offer open times (`calendar: true`, needs Google Calendar), and their working hours (`workHours`).
 - **Copy targets:** other addresses for one-click "copy to account" (`copyTargets`).
 - **Follow-up window:** days before sent mail counts as waiting (`waitingDays`, default 3).
@@ -76,9 +76,17 @@ Tasks and contacts use connector adapters: `{ label, server, tool, input }`. `in
    - Add fixed values the target requires.
    - For Notion, fetch the database. Use its `collection://` data source ID, exact property names, `"__YES__"`/`"__NO__"` for checkboxes, and `date:Prop:start` for dates.
    - If the user's list is a filtered view, set every property the view filters on. Otherwise tasks are saved but hidden.
-4. **Contacts on Notion.** You may use the short form `{ dataSourceId, nameProp, emailProp, ... }`. If they have no contacts database, offer to create one with Name, Email, Company, Title, Phone, LinkedIn, X, Bluesky, GitHub, Instagram, Website, Location, How we met, First contact (date), Notes, Background, Source and Tags.
-5. **Contacts elsewhere.** Add a `dupCheck` (a search tool plus `{{email}}`) when the app has one.
-6. **Never create a test task or test contact.** The user's first real one is the test.
+4. **Contacts: default to the mail account's own address book.** For Gmail that's Google Contacts. claude.ai has no native Google Contacts connector, so it goes through Composio's `googlecontacts` toolkit:
+   - If they use Composio, check for an active `googlecontacts` connection (Composio's tool search shows connection status). If there's none, call `COMPOSIO_MANAGE_CONNECTIONS` for `googlecontacts` and give them the link it returns. Composio has had no managed sign-in for Google Contacts, in which case that call returns a dashboard link instead: the user adds their own Google OAuth client for Google Contacts there (a Google Cloud project with the People API on), then connects. Say plainly that this is a one-time chore, and offer another address book if they'd rather skip it. Until it's connected, the page offers setup and Copy as vCard instead of Save.
+   - Set `contacts: { book: "google" }`. With several Gmail accounts, put each account's Google Contacts connected-account id on that account as `contacts` (`accounts: [{ id, email, label, contacts: "googlecontacts_…" }]`) so a contact saves into the account the mail came to. Without it, the page uses Composio's default `googlecontacts` connection.
+   - Google Contacts has no How we met or Background fields, so the page saves them as custom fields (People API `userDefined`), the first email together as a dated "First contact" event, and Notes in the Notes field. Nothing to create ahead of time.
+   - If they don't use Composio, or would rather use something else, offer what they have: Notion, HubSpot, Airtable, a CRM. Outlook users: Outlook contacts through Composio's Outlook toolkit, as a custom adapter.
+   - Without any address book, the page still offers **Copy as vCard** and a **Set up an address book** button that copies a request for you.
+5. **Contacts on Notion.** You may use the short form `{ dataSourceId, nameProp, emailProp, ... }`. If they have no contacts database, offer to create one with Name, Email, Company, Title, Phone, LinkedIn, X, Bluesky, GitHub, Instagram, Website, Location, How we met, First contact (date), Notes, Background, Source and Tags.
+6. **Missing fields.** When their database or CRM lacks fields the page fills (How we met, Background, First contact, Notes, the social links), list the missing ones and offer to add them (Notion: `notion-update-data-source`; other apps: their own property or field tools). Add them only after they say yes: it changes their schema. Then map them in CONFIG.
+7. **Contacts elsewhere.** Add a `dupCheck` (a search tool plus `{{email}}`) when the app has one.
+8. **Enrichment.** Ask which enrichment app they use, from what's connected: Clay (`clay: true`; needs the Clay connector), or any other with a person-lookup tool (Apollo, People Data Labs, ZoomInfo, Lusha, natively or through Composio) as `enrich: { label, server, tool, input }` with `{{email}}`, `{{name}}`, `{{domain}}`, `{{company}}` or `{{linkedin}}` placeholders. Read the tool's schema; use its exact argument names. Tell them it uses credits in that app, and don't run a lookup as a test without asking. With no enrichment set up, the page shows **Set up enrichment**, which copies a request to run this step.
+9. **Never create a test task or test contact.** The user's first real one is the test.
 
 ## 3b. Context sources and Route actions
 
@@ -91,7 +99,11 @@ These make it a hub rather than a client. Details and placeholders are in `docs/
 4. Never put a tool that creates, updates, sends or deletes in `context`.
 5. Keep it to about eight sources.
 
-**Route (`CONFIG.actions`).** Extra places a thread can go, beyond task, contact, snooze and remind-me.
+**Route.** Where a thread goes after the inbox. Task, contact, snooze and remind-me are built in.
+
+**Slack, by default.** If they have the Slack connector, set `slack: true`. Route then offers **Message someone in Slack**: the AI suggests who and what to say, the user edits both, and the page finds the person or `#channel` by name and leaves a draft in Slack for them to send. It never sends.
+
+**Custom actions (`CONFIG.actions`).** Anything else, described in the user's own words ("hand off scheduling to Christine in Slack", "log sponsor emails as deals in HubSpot"). The page's **Add a custom action** box in Route copies such a description as a request to run this step.
 1. Ask where threads usually go after the inbox: an assistant, a CRM, a pipeline, a support queue.
 2. For each, pick the connector tool and read its schema. Prefer tools that leave a draft or a note for the user to finish (a Slack draft, a CRM note) over tools that message other people directly.
 3. Write `{ key, label, server, tool, input, ai, when }`. `ai` names the free-text fields the AI writes, with one line on what each should say. `when` says when the action fits.
@@ -133,6 +145,9 @@ Declare capabilities from CONFIG, and only what's used:
 | `voiceSource` is set | `Notion` | `notion-fetch` |
 | `calendar` is true | `Google Calendar` | `list_events` |
 | `clay` is true | `Clay` | `search-contacts-by-name`, `add-contact-data-points`, `get-task-context` |
+| `enrich` is set | its `server` | its `tool` |
+| `contacts.book` is `"google"`, or `gmail.via` is `"composio"` and `contacts` isn't set | `Composio` | `COMPOSIO_MULTI_EXECUTE_TOOL` |
+| `slack` is true | `Slack` | `slack_search_users`, `slack_search_channels`, `slack_send_message_draft` |
 | `models` is not empty | `OpenRouter` | `send-message` |
 | each `context` entry | its `server` | its `tool` |
 | each `actions` entry | its `server` | its `tool` |
@@ -144,7 +159,7 @@ Merge tools for a server that appears more than once.
 
 - Make one or two read-only calls: a small Gmail search, and Calendar `list_events` if calendar is on. Context sources were already checked in step 3b.
 - Do not send, move, forward, label, file or save anything as a test.
-- Tell the user plainly which integrations were exercised and which stay unverified until first use (sending, moving, tasks, contacts, Clay, other models).
+- Tell the user plainly which integrations were exercised and which stay unverified until first use (sending, moving, tasks, contacts, enrichment, Slack, other models).
 
 ## 7. Hand over
 
@@ -154,7 +169,7 @@ One or two sentences: what the page is, and what to try first (open a thread, pr
 
 Don't commit anything unless the user owns the repo and it's private (check `git remote get-url origin` against their GitHub login, and `gh repo view --json visibility`). Then commit `my/config.js` and `my/chatterbuilt-mail.html` with `git add -f` (they're git-ignored). Anywhere else, including a clone of mrhinkle/chatterbuilt-mail or a public fork, leave them uncommitted and don't report it as a problem: the published artifact holds the CONFIG, and "Changing it later" reads it from there. If they'd like their settings versioned, offer to make them a private repo of their own.
 
-After the hand-over, list what they can add when they want it, one line each: open times from Google Calendar, tasks, contacts, context from their other apps, Route actions, More context, other models, several Gmail accounts (Composio).
+After the hand-over, list what they can add when they want it, one line each: open times from Google Calendar, tasks, contacts in their address book, enrichment, context from their other apps, a Slack message and custom Route actions, More context, several Gmail accounts (Composio). Mention the `contact-cleanup` skill for tidying the address book they already have.
 
 ## 8. Offer the morning run
 

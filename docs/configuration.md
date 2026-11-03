@@ -24,6 +24,8 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 
 ## Models
 
+The model comes from where the page runs. In Claude, the page asks Claude without naming a model or a tier, and Claude's interface decides, so it never reaches for a bigger model than the task needs. Leave these as they are unless you want another model on purpose.
+
 | Key | What it is |
 |---|---|
 | `defaultModel` | `"claude"` (built in, no setup), or a value from `models` |
@@ -31,19 +33,24 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 
 ## Tasks and contacts
 
+<a id="contacts-and-enrichment"></a>
+
 | Key | What it is |
 |---|---|
 | `tasks` | Any task app: `{ label, server, tool, input }`. See [connectors.md](connectors.md). |
 | `notion` | Older Notion shortcut for tasks: `{ dataSourceId, titleProp, urlProp, notesProp, emailProp, extra }`. Used only when `tasks` is null. |
 | `contacts` | Any contacts app: `{ label, server, tool, input, dupCheck }`. Or the Notion shortcut: `{ dataSourceId, nameProp, emailProp, companyProp, titleProp, phoneProp, linkedinProp, xProp, blueskyProp, githubProp, instagramProp, websiteProp, locationProp, metProp, firstContactProp, notesProp, backgroundProp, extra }`. |
+| `contacts` (Google) | `{ book: "google" }` saves to Google Contacts through Composio, with How we met and Background as custom fields and First contact as a dated event. With several Gmail accounts, give each account its own address book: `accounts: [{ id, email, label, contacts: "<Composio googlecontacts connected-account id>" }]`. When Gmail runs through Composio and `contacts` isn't set, this is the default. Composio has no ready-made sign-in for Google Contacts, so it needs your own Google OAuth client in Composio's dashboard first; until then the dialog offers setup and vCard instead of Save. |
 | `clay` | `true` shows **Enrich with Clay** on contacts. Needs the Clay connector; uses Clay credits. |
+| `enrich` | Another enrichment app: `{ label, server, tool, input }` with `{{email}}`, `{{name}}`, `{{domain}}`, `{{company}}`, `{{linkedin}}`. Shows **Enrich with** *label*. Its answer can be any shape; the AI maps it to contact fields. With neither `clay` nor `enrich`, the button is **Set up enrichment**, which copies a setup request for Claude. |
 
 ## Your other systems
 
 | Key | Default | What it is |
 |---|---|---|
 | `context` | `[]` | Read-only lookups run when you open a thread: `[{ label, server, tool, input }]`. Feeds the context card, drafts, the pre-send check, Route and the morning run. See [connectors.md](connectors.md#context-sources). |
-| `actions` | `[]` | Extra Route actions: `[{ key, label, server, tool, input, ai, when }]`. `ai` names the fields the AI writes; `when` tells it when the action fits. See [connectors.md](connectors.md#route-actions). |
+| `slack` | `false` | `true` adds **Message someone in Slack** to Route: you name a person or `#channel`, and it leaves a draft in Slack for you to send. Needs the Slack connector. |
+| `actions` | `[]` | Custom Route actions: `[{ key, label, server, tool, input, ai, when }]`. `ai` names the fields the AI writes; `when` tells it when the action fits. See [connectors.md](connectors.md#route-actions). |
 | `lookup` | `[]` | **More context** web lookups: `[{ label, server, tool, input, needs }]`. Placeholders `{{personQuery}}`, `{{companyQuery}}`, `{{name}}`, `{{org}}`, `{{domain}}`, `{{email}}`. `needs: ["companyQuery"]` skips an entry when the person has no company domain. See [connectors.md](connectors.md#more-context-web-lookups). |
 | `snippets` | `[]` | Starting snippets: `[{ name, text }]`. `{{firstName}}` and `{{myName}}` are filled in. |
 | `labelPrefix` | `"CB"` | Gmail label prefix for snooze (`CB/Snooze/YYYY-MM-DD`), remind-me (`CB/Remind/YYYY-MM-DD`) and morning-run drafts (`CB/Drafted`) |

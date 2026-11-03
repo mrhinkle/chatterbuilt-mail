@@ -37,9 +37,36 @@ Press **Triage** next to the search box. The AI reads the first 40 threads in th
 
 The list then groups into **Needs you**, **Worth reading** and **FYI**, and each row gets a reason of a few words.
 
-With Review on, Triage also suggests tidying up: archive this, move that to Finance. Those suggestions don't run. They wait in **Tools → Review** for you to approve, and the badge on Tools counts them. It never suggests archiving or moving a thread marked *reply*. See [organizing.md](organizing.md#review-and-undo).
+### A next step on every row
 
-Triage learns. When you untick a suggestion in Review, that's recorded, and **Learn now** turns your corrections into lessons that steer the next Triage. See [self-improving.md](self-improving.md).
+Sorting is half of it. Each triaged row also gets one button: the next step Triage thinks you'll take. Press it and it happens.
+
+| The button says | What pressing it does |
+|---|---|
+| **Say yes**, **Decline**, **Ask a question**, **Offer a call**, **Follow up later**, **Nudge them** | Opens the thread and drafts that reply, using the hint Triage wrote (hover the button to read it). Nothing is sent. |
+| **Create task** | Files it in your task app |
+| **Hand off to …** or any custom action | Opens Route with that thread |
+| **Snooze to Mon, Nov 9**, **Remind me Thu** | Snoozes it, or sets a reminder if nobody answers |
+| **Unsubscribe…** | Opens the unsubscribe check |
+| **Add contact** | Opens Add contact for the sender |
+| **Star**, **Mark read**, **Archive**, **Move to Finance** | Does it, with Undo |
+
+It only suggests what your copy can do: no task button without a task app, no Route action you haven't set up. It never suggests archiving, moving, unsubscribing or marking read a thread that needs your reply. The **×** next to a button dismisses it, and that counts as a correction (below).
+
+![Triage: Needs you, Worth reading and FYI, each row with its next step, and one-click actions on the section headers](images/triage.webp)
+
+### A whole section at once
+
+The section headers have their own button:
+- **Needs you → Pre-draft:** reply options for each one, up to 8. Nothing is saved or sent.
+- **Worth reading → Mark N read.**
+- **FYI → Clear N:** archives them, or files each in the folder Triage suggested. It asks once ("Yes, clear 4"), and one **Undo** puts them all back.
+
+### Review still works
+
+With Review on, the archive and move suggestions also wait in **Tools → Review**, so you can go through them as a list, and the badge on Tools counts them. Using a row's button or dismissing it takes that thread out of Review. See [organizing.md](organizing.md#review-and-undo).
+
+Triage learns. When you untick a suggestion in Review or dismiss a row's button, that's recorded, and **Learn now** turns your corrections into lessons that steer the next Triage. See [self-improving.md](self-improving.md).
 
 ## Summarize
 
@@ -88,7 +115,7 @@ Before anything is shown, it removes scripts, styles, forms, images (tracking pi
 | Feature | Reads | Writes | Sent to the AI |
 |---|---|---|---|
 | The list and search | Gmail (`search_threads`, `get_thread`) | nothing | nothing |
-| Triage | the list you already loaded, your Gmail folder names | nothing (suggestions wait in Review) | sender, subject and preview of up to 40 threads |
+| Triage | the list you already loaded, your Gmail folder names, your Route action names | nothing until you press a row's button or a section's (archive, move and Clear come with Undo) | sender, subject and preview of up to 40 threads |
 | Summarize | the open thread | nothing | the thread |
 | Ask | Gmail search results | nothing | your question, then the top five threads |
 | Formatted view | the open thread's HTML (`get_thread`, full content) | nothing | nothing |

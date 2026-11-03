@@ -32,7 +32,7 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 | No thread open | **Today**: drafts waiting in Gmail, what needs you, suggestions in Review, who owes you a reply, and your next meeting. |
 | Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact**, then **More** (Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
 | Beside a thread (wide screens) | The **context panel**: who it is, what your systems know, **More context** from the web, and **Next steps**. **Hide** at the top of the panel closes it; **Context** in the thread toolbar opens it again. On narrower screens the same panel sits at the top of the thread. Drag the grip between any two panes to resize them; double-click to reset. |
-| Reply box | Reply buttons, your own instruction, **Draft with** switches (My tone with them, Context, Open times), the reply, then Snippets, Attach, Reply all, Remind me, **Save draft** and **Send**. |
+| Reply box | Reply buttons, your own instruction, **Draft with** switches (My tone with them, Context, Open times), who it goes to with **Cc** and **Bcc**, the reply, then Snippets, Attach, Reply all, Remind me, **Save draft** and **Send**. |
 
 ## Reading
 
@@ -48,7 +48,7 @@ Guide: [reading-and-triage.md](reading-and-triage.md).
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
-**Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each, and groups the list under **Needs you**, **Worth reading** and **FYI**. With Review on, it also suggests archives and folder moves. Those land in the review queue; nothing moves on its own.
+**Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each, and groups the list under **Needs you**, **Worth reading** and **FYI**. Each row then gets a **next step** button: a reply type (Say yes, Decline, Ask a question, Offer a call), Create task, a Route action, Snooze to a date, Unsubscribe, Add contact, Star, Archive or Move to a folder. Press it and it happens; **×** dismisses it and teaches Triage. Section headers add **Pre-draft**, **Mark N read** and **Clear N** (archive or file the whole FYI section, with one Undo). Archive and move suggestions also wait in the review queue. Nothing moves until you press something.
 
 **Ask your inbox.** Switch on **Ask** inside the search box and type a question, or **Tools → Ask**. Ask a question in plain English ("When is the venue walkthrough?").
 - It writes the Gmail search and shows it to you, so you can edit and re-run.
@@ -90,7 +90,8 @@ Drafts and the pre-send check use the card. Turn off **Context** under *Draft wi
 - a task in your task app, with a title starting with a verb;
 - a contact, which opens Add to contacts;
 - snooze until a date, or remind me if nobody replies;
-- any action you add in `CONFIG.actions`: a Slack handoff to an assistant, a CRM note, a pipeline update, a ticket. See [connectors.md](connectors.md#route-actions).
+- **Message someone in Slack** (with `slack: true`): it finds the person or `#channel` by name and leaves a draft in Slack;
+- custom actions you describe in plain words, such as a handoff to your assistant, a CRM note, a pipeline update or a ticket. **Add a custom action…** at the bottom of Route copies your description for Claude to set up. See [connectors.md](connectors.md#route-actions).
 
 Suggested actions are ticked. Edit any field, untick what you don't want, then **Apply selected**. Each action shows *done* or the reason it failed. Nothing runs until you apply, and read-only mode blocks it.
 
@@ -199,9 +200,11 @@ Guide: [tasks-and-contacts.md](tasks-and-contacts.md).
 **Add to contacts.** Press **Contact** above the thread, or `c`. Pick the person if the thread has several. Then:
 - **Details from their emails.** It reads every email they've sent you (the current thread plus up to four more) for their signature: title, company, phone, website, location. It also picks up social profiles: LinkedIn, X, Bluesky, GitHub, Instagram.
 - **How we met.** It finds your earliest thread with them and writes a one- or two-sentence note: month and year, who reached out, what it was about, who introduced you. It links that first thread.
-- **Enrich with Clay** (optional). It looks them up in Clay and adds title, LinkedIn, social profiles, location and a work-history summary. This uses Clay credits and only runs when you press it.
-- **Edit and save.** Every field is editable. If the person is already in your contacts, it warns you before you save a second entry. **Save** writes to your contacts app.
-- **Copy as vCard** works with no contacts app at all.
+- **Background and Notes.** Background is a work-history summary from your enrichment app; Notes are yours.
+- **Enrich** (optional). **Enrich with Clay**, or with Apollo, People Data Labs, ZoomInfo, Lusha or any app with a person lookup, adds title, LinkedIn, profiles, location and Background. It uses credits in that app and only runs when you press it. With none set up, **Set up enrichment** copies a request for Claude.
+- **Edit and save.** Every field is editable. If the person is already in your address book, it warns you before you save a second entry. **Save** writes to the address book that comes with your mail account (Google Contacts for Gmail, with How we met and Background as custom fields), or to any contacts app or CRM you pick.
+- **Copy as vCard** works with no address book at all.
+- **In bulk:** the `contact-cleanup` skill completes the address book you already have the same way, after you approve the changes.
 
 ## Learning and voice
 
@@ -247,7 +250,9 @@ Guide: [settings-and-shortcuts.md](settings-and-shortcuts.md).
 | `?` | This list (opens Skills at Keyboard) |
 | `Esc` | Close a menu or dialog |
 
-**Model.** Claude drafts by default. If `CONFIG.models` lists other models (through OpenRouter), a **Model** picker appears in Settings; with none listed, it stays hidden.
+**Model.** The model comes from where the page runs. In Claude, the page never names a model or tier, so Claude's interface picks, and it won't reach for a bigger model than the job needs. If `CONFIG.models` lists other models (through OpenRouter), a **Model** picker appears in Settings; with none listed, it stays hidden.
+
+**Look.** A square grid: flat panes on hairline borders, small corners and no drop shadows, so the panes read as one sheet. Only floating menus and dialogs keep a light shadow.
 
 **Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, buttons that change something are greyed out, and nothing can be sent, moved, labeled, drafted, filed or saved. Route and Contact still open, so you can see suggestions or copy a vCard, and they say saving is off. Reading, summaries, triage, Ask and drafting on the page still work.
 
@@ -302,6 +307,7 @@ Sources:
 | Move, archive, star, review, sweep archive | Gmail labels | Gmail labels (undoable) |
 | Unsubscribe | Gmail message headers | an email to the sender's unsubscribe address, if you choose that |
 | Tasks | Gmail | your task app |
-| Contacts | Gmail; your contacts app (duplicate check); Clay if you press it | your contacts app |
+| Contacts | Gmail; your address book (duplicate check); your enrichment app if you press Enrich | your address book |
+| Cc and Bcc | the threads you've loaded; your address book's search | nothing until you send |
 | Voice | Gmail sent mail (train); Notion page (pointer) | your browser only |
 | Rules, lessons, feature switches | | your browser only, until you run the improve skill |

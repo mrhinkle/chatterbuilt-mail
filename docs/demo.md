@@ -2,7 +2,7 @@
 
 Every image and the video here use made-up people and companies: Alex Rivera at Rivera Labs, Dana Ruiz at Acme Robotics, Jordan Blake at the makerspace. No real inbox, connector or account was touched to make them. The demo copy reaches everything except Gmail through [Composio](composio.md).
 
-**Video:** [demo.mp4](media/demo.mp4), about 45 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, the pre-send check catching a forgotten promise, resizing a pane, a PDF attachment opening in the page, and All inboxes: two Gmail accounts in one list, color-coded.
+**Videos:** [add-contact.mp4](media/add-contact.mp4), about 25 seconds: Add contact reads the signature, writes how you met from your first thread, pulls background from an enrichment app, takes your notes and saves to Google Contacts. [demo.mp4](media/demo.mp4), about 45 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, the pre-send check catching a forgotten promise, resizing a pane, a PDF attachment opening in the page, and All inboxes: two Gmail accounts in one list, color-coded.
 
 Each section links to its guide.
 
@@ -18,7 +18,7 @@ Each section links to its guide.
 | | |
 |---|---|
 | ![Triage](images/triage.webp) | ![Summarize](images/summarize.webp) |
-| Triage groups the list into Needs you, Worth reading and FYI | Summarize: where it stands, then the asks |
+| Triage: Needs you, Worth reading and FYI, a next step on every row, and one-click section actions | Summarize: where it stands, then the asks |
 | ![Ask your inbox](images/ask.webp) | ![Formatted view](images/formatted.webp) |
 | Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Formatted view, with scripts and tracking pixels removed |
 | ![Ask in the search box](images/ask-mode.webp) | ![Tools menu](images/tools-menu.webp) |
@@ -52,8 +52,8 @@ Each section links to its guide.
 | A draft that used your tone with this person and the brief | Three options: Best fit, Shorter, Polite no |
 | ![Reply menu](images/reply-menu.webp) | ![Revise](images/revise.webp) |
 | The Reply menu over the folded reply box | Revising the draft in the box, with Undo |
-| ![Row menu](images/row-menu.webp) | |
-| Right-click a row for every thread action | |
+| ![Row menu](images/row-menu.webp) | ![Cc and Bcc](images/cc-bcc.webp) |
+| Right-click a row for every thread action | Cc and Bcc, with suggestions from your address book |
 | ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
 | Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
 | ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |
@@ -85,8 +85,10 @@ Each section links to its guide.
 
 | | |
 |---|---|
-| ![Task](images/task.webp) | ![Contact](images/contact.webp) |
-| A task filed in Asana, with a link | Add contact, filled in from the signature |
+| ![Contact](images/contact.webp) | ![The whole picture](images/contact-story.webp) |
+| Add contact: job and links from the signature and Apollo | How you met, background and notes, saved to Google Contacts |
+| ![Task](images/task.webp) | |
+| A task filed in Asana, with a link | |
 
 ## Settings · [settings-and-shortcuts.md](settings-and-shortcuts.md)
 
@@ -126,6 +128,7 @@ node scripts/demo/screenshots.js demo-out/screens    # every screenshot on this 
 node scripts/demo/screenshots.js docs/images         # refresh the docs' screenshots (PNG; convert to WebP)
 node scripts/demo/screenshots.js demo-out/screens route,presend   # just these
 node scripts/demo/record.js demo-out                 # the video
+node scripts/demo/record-contact.js demo-out         # the Add contact video
 node scripts/demo/record.js demo-out --voice clips  # a narrated cut, one clip per line of scripts/demo/voiceover.md
 ```
 

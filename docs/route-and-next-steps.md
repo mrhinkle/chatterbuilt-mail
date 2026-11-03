@@ -37,7 +37,15 @@ Route always offers these when their features are on:
 | **Snooze** | Takes the thread out of the inbox until a date | `until`: a date |
 | **Remind me if no reply** | Brings it back on a date if nobody has answered | `until`: a date |
 
-Anything in `CONFIG.actions` is added to the list: a Slack handoff to an assistant, a CRM note, a pipeline update, a ticket. Each one names a connector tool, the fields the AI should write (`ai`), and when it applies (`when`). The AI only suggests an action when its `when` fits. See [connectors.md](connectors.md#route-actions) for the format.
+### Message someone in Slack
+
+With the Slack connector and `slack: true`, Route also offers **Message someone in Slack**. The AI suggests who should get it and what to say; you can change both. Type a person's full name or a `#channel`. On Apply, the page looks them up in Slack and leaves the message there as a **draft**, with a link to the email, for you to send from Slack. It never sends.
+
+### Custom actions
+
+Everything else is yours to describe. *"Hand off scheduling to Christine in Slack."* *"Log sponsor emails as deals in HubSpot."* *"Open a ticket in Linear for bug reports."* At the bottom of Route, **Add a custom action…** takes a sentence like that and copies it as a setup request; paste it into a chat with Claude, and the setup skill builds the action and republishes your copy. Or just ask Claude directly.
+
+Each custom action lives in `CONFIG.actions` and names a connector tool, the fields the AI should write (`ai`), and when it applies (`when`). The AI only suggests an action when its `when` fits. See [connectors.md](connectors.md#route-actions) for the format.
 
 ## How it decides
 
@@ -53,7 +61,7 @@ This matters with Composio: its `SLACK_SEND_MESSAGE` **sends** the message. It d
 
 ## What it touches
 
-- **Calls:** Claude or your chosen model to suggest; then, for what you tick, your task app (`CONFIG.tasks`), Gmail labels for snooze and remind-me (`create_label`, `label_thread`, `unlabel_thread`), and the connector tools in `CONFIG.actions`.
+- **Calls:** the AI to suggest; then, for what you tick, your task app (`CONFIG.tasks`), Gmail labels for snooze and remind-me (`create_label`, `label_thread`, `unlabel_thread`), Slack (`slack_search_users` or `slack_search_channels`, then `slack_send_message_draft`) and the connector tools in `CONFIG.actions`.
 - **Writes:** only what you tick, only when you press Apply selected.
 - **Read-only mode** greys out Route and blocks Apply selected. Route still opens and suggests, with a note at the top that nothing will be applied.
 - **Turn it off:** Settings → Skills → **Route**. That also removes Next steps from the panel.

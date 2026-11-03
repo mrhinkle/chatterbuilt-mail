@@ -10,6 +10,7 @@ This repo is a Chatterbuilt Mail plugin, or someone's fork of it.
   - `skills/email-voice-profile` learns their voice from sent mail.
   - `skills/chatterbuilt-mail-morning` is the morning run, for a scheduled task. It may only create Gmail drafts and change `CB/` labels.
   - `skills/chatterbuilt-mail-feedback` turns a bug or idea into a GitHub issue on mrhinkle/chatterbuilt-mail. It files only after the user says yes, and never puts email content in an issue.
+  - `skills/contact-cleanup` audits and completes an address book from mail and an enrichment app. It works without the app, writes only after the user approves the list, and never deletes a contact.
 - **Build.** `python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html`. It stamps the version from `.claude-plugin/plugin.json`, which the app shows in Settings → Skills.
 - **Don't edit the template for one person.** Personal changes go in `my/config.js`. Template changes are for everyone, so upstream them.
 - **Never test by acting.** Don't send, move, forward, label, file a task, save a contact or open an issue as a test. Read-only calls are fine.

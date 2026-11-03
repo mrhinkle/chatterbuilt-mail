@@ -15,8 +15,10 @@
     copyTargets: [],
     searchExample: "from:alex newer_than:7d",
     tasks: null,
-    contacts: null,
+    contacts: null,           // the setup skill offers your mail account's own address book first (Google Contacts for Gmail)
     clay: false,
+    enrich: null,
+    slack: false,
     calendar: false,
     workHours: [9, 17],
     waitingDays: 3,
