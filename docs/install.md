@@ -31,7 +31,7 @@ ChatGPT's connectors change often. The ChatGPT details above come from third-par
 
 **Before you start:**
 - Connect **Gmail** in claude.ai (Settings, Connectors). That's all you need to start.
-- Everything else is optional and can come later: Google Calendar for open times, a task app, a CRM, meeting notes. Add them as native claude.ai connectors when you want them. [Composio](composio.md) is an optional extra for apps with no native connector, or for several Gmail accounts in one copy.
+- Everything else is optional. Setup looks at the connectors you already have (claude.ai's native ones, MCP servers from your Claude plugins, and Composio if you use it), shows which features each one can power, and lets you pick. [connectors.md](connectors.md#apps-that-work-by-feature) lists apps that fit each feature.
 - Optionally, write an email memory file and attach it, or keep it in a private repo of your own ([getting-started.md](getting-started.md)).
 
 **What it asks you to allow.** A first install uses Gmail and Claude only. claude.ai asks you to allow Gmail the first time the page reads your mail. Each connector you add later asks once, the first time it's used. If you install from a prompt in Claude Code, the session also asks before it clones the repo, runs the build script and publishes; installing the plugin skips the clone.
@@ -47,10 +47,10 @@ Install Chatterbuilt Mail for me: an open source Gmail triage hub that runs as m
 2. Memory: if I have an email memory file (memory/EMAIL-MEMORY.md in my fork, or one I attach), read it first and ask only about gaps.
 3. About me: <name>, <Gmail address>. <One or two sentences on what I do.>
 4. Voice: <how I write, or "learn it from my sent mail">. Sign-off: <sign-off>. Never use: <words>. <Spelling or other rules.>
-5. Connections: start with just my claude.ai Gmail connector. <Or name the native connectors to add now, for example "and Google Calendar".> <Only if you use it: "Use Composio for <apps>.">
+5. Connections: start with my claude.ai Gmail connector. Show me which of my other connectors and plugins it can use, by feature, and let me pick. <If you use Composio: "Include what I have in Composio.">
 6. Tasks go to: <app and list, or "none">. Contacts go to: <app, or "none">.
 7. Context: when I open an email, check <meeting notes, calendar, notes, pipeline, CRM, newsletter list, memory system>.
-8. More context: look people and companies up on the web with <a search tool, for example "Firecrawl through Composio", or "skip">.
+8. More context: look people and companies up on the web with <a web search connector, for example "Exa", or "skip">.
 9. Route actions: <for example "hand off to my assistant <name> in Slack", or "none">.
 10. Never send, move, label, file or save anything as a test. Read-only calls only.
 11. Publish it as my artifact. Tell me what you checked live, what stays unverified until I use it, and anything I still need to connect. Then offer to set up the morning run.
@@ -61,7 +61,7 @@ Leave out any line you don't need. The setup skill asks about anything it can't 
 **The short version**, if you'd rather answer questions as it goes:
 
 ```text
-Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Use my claude.ai Gmail connector and start small: just my inbox, no other apps yet. Ask me only what you can't work out, and never send, move or file anything as a test.
+Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Use my claude.ai Gmail connector, show me which of my other connectors it can use and let me pick, and start small. Ask me only what you can't work out, and never send, move or file anything as a test.
 ```
 
 **If you already have the plugin:** say *"Set up Chatterbuilt Mail."*

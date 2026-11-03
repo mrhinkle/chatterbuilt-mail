@@ -38,7 +38,7 @@ Out of the box it writes like a polite robot. Give it a few minutes and it write
 
 Every feature has an off switch in **Settings → Skills**. Everything personal, like your connectors, task app, CRM, rules and voice, lives in one `CONFIG` block. You don't have to edit it yourself: ask Claude to change something and the setup skill does the rest.
 
-Connect your other apps when you want them, through the connectors claude.ai already has. [Composio](docs/composio.md) is optional: I use it to reach apps without a native connector and to run four Gmail accounts in one copy. Claude drafts by default, and GPT, Gemini and other models plug in through OpenRouter. → [Connectors](docs/connectors.md) · [Configuration](docs/configuration.md)
+Use the connectors you already have: claude.ai's native ones, MCP servers from your Claude plugins, or [Composio](docs/composio.md) if you use it. Composio is optional; I use it to reach apps without a native connector and to run four Gmail accounts in one copy. [Which apps fit which feature](docs/connectors.md#apps-that-work-by-feature). Claude drafts by default, and GPT, Gemini and other models plug in through OpenRouter. → [Connectors](docs/connectors.md) · [Configuration](docs/configuration.md)
 
 ## Built for Gmail. Bring your own inbox.
 
@@ -55,10 +55,10 @@ Nothing is sent, moved or filed until you say so. AI suggestions wait for your O
 Paste this into Claude:
 
 ```text
-Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Use my claude.ai Gmail connector and start small: just my inbox, no other apps yet. Ask me only what you can't work out, and never send, move or file anything as a test.
+Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as my private Claude artifact. Use my claude.ai Gmail connector, show me which of my other connectors it can use and let me pick, and start small. Ask me only what you can't work out, and never send, move or file anything as a test.
 ```
 
-You need one thing first: the **Gmail** connector in claude.ai (Settings → Connectors). The page asks you to allow Gmail the first time it reads your mail, and nothing else until you add more. Calendar times, tasks, context from your other apps, or [Composio](docs/composio.md) for several Gmail accounts come later, one at a time, when you ask Claude.
+You need one thing first: the **Gmail** connector in claude.ai (Settings → Connectors). Setup then looks at what else you've connected (claude.ai's native connectors, MCP servers from your Claude plugins, and [Composio](docs/composio.md) if you use it), shows you which features each one can power, and turns on only what you pick. The page asks you to allow each connector the first time it uses it.
 
 Your settings live inside your artifact, so you don't need a repo of your own. If you want them versioned, keep them in a **private** repo you own, not a fork of this one: forks of a public repo are public.
 

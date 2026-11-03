@@ -9,7 +9,7 @@ The quickest start is a single prompt: see [install.md](install.md). That page a
 ## Before you start
 
 - A claude.ai account with the **Gmail** connector added (Settings, Connectors).
-- That's all you need for a first install. Add more later, one at a time, as native claude.ai connectors. [Composio](composio.md) is optional: one connector for apps without a native one, or several Gmail accounts in one copy.
+- That's all you need for a first install. Setup shows which of your other connectors it can use (native ones, MCP servers from your Claude plugins, and [Composio](composio.md) if you use it) and turns on only what you pick. See [apps that fit each feature](connectors.md#apps-that-work-by-feature).
 - Optional apps, depending on what you want:
   - **Notion**, or another task app (Asana, Basecamp, Linear, Todoist...), for Tasks.
   - **Notion** or a CRM for Contacts, plus **Clay** if you want enrichment.

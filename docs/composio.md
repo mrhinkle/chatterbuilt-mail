@@ -2,7 +2,7 @@
 
 Chatterbuilt Mail reaches your apps through claude.ai connectors. You can add a native connector for each app (Notion, Slack, Asana, Fireflies…), or add **one** connector, [Composio](https://composio.dev), and reach hundreds of apps through it.
 
-**Suggested if you don't want to manage a stack of native connectors.** You connect each app once inside Composio, and Chatterbuilt Mail sees all of them through a single claude.ai connector.
+**Optional.** You don't need Composio: claude.ai's native connectors and your plugins' MCP servers cover most apps ([connectors.md](connectors.md#apps-that-work-by-feature)). If you already use Composio, setup offers it: you connect each app once inside Composio, and Chatterbuilt Mail sees all of them through a single claude.ai connector. It's also how one copy reads several Gmail accounts.
 
 Almost every screenshot in these docs comes from a demo copy set up this way: Gmail native, and context, tasks, contacts, Route actions and More context all through Composio. The account-switcher screenshot and the demo video run Gmail through Composio too.
 

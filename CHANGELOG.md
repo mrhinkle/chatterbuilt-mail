@@ -9,6 +9,7 @@ Fixes from beta testing: installs were heavier than they needed to be.
 - **No Composio unless you ask for it.** The install prompts and docs used to suggest Composio for everything except Gmail. They now use claude.ai's native connectors, and Composio is an option for apps without a native connector or for several Gmail accounts in one copy.
 - **No repo needed, and no commits to this one.** Your settings live in your published artifact; "change it later" reads them from there. `my/` and `memory/EMAIL-MEMORY.md` are git-ignored, and the setup and improve skills commit them only in a private repo you own (with `git add -f`). The docs no longer recommend forking: forks of a public repo are public. Path 1 in getting-started is now "just install it."
 - The install guide says what you'll be asked to allow, and where your settings live.
+- **Setup shows what you have and lets you pick.** It lists your connected apps (claude.ai's native connectors, MCP servers from your Claude plugins, and Composio only if you already use it), sorts them by feature (calendar, tasks, contacts, context, Route, web lookups, other models), and turns on only what you choose. Apps you name that aren't connected get a one-click suggestion from the connector directory. `docs/connectors.md` lists native connectors that fit each feature.
 
 ## 0.6.2 (2026-11-02)
 

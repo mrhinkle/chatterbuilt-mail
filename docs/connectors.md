@@ -1,6 +1,8 @@
 # Connectors and permissions
 
-The page reaches your apps only through your claude.ai connectors, using your own sign-in. When Claude publishes the page, it declares exactly which connector tools the page may call. The first time each one is used, claude.ai asks you to allow it, and you can review or revoke that in the artifact's Permissions menu.
+Chatterbuilt Mail works with the connectors you already have: claude.ai's native connectors, MCP servers that come with your Claude plugins, and [Composio](composio.md) if you use it. When you set it up, Claude looks at what you've connected, sorts it by feature, and asks which to turn on. Gmail is the only one you need.
+
+The page reaches your apps only through those connectors, using your own sign-in. When Claude publishes the page, it declares exactly which connector tools the page may call. The first time each one is used, claude.ai asks you to allow it, and you can review or revoke that in the artifact's Permissions menu.
 
 ## What each connector is for
 
@@ -19,7 +21,25 @@ The page reaches your apps only through your claude.ai connectors, using your ow
 
 Declare only what your copy uses. The setup skill builds this list from your `CONFIG`.
 
-**Prefer one connector?** Everything except Gmail can go through [Composio](composio.md): context sources, tasks, contacts, Route actions and More context all accept `server: "Composio"` with the `COMPOSIO_MULTI_EXECUTE_TOOL` tool. The page unwraps Composio's replies and shows its errors.
+## Apps that work, by feature
+
+Any connector with the right kind of tool works: the setup skill reads its tool schema and wires the exact arguments. These are some of the native connectors in the claude.ai connector directory (as listed on November 2, 2026) for each feature. Add one in claude.ai Settings, Connectors, then ask Claude to turn the feature on.
+
+| Feature | What it needs | Native connectors that fit |
+|---|---|---|
+| Open times in replies | a calendar | Google Calendar, Microsoft 365 (Outlook calendar) |
+| Context: meetings with this person | meeting notes or transcripts | Fireflies, Granola, Fathom, tl;dv, Circleback, Zoom, Webex |
+| Context: notes, pipeline, memory | search over notes or records | Notion, Evernote, Roam Research, Google Drive, your CRM |
+| Tasks | a create-task tool | Asana, Todoist, ClickUp, monday.com, TickTick, MeisterTask, Notion |
+| Contacts | a create-contact or create-record tool | HubSpot, Attio, Salesflare, Zoho CRM, Bigin, Nutshell, Notion |
+| Enrich a contact | person or company lookup | Clay, Apollo.io, Lusha, Crustdata |
+| Route: hand a thread off | a send or draft-message tool | Slack, RingCentral |
+| More context (web lookups) | web search that returns links | Exa, Parallel Search, AWS Web Search |
+| Other models | an LLM gateway | OpenRouter |
+
+**MCP servers from your plugins.** If a Claude plugin you use bundles an MCP server, the page can use it the same way. Remote servers show up as connectors. A local server (one that runs on your computer) only answers when the page is open in the Claude desktop app with that plugin running.
+
+**If you use Composio.** Composio is optional. If it's already connected in your claude.ai, setup offers it too: context sources, tasks, contacts, Route actions and More context all accept `server: "Composio"` with the `COMPOSIO_MULTI_EXECUTE_TOOL` tool, and it can run several Gmail accounts in one copy ([composio.md](composio.md)). The page unwraps Composio's replies and shows its errors.
 
 ## Tested connectors
 
