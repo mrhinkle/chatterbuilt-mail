@@ -24,9 +24,9 @@ Connect each Gmail account in Composio (work, a second business, personal), then
 gmail: {
   via: "composio",
   accounts: [
-    { id: "gmail_xxxx", email: "you@work.com", label: "Work" },
-    { id: "gmail_yyyy", email: "you@side.org", label: "Side project" },
-    { id: "gmail_zzzz", email: "you@gmail.com", label: "Personal" }
+    { id: "gmail_xxxx", email: "you@work.example", label: "Work" },
+    { id: "gmail_yyyy", email: "you@side.example", label: "Side project" },
+    { id: "gmail_zzzz", email: "you@personal.example", label: "Personal" }
   ]
 }
 ```

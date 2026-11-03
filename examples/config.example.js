@@ -1,7 +1,7 @@
   const CONFIG = {
     ownerName: "Alex",
     ownEmail: "alex@example.com",
-    gmail: null,              // or Gmail through Composio with several accounts: { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.com", label: "Work" }] }
+    gmail: null,              // or Gmail through Composio with several accounts: { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.example", label: "Work" }] }
     about: "Alex Rivera runs partnerships at Example Co. and hosts a monthly community meetup.",
     voice: "Warm, brief, a little dry. Short paragraphs. Gets to the point in the first line.",
     rules: "US spelling. Never use the word 'synergy'. No exclamation points.",
@@ -9,7 +9,7 @@
     defaultModel: "claude",
     models: [],               // e.g. [{ value: "provider/model-slug", label: "Name" }] via OpenRouter; the setup skill looks up real slugs
     notion: null,             // older Notion-only task shortcut; use tasks below instead
-    copyTargets: [{ label: "personal", address: "alex.rivera@gmail.com" }],
+    copyTargets: [{ label: "personal", address: "alex.rivera@mail.example" }],
     searchExample: "from:jordan newer_than:7d",
 
     // Tasks: any connector's create tool. This one is Notion. The setup skill writes these from your app's own schema.

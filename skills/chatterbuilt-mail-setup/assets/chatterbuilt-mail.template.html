@@ -666,7 +666,7 @@ body.ro [data-mut] { opacity: 0.4; }
   </div>
   <div id="popCopy" style="display:none;flex-direction:column;gap:8px">
     <div class="quick" id="quickAddrs"></div>
-    <input type="text" id="acctCustom" placeholder="name@otheraccount.com" autocomplete="off" aria-label="Destination address">
+    <input type="text" id="acctCustom" placeholder="name@otheraccount.example" autocomplete="off" aria-label="Destination address">
     <button type="button" class="btn primary" id="acctGo">Forward a copy</button>
     <div class="confirmbox" id="acctConfirm" hidden><span id="acctConfirmText"></span><button type="button" class="btn sm primary" id="acctYes">Yes, forward</button><button type="button" class="btn sm ghost" id="acctNo">Cancel</button></div>
     <div class="note">Forwards the newest message, with its quoted history, as a new email. The original stays here. It is not a label-for-label copy.</div>
@@ -698,7 +698,7 @@ body.ro [data-mut] { opacity: 0.4; }
     ownerName: "",            // your name, e.g. "Alex Rivera"
     ownEmail: "",             // your Gmail address (used to skip yourself when unsubscribing/copying)
     gmail: null,              // null: claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts:
-                              //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.com", label: "Work" }, ...] }
+                              //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.example", label: "Work" }, ...] }
                               //   id is the Composio connected-account id; the first account opens by default.
     about: "",                // one or two sentences on who you are and what you do
     voice: "",                // how you write, e.g. "Warm, brief, a little dry. Short paragraphs."
@@ -707,7 +707,7 @@ body.ro [data-mut] { opacity: 0.4; }
     defaultModel: "claude",   // "claude" (built in, no setup) or any value from models below
     models: [],               // optional extra LLMs through the OpenRouter connector (GPT, Gemini, GLM, Llama...), e.g. [{ value: "provider/model-slug", label: "Display name" }]
     notion: null,             // or { dataSourceId: "...", titleProp: "Name", urlProp: "URL", notesProp: "Notes", emailProp: null, extra: { "Status": "To Do" } }
-    copyTargets: [],          // quick-pick forward targets, e.g. [{ label: "work", address: "me@work.com" }]
+    copyTargets: [],          // quick-pick forward targets, e.g. [{ label: "work", address: "me@work.example" }]
     searchExample: "from:alex newer_than:7d",
     tasks: null,              // any task app with a connector: { label: "Asana", server: "Asana", tool: "<create tool>", input: { ...tool args with {{title}} {{notes}} {{url}} {{body}} {{fromEmail}} } }. Leave null to use notion above.
     contacts: null,           // any CRM/contacts app: { label, server, tool, input with {{name}} {{email}} {{company}} {{title}} {{phone}} {{linkedin}} {{x}} {{bluesky}} {{github}} {{instagram}} {{website}} {{location}} {{met}} {{firstContact}} {{background}} {{notes}} {{content}} }, or a Notion shortcut: { dataSourceId, nameProp, emailProp, ... }

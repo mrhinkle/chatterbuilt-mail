@@ -73,7 +73,7 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 
 | Key | What it is |
 |---|---|
-| `copyTargets` | One-click "copy to account" addresses: `[{ label: "work", address: "me@work.com" }]` |
+| `copyTargets` | One-click "copy to account" addresses: `[{ label: "work", address: "me@work.example" }]` |
 | `searchExample` | Placeholder text in the search box |
 | `repoUrl`, `supportUrl` | Where the header logo and Skills help link. Point them at your fork if you like. |
 

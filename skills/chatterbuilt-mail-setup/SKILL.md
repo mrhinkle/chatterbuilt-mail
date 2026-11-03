@@ -140,7 +140,7 @@ One or two sentences: what the page is, and what to try first (open a thread, pr
 - the first use of each connector asks for consent;
 - Read-only is there for a careful first look.
 
-In a repo, commit `my/config.js` and `my/chatterbuilt-mail.html`.
+In a repo, commit `my/config.js` and `my/chatterbuilt-mail.html` only if the repo is private (check with `gh repo view --json visibility`). A GitHub fork of a public repo is public, and CONFIG holds workspace IDs, addresses and account IDs; in a public repo, leave both files uncommitted and tell the user why.
 
 ## 8. Offer the morning run
 

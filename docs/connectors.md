@@ -63,7 +63,7 @@ These are the argument names those connectors took in November 2026. Connectors 
 | `{{name}}` | Their name, if the address has one |
 | `{{who}}` | Name if known, otherwise email |
 | `{{domain}}` | Their email domain |
-| `{{org}}` | The company part of the domain (`acme` from `jo@mail.acme.co.uk`); empty for Gmail, Outlook and other free mail |
+| `{{org}}` | The company part of the domain (`acme` from `jo@mail.acme.example`); empty for Gmail, Outlook and other free mail |
 | `{{orgOrEmail}}` | `{{org}}`, or the email when there's no company |
 | `{{subject}}` | Thread subject without Re:/Fwd: |
 | `{{today}}` | Today, YYYY-MM-DD |
