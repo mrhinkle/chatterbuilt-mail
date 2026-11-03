@@ -82,7 +82,8 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 ## Everything else in the reply box
 
 - **Snippets:** reusable text you insert at the cursor, with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
-- **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link.
+- **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. A line under the reply box says so. Each account uses its own signature. If your drafts already end with a signature block, turn **Gmail signature** off in Skills so you don't get two.
+- **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
 - **Reply all:** off by default. The pre-send check warns when reply-all looks risky.
 - **Remind me in N days:** if nobody answers by then, the thread comes back to your inbox. See [following-up.md](following-up.md).
 - **Drafts waiting in Gmail:** when a thread already has a Gmail draft, a banner offers **Load it**. Sending then replaces that draft, so you don't end up with a stray copy.
@@ -93,7 +94,7 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 | Step | Reads | Writes | Sent to the AI |
 |---|---|---|---|
 | Drafting | the thread; your sent mail to this person (tone); the context brief; your calendar (open times only) | nothing | the thread, your voice and lessons, the brief, free time slots |
-| Save draft | | a Gmail draft (`create_draft`) | |
+| Save draft | | a Gmail draft (`create_draft`, with your Gmail signature) | |
 | Send | | the reply (`reply`), or a new message threaded under your last one when you're following up (`send_message`) | the reply and thread, for the pre-send check |
 
 Read-only mode blocks Save draft and Send. Nothing is sent without your confirmation.

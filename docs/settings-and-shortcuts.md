@@ -23,7 +23,7 @@ Everything that controls the app itself sits in one **Settings** menu in the top
 
 Open **Settings → Skills**, or press `?`. Each row has the feature's name, what it does, and **How** to use it. Untick one and its buttons disappear right away; tick it to bring them back. A feature that needs a connector you haven't set up shows *needs setup* and says what's missing.
 
-The list covers: Triage, Waiting on reply, Per-recipient tone, Review queue, Pre-drafts with options, Plain-English rules, Unsubscribe sweep, Ask your inbox, Calendar-aware replies, Add to contacts, Voice, Self-improving, Tasks, Move and copy, Unsubscribe, Pre-send check, Context from your systems, More context, Today, Route, Snooze and remind-me, Drafts waiting in Gmail, Snippets, Attachments, Formatted view, and Keyboard shortcuts.
+The list covers: Triage, Waiting on reply, Per-recipient tone, Review queue, Pre-drafts with options, Plain-English rules, Unsubscribe sweep, Ask your inbox, Calendar-aware replies, Add to contacts, Voice, Self-improving, Tasks, Move and copy, Unsubscribe, Pre-send check, Context from your systems, More context, Today, Route, Snooze and remind-me, Drafts waiting in Gmail, Snippets, Gmail signature, Attachments, Formatted view, and Keyboard shortcuts.
 
 Below the list are the keyboard shortcuts, a short safety note, and links to the docs and to GitHub issues. **Reset to defaults** turns everything back to how your copy ships.
 
@@ -54,7 +54,7 @@ Claude does the drafting, triage, briefs and checks by default, through your own
 
 Press **⌘K** (Mac) or **Ctrl K** (Windows, Linux), or click **Commands** in the top bar. Type a few letters to filter, use the arrow keys to pick, and press Enter.
 
-It lists every action that's switched on: the views (Inbox, Unread, Waiting on reply, Starred), search, Triage, Review, Pre-draft, Rules, Sweep, Ask, Voice and lessons, Skills and help, Toggle read-only, Refresh, Undo, showing or hiding the thread list, and **Reset pane sizes** once you've dragged a pane wider or narrower. With a thread open it adds the thread actions too: Route, Snooze, Formatted view, Insert a snippet, Refresh context, Summarize, Archive, Star, Move, Unsubscribe, Three reply options, Add to contacts and File as a task. Each command shows its shortcut when it has one.
+It lists every action that's switched on: the views (Inbox, Unread, Waiting on reply, Starred), search, Triage, Review, Pre-draft, Rules, Sweep, Ask, Voice and lessons, Skills and help, Toggle read-only, Refresh, Undo, showing or hiding the thread list, **Reset pane sizes** once you've dragged a pane wider or narrower, and **Switch to …** for each of your other accounts when Gmail goes through Composio. With a thread open it adds the thread actions too: Route, Snooze, Formatted view, Insert a snippet, Refresh context, Summarize, Archive, Star, Move, Unsubscribe, Three reply options, Add to contacts and File as a task. Each command shows its shortcut when it has one.
 
 ## Keyboard shortcuts
 

@@ -1,6 +1,7 @@
   const CONFIG = {
     ownerName: "Alex",
     ownEmail: "alex@example.com",
+    gmail: null,              // or Gmail through Composio with several accounts: { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.com", label: "Work" }] }
     about: "Alex Rivera runs partnerships at Example Co. and hosts a monthly community meetup.",
     voice: "Warm, brief, a little dry. Short paragraphs. Gets to the point in the first line.",
     rules: "US spelling. Never use the word 'synergy'. No exclamation points.",

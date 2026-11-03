@@ -44,6 +44,8 @@ Connect your other apps however you like. I use a mix of native claude.ai connec
 
 I built this for Gmail because that's where my mail lives. But the app only talks to a handful of connector tools (search, read, draft, send, label), so there's nothing stopping it from running on Outlook or anything else with a connector. Fork it, swap in your email platform, and send a pull request. That's how open source is supposed to work, right? [CONTRIBUTING.md](CONTRIBUTING.md) has the map of what to change.
 
+Got more than one inbox? I've got four. Run Gmail through [Composio](docs/composio.md#gmail-through-composio-several-accounts-in-one-copy) and the app switches between all your accounts from one menu.
+
 ## Nothing happens without a click
 
 Nothing is sent, moved or filed until you say so. AI suggestions wait for your OK, there's undo, and read-only mode blocks every change outright, which is handy for demos. → [Safety and privacy](docs/safety-and-privacy.md)

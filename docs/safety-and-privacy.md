@@ -36,6 +36,7 @@
 - **Context sources.** These are different by design: their results do go to the model, so it can brief you. Event descriptions, meeting links, HTML bodies and similar fields are dropped first, and long text is cut. Choose sources you're comfortable sending to the model you use, and leave out any you're not.
 - **Clay.** Clay is called only when you press Enrich with Clay, and it uses your Clay credits.
 - **More context.** Runs only when you press it. The person's name, company and email domain go to your web search provider; nothing from the email does. The results are kept apart from your systems' context and only go into a draft if you switch on Web context.
+- **Attachments.** Opening one reads the message source through your Gmail connection and shows it in the page. Nothing from it goes to the model. PDFs are drawn with pdf.js, a script loaded from cdnjs.cloudflare.com; the file itself never leaves the page. **Save** asks before it downloads anything.
 - **Next meeting (Today).** The title and time are shown on the page only; they are never sent to the model.
 - **Your browser.** Voice edits, rules, lessons and switches are stored in that browser's local storage for this artifact. Clearing site data clears them. Copy for Claude is the backup.
 - **Sharing.** The artifact is private to you. If you share it, the other person uses their own connectors and sees their own mail, never yours. Your browser-stored lessons don't travel with the link.
@@ -48,5 +49,6 @@
 ## Known limits
 
 - Attachments are capped at 18 MB per message.
-- One Gmail connector reaches one mailbox. "Copy to account" forwards a message as a new email; it isn't a label-for-label copy.
+- claude.ai's Gmail connector reaches one mailbox. For several, use Gmail through Composio (see [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy)); that gives the page Composio's wider permission. "Copy to account" forwards a message as a new email; it isn't a label-for-label copy.
+- Attaching files to a reply isn't available yet when Gmail goes through Composio.
 - One-click unsubscribe (the POST kind) can't be sent from a web page, so the page opens the sender's own unsubscribe page instead.

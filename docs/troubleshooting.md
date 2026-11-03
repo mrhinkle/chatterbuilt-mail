@@ -5,6 +5,12 @@
 | "Open this in claude.ai" | The page only reaches your connectors inside claude.ai. Open it from your artifacts list. |
 | "Gmail couldn't finish that just now" | Usually it ran while claude.ai was asking you to allow Gmail for the page, or Gmail had a short hiccup. Allow it if asked, then press **Try again** (or Refresh). The page already retries a read once on its own when the error says that may work. It never retries a send, a move or a save, because a failure isn't proof it didn't happen. Check Sent or Drafts before trying a write again. |
 | "Gmail isn't connected" or "Reconnect Gmail" | claude.ai Settings, Connectors: add or reconnect Gmail, then refresh the page. |
+| "Composio isn't connected" | Your copy reads Gmail through Composio. Add or reconnect Composio in claude.ai Settings, Connectors, and check the Gmail accounts are still connected inside Composio. |
+| An account in the switcher shows an error | That account's connection in Composio lapsed or was removed. Reconnect it in Composio; the other accounts keep working. |
+| Your signature appears twice | Your drafts already end with a signature block and Gmail adds yours too. Turn off **Gmail signature** in Skills, or take the block out of your sign-off. |
+| No signature on sent mail | Set one in Gmail (Settings → Signature, and pick it under "Signature defaults"), and check **Gmail signature** is on in Skills. |
+| "Couldn't open the PDF viewer here" | The PDF viewer loads from cdnjs.cloudflare.com and that didn't load. Refresh and try again, or use **Open in Gmail**. |
+| No **Save** button on an attachment | The page wasn't given permission to offer downloads. Ask Claude to republish it with the `downloads` capability, or use **Open in Gmail**. |
 | "Not connected: Notion, Google Calendar…" toast | Those features need that connector. Reading mail still works. |
 | "This page isn't allowed to use …" | Allow it in the artifact's Permissions menu, or ask Claude to republish with that tool declared. |
 | Drafts don't sound like you | Settings → Voice → train from your sent mail, or point to your voice page. Then edit a few drafts before sending and press Learn now. |

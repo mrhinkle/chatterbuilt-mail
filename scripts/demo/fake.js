@@ -16,9 +16,9 @@ module.exports = function fake() {
       labelIds: ['INBOX'],
       htmlBody: '<div style="font-family:Georgia,serif;max-width:560px"><h1 style="font-size:22px">The Weekly Byte</h1><p>Five stories you missed this week.</p><h2 style="font-size:17px">1. Agents that file their own tickets</h2><p>Support teams are letting agents open, tag and route tickets. <a href="https://weeklybyte.example/agents">Read more</a></p><h2 style="font-size:17px">2. The quiet return of on-prem</h2><p>Why some teams are bringing models back in-house.</p><table border="1" cellpadding="6" style="border-collapse:collapse"><tr><th>Story</th><th>Minutes</th></tr><tr><td>Agents</td><td>4</td></tr><tr><td>On-prem</td><td>6</td></tr></table><img src="https://track.weeklybyte.example/open.gif" width="1" height="1"><p style="font-size:12px"><a href="https://weeklybyte.example/unsubscribe?u=demo">Unsubscribe</a></p><script>alert(1)</script></div>'
     }),
-    t6: mk('t6', 'Morgan Lee <morgan@cityworks.example>', 'Intro: Alex, meet Jordan', 'Alex, meet Jordan, who runs the downtown makerspace. I think you two should talk.', 26 * H),
+    t6: mk('t6', 'Morgan Lee <morgan@cityworks.example>', 'Intro: Alex, meet Jordan', 'Alex, meet Jordan, who runs the downtown makerspace. I think you two should talk.', 26 * H, { cc: 'Jordan Blake <jordan@makerspace.example>' }),
     t7: mk('t7', 'Stripe <receipts@stripe.example>', 'Your receipt from Rivera Labs', 'Receipt for $120.00', 30 * H, { labelIds: ['INBOX'] }),
-    t8: mk('t8', 'Cloudway Billing <billing@notify.cloudway.example>', 'Payment received for invoice CW-2026-1142', 'Thanks for your payment. Invoice CW-2026-1142 for Rivera Labs has been paid. The invoice PDF is attached. This mailbox is not monitored.', 32 * H, { labelIds: ['INBOX'] }),
+    t8: mk('t8', 'Cloudway Billing <billing@notify.cloudway.example>', 'Payment received for invoice CW-2026-1142', 'Thanks for your payment. Invoice CW-2026-1142 for Rivera Labs has been paid. The invoice PDF is attached. This mailbox is not monitored.', 32 * H, { labelIds: ['INBOX'], attachments: [{ filename: 'CW-2026-1142.pdf', mimeType: 'application/pdf' }] }),
     w1: mine('w1', 'Jordan Blake <jordan@makerspace.example>', 'Re: Space for the March meetup', 'Hi Jordan, could the March meetup use the big room? We expect about 60 people. Happy to cover cleanup. Alex', 5 * D,
       [{ id: 'mw1a', sender: 'Jordan Blake <jordan@makerspace.example>', toRecipients: [ME], date: iso(now - 7 * D), subject: 'Space for the March meetup', labelIds: [], plaintextBody: 'Morgan said you might need a room for your meetup. Happy to talk.' }]),
     s1: mine('s1', 'Sam Ortiz <sam@riveralabs.example>', 'Re: Panel', 'Sam, happy to do the panel. Send the run of show and I will block the time. Alex', 20 * D),
@@ -28,6 +28,19 @@ module.exports = function fake() {
   };
   const order = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8'];
   const summ = (id) => { const t = T[id]; const m = t.messages[t.messages.length - 1]; return { id, messageCount: t.messages.length, messages: [{ id: m.id, sender: m.sender, subject: m.subject, toRecipients: m.toRecipients, threadId: id }] }; };
+  const search = (q) => {
+    if (/before:/.test(q)) return {};
+    if (q === 'in:sent newer_than:180d') return { threads: ['s1', 's2', 's3', 'w1'].map(summ) };
+    if (/^in:sent to:/.test(q)) return { threads: [summ('s3')] };
+    if (/^in:sent/.test(q)) return { threads: ['w1', 's1'].map(summ) };
+    if (/^label:/.test(q)) return {};
+    if (/unsubscribe/i.test(q)) return { threads: ['t5', 't4', 't7'].map(summ) };
+    if (/note to self/i.test(q)) return { threads: [summ('n1')] };
+    if (/venue|walkthrough/i.test(q)) return { threads: [summ('t2')] };
+    if (/stripe/i.test(q)) return { threads: [summ('t4'), summ('t7')] };
+    if (/dana@|acmerobotics/i.test(q)) return { threads: [summ('s3'), summ('t1')] };
+    return { resultCountEstimate: '8', threads: order.map(summ) };
+  };
   const DRAFTS = { drafts: [{ id: 'd1', threadId: 't2', plaintextBody: 'Hi Lee, Tuesday at 10 works. See you there. Alex', viewUrl: 'https://mail.google.com/d1' }] };
   const env = (data) => ({ successful: true, data: { results: [{ response: { successful: true, data }, tool_slug: 'X' }] } });
   // Context sources answer by who is being looked up: Dana (a sponsor), Cloudway (a vendor invoice), Jordan (waiting on a reply).
@@ -57,6 +70,45 @@ module.exports = function fake() {
   const web = (q) => /company news/.test(q)
     ? [{ title: 'Acme Robotics: warehouse robots for mid-size retailers', url: 'https://acmerobotics.example/about', description: 'Acme Robotics builds warehouse robots for mid-size retailers.' }, { title: 'Acme Robotics opens a Raleigh office', url: 'https://news.example/acme-raleigh', description: 'The company is hiring 40 people in Raleigh this year.' }]
     : [{ title: 'Dana Ruiz, VP Marketing, Acme Robotics', url: 'https://acmerobotics.example/team/dana', description: 'Dana leads marketing and events at Acme Robotics.' }];
+  // A second, personal mailbox for the account switcher (Gmail through Composio).
+  const ME2 = 'Alex Rivera <alex.rivera@mail.example>';
+  const pmk = (id, from, subject, body, ago, extra) => ({ id, messages: [Object.assign({ id: 'm' + id, sender: from, toRecipients: [ME2], date: iso(now - ago), subject, labelIds: ['INBOX', 'UNREAD'], plaintextBody: body }, extra || {})] });
+  const PT = {
+    p1: pmk('p1', 'Casey Rivera <casey@family.example>', 'Saturday dinner', 'Still on for Saturday? We can do 6:30 if that works better for you.', 3 * H),
+    p2: pmk('p2', 'Library Annex <events@libraryannex.example>', 'Your room booking is confirmed', 'Room B is booked for March 14, 6 to 9 pm. Reply to this email to change it.', 20 * H, { labelIds: ['INBOX'] }),
+    p3: pmk('p3', 'Spokeworks <service@spokeworks.example>', 'Your tune-up is ready', 'Your bike is ready for pickup any time before 6.', 2 * D, { labelIds: ['INBOX'] })
+  };
+  // Gmail through Composio: answer GMAIL_* tools the way Composio does (shapes taken from real responses, data made up).
+  const u64 = (v) => btoa(unescape(encodeURIComponent(v))).replace(/\+/g, '-').replace(/\//g, '_');
+  const cmsg = (m, tid, full) => {
+    const o = { messageId: m.id, threadId: tid, sender: m.sender, to: (m.toRecipients || []).join(', '), subject: m.subject, messageTimestamp: m.date, labelIds: m.labelIds || [], attachmentList: (m.attachments || []).map((x, i) => ({ attachmentId: 'att' + i, filename: x.filename, mimeType: x.mimeType })),
+      preview: { body: String(m.plaintextBody || '').replace(/'/g, '&#39;').slice(0, 200), subject: m.subject }, display_url: 'https://mail.google.com/mail/u/0/#inbox/' + tid, messageText: full ? String(m.plaintextBody || '').replace(/\n/g, '\r\n') : '' };
+    if (full) o.payload = { mimeType: 'multipart/alternative', headers: [{ name: 'From', value: m.sender }, { name: 'To', value: o.to }, { name: 'Subject', value: m.subject }].concat(m.cc ? [{ name: 'Cc', value: m.cc }] : []),
+      parts: [{ mimeType: 'text/plain', body: { data: u64(m.plaintextBody || '') } }].concat(m.htmlBody ? [{ mimeType: 'text/html', body: { data: u64(m.htmlBody) } }] : []) };
+    return o;
+  };
+  const gmailBridge = (slug, a, account) => {
+    const personal = /personal/.test(account || '');
+    const box = personal ? PT : T;
+    const last = (t) => t.messages[t.messages.length - 1];
+    if (slug === 'GMAIL_FETCH_EMAILS' || slug === 'GMAIL_LIST_THREADS') {
+      let ids;
+      if (personal) ids = /before:|label:|in:sent/.test(a.query || '') ? [] : ['p1', 'p2', 'p3'];
+      else ids = (search(a.query || '').threads || []).map((t) => t.id);
+      if (slug === 'GMAIL_LIST_THREADS') return { threads: ids.map((id) => ({ id, historyId: '1', snippet: String(last(box[id]).plaintextBody || '').slice(0, 120) })), resultSizeEstimate: ids.length };
+      return { messages: ids.map((id) => cmsg(last(box[id]), id, false)), resultSizeEstimate: ids.length };
+    }
+    if (slug === 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID') { const t = box[a.thread_id]; return t ? { threadId: t.id, display_url: '', messages: t.messages.map((m) => cmsg(m, t.id, true)) } : { messages: [] }; }
+    if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID' && a.format === 'raw') return { messageId: a.message_id, raw: a.message_id === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') };
+    if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID') return { messageId: a.message_id, payload: { mimeType: 'multipart/alternative', headers: [{ name: 'Subject', value: 'x' }].concat(a.message_id === 'mt5' ? [{ name: 'List-Unsubscribe', value: '<https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>' }] : []) } };
+    if (slug === 'GMAIL_LIST_LABELS') return { labels: [{ id: 'INBOX', name: 'INBOX', type: 'system' }].concat((personal ? ['Family', 'Bikes'] : ['Finance', 'Sponsors', 'Meetup', 'Newsletters']).map((n, i) => ({ id: 'L' + (i + 1), name: n, type: 'user' }))) };
+    if (slug === 'GMAIL_LIST_DRAFTS') return { drafts: personal ? [] : [{ id: 'd1', message: { id: 'md1', threadId: 't2' } }] };
+    if (slug === 'GMAIL_GET_DRAFT') return { id: 'd1', message: cmsg({ id: 'md1', sender: ME, toRecipients: ['Lee Park <lee@venuehall.example>'], date: iso(now - H), subject: 'Re: Venue walkthrough', labelIds: ['DRAFT'], plaintextBody: DRAFTS.drafts[0].plaintextBody }, 't2', true) };
+    return { id: 'ok' };
+  };
+  // The Cloudway invoice as a raw message with a (made-up) PDF attached, for the attachment viewer.
+  const INVOICE_PDF = 'JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQ29udGVudHMgOCAwIFIgL01lZGlhQm94IFsgMCAwIDYxMiA3OTIgXSAvUGFyZW50IDcgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL1BhZ2VNb2RlIC9Vc2VOb25lIC9QYWdlcyA3IDAgUiAvVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKNiAwIG9iago8PAovQXV0aG9yIChhbm9ueW1vdXMpIC9DcmVhdGlvbkRhdGUgKEQ6MjAyNjExMDIxODQyNDktMDUnMDAnKSAvQ3JlYXRvciAoYW5vbnltb3VzKSAvS2V5d29yZHMgKCkgL01vZERhdGUgKEQ6MjAyNjExMDIxODQyNDktMDUnMDAnKSAvUHJvZHVjZXIgKFJlcG9ydExhYiBQREYgTGlicmFyeSAtIFwob3BlbnNvdXJjZVwpKSAKICAvU3ViamVjdCAodW5zcGVjaWZpZWQpIC9UaXRsZSAoQ2xvdWR3YXkgaW52b2ljZSBDVy0yMDI2LTExNDIpIC9UcmFwcGVkIC9GYWxzZQo+PgplbmRvYmoKNyAwIG9iago8PAovQ291bnQgMSAvS2lkcyBbIDQgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDY2OQo+PgpzdHJlYW0KR2F0JHViQVEmZyZBNzxaaylfcUMsVjZLUkxxOiE7aCZuc1woVEdiZkVoUCkpOzUmYWdlI0U2PUtkOS9jU1tvPTsrRVo4LFJAU2EzRSxeWCQ/J2A4T2BMQEE+SnJpL10uJk4qX0AkWDhVLipXRDUtRVNTbl8lSUM3LFxVNFUiY2VyYE4kJ0FjTlE4cV4sZ18iYi5kQCE/VWZwJGhiakdLWmwoMW0/LyZZPS8vVEVnJ2w+PzdOckFbMUAlSSpbUFlZdWYuNz9aJjYhJHNLOSchXkY6YVMhUyxvQllXTGUkIytWYV1vMUhrWj5QQzskZ2lnNzgsbEMtXlNKVS1QTCIoJS8lSXJPUSQ8bmE9KlxOaD9lKFkwZWpNQFw0RmlCZWl1YVYkSD5uNDJUXmxvQiplMjEoIydvXGRpbU4uOlZMaFlFSnIqMWxZQyIsa1tJaVZHQWlzJ1RsPm8hby9nJFYkXC03cj03dDtAbEpNS2BaSDpdQVlIJm8nX0QlaEpPUlRFU1tvRjpCQlNBQHFKNkFqIzsuLWdrb140My8zaTYjUUtcIVUvLytFP1ZoOWdPKjk2ZE5zK2c0b184QS1PWS9tTywtZStrYWErT2s3dExESmQ+KkBvJmA7SipeLStqTHRnN2lnNFk9ZT4iSWowL2k0aiZXbWppNCwzcWFXZV4iVGNzKHMqQUksPyY6WlRrcGtwPGZIPFVtX25VPC4+M2ssNixRWTQ+RzxRbXVQaV9TYzdga0RJRjgmcEJqQiFROUxIb1ZbL2BFWGVmUG8pJTliSV9uYl5ZR3VTPSYzdFFvUVs7UktMXypmVUM0bXNNZXVjJ2dxKC1gazAnNFBxJ3MwWykrSHQoZixnRS9mYWFdK2ZMUkViVERKKCZJZn4+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgOQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDEwMiAwMDAwMCBuIAowMDAwMDAwMjA5IDAwMDAwIG4gCjAwMDAwMDAzMjEgMDAwMDAgbiAKMDAwMDAwMDUxNCAwMDAwMCBuIAowMDAwMDAwNTgyIDAwMDAwIG4gCjAwMDAwMDA4NjQgMDAwMDAgbiAKMDAwMDAwMDkyMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzxmM2YyNmFkNzZhNGQwOGVhMjQzYjlmNTE3ZTJjODhkYj48ZjNmMjZhZDc2YTRkMDhlYTI0M2I5ZjUxN2UyYzg4ZGI+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDYgMCBSCi9Sb290IDUgMCBSCi9TaXplIDkKPj4Kc3RhcnR4cmVmCjE2ODIKJSVFT0YK';
+  const cwRaw = b64('From: Cloudway Billing <billing@notify.cloudway.example>\r\nTo: Alex Rivera <alex@riveralabs.example>\r\nSubject: Payment received for invoice CW-2026-1142\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="cwb"\r\n\r\n--cwb\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\nThanks for your payment.\r\n--cwb\r\nContent-Type: application/pdf; name="CW-2026-1142.pdf"\r\nContent-Disposition: attachment; filename="CW-2026-1142.pdf"\r\nContent-Transfer-Encoding: base64\r\n\r\n' + INVOICE_PDF.replace(/(.{76})/g, '$1\r\n') + '\r\n--cwb--\r\n');
   const unsubRaw = b64('List-Unsubscribe: <https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>\r\nSubject: This week in AI\r\n\r\nbody');
   window.__calls = [];
   const mcp = {
@@ -66,26 +118,13 @@ module.exports = function fake() {
       window.__calls.push({ server, tool, input }); await new Promise((r) => setTimeout(r, 120));
       const P = (x) => ({ payload: x });
       if (server === 'Gmail') {
-        if (tool === 'search_threads') {
-          const q = input.query || '';
-          if (/before:/.test(q)) return P({});
-          if (q === 'in:sent newer_than:180d') return P({ threads: ['s1', 's2', 's3', 'w1'].map(summ) });
-          if (/^in:sent to:/.test(q)) return P({ threads: [summ('s3')] });
-          if (/^in:sent/.test(q)) return P({ threads: ['w1', 's1'].map(summ) });
-          if (/^label:/.test(q)) return P({});
-          if (/unsubscribe/i.test(q)) return P({ threads: ['t5', 't4', 't7'].map(summ) });
-          if (/note to self/i.test(q)) return P({ threads: [summ('n1')] });
-          if (/venue|walkthrough/i.test(q)) return P({ threads: [summ('t2')] });
-          if (/stripe/i.test(q)) return P({ threads: [summ('t4'), summ('t7')] });
-          if (/dana@|acmerobotics/i.test(q)) return P({ threads: [summ('s3'), summ('t1')] });
-          return P({ resultCountEstimate: '8', threads: order.map(summ) });
-        }
+        if (tool === 'search_threads') return P(search(input.query || ''));
         if (tool === 'get_thread') {
           const t = JSON.parse(JSON.stringify(T[input.threadId]));
           if (input.messageFormat !== 'FULL_CONTENT') t.messages.forEach((m) => { delete m.htmlBody; });
           return P(t);
         }
-        if (tool === 'get_message') return P({ id: input.messageId, raw: input.messageId === 'mt5' ? unsubRaw : b64('Subject: x\r\n\r\nbody') });
+        if (tool === 'get_message') return P({ id: input.messageId, raw: input.messageId === 'mt5' ? unsubRaw : input.messageId === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') });
         if (tool === 'list_drafts') return P(DRAFTS);
         if (tool === 'list_labels') return P({ labels: [{ labelId: 'L1', name: 'Finance', labelType: 'USER' }, { labelId: 'L2', name: 'Sponsors', labelType: 'USER' }, { labelId: 'L3', name: 'Meetup', labelType: 'USER' }, { labelId: 'L4', name: 'Newsletters', labelType: 'USER' }] });
         return P({ id: 'ok' });
@@ -96,6 +135,7 @@ module.exports = function fake() {
       ] });
       if (server === 'Composio') {
         const it = (input.tools || [])[0] || {}; const slug = it.tool_slug;
+        if (/^GMAIL_/.test(slug)) return P(env(gmailBridge(slug, it.arguments || {}, it.account)));
         if (slug === 'FIRECRAWL_SEARCH') return P(env({ data: { web: web(it.arguments.q) } }));
         const c = ctx(slug, it.arguments); if (c !== undefined) return P(env(c));
         if (slug === 'ASANA_CREATE_A_TASK') return P(env({ data: { gid: '1200000000000001', permalink_url: 'https://app.asana.com/0/0/1200000000000001' } }));

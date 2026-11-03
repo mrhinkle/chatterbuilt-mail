@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.0 (2026-11-02)
+
+### New
+- **Several Gmail accounts in one copy, through Composio.** Set `CONFIG.gmail` to `{ via: "composio", accounts: [...] }` and the address under the app name becomes an account menu (and **Switch to …** in the command palette). The list, labels, drafts, Today and Waiting reload for each account. Every feature works through Composio except attaching files to a reply, which is hidden for now. The page translates its Gmail calls into Composio's Gmail tools (`gmailComposio()` in the template), so the rest of the app is unchanged, and claude.ai's Gmail connector stays the default.
+- **Open attachments in the page.** Attachments are buttons now. PDFs show page by page (pdf.js from cdnjs), images full size, and text files as text. Anything else gets **Save** (it asks before downloading) and **Open in Gmail**. Nothing from the file goes to the AI.
+- **Clickable links.** Web addresses in messages are links that open in a new browser tab.
+- **Your Gmail signature on everything you send.** Replies, drafts and forwards ask Gmail to add the signature you set in Gmail, so it keeps its formatting, links and images. A line under the reply box says so. Each account uses its own. Switch it off under Skills, **Gmail signature**.
+
+### Changed
+- The setup skill declares the `downloads` capability (for Save) and, with Gmail through Composio, `Composio` instead of `Gmail`.
+- The morning run handles Gmail through Composio, one account at a time.
+- Screenshots and the demo video are retaken; new ones show an attachment open and a second account.
+
 ## 0.5.4 (2026-11-02)
 
 ### New

@@ -13,6 +13,7 @@ This repo is a Chatterbuilt Mail plugin, or someone's fork of it.
 - **Build.** `python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html`. It stamps the version from `.claude-plugin/plugin.json`, which the app shows in Settings → Skills.
 - **Don't edit the template for one person.** Personal changes go in `my/config.js`. Template changes are for everyone, so upstream them.
 - **Never test by acting.** Don't send, move, forward, label, file a task, save a contact or open an issue as a test. Read-only calls are fine.
+- **Two Gmail paths.** Every Gmail call goes through `call(GMAIL, …)` with claude.ai connector tool names. When `CONFIG.gmail.via` is `"composio"`, `gmailComposio()` translates it to Composio's Gmail tools for the current account. A change to a Gmail call must work on both paths.
 - **Connector reads vs writes.** The page retries a read once when the runtime marks the error retryable. Never add retries to writes: a failed write may still have run.
 - Docs are in `docs/`. Keep them in step with any template change.
 - **Screenshots.** After a UI change, run `node scripts/demo/screenshots.js demo-out/screens`, convert to WebP (see `docs/demo.md`) and replace the matching files in `docs/images/`. They use made-up data from `scripts/demo/fake.js`. Never commit screenshots of real mail.

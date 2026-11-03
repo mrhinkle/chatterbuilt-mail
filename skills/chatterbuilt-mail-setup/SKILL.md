@@ -20,12 +20,18 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 
 ## 1. Check connectors
 
-- Gmail is required. If it isn't connected, tell the user to add it in claude.ai Settings, Connectors, and stop.
+- Gmail is required: either claude.ai's Gmail connector, or Gmail connected inside Composio (step 1b). If neither is there, tell the user to add one in claude.ai Settings, Connectors, and stop.
 - Note which optional connectors exist: Notion or another task app, a contacts app or CRM, Google Calendar, Clay, OpenRouter, Slack, and anything that knows about people the user emails (meeting notes such as Fireflies, a pipeline, newsletter lists such as Beehiiv, a memory system such as Cortex).
 
 ## 1b. Native connectors or Composio
 
-Gmail must be the native claude.ai Gmail connector. Everything else (context, tasks, contacts, Route actions, More context) can use native connectors, Composio, or a mix. If the user has no preference and doesn't want to manage many connectors, suggest Composio (`docs/composio.md`). Through Composio:
+**Gmail.** Use claude.ai's Gmail connector by default. Use Gmail through Composio when the user wants more than one Gmail account in one copy, or prefers Composio:
+- list their Composio Gmail connections with Composio's tool search (its connection status lists each account's `id`, email and alias); ask which to include and a short label for each;
+- set `CONFIG.gmail = { via: "composio", accounts: [{ id, email, label }, ...] }`, with the account they use most first;
+- one read-only check per account (a `GMAIL_FETCH_EMAILS` search with `max_results: 1`) confirms each connection works;
+- tell them attaching files to replies isn't available through Composio yet, and that `COMPOSIO_MULTI_EXECUTE_TOOL` can send from every Gmail account connected there.
+
+Everything else (context, tasks, contacts, Route actions, More context) can use native connectors, Composio, or a mix. If the user has no preference and doesn't want to manage many connectors, suggest Composio (`docs/composio.md`). Through Composio:
 - every adapter is `{ server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", input: { tools: [{ tool_slug, arguments }], sync_response_to_workbench: false } }`;
 - find each action with Composio's tool search and read its full schema; never guess a slug or argument;
 - check that each app has an active connection in Composio and tell the user which to connect if not;
@@ -102,11 +108,13 @@ Load the `artifact-capabilities` and `artifact-design` skills if they are listed
 
 Declare capabilities from CONFIG, and only what's used:
 - `sample: {}`. This is always declared; it's how Claude drafts.
+- `downloads: true`. Always declared; it lets **Save** on an attachment offer the file (the viewer confirms every save).
 - `mcp.servers`. Each entry needs a non-empty `tools` list. Use the connector's exact display name as `server`.
 
 | When | Server | Tools |
 |---|---|---|
-| Always | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
+| `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
+| `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL` |
 | `tasks` is set | its `server` | its `tool` |
 | `contacts` uses the Notion short form | `Notion` | `notion-create-pages`, `notion-search` |
 | `contacts` is a custom adapter | its `server` (and `dupCheck.server`) | its `tool` (and `dupCheck.tool`) |

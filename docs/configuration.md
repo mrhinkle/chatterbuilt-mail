@@ -14,6 +14,7 @@ You don't need to edit this by hand. Ask Claude, and the setup skill does it. Th
 |---|---|---|
 | `ownerName` | Your name, as drafts should use it | `"Alex"` |
 | `ownEmail` | Your Gmail address; used to tell your messages from theirs | `"alex@example.com"` |
+| `gmail` | `null` for claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts and a switcher: `{ via: "composio", accounts: [{ id, email, label }] }`. With accounts, each account's `email` replaces `ownEmail`. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy) | |
 | `about` | One or two sentences on who you are; context for every prompt | `"Alex runs partnerships at Example Co."` |
 | `voice` | How you write | `"Warm, brief, a little dry."` |
 | `rules` | Hard writing rules, checked again before you send | `"Never use 'synergy'. US spelling."` |

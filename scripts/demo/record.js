@@ -9,17 +9,16 @@ const fs = require('fs'); const path = require('path'); const os = require('os')
 const ROOT = path.resolve(__dirname, '..', '..');
 const OUT = path.resolve(process.argv[2] || 'demo-out'); fs.mkdirSync(OUT, { recursive: true });
 const FR = path.join(OUT, 'frames'); fs.rmSync(FR, { recursive: true, force: true }); fs.mkdirSync(FR, { recursive: true });
-const built = path.join(os.tmpdir(), 'chatterbuilt-demo.html');
-execFileSync('python3', [path.join(ROOT, 'scripts/build.py'), path.join(ROOT, 'skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html'), path.join(__dirname, 'demo.config.js'), built], { stdio: 'inherit' });
-// The artifact host wraps the page in this skeleton; do the same so it renders as it would in claude.ai.
-const html = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + fs.readFileSync(built, 'utf8') + '</body></html>';
-const page = path.join(OUT, 'page.html'); fs.writeFileSync(page, html);
+// The demo copy reads Gmail through Composio with two made-up accounts, so the account switcher shows.
+const page = require('./build-page.js')('chatterbuilt-demo', { accounts: true });
 
 const fake = require('./fake.js');
 
 (async () => {
   const b = await chromium.launch();
   const ctx = await b.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  // The attachment viewer loads pdf.js from cdnjs; use a local pdfjs-dist@3.11.174 if one is installed.
+  try { const dir = path.dirname(require.resolve('pdfjs-dist/build/pdf.min.js', { paths: [process.cwd(), __dirname] })); await ctx.route('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/*', (r) => r.fulfill({ status: 200, contentType: 'application/javascript', body: fs.readFileSync(path.join(dir, r.request().url().split('/').pop())) })); } catch {}
   const pg = await ctx.newPage(); const errs = []; pg.on('pageerror', (e) => errs.push(e.message));
   await pg.addInitScript(fake); await pg.goto('file://' + page);
   const t0 = Date.now(); let n = 0; const snap = async () => { await pg.screenshot({ path: path.join(FR, String(n++).padStart(5, '0') + '.png') }); };
@@ -45,8 +44,15 @@ const fake = require('./fake.js');
   await caption('Pre-send check: catches the promise you forgot'); await pg.click('#sendBtn'); await hold(3000);
   await caption(''); await shot('presend');
   await pg.click('#cancelSend'); await hold(300);
-  await pg.click('#toolsBtn'); await caption('Tools: Review, Pre-draft, Rules, Sweep, Ask'); await hold(2200);
-  await pg.keyboard.press('Escape'); await caption(''); await hold(600);
+  await caption('Drag any pane wider or narrower');
+  { const g = await pg.$eval('#sideSplit', (h) => { const r = h.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; });
+    await pg.mouse.move(g.x, g.y); await pg.mouse.down(); for (let k = 1; k <= 12; k++) { await pg.mouse.move(g.x - k * 10, g.y); await snap(); } await pg.mouse.up(); await hold(900); }
+  await caption('Open attachments right here: PDFs, images, text'); await pg.click('.thread[data-id="t8"]'); await hold(2600); await clearToasts();
+  await pg.click('#reading .attbtn'); await hold(2800);
+  await caption(''); await shot('attachment');
+  await pg.keyboard.press('Escape'); await hold(300);
+  await caption('Switch between your Gmail accounts'); await pg.selectOption('#acctSel', '1'); await hold(2600); await clearToasts();
+  await caption(''); await hold(600);
   const secs = (Date.now() - t0) / 1000;
 
   // phone

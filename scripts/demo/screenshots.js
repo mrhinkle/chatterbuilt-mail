@@ -10,10 +10,8 @@ const fake = require('./fake.js');
 const ROOT = path.resolve(__dirname, '..', '..');
 const OUT = path.resolve(process.argv[2] || 'demo-out/screens'); fs.mkdirSync(OUT, { recursive: true });
 const only = (process.argv[3] || '').split(',').filter(Boolean);
-const built = path.join(os.tmpdir(), 'chatterbuilt-shots.html');
-execFileSync('python3', [path.join(ROOT, 'scripts/build.py'), path.join(ROOT, 'skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html'), path.join(__dirname, 'demo.config.js'), built], { stdio: 'ignore' });
-const page = path.join(os.tmpdir(), 'chatterbuilt-shots-page.html');
-fs.writeFileSync(page, '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><style>[hidden]{display:none!important}body{margin:0}</style></head><body>' + fs.readFileSync(built, 'utf8') + '</body></html>');
+const page = require('./build-page.js')('chatterbuilt-shots');
+const pageAccounts = require('./build-page.js')('chatterbuilt-shots-accounts', { accounts: true });
 
 const DESK = { viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 };
 const PHONE = { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true, deviceScaleFactor: 2 };
@@ -24,6 +22,9 @@ const more = async (pg, sel) => { await pg.click('#threadMoreBtn'); await pg.wai
 const settings = async (pg, id) => { await pg.click('#setBtn'); await pg.waitForTimeout(150); await pg.click('#' + id); };
 
 // name, device, steps. Steps leave the page in the state to capture; return 'keep-toasts' to keep toasts on screen.
+// The attachment viewer loads pdf.js from cdnjs. Use a local pdfjs-dist@3.11.174 if one is installed (npm i pdfjs-dist@3.11.174).
+const pdfRoute = async (ctx) => { let dir; try { dir = path.dirname(require.resolve('pdfjs-dist/build/pdf.min.js', { paths: [process.cwd(), __dirname] })); } catch { return; }
+  await ctx.route('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/*', (r) => r.fulfill({ status: 200, contentType: 'application/javascript', body: fs.readFileSync(path.join(dir, r.request().url().split('/').pop())) })); };
 const scenes = [
   ['today', DESK, async (pg) => { await pg.waitForTimeout(1200); }],
   ['triage', DESK, async (pg) => { await pg.click('#triageBtn'); await pg.waitForTimeout(2800); }],
@@ -33,6 +34,8 @@ const scenes = [
   ['list-hidden', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#listTog'); await pg.waitForTimeout(400); }],
   ['resize', DESK, async (pg) => { await open(pg, 't1'); const b = await pg.$eval('#sideSplit', (h) => { const r = h.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }); await pg.mouse.move(b.x, b.y); await pg.mouse.down(); await pg.mouse.move(b.x - 60, b.y, { steps: 6 }); await pg.mouse.move(b.x - 120, b.y, { steps: 6 }); await pg.mouse.up(); await pg.$eval('#sideSplit', (h) => h.classList.add('drag')); await pg.waitForTimeout(200); }],
   ['receipt-context', DESK, async (pg) => { await open(pg, 't8'); }],
+  ['attachment', DESK, async (pg) => { await open(pg, 't8'); await pg.click('#reading .attbtn'); await pg.waitForTimeout(2500); }],
+  ['accounts', DESK, async (pg) => { await pg.selectOption('#acctSel', '1'); await pg.waitForTimeout(2200); await open(pg, 'p1'); }, { accounts: true }],
   ['more-context', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="more"]'); await pg.waitForTimeout(3200); }],
   ['next-steps', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="steps"]'); await pg.waitForTimeout(2800); }],
   ['route', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#routeBtn'); await pg.waitForTimeout(2800); }],
@@ -85,12 +88,12 @@ const scenes = [
 
 (async () => {
   const b = await chromium.launch(); const done = [], failed = [];
-  for (const [name, device, steps] of scenes) {
+  for (const [name, device, steps, sopts] of scenes) {
     if (only.length && !only.includes(name)) continue;
-    const ctx = await b.newContext(device); const pg = await ctx.newPage(); const errs = [];
+    const ctx = await b.newContext(device); await pdfRoute(ctx); const pg = await ctx.newPage(); const errs = [];
     pg.on('pageerror', (e) => errs.push(e.message));
     try {
-      await pg.addInitScript(fake); await pg.goto('file://' + page); await pg.waitForTimeout(1600); await clearToasts(pg);
+      await pg.addInitScript(fake); await pg.goto('file://' + (sopts && sopts.accounts ? pageAccounts : page)); await pg.waitForTimeout(1600); await clearToasts(pg);
       const r = await steps(pg);
       if (r !== 'keep-toasts') await clearToasts(pg);
       if (device === DESK) await pg.mouse.move(1439, 899);

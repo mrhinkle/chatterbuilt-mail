@@ -40,10 +40,12 @@ Chatterbuilt Mail is built on Gmail because that's where my mail lives. The page
 |---|---|
 | `search_threads` | The list, tabs, search, paging, Waiting, Ask, rules, the sweep |
 | `get_thread` | Reading a thread (plain text, or full content for the formatted view and unsubscribe links) |
-| `get_message` | The raw message, for the List-Unsubscribe header |
+| `get_message` | The raw message, for the List-Unsubscribe header and opening attachments |
 | `reply`, `send_message`, `forward` | Sending, follow-ups, copies to another account, unsubscribe emails |
-| `create_draft`, `list_drafts`, `delete_draft` | Save draft, drafts waiting, replacing a draft on send |
+| `create_draft`, `list_drafts`, `delete_draft` | Save draft, drafts waiting, replacing a draft on send (plus `get_draft` through Composio) |
 | `label_thread`, `unlabel_thread`, `list_labels`, `create_label` | Archive, move, star, read, snooze and remind-me labels |
+
+`gmailComposio()` in the template is a working example of this kind of adapter: it maps every tool above onto Composio's Gmail tools (`GMAIL_FETCH_EMAILS`, `GMAIL_FETCH_MESSAGE_BY_THREAD_ID`, `GMAIL_MODIFY_THREAD_LABELS`, `GMAIL_REPLY_TO_THREAD` and the rest) and reshapes the replies so the rest of the page doesn't change. Start from it.
 
 To add a platform, such as Outlook through a Microsoft 365 connector, Fastmail, or IMAP through a custom MCP server:
 

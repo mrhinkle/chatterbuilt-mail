@@ -70,6 +70,8 @@ header.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; pad
 .brand h1 a:hover { color: var(--accent); }
 .brand h1 a .gh { font-size: 10.5px; font-weight: 600; color: var(--faint); margin-left: 6px; letter-spacing: 0.02em; }
 .brand .acct { font-size: 11.5px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.brand .acctsel { font: inherit; font-size: 11.5px; color: var(--muted); background: transparent; border: 0; border-radius: 6px; padding: 1px 2px; margin-left: -2px; max-width: 260px; cursor: pointer; text-overflow: ellipsis; }
+.brand .acctsel:hover, .brand .acctsel:focus-visible { color: var(--fg); background: var(--hover); outline: none; }
 .barright { margin-left: auto; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .model { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
 .model select, .tools select { padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); font-size: 12px; }
@@ -277,6 +279,19 @@ body.ro [data-mut] { opacity: 0.4; }
 .msg.collapsed .body, .msg.collapsed .att { display: none; }
 .msg .att { padding: 0 14px 12px; display: flex; gap: 6px; flex-wrap: wrap; }
 .msg .att span { font-size: 11.5px; border: 1px solid var(--line); padding: 2px 8px; border-radius: 7px; color: var(--muted); background: rgba(15, 23, 42, 0.03); }
+.msg .att .attbtn { font: inherit; font-size: 12px; border: 1px solid var(--line-2); padding: 3px 9px; border-radius: 7px; color: var(--fg); background: var(--field); cursor: pointer; display: inline-flex; align-items: center; gap: 5px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.msg .att .attbtn::before { content: ""; width: 12px; height: 12px; flex: none; background: currentColor; opacity: 0.55; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12.5l-8.6 8.6a5.5 5.5 0 0 1-7.8-7.8l9-9a3.7 3.7 0 0 1 5.2 5.2l-9 9a1.8 1.8 0 0 1-2.6-2.6l8.3-8.3'/%3E%3C/svg%3E") center / contain no-repeat; }
+.msg .att .attbtn:hover { border-color: var(--accent); color: var(--accent); }
+.msg .body a, .msg .quoted a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.sighint { margin: -2px 2px 2px; font-size: 11.5px; }
+.modal.attmodal { width: min(980px, 100%); }
+.attview { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.attview .attbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.attview .attbar .grow { flex: 1; }
+.attview .attstage { border: 1px solid var(--line); border-radius: 12px; background: var(--hover); overflow: auto; max-height: calc(100vh - 230px); min-height: 160px; display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 10px; }
+.attview .attstage img { max-width: 100%; height: auto; border-radius: 6px; background: #fff; }
+.attview .attstage canvas { max-width: 100%; height: auto; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+.attview .attstage pre { align-self: stretch; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; }
 .msg .quoted { color: var(--muted); }
 
 .compose { border-top: 1px solid var(--line); background: rgba(255, 255, 255, 0.38); padding: 12px 18px 16px; display: flex; flex-direction: column; gap: 9px; }
@@ -569,6 +584,7 @@ body.ro [data-mut] { opacity: 0.4; }
           <label class="tog" data-feat="more" id="webTog" title="Use what More context found on the public web. Press More context first."><input type="checkbox" id="webChk" disabled>Web context</label>
         </div>
         <textarea id="body" placeholder="Your reply. Type here, or hit a button above for a first draft."></textarea>
+        <div class="sighint note" data-feat="signature">Your Gmail signature is added below this when it sends or saves as a draft.</div>
         <div class="foot">
           <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
           <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
@@ -681,6 +697,9 @@ body.ro [data-mut] { opacity: 0.4; }
   const CONFIG = {
     ownerName: "",            // your name, e.g. "Alex Rivera"
     ownEmail: "",             // your Gmail address (used to skip yourself when unsubscribing/copying)
+    gmail: null,              // null: claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts:
+                              //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.com", label: "Work" }, ...] }
+                              //   id is the Composio connected-account id; the first account opens by default.
     about: "",                // one or two sentences on who you are and what you do
     voice: "",                // how you write, e.g. "Warm, brief, a little dry. Short paragraphs."
     rules: "",                // hard rules, e.g. "Never use the word 'synergy'. US spelling."
@@ -712,7 +731,14 @@ body.ro [data-mut] { opacity: 0.4; }
   const GMAIL = "Gmail", ROUTER = "OpenRouter", NOTION = "Notion", CAL = "Google Calendar", CLAY = "Clay";
   const aiLabel = () => (state.model === "claude" ? "Claude" : "OpenRouter");
   const OWNER = CONFIG.ownerName || "the user";
-  const OWN = (CONFIG.ownEmail || "").toLowerCase();
+  // Gmail through Composio, with one or more accounts (see CONFIG.gmail). acctIdx is the account on screen.
+  const GX = CONFIG.gmail && CONFIG.gmail.via === "composio" && Array.isArray(CONFIG.gmail.accounts) && CONFIG.gmail.accounts.some((a) => a && a.id) ? Object.assign({}, CONFIG.gmail, { accounts: CONFIG.gmail.accounts.filter((a) => a && a.id) }) : null;
+  const GX_SERVER = GX ? (GX.server || "Composio") : "";
+  let acctIdx = 0;
+  if (GX) { try { const want = localStorage.getItem("cm.acct"); const i = GX.accounts.findIndex((a) => a.id === want); if (i > 0) acctIdx = i; } catch {} }
+  const curAcct = () => (GX ? GX.accounts[acctIdx] || GX.accounts[0] : null);
+  const curEmail = () => ((curAcct() && curAcct().email) || CONFIG.ownEmail || "");
+  let OWN = curEmail().toLowerCase();
   if (!taskAdapter()) document.body.classList.add("no-tasks");
   if (!CONFIG.models.length) document.body.classList.add("no-model-pick");
   const $ = (id) => document.getElementById(id);
@@ -754,7 +780,8 @@ body.ro [data-mut] { opacity: 0.4; }
     { key: "snooze", name: "Snooze and remind-me", desc: "Snooze a thread until a date, or get it back if nobody replies. Both are Gmail labels, so the morning run and Gmail itself see them.", how: "Snooze above the thread (b), or tick Remind me under the reply box." },
     { key: "drafts", name: "Drafts waiting in Gmail", desc: "Threads with a draft in Gmail (from the morning run or your own) get a tag. Open one and load the draft in a click; sending replaces it.", how: "Set up the morning run, or write drafts in Gmail." },
     { key: "snippets", name: "Snippets", desc: "Reusable text with the person's first name filled in.", how: "Snippets under the reply buttons." },
-    { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons." },
+    { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own.", how: "On by default. Turn it off if your drafts already end with a signature." },
+    { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
     { key: "html", name: "Formatted view", desc: "Shows messages with their links, lists and tables, cleaned of scripts, styles and tracking images.", how: "More, Formatted view, above the thread." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
@@ -806,7 +833,7 @@ body.ro [data-mut] { opacity: 0.4; }
     toast('<span class="spin"></span>Undoing ' + esc(u.label) + "…", "", 30000);
     try {
       for (const op of u.ops) await threadOp(op.threadId, op.remove, op.add);
-      try { await state.mcp.invalidate(GMAIL); } catch {}
+      try { await invalGmail(); } catch {}
       toast("Undid " + esc(u.label) + ".", "ok", 4000); loadThreads(false);
     } catch (e) { state.undo.push(u); toast(esc(mcpCopy(e, GMAIL)), "err", 8000); }
   }
@@ -917,10 +944,11 @@ body.ro [data-mut] { opacity: 0.4; }
   async function call(server, tool, input, opts) {
     if (!state.mcp) throw { code: "not_granted", message: "mcp unavailable" };
     if (state.readOnly && MUTATING.has(tool)) throw { code: "read_only", server: server, message: "read-only mode" };
+    if (GX && server === GMAIL) return gmailComposio(tool, input || {}, opts);
     // Reads get one retry when the runtime marks the failure retryable: a short outage, or a call that ran while
     // claude.ai's "allow this connector" prompt was still open. Writes never retry: a failure isn't proof they didn't run.
     const isRead = !MUTATING.has(tool) && (tool !== "COMPOSIO_MULTI_EXECUTE_TOOL" || !!(opts && opts.read));
-    let mo = opts; if (opts && "read" in opts) { mo = Object.assign({}, opts); delete mo.read; }
+    let mo = opts; if (opts && ("read" in opts || "full" in opts)) { mo = Object.assign({}, opts); delete mo.read; delete mo.full; }
     let r;
     try { r = await state.mcp.callTool(server, tool, input, mo); }
     catch (e) {
@@ -943,6 +971,129 @@ body.ro [data-mut] { opacity: 0.4; }
     const out = rs.map((x) => (x && x.response && x.response.data !== undefined ? x.response.data : x));
     return out.length === 1 ? out[0] : out;
   }
+  // ---------- Gmail through Composio (CONFIG.gmail.via === "composio") ----------
+  // The page speaks claude.ai's Gmail connector everywhere (same tool names and inputs). When CONFIG.gmail routes Gmail
+  // through Composio, gmailComposio() turns each call into the matching Composio Gmail tool for the account you're
+  // on, and reshapes the answer to look like the connector's, so nothing else in the page has to know.
+  const gxMsg = {}; // messageId -> normalized message, so replies, drafts and forwards can find their thread
+  const deEnt = (v) => { const t = String(v || ""); if (!/&(#\d+|#x[0-9a-f]+|[a-z]+);/i.test(t)) return t; const ta = document.createElement("textarea"); ta.innerHTML = t; return ta.value; };
+  function splitAddrs(v) {
+    if (Array.isArray(v)) return v;
+    const out = []; let cur = "", q = false, a = 0;
+    for (const ch of String(v || "")) {
+      if (ch === '"') q = !q; else if (ch === "<") a++; else if (ch === ">") a = Math.max(0, a - 1);
+      if (ch === "," && !q && !a) { if (cur.trim()) out.push(cur.trim()); cur = ""; } else cur += ch;
+    }
+    if (cur.trim()) out.push(cur.trim());
+    return out;
+  }
+  const gxHdr = (m, name) => { const h = ((m && m.payload && m.payload.headers) || []).find((x) => x && String(x.name).toLowerCase() === name); return h ? String(h.value || "") : ""; };
+  function b64uText(v) { try { const bin = atob(String(v).replace(/-/g, "+").replace(/_/g, "/")); return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))); } catch { return ""; } }
+  function gxPart(p, mime) { if (!p) return null; if (p.mimeType === mime && p.body && p.body.data) return p; for (const c of p.parts || []) { const f = gxPart(c, mime); if (f) return f; } return null; }
+  const gxView = (id) => { const a = curAcct(); return "https://mail.google.com/mail/" + (a && a.email ? "?authuser=" + encodeURIComponent(a.email) : "u/0/") + "#all/" + encodeURIComponent(id || ""); };
+  function gxNorm(m, full) {
+    const id = m.messageId || m.id;
+    const o = { id: id, threadId: m.threadId, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")),
+      date: m.messageTimestamp || m.date || "", subject: m.subject || (m.preview && m.preview.subject) || gxHdr(m, "subject"), labelIds: Array.isArray(m.labelIds) ? m.labelIds : [],
+      snippet: deEnt((m.preview && m.preview.body) || m.snippet || ""), viewUrl: gxView(m.threadId || id),
+      attachments: (m.attachmentList || []).filter((x) => x && x.filename).map((x) => ({ id: x.attachmentId, filename: x.filename, mimeType: x.mimeType })) };
+    const hp = gxPart(m.payload, "text/html");
+    if (m.messageText) o.plaintextBody = String(m.messageText).replace(/\r\n/g, "\n");
+    else { const tp = gxPart(m.payload, "text/plain"); if (tp) o.plaintextBody = b64uText(tp.body.data); else if (hp) o.plaintextBody = (new DOMParser().parseFromString(b64uText(hp.body.data), "text/html").body.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); }
+    if (full && hp) o.htmlBody = b64uText(hp.body.data);
+    if (id && (o.plaintextBody || !gxMsg[id])) gxMsg[id] = o;
+    return o;
+  }
+  async function gx(slug, args, opts, read) {
+    Object.keys(args).forEach((k) => { if (args[k] === undefined || args[k] === null || args[k] === "") delete args[k]; });
+    const a = curAcct();
+    const input = { tools: [{ tool_slug: slug, arguments: args, account: a.id }], sync_response_to_workbench: false, current_step: "CHATTERBUILT_MAIL", thought: "Chatterbuilt Mail: " + slug.toLowerCase().replace(/_/g, " ") };
+    const d = await call(GX_SERVER, "COMPOSIO_MULTI_EXECUTE_TOOL", input, Object.assign({}, opts || {}, { read: !!read }));
+    return d && typeof d === "object" ? d : {};
+  }
+  const gxNoAtt = (input) => { if (input.attachments && input.attachments.length) throw { code: "tool_error", message: "attachments don't go through Composio yet. Remove them, or send this one from Gmail" }; };
+  const gxThreadOf = (msgId) => (gxMsg[msgId] && gxMsg[msgId].threadId) || "";
+  async function gmailComposio(tool, input, opts) {
+    const me = ((curAcct() || {}).email || OWN || "").toLowerCase();
+    const mine = (x) => !!me && emailOf(x).toLowerCase() === me;
+    switch (tool) {
+      case "search_threads": {
+        if (input.view === "THREAD_VIEW_IDS_ONLY") {
+          const d = await gx("GMAIL_LIST_THREADS", { query: input.query || "", max_results: input.pageSize || 20, page_token: input.pageToken, verbose: false }, opts, true);
+          return { threads: (d.threads || []).map((t) => ({ id: t.id, snippet: deEnt(t.snippet) })), nextPageToken: d.nextPageToken || null, resultCountEstimate: d.resultSizeEstimate };
+        }
+        // One metadata-only message search, grouped by thread. Each row shows the newest message that matched, which
+        // may not be the thread's newest message, so threads are marked approx and Waiting checks them in full.
+        const n = input.pageSize || 20;
+        const d = await gx("GMAIL_FETCH_EMAILS", { query: input.query || "", max_results: Math.min(100, n * 2), page_token: input.pageToken, verbose: false, include_payload: false }, opts, true);
+        const by = new Map();
+        (d.messages || []).forEach((m) => { const t = m.threadId || m.messageId; if (!t) return; if (!by.has(t)) by.set(t, { id: t, messageCount: 0, approx: true, viewUrl: gxView(t), messages: [gxNorm(m, false)] }); by.get(t).messageCount++; });
+        return { threads: [...by.values()], nextPageToken: d.nextPageToken || null, resultCountEstimate: d.resultSizeEstimate };
+      }
+      case "get_thread": {
+        const d = await gx("GMAIL_FETCH_MESSAGE_BY_THREAD_ID", { thread_id: input.threadId }, opts, true);
+        const id = d.threadId || input.threadId;
+        return { id: id, viewUrl: gxView(id), messages: (d.messages || []).map((m) => gxNorm(m, input.messageFormat === "FULL_CONTENT")) };
+      }
+      case "get_message": {
+        if (opts && opts.full) { const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "raw" }, opts, true); return { id: input.messageId, raw: d.raw || "" }; }
+        // Unsubscribe only needs the headers (List-Unsubscribe), so fetch metadata and hand back the header block as raw.
+        const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "metadata" }, opts, true);
+        const head = ((d.payload && d.payload.headers) || []).map((h) => h.name + ": " + h.value).join("\r\n") + "\r\n\r\n";
+        return { id: input.messageId, raw: btoa(unescape(encodeURIComponent(head))).replace(/\+/g, "-").replace(/\//g, "_") };
+      }
+      case "list_labels": {
+        const d = await gx("GMAIL_LIST_LABELS", {}, opts, true);
+        return { labels: (d.labels || []).map((l) => ({ labelId: l.id, name: l.name, labelType: String(l.type || "").toUpperCase() })) };
+      }
+      case "create_label": {
+        const d = await gx("GMAIL_CREATE_LABEL", { label_name: input.displayName }, opts, false);
+        return { labelId: d.id, name: d.name || input.displayName };
+      }
+      case "label_thread": return gx("GMAIL_MODIFY_THREAD_LABELS", { thread_id: input.threadId, add_label_ids: input.labelIds || [] }, opts, false);
+      case "unlabel_thread": return gx("GMAIL_MODIFY_THREAD_LABELS", { thread_id: input.threadId, remove_label_ids: input.labelIds || [] }, opts, false);
+      case "list_drafts": {
+        const d = await gx("GMAIL_LIST_DRAFTS", { max_results: input.pageSize || 20, verbose: input.view === "DRAFT_VIEW_FULL" }, opts, true);
+        return { drafts: (d.drafts || []).map((x) => { const m = x.message || {}; if (m.messageId || m.payload) { const o = gxNorm(m, true); return Object.assign({}, o, { id: x.id, messageId: o.id }); } return { id: x.id, messageId: m.id, threadId: m.threadId }; }) };
+      }
+      case "get_draft": {
+        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: "full" }, opts, true);
+        const o = gxNorm(d.message || {}, true); return Object.assign({}, o, { id: d.id || input.draftId, messageId: o.id });
+      }
+      case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false);
+      case "create_draft": {
+        gxNoAtt(input);
+        const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
+        const d = await gx("GMAIL_CREATE_EMAIL_DRAFT", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, thread_id: tid, include_signature: !!input.includeSignature }, opts, false);
+        const a = curAcct();
+        return { id: d.id || (d.draft && d.draft.id) || "", threadId: tid, viewUrl: "https://mail.google.com/mail/" + (a && a.email ? "?authuser=" + encodeURIComponent(a.email) : "u/0/") + "#drafts" };
+      }
+      case "send_message": {
+        gxNoAtt(input);
+        const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
+        if (tid) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), message_body: input.body, include_signature: !!input.includeSignature }, opts, false);
+        return gx("GMAIL_SEND_EMAIL", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, opts, false);
+      }
+      case "reply": {
+        gxNoAtt(input);
+        const m = gxMsg[input.messageId];
+        if (!m || !m.threadId) throw { code: "tool_error", message: "couldn't find that message. Open the thread again, then reply" };
+        const fromMe = mine(m.sender);
+        const back = fromMe ? [] : (m.replyTo && m.replyTo.length ? m.replyTo : [m.sender]);
+        const primary = (fromMe ? m.toRecipients : back).map(emailOf).filter((x) => x && !mine(x));
+        let extra = [], cc = [];
+        if (input.replyAll) {
+          extra = (fromMe ? [] : m.toRecipients).map(emailOf).filter((x) => x && !mine(x) && !primary.includes(x));
+          cc = (m.ccRecipients || []).map(emailOf).filter((x) => x && !mine(x) && !primary.includes(x) && !extra.includes(x));
+        }
+        if (!primary.length) throw { code: "tool_error", message: "there's no one to reply to on that message" };
+        return gx("GMAIL_REPLY_TO_THREAD", { thread_id: m.threadId, recipient_email: primary[0], extra_recipients: primary.slice(1).concat(extra), cc: cc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false);
+      }
+      case "forward": return gx("GMAIL_FORWARD_MESSAGE", { message_id: input.messageId, recipients: [].concat(input.to || []), include_signature: !!input.includeSignature }, opts, false);
+      default: throw { code: "bad_request", message: tool + " isn't mapped to Composio yet" };
+    }
+  }
+  const invalGmail = (tool) => { if (!state.mcp) return Promise.resolve(); return GX ? state.mcp.invalidate(GX_SERVER) : (tool ? invalGmail(tool) : invalGmail()); };
   function showBanner(text, cls) { const b = $("banner"); b.hidden = !text; b.textContent = text || ""; b.className = "banner " + (cls || ""); }
 
   // ---------- AI: Claude (sample) or OpenRouter ----------
@@ -1096,6 +1247,100 @@ body.ro [data-mut] { opacity: 0.4; }
 
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-retrylist]")) loadThreads(false); });
 
+  // ---------- attachments: open them right here ----------
+  // Fetches the message's raw source (the same read unsubscribe uses), pulls out the attachment's MIME part and shows
+  // images, PDFs (pdf.js from cdnjs) and text files in a viewer. Anything else gets Save, which asks before it
+  // downloads, and Open in Gmail.
+  const PDFJS = "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/";
+  let pdfjsP = null, dlNS;
+  const loadScript = (src) => new Promise((res, rej) => { const el = document.createElement("script"); el.src = src; el.onload = res; el.onerror = () => rej(new Error("couldn't load " + src)); document.head.append(el); });
+  function loadPdfJs() {
+    if (!pdfjsP) { pdfjsP = (async () => { await loadScript(PDFJS + "pdf.min.js"); await loadScript(PDFJS + "pdf.worker.min.js"); if (!window.pdfjsLib) throw new Error("no pdf.js"); return window.pdfjsLib; })(); pdfjsP.catch(() => { pdfjsP = null; }); }
+    return pdfjsP;
+  }
+  async function downloadsNS() { if (dlNS === undefined) { try { dlNS = window.claude && window.claude.use ? await claude.use("downloads") : null; } catch { dlNS = null; } } return dlNS; }
+  function b64Bytes(v) { const bin = atob(String(v || "").replace(/-/g, "+").replace(/_/g, "/").replace(/[^A-Za-z0-9+/=]/g, "")); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+  function bytesLatin1(u) { let out = ""; for (let i = 0; i < u.length; i += 0x8000) out += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return out; }
+  const utf8Of = (str) => { try { return new TextDecoder().decode(Uint8Array.from(str, (c) => c.charCodeAt(0) & 255)); } catch { return str; } };
+  function mimeHead(src) { const m = /\r?\n\r?\n/.exec(src); return m ? { head: src.slice(0, m.index), body: src.slice(m.index + m[0].length) } : { head: src, body: "" }; }
+  function mimeHeaders(head) { const h = {}; head.replace(/\r?\n[ \t]+/g, " ").split(/\r?\n/).forEach((l) => { const k = l.indexOf(":"); if (k > 0) { const n = l.slice(0, k).trim().toLowerCase(); if (!(n in h)) h[n] = l.slice(k + 1).trim(); } }); return h; }
+  function mimeParam(v, name) {
+    const star = new RegExp("(?:^|;)\\s*" + name + "\\*=([^;]+)", "i").exec(v || "");
+    if (star) { const x = star[1].trim().replace(/^"|"$/g, ""); const q = x.split("'"); try { return decodeURIComponent(q.length >= 3 ? q.slice(2).join("'") : x); } catch { return x; } }
+    const m = new RegExp("(?:^|;)\\s*" + name + "=(\"([^\"]*)\"|[^;]+)", "i").exec(v || "");
+    return m ? (m[2] !== undefined ? m[2] : m[1].trim()) : "";
+  }
+  function mimeWords(v) {
+    return String(v || "").replace(/\?=\s+=\?/g, "?==?").replace(/=\?([^?]+)\?([bq])\?([^?]*)\?=/gi, (all, cs, enc, txt) => {
+      try { const bytes = enc.toLowerCase() === "b" ? b64Bytes(txt) : Uint8Array.from(txt.replace(/_/g, " ").replace(/=([0-9a-f]{2})/gi, (x, hx) => String.fromCharCode(parseInt(hx, 16))), (c) => c.charCodeAt(0) & 255); return new TextDecoder(cs).decode(bytes); } catch { return all; }
+    });
+  }
+  function mimeParts(src, out) {
+    const { head, body } = mimeHead(src); const h = mimeHeaders(head); const ct = h["content-type"] || "text/plain";
+    if (/^multipart\//i.test(ct)) {
+      const b = mimeParam(ct, "boundary");
+      if (b) { const segs = body.split("--" + b); for (let i = 1; i < segs.length; i++) { if (segs[i].startsWith("--")) break; mimeParts(segs[i].replace(/^[ \t]*\r?\n/, ""), out); } }
+      return out;
+    }
+    const disp = h["content-disposition"] || "";
+    const fn = mimeWords(utf8Of(mimeParam(disp, "filename") || mimeParam(ct, "name")));
+    out.push({ type: ct.split(";")[0].trim().toLowerCase(), filename: fn, enc: (h["content-transfer-encoding"] || "").trim().toLowerCase(), body: body });
+    return out;
+  }
+  function partBytes(p) {
+    if (p.enc === "base64") return b64Bytes(p.body);
+    if (p.enc === "quoted-printable") return Uint8Array.from(p.body.replace(/=\r?\n/g, "").replace(/=([0-9a-f]{2})/gi, (x, hx) => String.fromCharCode(parseInt(hx, 16))), (c) => c.charCodeAt(0) & 255);
+    return Uint8Array.from(p.body.replace(/\r?\n$/, ""), (c) => c.charCodeAt(0) & 255);
+  }
+  function attKind(type, name) {
+    const ext = (String(name).match(/\.([a-z0-9]+)$/i) || ["", ""])[1].toLowerCase();
+    if (/^image\/(png|jpe?g|gif|webp|bmp|svg\+xml)$/.test(type) || /^(png|jpe?g|gif|webp|bmp|svg)$/.test(ext)) return "image";
+    if (type === "application/pdf" || ext === "pdf") return "pdf";
+    if (/^text\//.test(type) || /^(txt|csv|md|json|log|ics|vcf|xml)$/.test(ext) || type === "application/json") return "text";
+    return "";
+  }
+  async function openAttachment(msgId, idx) {
+    const t = state.thread; const m = t && (t.messages || []).find((x) => x.id === msgId); const a = m && (m.attachments || [])[idx]; if (!a) return;
+    const name = a.filename || "attachment";
+    openModal(name, '<div class="attview"><div class="attbar"><span class="note grow" id="attMeta"><span class="spin"></span>Getting the file…</span><button type="button" class="btn sm" id="attSave" hidden>Save</button>' + (t.viewUrl ? '<a class="btn sm ghost" href="' + esc(t.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail</a>' : "") + '</div><div class="attstage" id="attStage"></div></div>', "attmodal");
+    const stage = $("attStage"), meta = $("attMeta");
+    let bytes, type;
+    try {
+      const p = await call(GMAIL, "get_message", { messageId: msgId, messageFormat: "RAW" }, { cache: { staleTime: 600000, gcTime: 900000 }, full: true });
+      const parts = mimeParts(bytesLatin1(b64Bytes(p && p.raw)), []).filter((x) => x.filename);
+      const same = (m.attachments || []).slice(0, idx).filter((x) => x.filename === a.filename).length;
+      const part = parts.filter((x) => x.filename === a.filename)[same] || parts[idx];
+      if (!part) throw { code: "tool_error", message: "the attachment wasn't in the message source" };
+      bytes = partBytes(part); type = (a.mimeType || part.type || "application/octet-stream").toLowerCase();
+    } catch (e) { if ($("attMeta") === meta) { meta.textContent = "Couldn't get the file. " + mcpCopy(e, GMAIL); } return; }
+    if ($("attMeta") !== meta) return;
+    const blob = new Blob([bytes], { type: type });
+    meta.textContent = fmtSize(bytes.length) + " · " + (type.split("/")[1] || type);
+    const dl = await downloadsNS();
+    if (dl) { const sb = $("attSave"); sb.hidden = false; sb.addEventListener("click", async () => { try { await dl.save({ filename: name, data: blob }); } catch (e) { if (e && e.code !== "declined") toast(e.code === "rejected_extension" ? "This kind of file can't be saved from here. Use Open in Gmail." : "Couldn't save it (" + esc(e.code || "error") + ").", "err", 6000); } }); }
+    const kind = attKind(type, name);
+    if (kind === "image") { const url = URL.createObjectURL(blob); const img = document.createElement("img"); img.alt = name; img.src = url; stage.append(img); return; }
+    if (kind === "text") { const pre = document.createElement("pre"); const txt = new TextDecoder().decode(bytes); pre.textContent = txt.length > 300000 ? txt.slice(0, 300000) + "\n…" : txt; stage.append(pre); return; }
+    if (kind === "pdf") {
+      stage.innerHTML = '<div class="note"><span class="spin"></span>Opening the PDF…</div>';
+      try {
+        const lib = await loadPdfJs(); const doc = await lib.getDocument({ data: bytes.slice(0), isEvalSupported: false }).promise;
+        if ($("attStage") !== stage) return; stage.innerHTML = ""; meta.textContent += " · " + doc.numPages + " page" + (doc.numPages === 1 ? "" : "s");
+        const w = Math.min(stage.clientWidth - 24, 900) || 700;
+        for (let i = 1; i <= Math.min(doc.numPages, 30); i++) {
+          const pg = await doc.getPage(i); const v0 = pg.getViewport({ scale: 1 }); const sc = w / v0.width; const vp = pg.getViewport({ scale: sc * (window.devicePixelRatio || 1) });
+          const c = document.createElement("canvas"); c.width = vp.width; c.height = vp.height; c.style.width = Math.round(v0.width * sc) + "px"; c.setAttribute("aria-label", name + ", page " + i);
+          stage.append(c); await pg.render({ canvasContext: c.getContext("2d"), viewport: vp }).promise;
+          if ($("attStage") !== stage) return;
+        }
+        if (doc.numPages > 30) { const n = document.createElement("div"); n.className = "note"; n.textContent = "Showing the first 30 pages. Save it or open it in Gmail for the rest."; stage.append(n); }
+      } catch (e) { stage.innerHTML = '<div class="note">Couldn\'t open the PDF viewer here. Save it or open it in Gmail.</div>'; }
+      return;
+    }
+    stage.innerHTML = '<div class="note">No preview for this kind of file. ' + (dl ? "Save it, or open it in Gmail." : "Open it in Gmail.") + '</div>';
+  }
+  reading.addEventListener("click", (ev) => { const b = ev.target.closest(".attbtn[data-attm]"); if (b) openAttachment(b.dataset.attm, +b.dataset.atti); });
+
   // ---------- reading pane ----------
   function lastMessage(t) { const ms = ((t || state.thread) && (t || state.thread).messages) || []; return ms[ms.length - 1] || null; }
   function splitQuoted(body) {
@@ -1108,6 +1353,18 @@ body.ro [data-mut] { opacity: 0.4; }
     }
     if (cut === -1) return { main: String(body || "").trim(), quoted: "" };
     return { main: lines.slice(0, cut).join("\n").trim(), quoted: lines.slice(cut).join("\n").trim() };
+  }
+  // Plain-text bodies with their web addresses made into links. Links open in a new browser tab.
+  function linkify(text) {
+    const re = /\bhttps?:\/\/[^\s<>"'()]+(?:\([^\s<>"'()]*\)[^\s<>"'()]*)*/gi;
+    let out = "", at = 0, m;
+    const t = String(text || "");
+    while ((m = re.exec(t))) {
+      let url = m[0]; const trail = (url.match(/[.,;:!?\]]+$/) || [""])[0]; if (trail) url = url.slice(0, -trail.length);
+      out += esc(t.slice(at, m.index)) + '<a href="' + esc(url) + '" target="_blank" rel="noopener noreferrer">' + esc(url) + '</a>';
+      at = m.index + url.length; re.lastIndex = at;
+    }
+    return out + esc(t.slice(at));
   }
   function renderThread() {
     const t = state.thread; if (!t) return;
@@ -1126,8 +1383,8 @@ body.ro [data-mut] { opacity: 0.4; }
       const parts = splitQuoted(body);
       return '<article class="msg' + (collapsed ? " collapsed" : "") + '" data-i="' + i + '" data-mid="' + esc(m.id) + '">'
         + '<div class="mh" draggable="true" title="Drag onto Tasks, or click to collapse"><span class="who">' + esc(nameOf(m.sender)) + '</span><span class="to">to ' + esc((m.toRecipients || []).map(nameOf).join(", ")) + '</span><span class="when">' + esc(fmtDate(m.date)) + '</span></div>'
-        + '<div class="body">' + esc(parts.main) + (parts.quoted ? '<details><summary class="note">Earlier messages</summary><div class="quoted">' + esc(parts.quoted) + '</div></details>' : "") + '</div>'
-        + ((m.attachments && m.attachments.length) ? '<div class="att">' + m.attachments.map((a) => '<span>' + esc(a.filename || a.mimeType || "attachment") + '</span>').join("") + '</div>' : "")
+        + '<div class="body">' + linkify(parts.main) + (parts.quoted ? '<details><summary class="note">Earlier messages</summary><div class="quoted">' + linkify(parts.quoted) + '</div></details>' : "") + '</div>'
+        + ((m.attachments && m.attachments.length) ? '<div class="att">' + m.attachments.map((a, ai) => '<button type="button" class="attbtn" data-attm="' + esc(m.id) + '" data-atti="' + ai + '" title="Open ' + esc(a.filename || "attachment") + '">' + esc(a.filename || a.mimeType || "attachment") + '</button>').join("") + '</div>' : "")
         + '</article>';
     }).join("");
     compose.hidden = false;
@@ -1166,7 +1423,9 @@ body.ro [data-mut] { opacity: 0.4; }
     if (out.length > maxChars) out = out.slice(0, maxChars) + "\n[trimmed]";
     return out;
   }
-  const MARK = "You are an email assistant for " + OWNER + (CONFIG.ownEmail ? " (" + CONFIG.ownEmail + ")" : "") + "." + (CONFIG.about ? " " + CONFIG.about : "");
+  let MARK = "";
+  const markFor = (email) => "You are an email assistant for " + OWNER + (email ? " (" + email + ")" : "") + "." + (CONFIG.about ? " " + CONFIG.about : "");
+  MARK = markFor(curEmail());
   async function summarize() {
     if (!state.thread) return;
     const box = $("sumBox"); box.hidden = false; box.className = "summary"; box.innerHTML = '<div class="lbl">Summary</div><span class="spin"></span>Thinking…';
@@ -1308,7 +1567,7 @@ body.ro [data-mut] { opacity: 0.4; }
     try {
       const subj = /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || "");
       const to = isOwn(last) ? counterpart(last) : [emailOf(last.sender)];
-      const p = await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      const p = await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body, includeSignature: featOn("signature") }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]);
       note("Saved to Gmail drafts.", "ok");
       if (p && p.viewUrl) { const a = document.createElement("a"); a.href = p.viewUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open draft"; $("composeNote").append(" ", a); }
@@ -1323,12 +1582,12 @@ body.ro [data-mut] { opacity: 0.4; }
       const own = isOwn(last); const to = own ? counterpart(last) : [emailOf(last.sender)];
       if (own) {
         if (!to.length) throw { code: "tool_error", message: "there's no one to follow up with on this thread" };
-        await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
-      } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+        await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id, includeSignature: featOn("signature") }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked, includeSignature: featOn("signature") }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]); delete state.variants[state.selectedId];
       const after = await afterSend(state.selectedId);
       note("Sent" + (after.length ? "; " + after.join(", ") : "") + ".", "ok"); $("body").value = "";
-      try { await state.mcp.invalidate(GMAIL, "get_thread"); } catch {}
+      try { await invalGmail("get_thread"); } catch {}
       openThread(state.selectedId);
     } catch (e) {
       const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
@@ -1344,7 +1603,7 @@ body.ro [data-mut] { opacity: 0.4; }
       await threadOp(id, add, remove);
       pushUndo(undoName, [{ threadId: id, add: add, remove: remove }]);
       if (remove.includes("INBOX")) recordAction(who, "archive", null); else if (add.includes("STARRED")) recordAction(who, "star", null); else if (remove.includes("UNREAD")) recordAction(who, "read", null);
-      try { await state.mcp.invalidate(GMAIL); } catch {}
+      try { await invalGmail(); } catch {}
       showBanner("");
       if (remove.includes("INBOX")) { clearDesk("Archived"); toast("Archived." + undoBtn(), "ok", 6000); loadThreads(false); }
       else openThread(id);
@@ -1419,7 +1678,7 @@ body.ro [data-mut] { opacity: 0.4; }
       await threadOp(id, [labelId], ["INBOX"]);
       pushUndo("move to " + name, [{ threadId: id, add: [labelId], remove: ["INBOX"] }]);
       recordAction(who, "move", { labelId: labelId, name: name });
-      try { await state.mcp.invalidate(GMAIL); } catch {}
+      try { await invalGmail(); } catch {}
       if (state.selectedId === id) { clearDesk("Moved"); }
       toast('Moved to <strong>' + esc(name) + '</strong>.' + undoBtn(), "ok", 7000);
       loadThreads(false);
@@ -1429,7 +1688,7 @@ body.ro [data-mut] { opacity: 0.4; }
     $("popNote").className = "note"; $("popNote").textContent = "Creating folder…";
     try {
       await call(GMAIL, "create_label", { displayName: name }, { cache: false });
-      state.labels = null; try { await state.mcp.invalidate(GMAIL, "list_labels"); } catch {}
+      state.labels = null; try { await invalGmail("list_labels"); } catch {}
       const ls2 = await loadLabels();
       const f = ls2.find((l) => l.name.toLowerCase() === name.toLowerCase());
       if (!f) throw { code: "tool_error", message: "folder was created but couldn't be found; try again" };
@@ -1449,7 +1708,7 @@ body.ro [data-mut] { opacity: 0.4; }
       const t = (state.thread && state.thread.id === id) ? state.thread : await fetchThread(id);
       const last = (t.messages || [])[(t.messages || []).length - 1];
       if (!last) throw { code: "tool_error", message: "no message to forward" };
-      await call(GMAIL, "forward", { messageId: last.id, to: [addr] }, { cache: false });
+      await call(GMAIL, "forward", { messageId: last.id, to: [addr], includeSignature: featOn("signature") }, { cache: false });
       toast('Forwarded a copy to <strong>' + esc(addr) + '</strong>', "ok", 6000);
     } catch (e) {
       const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
@@ -1563,7 +1822,7 @@ body.ro [data-mut] { opacity: 0.4; }
     await threadOp(id, [], ["INBOX"]);
     pushUndo("archive", [{ threadId: id, add: [], remove: ["INBOX"] }]);
     recordAction(who, "archive", null);
-    try { await state.mcp.invalidate(GMAIL); } catch {}
+    try { await invalGmail(); } catch {}
     if (state.selectedId === id) { clearDesk("Archived."); }
     loadThreads(false);
   }
@@ -1615,7 +1874,7 @@ body.ro [data-mut] { opacity: 0.4; }
         while (i < cand.length && token === state.loadToken) {
           const t = cand[i++]; const s = (t.messages && t.messages[0]) || null;
           if (s && s.sender && OWN && emailOf(s.sender).toLowerCase() !== OWN) { /* someone else had the last word */ }
-          else if (s && s.date && Array.isArray(s.labelIds)) consider(t, s, t.messageCount);
+          else if (s && s.date && Array.isArray(s.labelIds) && !t.approx) consider(t, s, t.messageCount);
           else {
             try { const full = await fetchThread(t.id); const ms = (full && full.messages) || []; state.preview[t.id] = makePreview(full); consider(t, ms[ms.length - 1], ms.length); }
             catch (e) { if (e && (e.code === "needs_reauth" || e.code === "rate_limited" || e.code === "not_granted")) { i = cand.length; throw e; } }
@@ -1869,7 +2128,7 @@ body.ro [data-mut] { opacity: 0.4; }
     if (ops.length) pushUndo(ops.length + " change" + (ops.length === 1 ? "" : "s"), ops);
     const doneIds = new Set(ops.map((o) => o.threadId)); const skipIds = new Set(skipped.map((p) => p.threadId));
     state.queue = state.queue.filter((p) => !doneIds.has(p.threadId) && !skipIds.has(p.threadId)); updateReviewBadge();
-    if (ops.length) { try { await state.mcp.invalidate(GMAIL); } catch {} loadThreads(false); }
+    if (ops.length) { try { await invalGmail(); } catch {} loadThreads(false); }
     closeModal();
     if (err) toast(esc(mcpCopy(err, GMAIL)) + (ops.length ? " Applied " + ops.length + " before that." + undoBtn() : ""), "err", 10000);
     else toast("Applied " + ops.length + " change" + (ops.length === 1 ? "" : "s") + "." + undoBtn(), "ok", 9000);
@@ -2126,7 +2385,7 @@ body.ro [data-mut] { opacity: 0.4; }
     } catch (e) { err = e; }
     btn.classList.remove("primary"); btn.textContent = ops.length ? "Archived " + ops.length : "Archive all"; if (!ops.length) { btn.disabled = false; delete btn.dataset.armed; }
     if (err) btn.after(" " + mcpCopy(err, GMAIL));
-    if (ops.length) { pushUndo("archive " + ops.length + " from " + (g.name || g.addr), ops); recordAction({ addr: g.addr, name: g.name, subject: g.subject }, "archive", null, Math.min(3, ops.length)); try { await state.mcp.invalidate(GMAIL); } catch {} toast("Archived " + ops.length + " thread" + (ops.length === 1 ? "" : "s") + " from " + esc(g.name || g.addr) + "." + undoBtn(), "ok", 9000); loadThreads(false); }
+    if (ops.length) { pushUndo("archive " + ops.length + " from " + (g.name || g.addr), ops); recordAction({ addr: g.addr, name: g.name, subject: g.subject }, "archive", null, Math.min(3, ops.length)); try { await invalGmail(); } catch {} toast("Archived " + ops.length + " thread" + (ops.length === 1 ? "" : "s") + " from " + esc(g.name || g.addr) + "." + undoBtn(), "ok", 9000); loadThreads(false); }
   }
 
   // ---------- ask your inbox ----------
@@ -2267,6 +2526,19 @@ body.ro [data-mut] { opacity: 0.4; }
     if (focusKeys) { const h = $("keysHead"); if (h) h.scrollIntoView({ block: "start" }); }
   }
 
+  // ---------- email accounts (Gmail through Composio) ----------
+  function setAccount(i) {
+    if (!GX || !GX.accounts[i] || i === acctIdx) return;
+    acctIdx = i; ls.set("cm.acct", GX.accounts[i].id);
+    OWN = curEmail().toLowerCase(); MARK = markFor(curEmail());
+    const sel = $("acctSel"); if (sel) sel.value = String(i);
+    // Thread ids, labels and drafts belong to one mailbox, so drop everything that came from the last one.
+    state.labels = null; state.preview = {}; state.full = {}; state.draftMap = {}; draftsAt = 0; state.triage = {}; state.age = {}; state.variants = {}; state.aiDraft = {};
+    state.queue = []; state.undo = []; state.ctx = {}; state.loadedDraftId = null; Object.keys(gxMsg).forEach((k) => delete gxMsg[k]);
+    updateReviewBadge(); clearDesk(); loadThreads(false);
+    toast("Now showing " + esc(GX.accounts[i].label || GX.accounts[i].email || "that account") + ".", "ok", 2500);
+  }
+
   // ---------- command palette + keys ----------
   function clickChip(key) { const c = document.querySelector('#chips .chip[data-key="' + key + '"]'); if (c) c.click(); }
   function commands() {
@@ -2278,6 +2550,7 @@ body.ro [data-mut] { opacity: 0.4; }
     ];
     if (!phoneMQ.matches) c.push([state.railOff ? "Show the thread list" : "Hide the thread list", "[", () => setRailOff(!state.railOff)]);
     if (!phoneMQ.matches && (state.paneW.rail || state.paneW.side)) c.push(["Reset pane sizes", "", resetPanes]);
+    if (GX && GX.accounts.length > 1) GX.accounts.forEach((a, i) => { if (i !== acctIdx) c.push(["Switch to " + (a.label || a.email || a.id), "", () => setAccount(i)]); });
     if (state.thread && panelOn()) c.push([(wideMQ.matches ? !state.sideOff : !state.ctxFold) ? "Hide context" : "Show context", "]", toggleContext]);
     if (state.thread) c.push(["Route to my systems", "o", openRoute, "route"], ["Snooze or remind me", "b", openSnooze, "snooze"], ["Formatted view", "", toggleFormatted, "html"], ["Insert a snippet", "", openSnippets, "snippets"], ["Refresh context", "", () => loadContext(true), "context"], ["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
     return c.filter((x) => !x[3] || featOn(x[3]));
@@ -2985,7 +3258,7 @@ body.ro [data-mut] { opacity: 0.4; }
   async function ensureLabel(name) {
     let l = (await loadLabels()).find((x) => x.name === name); if (l) return l;
     await call(GMAIL, "create_label", { displayName: name }, { cache: false });
-    state.labels = null; try { await state.mcp.invalidate(GMAIL, "list_labels"); } catch {}
+    state.labels = null; try { await invalGmail("list_labels"); } catch {}
     l = (await loadLabels()).find((x) => x.name === name);
     if (!l) throw { code: "tool_error", message: "couldn't create the label " + name };
     return l;
@@ -2996,7 +3269,7 @@ body.ro [data-mut] { opacity: 0.4; }
     await threadOp(id, [l.labelId], ["INBOX"]);
     pushUndo("snooze", [{ threadId: id, add: [l.labelId], remove: ["INBOX"] }]);
     if (state.selectedId === id) clearDesk("Snoozed until " + niceDate(date));
-    try { await state.mcp.invalidate(GMAIL); } catch {}
+    try { await invalGmail(); } catch {}
     toast("Snoozed until " + esc(niceDate(date)) + ". It comes back that morning." + undoBtn(), "ok", 7000); loadThreads(false);
   }
   async function remindThread(id, date) {
@@ -3157,6 +3430,7 @@ body.ro [data-mut] { opacity: 0.4; }
   async function draftFull(d) {
     if (d.plaintextBody || d.htmlBody) return d;
     if (d._full !== undefined) return d._full;
+    if (GX) { d._full = await call(GMAIL, "get_draft", { draftId: d.id }, { cache: { staleTime: 60000, gcTime: 300000 } }); return d._full; }
     const to = emailOf((d.toRecipients || [])[0] || "");
     const input = { pageSize: to ? 10 : 5, view: "DRAFT_VIEW_FULL" }; if (to) input.query = "to:" + to;
     const p = await call(GMAIL, "list_drafts", input, { cache: { staleTime: 60000, gcTime: 300000 } });
@@ -3192,7 +3466,7 @@ body.ro [data-mut] { opacity: 0.4; }
   $("askMode").addEventListener("click", () => { const on = $("askMode").getAttribute("aria-pressed") !== "true"; $("askMode").setAttribute("aria-pressed", String(on)); $("q").placeholder = on ? "Ask a question about your mail" : "Search mail"; $("q").focus(); });
   $("searchForm").addEventListener("submit", (ev) => { if ($("askMode").getAttribute("aria-pressed") === "true" && featOn("ask")) { ev.preventDefault(); ev.stopImmediatePropagation(); const qv = $("q").value.trim(); if (!qv) return; openAsk(); $("askQ").value = qv; runAsk(); } }, true);
   $("searchForm").addEventListener("submit", (ev) => { ev.preventDefault(); const q = $("q").value.trim(); if (!q) return; document.querySelectorAll("#chips .chip").forEach((x) => x.classList.remove("on")); state.query = q; state.mode = "normal"; $("waitWrap").hidden = true; state.triage = {}; loadThreads(false); });
-  $("refreshBtn").addEventListener("click", async () => { try { await state.mcp.invalidate(GMAIL, "search_threads"); } catch {} state.triage = {}; loadThreads(false); });
+  $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} state.triage = {}; loadThreads(false); });
   $("moreBtn").addEventListener("click", () => loadThreads(true));
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-loadmore]")) loadThreads(true); });
   list.addEventListener("scroll", () => { if (state.hasMore && !state.loadingMore && list.scrollTop > 0 && list.scrollTop + list.clientHeight > list.scrollHeight - 240) loadThreads(true); }, { passive: true });
@@ -3301,7 +3575,13 @@ body.ro [data-mut] { opacity: 0.4; }
   applyFeatures();
   $("repoLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
   $("docsLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
-  if (CONFIG.ownEmail) $("acct").textContent = CONFIG.ownEmail;
+  if (curEmail()) $("acct").textContent = curEmail();
+  if (GX && GX.accounts.length > 1) {
+    const sel = document.createElement("select"); sel.id = "acctSel"; sel.className = "acctsel"; sel.setAttribute("aria-label", "Email account"); sel.title = "Switch email account";
+    GX.accounts.forEach((a, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = (a.label ? a.label + " · " : "") + (a.email || a.id); sel.append(o); });
+    sel.value = String(acctIdx); sel.addEventListener("change", () => setAccount(+sel.value));
+    $("acct").replaceWith(sel);
+  }
   if (CONFIG.searchExample) $("q").placeholder = "Search, e.g. " + CONFIG.searchExample;
   { const ro = ls.get("cm.ro"); setRO(ro === null ? !!CONFIG.readOnly : ro === "1", false); }
   { const wd = +(ls.get("cm.waitDays") || 0); if (wd) state.waitDays = wd; const sel = $("waitDays"); if (![...sel.options].some((o) => +o.value === state.waitDays)) { const o = document.createElement("option"); o.textContent = String(state.waitDays); sel.append(o); } sel.value = String(state.waitDays); }
@@ -3322,7 +3602,8 @@ body.ro [data-mut] { opacity: 0.4; }
     try {
       const lt = await mcp.listTools();
       const by = {}; (lt.servers || []).forEach((s) => { by[s.server] = s; });
-      const g = by[GMAIL];
+      const g = by[GX ? GX_SERVER : GMAIL];
+      if (!g && GX) { setStatus(GX_SERVER + " not connected", "err"); list.innerHTML = '<div class="empty"><h2>' + esc(GX_SERVER) + ' isn\'t connected</h2><p>Your Gmail goes through ' + esc(GX_SERVER) + '. Add it in claude.ai Settings → Connectors, then refresh this page.</p></div>'; return; }
       if (!g) { setStatus("Gmail not connected", "err"); list.innerHTML = '<div class="empty"><h2>Gmail isn\'t connected</h2><p>Add Gmail in claude.ai Settings → Connectors, then refresh this page.</p></div>'; return; }
       if (g.authStatus === "needs_reauth") { setStatus("reconnect Gmail", "err"); list.innerHTML = '<div class="empty"><h2>Reconnect Gmail</h2><p>Your Gmail connection lapsed. Reconnect it in claude.ai Settings → Connectors, then refresh.</p></div>'; return; }
       const TA = taskAdapter(), CA = contactAdapter();

@@ -57,6 +57,19 @@ The Ask switch in the search box:
 
 ![The search box with Ask switched on](images/ask-mode.webp)
 
+## Links and attachments
+
+- **Links** in a message are clickable and open in a new browser tab.
+- **Attachments** show as buttons under the message. Click one to open it right here:
+  - PDFs show page by page (up to 30 pages);
+  - images show full size;
+  - text files (TXT, CSV, JSON, Markdown, calendar invites) show as text;
+  - anything else gets **Save**, which asks before it downloads, and **Open in Gmail**.
+
+![A PDF invoice open in the attachment viewer, with Save and Open in Gmail](images/attachment.webp)
+
+The viewer reads the message's source through the same Gmail read the page already uses, so nothing new is connected and nothing is sent to the AI. PDFs are drawn with pdf.js, loaded from cdnjs the first time you open one.
+
 ## Formatted view
 
 Messages show as plain text by default. **More → Formatted view** shows them with their links, headings, lists and tables.
@@ -74,6 +87,7 @@ Before anything is shown, it removes scripts, styles, forms, images (tracking pi
 | Summarize | the open thread | nothing | the thread |
 | Ask | Gmail search results | nothing | your question, then the top five threads |
 | Formatted view | the open thread's HTML (`get_thread`, full content) | nothing | nothing |
+| Opening an attachment | the message source (`get_message`, raw) | nothing (Save asks before downloading) | nothing |
 
 Opening a thread doesn't mark it read. **More → Mark read** does.
 

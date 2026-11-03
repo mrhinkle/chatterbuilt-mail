@@ -42,6 +42,10 @@ Guide: [reading-and-triage.md](reading-and-triage.md).
 
 **Inbox, Unread, Primary, Starred, Files.** These are Gmail searches. Type any Gmail query in the search box and press Enter (`from:alex newer_than:7d`, `subject:invoice has:attachment`). Rows fill in their preview, date and unread dot as each thread loads. The list shows 25 at a time; scroll to the end, or press **Load older mail**, for the next batch.
 
+**Links and attachments.** Links in a message open in a new browser tab. Click an attachment to open it in the page: PDFs page by page, images, and text files. Anything else gets **Save** (it asks first) and **Open in Gmail**.
+
+**Several Gmail accounts.** With Gmail through Composio, the address under the app name is a menu: switch between work, side projects and personal mail in one copy. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy).
+
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
 **Triage.** Sorts the visible threads into *reply* (a person is waiting on you), *read* and *skip*, with a short reason each, and groups the list under **Needs you**, **Worth reading** and **FYI**. With Review on, it also suggests archives and folder moves. Those land in the review queue; nothing moves on its own.
@@ -289,6 +293,8 @@ Sources:
 | Today | Gmail; Google Calendar (next meeting, shown on the page only) | nothing |
 | Drafting, 3 options, Pre-draft, pre-send check | Gmail; your sent mail to that person (tone); Calendar free/busy (times); the context card | nothing until Save or Send |
 | Send / Save draft / Nudge / attachments | | Gmail send or draft; removes a loaded Gmail draft after sending |
+| Opening an attachment | the message source from Gmail | nothing; Save asks before it downloads |
+| Switching accounts (Gmail through Composio) | the other account's Gmail | nothing |
 | Route | Gmail; the context card | whatever you tick: your task app, contacts, Gmail labels, or a `CONFIG.actions` tool |
 | Snooze, remind-me | Gmail labels | Gmail labels under `CB/` (undoable) |
 | Morning run | Gmail; every system in `CONFIG.context`, read-only | Gmail drafts and `CB/` labels only |

@@ -2,7 +2,7 @@
 
 Every image and the video here use made-up people and companies: Alex Rivera at Rivera Labs, Dana Ruiz at Acme Robotics, Jordan Blake at the makerspace. No real inbox, connector or account was touched to make them. The demo copy reaches everything except Gmail through [Composio](composio.md).
 
-**Video:** [demo.mp4](media/demo.mp4), about 30 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, and the pre-send check catching a forgotten promise.
+**Video:** [demo.mp4](media/demo.mp4), about 45 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, the pre-send check catching a forgotten promise, resizing a pane, a PDF attachment opening in the page, and switching Gmail accounts.
 
 Each section links to its guide.
 
@@ -25,6 +25,8 @@ Each section links to its guide.
 | The Ask switch in the search box | Tools: Review, Pre-draft, Rules, Sweep, Ask |
 | ![List hidden](images/list-hidden.webp) | ![Resized](images/resize.webp) |
 | The thread list hidden (`[`): the thread gets the full width | Drag the grip between panes to resize them |
+| ![Attachment](images/attachment.webp) | ![Accounts](images/accounts.webp) |
+| A PDF attachment open in the page | A second Gmail account, through Composio |
 
 ## Context · [context-panel.md](context-panel.md) · [more-context.md](more-context.md)
 
@@ -122,7 +124,7 @@ node scripts/demo/screenshots.js demo-out/screens route,presend   # just these
 node scripts/demo/record.js demo-out                 # the video
 ```
 
-They need Node with Playwright and Chromium, Python 3, and ffmpeg for the video. `demo-out/` is ignored by git. The made-up owner and connectors are in `scripts/demo/demo.config.js`. The threads, context and AI replies are in `scripts/demo/fake.js`.
+They need Node with Playwright and Chromium, Python 3, and ffmpeg for the video. The attachment scenes draw the PDF with pdf.js, which the page loads from cdnjs; if your machine can't reach it, run `npm i pdfjs-dist@3.11.174` in the folder you run the scripts from and they'll serve that copy instead. The video and the `accounts` screenshot use a copy with Gmail through Composio and two made-up accounts (`scripts/demo/build-page.js`). `demo-out/` is ignored by git. The made-up owner and connectors are in `scripts/demo/demo.config.js`. The threads, context and AI replies are in `scripts/demo/fake.js`.
 
 The docs use WebP at quality 90, about a third the size of PNG. To convert:
 

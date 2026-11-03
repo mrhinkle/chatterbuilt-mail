@@ -36,6 +36,21 @@ You need:
 - `labelPrefix`;
 - `context` (the read-only lookups).
 
+## Gmail through Composio
+
+If `CONFIG.gmail.via` is `"composio"`, run the steps below once per account in `CONFIG.gmail.accounts`, through `COMPOSIO_MULTI_EXECUTE_TOOL` with that account's `id` as `account`. For each account, `ownEmail` is that account's `email`. The Gmail tools map like this:
+
+| Step uses | Composio tool |
+|---|---|
+| `list_labels` | `GMAIL_LIST_LABELS` |
+| `search_threads` | `GMAIL_FETCH_EMAILS` (`verbose: false`, `include_payload: false`), grouped by `threadId` |
+| `get_thread` | `GMAIL_FETCH_MESSAGE_BY_THREAD_ID` (the plain text is `messageText`) |
+| `label_thread` / `unlabel_thread` | `GMAIL_MODIFY_THREAD_LABELS` (`add_label_ids` / `remove_label_ids`) |
+| `list_drafts` | `GMAIL_LIST_DRAFTS` (each draft's `message.threadId`) |
+| `create_draft` | `GMAIL_CREATE_EMAIL_DRAFT` with `thread_id`, `recipient_email` and `include_signature: true` |
+
+The hard limits are the same: never call `GMAIL_SEND_EMAIL`, `GMAIL_REPLY_TO_THREAD`, `GMAIL_FORWARD_MESSAGE`, `GMAIL_SEND_DRAFT`, `GMAIL_DELETE_DRAFT` or any trash, spam or delete tool. In the summary, group results by account.
+
 ## Steps
 
 1. **Wake snoozes and reminders.**
@@ -71,7 +86,7 @@ You need:
    - Use the context to be specific, but never mention the tools or that you looked anything up.
    - Don't invent facts, dates, prices or commitments.
    - For nudge-list threads, write a short, friendly follow-up instead.
-   - `create_draft` with:
+   - `create_draft` (with `includeSignature: true`) with:
      - `replyToMessageId` set to the newest message;
      - `to` set to the other person, or for a nudge, the people the user wrote to;
      - `subject` set to `Re: <subject>` unless the subject already starts with Re:.

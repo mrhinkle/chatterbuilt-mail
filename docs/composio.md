@@ -4,17 +4,42 @@ Chatterbuilt Mail reaches your apps through claude.ai connectors. You can add a 
 
 **Suggested if you don't want to manage a stack of native connectors.** You connect each app once inside Composio, and Chatterbuilt Mail sees all of them through a single claude.ai connector.
 
-Every screenshot in these docs comes from a demo copy set up this way: Gmail native, and context, tasks, contacts, Route actions and More context all through Composio.
+Almost every screenshot in these docs comes from a demo copy set up this way: Gmail native, and context, tasks, contacts, Route actions and More context all through Composio. The account-switcher screenshot and the demo video run Gmail through Composio too.
 
 ![The context panel and a cited web lookup, all through one Composio connector](images/more-context.webp)
 
-## What stays native
+## What goes where
 
 | Part | Connector | Why |
 |---|---|---|
-| Your mailbox | **Gmail** (native claude.ai connector) | The page is built around its tools: search, threads, drafts, labels, send. |
+| Your mailbox | **Gmail**, the native claude.ai connector, or **Gmail through Composio** | Composio can hold several Gmail accounts, and the page switches between them. See below. |
 | Drafting, triage, checks | **Claude** (built in) | No connector needed. |
 | Everything else | **Composio**, or native connectors, or a mix | Context sources, tasks, contacts, Route actions, More context. |
+
+## Gmail through Composio: several accounts in one copy
+
+Connect each Gmail account in Composio (work, a second business, personal), then list them in CONFIG:
+
+```js
+gmail: {
+  via: "composio",
+  accounts: [
+    { id: "gmail_xxxx", email: "you@work.com", label: "Work" },
+    { id: "gmail_yyyy", email: "you@side.org", label: "Side project" },
+    { id: "gmail_zzzz", email: "you@gmail.com", label: "Personal" }
+  ]
+}
+```
+
+![A second Gmail account open: the account menu under the app name shows Personal](images/accounts.webp)
+
+`id` is Composio's connected-account id. The setup skill finds them for you, or look in Composio under Connected accounts. The first account opens by default.
+
+- **Switching.** The address under the app name becomes a menu. Pick an account and the list, labels, drafts and Today reload for it. The command palette has **Switch to …** for each one. The app remembers the last account you used.
+- **Same features.** Reading, Triage, Ask, replies, drafts, Move, Archive, Snooze, Remind me, unsubscribe, Waiting, Pre-draft, opening attachments and your Gmail signature all work through Composio. Each account uses its own labels, drafts and signature.
+- **What's missing.** Attaching files to a reply doesn't go through Composio yet, so **Attach** is hidden. Attach from Gmail for now.
+- **Speed.** Each call takes one extra hop through Composio. The list uses one metadata-only search per page, so it stays quick. Waiting checks each sent thread in full, so it takes a little longer than with the native connector.
+- **Permissions.** The page holds `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, including sending from every Gmail account there. The page only calls the Gmail tools listed in [CONTRIBUTING.md](../CONTRIBUTING.md#add-another-email-platform), read-only mode blocks every change, and writes are never retried.
 
 ## Native connectors or Composio?
 
