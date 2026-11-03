@@ -374,7 +374,7 @@ body:not(.thread-open) .headtog { display: none; }
 .thenrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 2px; font-size: 12.5px; } .thenrow .rl { color: var(--muted); font-weight: 600; } .thenrow input { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font: inherit; } .thenrow .note { flex-basis: 100%; font-size: 11.5px; }
 .thenplan { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 6px; font-size: 12.5px; } .thenplan .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); } .thenplan ul { margin: 0; padding-left: 18px; }
 .sigrow { display: flex; align-items: center; gap: 6px; margin: -2px 2px 2px; font-size: 12px; }
-.sigbox, .dsig .dsigbody { overflow: visible; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
+.sigbox { overflow: visible; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
 .sigview { background: #ffffff; } .sigimg { margin: 6px 0 0; font-size: 11px; }
 .modal.attmodal { width: min(980px, 100%); }
 .attview { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
@@ -571,14 +571,25 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dfields span { color: var(--muted); font-weight: 600; font-size: 12px; }
 .dfields > input { width: 100%; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
 .rfwrap { position: relative; min-width: 0; } .rfwrap .sug { left: 0; }
-.rtbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; background: var(--hover); }
-.rtbar button { min-width: 30px; height: 28px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; color: var(--fg); font-size: 13px; }
-.rtbar button:hover, .rtbar button.on { background: var(--glass-strong); }
-.rte { min-height: 220px; max-height: 52vh; overflow-y: auto; padding: 12px 14px; border: 1px solid var(--line); border-radius: 0 0 6px 6px; background: var(--field); line-height: 1.55; font-size: 14px; outline: none; overflow-wrap: anywhere; }
-.rte:focus { border-color: rgba(37, 99, 235, 0.5); }
-.rte p { margin: 0 0 0.7em; } .rte ul, .rte ol { margin: 0 0 0.7em; padding-left: 1.4em; }
-.rte .gmail_signature, .rte [data-smartmail] { color: var(--muted); }
-.dlink { display: flex; gap: 6px; } .dlink input { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+/* The draft editor is one sheet laid out like the email: toolbar, your text, the signature, earlier messages. */
+.rtsheet { border: 1px solid var(--line); border-radius: 8px; background: #ffffff; color: #202124; }
+.rtsheet:focus-within { border-color: rgba(37, 99, 235, 0.5); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.08); }
+.rtbar { position: sticky; top: 0; z-index: 2; display: flex; flex-wrap: wrap; align-items: center; gap: 2px; padding: 4px 6px; border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; background: #f8f9fb; }
+.rtbar .rtb { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: #3c4043; cursor: pointer; }
+.rtbar .rtb:hover { background: rgba(60, 64, 67, 0.08); }
+.rtbar .rtb.on, .rtbar .rtb[aria-pressed="true"] { background: rgba(37, 99, 235, 0.12); color: var(--accent); }
+.rtbar .rtsep { width: 1px; height: 20px; margin: 0 4px; background: var(--line); }
+.rte { position: relative; min-height: 180px; padding: 14px 16px 10px; border: 0; background: transparent; font: 14px/1.5 Arial, Helvetica, sans-serif; color: #202124; outline: none; overflow-wrap: anywhere; }
+.rte.isempty::before { content: attr(data-placeholder); position: absolute; left: 16px; top: 14px; color: #9aa0a6; pointer-events: none; }
+.rte p { margin: 0 0 0.7em; } .rte ul, .rte ol { margin: 0 0 0.7em; padding-left: 1.6em; } .rte blockquote { margin: 0 0 0.7em 0.8ex; padding-left: 1ex; border-left: 1px solid #ccc; }
+.rte a { color: #1155cc; }
+.dsig { position: relative; padding: 2px 16px 12px; }
+.dsig .dsigx { position: absolute; top: 0; right: 10px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; color: var(--muted); font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.12s; }
+.dsig:hover .dsigx, .dsig:focus-within .dsigx { opacity: 1; } .dsig .dsigx:hover { color: #b42318; }
+@media (hover: none) { .dsig .dsigx { opacity: 1; } }
+.dquote { margin: 0 16px 12px; } .dquote summary { cursor: pointer; color: #5f6368; font-size: 12.5px; } .dquote .body { margin-top: 8px; }
+.rtsheet .rtnote { margin: 0; padding: 0 16px 10px; font-size: 11.5px; }
+.dlink { display: flex; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--line); background: #f8f9fb; } .dlink input { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
 .dcheck { border: 1px solid var(--line); border-radius: 6px; background: var(--field); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
 .dcheck .dchead { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 650; font-size: 13px; }
 .dcheck label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
@@ -587,10 +598,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 /* A sticky bar stops at its scroller's padding edge, so the draft pane drops its bottom padding and the bar sits on the edge */
 .dedit { padding-bottom: 0; } .reading:has(> .dedit) { padding-bottom: 0; }
 .dfoot .dnote, .dfoot .confirmbox { flex: 1 1 100%; } .dfoot .dnote:empty { display: none; }
-.dsig { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-left: 2px solid var(--line-2); }
 .dedit .warnline { color: var(--warm); }
-.dsig .dsighead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.rtbar .rtsig { margin-left: auto; font-size: 12px; padding: 4px 8px; border-radius: 5px; border: 1px solid var(--line); background: #ffffff; cursor: pointer; } .rtbar .rtsig:hover { background: var(--hover); }
+@media (max-width: 600px) { .rtbar .rtb { width: 30px; } .rtbar .rtsig { width: 32px; padding: 0; justify-content: center; } .rtbar .rtsig span { display: none; } }
+.rtbar .rtsig { display: inline-flex; align-items: center; gap: 5px; margin-left: auto; height: 30px; padding: 0 10px; font-size: 12.5px; border-radius: 6px; border: 1px solid var(--line); background: #ffffff; color: #3c4043; cursor: pointer; } .rtbar .rtsig:hover { background: rgba(60, 64, 67, 0.06); }
 
 /* Cc and Bcc */
 .rcpts { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
@@ -1514,7 +1524,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         }) };
       }
       case "get_draft": {
-        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: input.messageFormat === "MINIMAL" ? "metadata" : "full" }, opts, true, A);
+        // full: a large reply read back from Composio's sandbox keeps the HTML part, which the editor needs.
+        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: input.messageFormat === "MINIMAL" ? "metadata" : "full" }, Object.assign({}, opts || {}, { full: input.messageFormat !== "MINIMAL" }), true, A);
         const o = gxNorm(d.message || {}, true, A); return Object.assign({}, o, { id: d.id || input.draftId, messageId: o.id });
       }
       case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false, A);
@@ -4656,7 +4667,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // and no box for an image with no size (often a tracking pixel), just its alt text if it has one.
   const MAIL_TAGS = /^(BLOCKQUOTE|PRE|CODE|CAPTION|S|STRIKE|DEL|INS|DL|DT|DD|CITE|Q|ABBR|MARK|BIG)$/;
   const QUOTE_CLS = /gmail_quote|reference-message|divRplyFwdMsg|moz-cite-prefix|yahoo_quoted/i;
-  function sigClean(html, mail) {
+  function sigClean(html, mail, quoted) {
     const doc = new DOMParser().parseFromString(String(html || ""), "text/html"); const out = document.createElement("div");
     // Only HTML elements count: SVG and MathML keep lower-case tag names, so they're dropped by namespace, with
     // everything inside them. Quoted history folds once; quotes inside a quote just carry on inside the same fold.
@@ -4684,7 +4695,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         if (n.tagName === "A") { const href = n.getAttribute("href") || ""; if (/^(https?:|mailto:|tel:)/i.test(href)) { el.setAttribute("href", href); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener noreferrer"); } }
         walk(n, el, inQuote); dst.append(el);
       });
-    })(doc.body, out, false);
+    })(doc.body, out, !!quoted);
     return out;
   }
   function mountSig(host, html) {
@@ -4694,11 +4705,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   // A message rendered from its own HTML, in a shadow root so its styles and the page's never mix. Pictures can't load
   // inside the artifact, so they show as boxes of their real size with their alt text, as in the signature preview.
-  function mountMail(body, html) {
+  function mountMail(body, html, quoted) {
     body.classList.add("html"); body.replaceChildren(); const host = document.createElement("div"); host.className = "mailhost"; body.append(host);
     const root = host.attachShadow({ mode: "open" });
     root.innerHTML = '<style>:host{display:block;overflow-x:auto;font:14.5px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1f2328}a{color:#1155cc;overflow-wrap:anywhere}table{border-collapse:collapse;max-width:100%}td,th{vertical-align:top}blockquote{margin:0 0 0 .8ex;padding-left:1ex;border-left:1px solid #ccd}pre{white-space:pre-wrap}details{margin-top:10px}summary{cursor:pointer;color:#6b7280;font-size:12.5px}.imgalt{color:#7a8394;font-size:12px}.ph{display:inline-block;box-sizing:border-box;max-width:100%;padding:2px;overflow:hidden;vertical-align:middle;text-align:center;background:#eef1f6;border:1px dashed #c5ccd8;border-radius:3px;color:#7a8394;font:600 9px/1.15 system-ui,-apple-system,sans-serif;word-break:break-word}</style>';
-    root.append(sigClean(html, true));
+    root.append(sigClean(html, true, quoted));
   }
   const SIG_IMGNOTE = '<p class="note sigimg">Pictures show here as boxes of their real size; the email gets the real images.</p>';
   const sigPreview = () => '<div class="sigview"></div>';
@@ -4762,11 +4773,20 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     } catch (e) { box.innerHTML = '<span class="note err">' + esc(mcpCopy(e, GMAIL) || "Couldn't read your signature.") + '</span>'; }
   }
   // The Drafts editor: insert your current signature, swap an old one for it, or take it off. Nothing is saved until Save.
+  // The signature sits in the sheet right under your text, as it will in the email. It isn't edited here (it's kept
+  // exactly as it is); Remove takes it off and Insert signature puts your current one on.
   function renderDraftSig() {
     const box = $("dSigBox"); if (!box) return;
-    box.innerHTML = state.dSig ? '<div class="dsig"><div class="dsighead"><span class="note">Signature · kept as it is</span><button type="button" class="btn sm ghost" id="dSigX">Remove</button></div><div class="dsigbody">' + sigPreview() + (/<img/i.test(state.dSig) ? SIG_IMGNOTE : "") + '</div></div>' : "";
+    box.innerHTML = state.dSig ? '<div class="dsig" role="group" aria-label="Signature"><button type="button" class="dsigx" id="dSigX" title="Take the signature off this draft">Remove signature</button>' + sigPreview() + '</div>' : "";
     if (state.dSig) mountSig(box.querySelector(".sigview"), state.dSig);
+    const sn = $("dSheetNote"); if (sn) sn.hidden = !/<img/i.test((state.dSig || "") + (state.dQuote || ""));
     const x = $("dSigX"); if (x) x.addEventListener("click", () => { state.dSig = ""; state.dDirty = true; renderDraftSig(); dNote("Signature removed. Save to keep the change; Insert signature puts it back."); });
+  }
+  // Earlier messages fold at the bottom of the sheet, as in Gmail; they're rendered the first time you open them.
+  function renderDraftQuote() {
+    const box = $("dQuoteBox"); if (!box) return;
+    box.innerHTML = state.dQuote ? '<details class="dquote"><summary>Earlier messages</summary><div class="body"></div></details>' : "";
+    const det = box.querySelector("details"); if (det) det.addEventListener("toggle", () => { const b = det.querySelector(".body"); if (det.open && !b.firstChild) mountMail(b, state.dQuote, true); });
   }
   async function insertDraftSig() {
     const c = state.dCur; if (!c || c.hasAtt) return; const id = c.d.id; dNote("Getting your signature…");
@@ -4776,7 +4796,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       if (!h) { dNote("No signature is set in Gmail for " + (emailOf(c.full.sender || "") || acctEmailOf(c.d.acct) || "this account") + ". Add one in Gmail under Settings → Signature.", "err"); return; }
       if (state.dSig === h) { dNote("Your signature is already on this draft.", "ok"); return; }
       const had = !!state.dSig; state.dSig = h; state.dDirty = true; renderDraftSig();
-      dNote(had ? "Swapped in your current signature from Gmail. Save to keep it." : "Signature added under the draft. Save to keep it.", "ok");
+      dNote(had ? "Swapped in your current signature from Gmail. Save to keep it." : "Signature added under your text. Save to keep it.", "ok");
     } catch (e) { dNote(mcpCopy(e, GMAIL) || "Couldn't read your signature.", "err"); }
   }
   // With no draft open, the desk says how many are left to review and starts you on the first.
@@ -4840,7 +4860,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     openDraft(ds[i].id);
   }
   // Rich text the editor keeps: bold, italic, underline, links, lists, paragraphs and line breaks. Everything else becomes plain text.
-  const RTE_KEEP = /^(B|STRONG|I|EM|U|A|UL|OL|LI|P|DIV|BR|SPAN|BLOCKQUOTE)$/;
+  const RTE_KEEP = /^(B|STRONG|I|EM|U|S|STRIKE|A|UL|OL|LI|P|DIV|BR|SPAN|BLOCKQUOTE|FONT)$/;
   function rteClean(html) {
     const doc = new DOMParser().parseFromString(String(html || ""), "text/html"); const out = document.createElement("div");
     (function walk(src, dst) {
@@ -4849,7 +4869,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         if (n.nodeType !== 1 || /^(SCRIPT|STYLE|HEAD|META|LINK|TITLE|IFRAME|OBJECT|EMBED|SVG|FORM|INPUT|BUTTON|TEMPLATE)$/.test(n.tagName)) return;
         if (n.tagName === "IMG") { const alt = (n.getAttribute("alt") || "").trim(); if (alt) dst.append(document.createTextNode("[" + alt + "]")); return; }
         if (!RTE_KEEP.test(n.tagName)) { walk(n, dst); return; }
-        const el = document.createElement(n.tagName === "SPAN" ? "span" : n.tagName.toLowerCase());
+        // What you see is what goes: a kept element keeps its safe inline styles (fonts, sizes, colors), and an old
+        // <font> becomes a span with the same color and face.
+        const el = document.createElement(n.tagName === "FONT" ? "span" : n.tagName.toLowerCase());
+        let st = sigStyle(n.getAttribute("style"));
+        if (n.tagName === "FONT") { const fc = n.getAttribute("color"), ff = n.getAttribute("face"); st = [st, fc && /^#?[\w]{1,20}$/.test(fc) ? "color:" + fc : "", ff && /^[\w ,'"-]{1,80}$/.test(ff) ? "font-family:" + ff.replace(/"/g, "'") : ""].filter(Boolean).join(";"); }
+        if (st) el.setAttribute("style", st);
         if (n.tagName === "A") { const h = n.getAttribute("href") || ""; if (/^(https?:|mailto:)/i.test(h)) { el.setAttribute("href", h); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener"); } }
         const c = n.getAttribute("class") || ""; if (/gmail_signature/.test(c)) el.className = "gmail_signature";
         walk(n, el); dst.append(el);
@@ -4865,17 +4890,31 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     return box.innerHTML;
   };
   const textToHtml = (t) => String(t || "").split(/\n{2,}/).map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
+  // Where a draft's signature and quoted history start, in the markup each mail app writes. Both stay exactly as they
+  // are (they're tables and images the editor would flatten) and go back on, after your text, when you save.
+  const DRAFT_QUOTE = '.gmail_quote_container, .gmail_quote, #mail-editor-reference-message-container, #appendonsend, #divRplyFwdMsg, #x_divRplyFwdMsg, blockquote[type="cite"], .yahoo_quoted, .moz-cite-prefix';
+  const DRAFT_SIG = '.gmail_signature, [data-smartmail="gmail_signature"], #ms-outlook-mobile-signature, #Signature, #signature, #x_Signature, .moz-signature';
+  const DRAFT_SIG_PRE = '.gmail_signature_prefix, #ms-outlook-mobile-body-separator-line';
   function draftHtml(full) {
     const html = full.htmlBody || (looksHtml(full.plaintextBody) ? full.plaintextBody : "");
     if (html) {
-      const doc = new DOMParser().parseFromString(html, "text/html"); const q = doc.querySelector(".gmail_quote");
-      state.dQuote = q ? q.outerHTML : ""; if (q) q.remove();
-      // Signatures are tables and images the editor would flatten, so they stay as they are and go back on when you save.
-      const sig = doc.querySelector('.gmail_signature, [data-smartmail="gmail_signature"]'); const pre = doc.querySelector(".gmail_signature_prefix");
-      state.dSig = sig ? (pre ? pre.outerHTML + "<br>" : "") + sig.outerHTML : ""; if (sig) sig.remove(); if (pre) pre.remove();
+      const doc = new DOMParser().parseFromString(html, "text/html");
+      // Quoted history first (it can hold older signatures): everything from where it starts to the end.
+      let q = doc.querySelector(DRAFT_QUOTE); state.dQuote = "";
+      if (q) {
+        if (q.matches('#divRplyFwdMsg, #x_divRplyFwdMsg') && q.previousElementSibling && q.previousElementSibling.tagName === "HR") q = q.previousElementSibling;
+        const r = doc.createRange(); r.setStartBefore(q); r.setEndAfter(doc.body.lastChild);
+        const box = doc.createElement("div"); box.append(r.extractContents()); state.dQuote = box.innerHTML;
+      }
+      const sig = doc.querySelector(DRAFT_SIG); const pre = sig && doc.querySelector(DRAFT_SIG_PRE);
+      state.dSig = sig ? (pre ? pre.outerHTML + (pre.matches(".gmail_signature_prefix") ? "<br>" : "") : "") + sig.outerHTML : ""; if (sig) sig.remove(); if (pre) pre.remove();
       return rteTrim(rteClean(doc.body.innerHTML));
     }
-    state.dQuote = ""; state.dSig = ""; return textToHtml(draftText(full));
+    // Text only (rare): what looks like a signature (from "[Website]", "[LinkedIn]" or an image on) is kept as the
+    // signature, so saving can't drop it.
+    state.dQuote = ""; const t = String(full.plaintextBody || "").replace(/\r/g, ""); const cut = t.search(/(^|\n)\[(image|Website|LinkedIn)[^\]]*\]/);
+    state.dSig = cut >= 0 ? textToHtml(t.slice(cut).trim()) : "";
+    return textToHtml((cut >= 0 ? t.slice(0, cut) : draftText(full)).trim());
   }
   const addrList = (v) => String(v || "").split(/[,;\n]+/).map((x) => emailOf(x.trim()).toLowerCase()).filter((x) => EMAIL_RE.test(x));
   async function openDraft(id) {
@@ -4905,6 +4944,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const unticked = () => !Object.keys(state.dTicks[id] || {}).length;
     if (featOn("precheck") && unticked()) Promise.resolve(ctxP).catch(() => {}).then(() => { if (state.dSel === id && unticked()) checkDraft(true); });
   }
+  // The draft editor's toolbar: [command, label, shows whether it's on]; null is a divider.
+  const RT_TOOLS = [["undo", "Undo (Ctrl Z)", false], ["redo", "Redo (Ctrl Shift Z)", false], null, ["bold", "Bold (Ctrl B)", true], ["italic", "Italic (Ctrl I)", true], ["underline", "Underline (Ctrl U)", true], ["strikeThrough", "Strikethrough", true], null, ["link", "Add a link", false], ["insertUnorderedList", "Bulleted list", true], ["insertOrderedList", "Numbered list", true], null, ["removeFormat", "Clear formatting", false]];
+  const RT_ICONS = {undo: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg>', redo: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg>', bold: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7z"/><path d="M7 12h7a3.5 3.5 0 0 1 0 7H7z"/></svg>', italic: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M19 4h-9M14 20H5M15 4 9 20"/></svg>', underline: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4v6a6 6 0 0 0 12 0V4"/><path d="M4 20h16"/></svg>', strikeThrough: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4H9a3 3 0 0 0-2.83 4"/><path d="M14 12a4 4 0 0 1 0 8H6"/><path d="M4 12h16"/></svg>', link: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>', insertUnorderedList: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1.2"/><circle cx="4.5" cy="12" r="1.2"/><circle cx="4.5" cy="18" r="1.2"/></svg>', insertOrderedList: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M10 6h11M10 12h11M10 18h11"/><path d="M4 5h1v4"/><path d="M3.5 9h2.5"/><path d="M6 19H3.6c0-1.2 2.4-1.9 2.4-3.2 0-.7-.6-1.2-1.3-1.2-.5 0-1 .3-1.2.7"/></svg>', removeFormat: '<svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7V4h16v3"/><path d="M5 20h6"/><path d="M13 4 8 20"/><path d="m15 15 5 5"/><path d="m20 15-5 5"/></svg>'};
+  // The buttons that switch something on show whether it's on where the cursor is.
+  function rtState() { reading.querySelectorAll(".rtbar [aria-pressed]").forEach((b) => { let on = false; try { on = document.queryCommandState(b.dataset.cmd); } catch {} b.setAttribute("aria-pressed", String(on)); b.classList.toggle("on", on); }); }
+  // The "Write your message…" prompt shows while the editor has no text.
+  const rtEmpty = (ed) => ed.classList.toggle("isempty", !ed.textContent.replace(/\u00a0/g, " ").trim() && !ed.querySelector("img, li, hr"));
   function renderDraftEditor() {
     const c = state.dCur; if (!c) return; const { d, full, theirs } = c; const ticks = state.dTicks[d.id] || (state.dTicks[d.id] = {});
     const subj = full.subject || ""; $("subject").textContent = subj || "Draft";
@@ -4916,12 +4962,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div id="ctxBox"></div>'
       + (theirs ? '<details class="dctx"' + (pos <= 1 ? " open" : "") + '><summary>Replying to <strong>' + esc(nameOf(theirs.sender)) + '</strong> · ' + esc(fmtDate(theirs.date)) + '</summary><div class="body">' + esc(splitQuoted(String(theirs.plaintextBody || theirs.snippet || "").replace(/\r/g, "")).main.slice(0, 4000)) + '</div></details>' : (d.threadId ? "" : '<p class="note">A new email, not a reply.</p>'))
       + '<div class="dfields">' + ["dto", "dcc", "dbcc"].map((k) => '<span>' + rcptLabel[k] + '</span><div class="rfwrap"><div class="rbox" data-rk="' + k + '"><input type="text" id="' + k + 'In" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="' + rcptLabel[k] + '" aria-autocomplete="list" aria-controls="' + k + 'Sug"></div><div class="sug" id="' + k + 'Sug" role="listbox" aria-label="Suggestions" hidden></div></div>').join("") + '<span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
-      + '<div><div class="rtbar" role="toolbar" aria-label="Formatting">'
-      + [["bold", "<b>B</b>", "Bold (Ctrl B)"], ["italic", "<i>I</i>", "Italic (Ctrl I)"], ["underline", "<u>U</u>", "Underline (Ctrl U)"], ["link", "Link", "Add a link"], ["insertUnorderedList", "• List", "Bulleted list"], ["insertOrderedList", "1. List", "Numbered list"], ["removeFormat", "Clear", "Clear formatting"]].map((b) => '<button type="button" data-cmd="' + b[0] + '" title="' + b[2] + '" aria-label="' + b[2] + '">' + b[1] + '</button>').join("")
-      + (featOn("signature") ? '<button type="button" class="rtsig" data-sig title="Add the signature you set in Gmail, or swap an old one for it">Insert signature</button>' : "")
-      + '</div><div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text"></div></div>'
-      + '<div id="dSigBox"></div>'
-      + '<div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
+      // The draft as it will look: one sheet with your text, then the signature in place, then earlier messages folded.
+      + '<div class="rtsheet" id="dSheet"><div class="rtbar" role="toolbar" aria-label="Formatting">'
+      + RT_TOOLS.map((b) => b ? '<button type="button" class="rtb" data-cmd="' + b[0] + '"' + (b[2] ? ' aria-pressed="false"' : "") + ' title="' + b[1] + '" aria-label="' + b[1].replace(/ \(.*\)$/, "") + '">' + RT_ICONS[b[0]] + '</button>' : '<span class="rtsep" aria-hidden="true"></span>').join("")
+      + (featOn("signature") ? '<button type="button" class="rtsig" data-sig title="Add the signature you set in Gmail, or swap an old one for it"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c2.5-3 4.5 1.5 7-1.5S12 9 15 9s2.5 3.5 6 3.5"/><path d="M3 21h18"/></svg><span>Insert signature</span></button>' : "")
+      + '</div><div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
+      + '<div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text" data-placeholder="Write your message…"></div>'
+      + '<div id="dSigBox"></div><div id="dQuoteBox"></div><p class="note rtnote" id="dSheetNote" hidden>Pictures show as boxes here; the email keeps the real ones.</p></div>'
       + (c.hasAtt ? '<p class="note">This draft has attachments. Saving from here would drop them, so edit and send it in Gmail.</p>' : "")
       + (GX && (full.inReplyTo || c.lostThread) ? '<p class="note warnline" id="dThreadWarn">' + (c.lostThread ? "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation." : "Heads up: Composio can't keep a reply's threading headers when it saves a draft. Gmail keeps it in your thread either way, but if you save here, their mail app may show it as a new conversation. To keep it threaded for them, make your edits in Gmail (Send from here is fine as long as you haven't saved).") + '</p>' : "")
       + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
@@ -4930,9 +4977,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div class="mrow dfoot"><span class="note dnote" id="dNote" aria-live="polite"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
       + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
       + '<button type="button" class="btn sm ghost dangerbtn" id="dDelete" data-mut title="Delete this draft from Gmail">Delete</button><button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
-    const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML; renderDraftSig();
-    const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; };
-    ed.addEventListener("input", dirty); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
+    const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML; rtEmpty(ed); renderDraftSig(); renderDraftQuote();
+    const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; rtEmpty(ed); };
+    ed.addEventListener("input", dirty); ed.addEventListener("keyup", rtState); ed.addEventListener("mouseup", rtState); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
     ["dto", "dcc", "dbcc"].forEach((k) => { renderRcpt(k); wireRcpt(k, (msg) => dNote(msg, "err")); });
     ed.addEventListener("paste", (ev) => { ev.preventDefault(); const t = (ev.clipboardData || window.clipboardData).getData("text/plain"); document.execCommand("insertText", false, t); });
     let saved = null;
@@ -4941,7 +4988,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       if (ev.target.closest("[data-sig]")) { insertDraftSig(); return; }
       const b = ev.target.closest("[data-cmd]"); if (!b || c.hasAtt) return; ed.focus();
       if (b.dataset.cmd === "link") { const sel = window.getSelection(); saved = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null; $("dLinkRow").hidden = false; $("dLinkUrl").focus(); return; }
-      document.execCommand(b.dataset.cmd, false, null); dirty();
+      document.execCommand(b.dataset.cmd, false, null); dirty(); rtState();
     });
     const addLink = () => {
       const u = $("dLinkUrl").value.trim(); const url = /^mailto:/i.test(u) ? u : normUrl(u); if (!/^(https?:|mailto:)/i.test(url)) { dNote("Links need to start with https:// or mailto:", "err"); return; }
@@ -5255,6 +5302,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const go = (n) => { ev.preventDefault(); items[(n + items.length) % items.length].focus(); };
     if (ev.key === "ArrowDown") go(i + 1); else if (ev.key === "ArrowUp") go(i < 0 ? -1 : i - 1); else if (ev.key === "Home") go(0); else if (ev.key === "End") go(-1); else if (ev.key === "Tab") closeMenus();
   });
+  document.addEventListener("selectionchange", () => { const ed = $("dEditor"), sel = document.getSelection(); if (ed && sel && sel.anchorNode && ed.contains(sel.anchorNode)) rtState(); });
   reading.addEventListener("click", (ev) => {
     const h = ev.target.closest(".mh"); if (!h) return; const art = h.parentElement; art.classList.toggle("collapsed");
     const html = !art.classList.contains("collapsed") && mailLater.get(art);

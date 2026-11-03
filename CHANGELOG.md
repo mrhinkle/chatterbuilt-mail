@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.7.5 (2026-11-03)
+
+### Changed
+- **The draft editor shows the email as it will look.** One white sheet: your text in its own fonts and colors, your signature right under it, and the earlier messages folded at the bottom. The toolbar is icons (undo, redo, bold, italic, underline, strikethrough, link, lists, clear formatting) that light up for what's on where the cursor is, and an empty draft says *Write your message…*. It used to be a text box with word buttons and the signature in a separate box below.
+
+### Fixed
+- **A draft started in Outlook opened blank, and saving it would have dropped its signature.** Outlook (and Apple Mail, Thunderbird, Yahoo) mark signatures and quoted history differently from Gmail, and the editor knew only Gmail's markers. It now finds all of them and keeps them on Save.
+- **Large drafts through Composio came without their HTML.** When a draft was too big to come back inline, the page read a trimmed copy without the HTML part, so the editor had only plain text to show (for a signature-only draft, nothing). Opening a draft now always asks for the HTML.
+
 ## 0.7.4 (2026-11-03)
 
 ### Fixed
