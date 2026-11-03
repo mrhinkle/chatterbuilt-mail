@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.6.3 (2026-11-02)
+
+Fixes from beta testing: installs were heavier than they needed to be.
+
+### Changed
+- **A first install is Gmail and Claude only.** The setup skill starts from a new starter CONFIG (`examples/config.example.js`) with no other apps, asks only who you are and how you write, and lists what you can add later (calendar times, tasks, contacts, context, Route, More context, other models). Every connector the page declares is one more thing claude.ai asks you to allow, so nothing is declared until you turn it on. The old filled-in example is `examples/config.full.example.js`.
+- **No Composio unless you ask for it.** The install prompts and docs used to suggest Composio for everything except Gmail. They now use claude.ai's native connectors, and Composio is an option for apps without a native connector or for several Gmail accounts in one copy.
+- **No repo needed, and no commits to this one.** Your settings live in your published artifact; "change it later" reads them from there. `my/` and `memory/EMAIL-MEMORY.md` are git-ignored, and the setup and improve skills commit them only in a private repo you own (with `git add -f`). The docs no longer recommend forking: forks of a public repo are public. Path 1 in getting-started is now "just install it."
+- The install guide says what you'll be asked to allow, and where your settings live.
+
 ## 0.6.2 (2026-11-02)
 
 ### New

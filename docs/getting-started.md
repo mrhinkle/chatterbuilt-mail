@@ -9,7 +9,7 @@ The quickest start is a single prompt: see [install.md](install.md). That page a
 ## Before you start
 
 - A claude.ai account with the **Gmail** connector added (Settings, Connectors).
-- For everything else, either native connectors per app or one **Composio** connector that reaches them all ([composio.md](composio.md)). Composio is the easier path if you don't want to manage many connectors.
+- That's all you need for a first install. Add more later, one at a time, as native claude.ai connectors. [Composio](composio.md) is optional: one connector for apps without a native one, or several Gmail accounts in one copy.
 - Optional apps, depending on what you want:
   - **Notion**, or another task app (Asana, Basecamp, Linear, Todoist...), for Tasks.
   - **Notion** or a CRM for Contacts, plus **Clay** if you want enrichment.
@@ -18,13 +18,17 @@ The quickest start is a single prompt: see [install.md](install.md). That page a
   - A **web search** tool (Firecrawl, Exa, Tavily, Perplexity) for More context.
   - Meeting notes, a pipeline or CRM, newsletter lists and a memory system for the context panel.
 
-## Path 1: fork the repo and back it with memory (recommended)
+## Path 1: just install it (recommended)
+
+Paste the prompt from [install.md](install.md) into Claude, or install the plugin and say *"Set up Chatterbuilt Mail."* It starts with just your inbox and asks only a few questions. Your settings live inside the published artifact, so there's no repo to manage, and changing something later is one sentence to Claude (*"turn on calendar times"*, *"file tasks in Asana"*).
+
+## Path 2: a private repo backed by an email memory file
 
 This keeps your settings, voice, rules and what the app learns in a repo you own, so every improvement is saved and versioned.
 
-1. **Make your own copy.**
-   - Fork [mrhinkle/chatterbuilt-mail](https://github.com/mrhinkle/chatterbuilt-mail) on GitHub.
-   - Forks of a public repo are public. Your memory file will describe how you handle email, so if that's personal, make a **private** copy instead: create an empty private repo, then use GitHub's "Import repository" with this repo's URL.
+1. **Make your own private copy.**
+   - Don't fork: forks of a public repo are public, and your settings and memory file describe your mail. Create an empty **private** repo, then use GitHub's "Import repository" with this repo's URL.
+   - `my/` and `memory/EMAIL-MEMORY.md` are git-ignored, so nothing personal is committed by accident. In your private copy the skills commit them on purpose.
 2. **Write your email memory.** Copy `memory/EMAIL-MEMORY.example.md` to `memory/EMAIL-MEMORY.md` and fill it in. It covers:
    - who you are and the people who matter most;
    - how you write;
@@ -44,7 +48,7 @@ This keeps your settings, voice, rules and what the app learns in a repo you own
    - The skill updates `my/config.js` and `memory/EMAIL-MEMORY.md`, republishes the page, and commits the change. Your lessons now follow you to every browser and device.
 5. **Get updates.** When this repo improves, pull from upstream (GitHub's "Sync fork", or `git pull upstream main`), then ask Claude to rebuild: *"rebuild my Chatterbuilt Mail from the template and republish."* Your `my/` folder and memory file are untouched by upstream changes.
 
-## Path 2: no GitHub (Google Drive, OneDrive or SharePoint)
+## Path 3: no GitHub (Google Drive, OneDrive or SharePoint)
 
 You can keep everything in a cloud folder instead of a repo.
 
@@ -52,7 +56,7 @@ You can keep everything in a cloud folder instead of a repo.
 2. **Put these files in it:**
    - `chatterbuilt-mail.template.html` (from `skills/chatterbuilt-mail-setup/assets/`);
    - the `skills/` folder, or just the `SKILL.md` files;
-   - your `EMAIL-MEMORY.md`, filled in as in Path 1, step 2.
+   - your `EMAIL-MEMORY.md`, filled in as in Path 2, step 2.
 
    Download them from GitHub's "Code → Download ZIP" if you don't use git.
 3. **Connect the folder to Claude.**

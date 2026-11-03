@@ -6,7 +6,7 @@ Everything personal lives in one `CONFIG` object at the top of the page script. 
 python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html
 ```
 
-You don't need to edit this by hand. Ask Claude, and the setup skill does it. This page is the reference. A complete example is in [`examples/config.example.js`](../examples/config.example.js).
+You don't need to edit this by hand. Ask Claude, and the setup skill does it. This page is the reference. A first install starts from [`examples/config.example.js`](../examples/config.example.js): Gmail and Claude, nothing else. Every option filled in is in [`examples/config.full.example.js`](../examples/config.full.example.js).
 
 ## You
 

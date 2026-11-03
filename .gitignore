@@ -2,3 +2,7 @@
 *.plugin
 node_modules/
 demo-out/
+
+# Your own copy. Settings and memory stay out of git; commit them (git add -f) only in a private repo you own.
+my/
+memory/EMAIL-MEMORY.md

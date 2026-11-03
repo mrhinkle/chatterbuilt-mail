@@ -20,24 +20,29 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 
 ## 1. Check connectors
 
-- Gmail is required: either claude.ai's Gmail connector, or Gmail connected inside Composio (step 1b). If neither is there, tell the user to add one in claude.ai Settings, Connectors, and stop.
+- Gmail is required: claude.ai's Gmail connector. (Gmail through Composio is an option only when the user asks for it; see 1b.) If there's no Gmail connector, tell the user to add it in claude.ai Settings, Connectors, and stop.
+- **Start small.** A first install is Gmail and Claude only: no tasks, contacts, context sources, Route actions, More context, other models or calendar unless the user asked for them in this request. Every connector the page declares is one more thing claude.ai asks the user to allow, so add the rest later, one at a time, when they ask. After publishing, list what they can add.
 - Note which optional connectors exist: Notion or another task app, a contacts app or CRM, Google Calendar, Clay, OpenRouter, Slack, and anything that knows about people the user emails (meeting notes such as Fireflies, a pipeline, newsletter lists such as Beehiiv, a memory system such as Cortex).
 
-## 1b. Native connectors or Composio
+## 1b. Composio (optional; only when asked)
 
-**Gmail.** Use claude.ai's Gmail connector by default. Use Gmail through Composio when the user wants more than one Gmail account in one copy, or prefers Composio:
+Default to native claude.ai connectors for everything. Don't suggest Composio on a first install, and never make it a requirement. Use it only when the user asks for it, wants more than one Gmail account in one copy, or wants an app that has no native claude.ai connector.
+
+**Gmail through Composio** (several accounts in one copy):
 - list their Composio Gmail connections with Composio's tool search (its connection status lists each account's `id`, email and alias); ask which to include and a short label for each;
 - set `CONFIG.gmail = { via: "composio", accounts: [{ id, email, label, color }, ...] }`, with the account they use most first. With two or more accounts the page opens on All inboxes, which merges them; ask whether they'd like a color per account so they can tell them apart there (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`; leave it out for none), and whether to open on All inboxes or the first account (`start: "first"`);
 - one read-only check per account (a `GMAIL_FETCH_EMAILS` search with `max_results: 1`) confirms each connection works;
 - tell them attaching files to replies isn't available through Composio yet, and that `COMPOSIO_MULTI_EXECUTE_TOOL` can send from every Gmail account connected there.
 
-Everything else (context, tasks, contacts, Route actions, More context) can use native connectors, Composio, or a mix. If the user has no preference and doesn't want to manage many connectors, suggest Composio (`docs/composio.md`). Through Composio:
+Everything else (context, tasks, contacts, Route actions, More context) uses native connectors unless the user asks for Composio. Through Composio:
 - every adapter is `{ server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", input: { tools: [{ tool_slug, arguments }], sync_response_to_workbench: false } }`;
 - find each action with Composio's tool search and read its full schema; never guess a slug or argument;
 - check that each app has an active connection in Composio and tell the user which to connect if not;
 - say plainly that `COMPOSIO_MULTI_EXECUTE_TOOL` can run any action on their connected apps, and offer native connectors for writes if they'd rather keep the page's permissions narrow.
 
 ## 2. Collect the basics (AskUserQuestion, skip what memory answered)
+
+On a first install ask only for who they are and their voice (or offer to learn it from their sent mail), in one AskUserQuestion. Everything else below has a safe default or waits until they ask for that feature.
 
 - **Who they are:** `ownerName`, `ownEmail`, `about` (one or two sentences).
 - **Voice:**
@@ -96,7 +101,7 @@ Offer it when the user has a web search connector (Exa, Perplexity, Tavily, Fire
 
 ## 4. Build
 
-- **In a repo:** write CONFIG to `my/config.js`, starting from `examples/config.example.js`. The file must start with `  const CONFIG = {` and end with `  };`. Then run:
+- **In a repo:** write CONFIG to `my/config.js` (git-ignored), starting from `examples/config.example.js` (the starter: Gmail and Claude only). `examples/config.full.example.js` shows every option filled in; copy from it only for features the user turned on. The file must start with `  const CONFIG = {` and end with `  };`. Then run:
   `python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html my/config.js my/chatterbuilt-mail.html`
 - **Elsewhere:** copy the template to `chatterbuilt-mail.html` and Edit only the CONFIG object.
 
@@ -140,7 +145,9 @@ One or two sentences: what the page is, and what to try first (open a thread, pr
 - the first use of each connector asks for consent;
 - Read-only is there for a careful first look.
 
-In a repo, commit `my/config.js` and `my/chatterbuilt-mail.html` only if the repo is private (check with `gh repo view --json visibility`). A GitHub fork of a public repo is public, and CONFIG holds workspace IDs, addresses and account IDs; in a public repo, leave both files uncommitted and tell the user why.
+Don't commit anything unless the user owns the repo and it's private (check `git remote get-url origin` against their GitHub login, and `gh repo view --json visibility`). Then commit `my/config.js` and `my/chatterbuilt-mail.html` with `git add -f` (they're git-ignored). Anywhere else, including a clone of mrhinkle/chatterbuilt-mail or a public fork, leave them uncommitted and don't report it as a problem: the published artifact holds the CONFIG, and "Changing it later" reads it from there. If they'd like their settings versioned, offer to make them a private repo of their own.
+
+After the hand-over, list what they can add when they want it, one line each: open times from Google Calendar, tasks, contacts, context from their other apps, Route actions, More context, other models, several Gmail accounts (Composio).
 
 ## 8. Offer the morning run
 
@@ -152,7 +159,7 @@ Offer once: a weekday scheduled task that drafts replies into Gmail before they 
 
 ## Changing it later
 
-"Switch tasks to Asana", "add GPT", "turn on calendar", "new sign-off": read the current config (`my/config.js`, or the published page), change only what was asked, rebuild, and republish to the same URL. Never rename the artifact.
+"Switch tasks to Asana", "add GPT", "turn on calendar", "new sign-off": read the current config (`my/config.js` if it's there, otherwise the CONFIG block in the published page: list their artifacts, read the one titled Chatterbuilt Mail), change only what was asked, rebuild, and republish to the same URL with the capabilities the new CONFIG needs. Never rename the artifact.
 
 ## Rebuilding after a template update
 

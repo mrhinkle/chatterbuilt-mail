@@ -16,7 +16,7 @@ Or open one yourself at https://github.com/mrhinkle/chatterbuilt-mail/issues/new
    - **Just for you:** your `CONFIG` in `my/config.js`. Don't put one person's settings in the template.
 3. Build a copy and try it:
    ```bash
-   python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html examples/config.example.js /tmp/chatterbuilt-mail.html
+   python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html examples/config.full.example.js /tmp/chatterbuilt-mail.html
    ```
 4. Check every screen. The screenshot script clicks through all of them with made-up data and fake connectors, and reports any page error:
    ```bash
