@@ -49,7 +49,7 @@ const scenes = [
   ['revise', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#replyMenuBtn'); await pg.click('[data-intent="yes"]'); await pg.waitForTimeout(2800); await pg.fill('#custom', 'mention the deck is coming today'); await pg.mouse.move(5, 5); }],
   ['summarize', DESK, async (pg) => { await open(pg, 't1'); await more(pg, '[data-proxy="sumBtn"]'); await pg.waitForTimeout(2200); }],
   ['thread-more', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#threadMoreBtn'); await pg.waitForTimeout(250); }],
-  ['formatted', DESK, async (pg) => { await open(pg, 't5'); await more(pg, '#htmlBtn'); await pg.waitForTimeout(2400); await pg.keyboard.press('Escape'); await pg.waitForTimeout(200); }],
+  ['formatted', DESK, async (pg) => { await open(pg, 't5'); await pg.waitForTimeout(2400); }],
   ['unsubscribe', DESK, async (pg) => { await open(pg, 't5'); await more(pg, '#unsubBtn'); await pg.waitForTimeout(1500); }],
   ['snooze', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#snoozeBtn'); await pg.waitForTimeout(400); }],
   ['move', DESK, async (pg) => { await open(pg, 't4'); await pg.click('#moveBtn'); await pg.waitForTimeout(600); }],

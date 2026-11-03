@@ -77,9 +77,9 @@ That's the loop: your meeting notes caught a promise, the brief put it in front 
 
    It never merges a lookalike match, and it says what's missing. If nothing is relevant, it says exactly that.
 5. On screens 1180 px and wider, the brief sits in a panel beside the thread. On narrower screens and phones, it sits at the top of the thread.
-   - **Hide** at the top of the panel closes it, and the thread gets the full width. **Context** in the thread toolbar opens it again, or press `]`. The page remembers your choice.
+   - Click the panel's header (or **Hide**) to close it to a slim **Context** strip at the edge, and the thread gets the width. Click the strip to open it again. `]` does both. The page remembers your choice.
 
-     ![The panel hidden: the thread at full width, and a Context button in the toolbar to bring it back](images/panel-hidden.webp)
+     ![The panel closed to a slim Context strip beside the thread](images/panel-hidden.webp)
 
    - On narrower screens and phones, where the brief sits at the top of the thread, **Hide** folds it to one line and **Show** opens it again. `]` does the same. The Drafts tab keeps the brief at the top of the draft when the panel is hidden, since it has no toolbar to bring the panel back. Both choices are remembered.
    - Too narrow or too wide? Drag the grip on the panel's left edge. Double-click it to reset.

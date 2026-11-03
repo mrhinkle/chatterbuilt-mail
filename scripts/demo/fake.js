@@ -112,7 +112,8 @@ module.exports = function fake() {
       if (slug === 'GMAIL_LIST_THREADS') return { threads: ids.map((id) => ({ id, historyId: '1', snippet: String(last(box[id]).plaintextBody || '').slice(0, 120) })), nextPageToken: next, resultSizeEstimate: total };
       return { messages: ids.map((id) => cmsg(last(box[id]), id, false)), nextPageToken: next, resultSizeEstimate: total };
     }
-    if (slug === 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID') { const t = box[a.thread_id]; return t ? { threadId: t.id, display_url: '', messages: t.messages.map((m) => cmsg(m, t.id, true)) } : { messages: [] }; }
+    // Like Gmail: a thread asked of the wrong account, or one in window.__gone404 (deleted), is a 404.
+    if (slug === 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID') { const t = box[a.thread_id]; if (t && !(window.__gone404 || []).includes(a.thread_id)) return { threadId: t.id, display_url: '', messages: t.messages.map((m) => cmsg(m, t.id, true)) }; if ((personal ? T : PT)[a.thread_id] || (window.__gone404 || []).includes(a.thread_id)) return { __404: a.thread_id }; return { messages: [] }; }
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID' && a.format === 'raw') return { messageId: a.message_id, raw: a.message_id === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') };
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID') return { messageId: a.message_id, payload: { mimeType: 'multipart/alternative', headers: [{ name: 'Subject', value: 'x' }].concat(a.message_id === 'mt5' ? [{ name: 'List-Unsubscribe', value: '<https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>' }] : []) } };
     if (slug === 'GMAIL_LIST_LABELS') return { labels: [{ id: 'INBOX', name: 'INBOX', type: 'system' }].concat((personal ? ['Family', 'Bikes'] : ['Finance', 'Sponsors', 'Meetup', 'Newsletters']).map((n, i) => ({ id: 'L' + (i + 1), name: n, type: 'user' }))) };
@@ -179,7 +180,12 @@ module.exports = function fake() {
       if (server === 'Composio') {
         if (tool === 'COMPOSIO_REMOTE_BASH_TOOL') return P(await bashTool(String((input || {}).command || '')));
         const it = (input.tools || [])[0] || {}; const slug = it.tool_slug;
-        if (/^GMAIL_/.test(slug)) return P(await offload(env(gmailBridge(slug, it.arguments || {}, it.account))));
+        if (/^GMAIL_/.test(slug)) {
+          if (window.__failSearch && /^GMAIL_(FETCH_EMAILS|LIST_THREADS)$/.test(slug)) return P({ successful: false, data: { results: [{ response: { successful: false, data: {}, error: 'Gmail is not answering' }, tool_slug: slug }] } });
+          const r = gmailBridge(slug, it.arguments || {}, it.account);
+          if (r && r.__404) return P({ successful: false, data: { results: [{ response: { successful: false, data: { http_error: '404 Client Error: Not Found for url: https://gmail.googleapis.com/gmail/v1/users/me/threads/' + r.__404, message: '{\n  "error": {\n    "code": 404,\n    "message": "Requested entity was not found.",\n    "status": "NOT_FOUND"\n  }\n}' }, error: '404 Client Error: Not Found' }, tool_slug: slug }] } });
+          return P(await offload(env(r)));
+        }
         if (slug === 'FIRECRAWL_SEARCH') return P(env({ data: { web: web(it.arguments.q) } }));
         const c = ctx(slug, it.arguments); if (c !== undefined) return P(env(c));
         if (slug === 'ASANA_CREATE_A_TASK') return P(env({ data: { gid: '1200000000000001', permalink_url: 'https://app.asana.com/0/0/1200000000000001' } }));

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.7.2 (2026-11-03)
+
+### Changed
+- **Messages open formatted.** A message shows with its own layout, colors, fonts, links and tables, in a sealed-off box so its styles and the page's never mix. Scripts, style sheets, forms and tracking pixels are removed, and pictures show as boxes of their real size. The thread shows as text for a moment, then the formatted version replaces it. **More → Formatted view** switches to plain text and back, and the choice is remembered. It used to be plain text unless you switched it on, every thread.
+- **The context panel opens and closes with a click.** Click its header (or Hide) and it closes to a slim **Context** strip at the edge; click the strip to open it. `]` still does both. The Context button in the thread toolbar is gone.
+- The context card at the top of a thread (narrow screens, phones, Drafts) no longer has a purple edge.
+- **You decide when the list updates.** Every few minutes, and when you come back to the tab, the list checks Gmail quietly. It no longer changes on its own: new mail shows **Updates available** (or **3 new · Update**) in the header, and the list updates when you click it or Refresh. Loading the page, switching views and your own archive, snooze and move still update it right away.
+- **Drafts on Today counts every draft.** The card used to count only drafts on threads in the view you were on (four in Unread, say). It now lists every draft in Gmail, all accounts in All inboxes, with who each is to and its subject wrapped in full instead of cut off. Click one to open it in the Drafts tab.
+
+### Fixed
+- **Threads from your other accounts open after a reload.** In All inboxes, the list that comes back from this session's saved copy (0.6.9) didn't remember which account each thread was in, so opening one asked the default account and Gmail answered 404. The saved copy now brings that back, the row's own account is used if it's still unknown, and if an account says a thread isn't there the page looks for it in your other accounts (reads only).
+- **"Can't find this thread" in plain words.** When Gmail can't find a thread (deleted or moved since the list loaded), the reader says so with a **Refresh the list** button, instead of showing Gmail's raw error.
+
 ## 0.7.1 (2026-11-03)
 
 ### Fixed

@@ -55,7 +55,7 @@ Guide: [reading-and-triage.md](reading-and-triage.md).
 - It reads the top five threads and answers with numbered sources.
 - Click a source to open the thread.
 
-**Formatted view.** **More → Formatted view** above the thread shows a message with its links, lists and tables. Scripts, styles, forms, images (including tracking pixels) and `javascript:` links are stripped first, links open in a new tab, and quoted history folds away. Plain text is the default.
+**Formatted view.** Messages open formatted, with their own layout, colors, links, lists and tables, each in a sealed-off box. Scripts, style sheets, forms and `javascript:` links are stripped first, pictures show as boxes of their size, links open in a new tab, and quoted history folds away. **More → Formatted view** above the thread switches to plain text and back, and the choice is remembered.
 
 ## Connecting your systems
 

@@ -20,7 +20,7 @@ Each section links to its guide.
 | ![Triage](images/triage.webp) | ![Summarize](images/summarize.webp) |
 | Triage: Needs you, Worth reading and FYI, a next step on every row, and one-click section actions | Summarize: where it stands, then the asks |
 | ![Ask your inbox](images/ask.webp) | ![Formatted view](images/formatted.webp) |
-| Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Formatted view, with scripts and tracking pixels removed |
+| Ask your inbox: the Gmail search it wrote, an answer, numbered sources | Messages open formatted, with scripts and tracking pixels removed |
 | ![Ask in the search box](images/ask-mode.webp) | ![Tools menu](images/tools-menu.webp) |
 | The Ask switch in the search box | Tools: Review, Pre-draft, Rules, Sweep, Ask |
 | ![List hidden](images/list-hidden.webp) | ![Resized](images/resize.webp) |
@@ -35,7 +35,7 @@ Each section links to its guide.
 | ![Context panel](images/context-panel.webp) | ![Receipt context](images/receipt-context.webp) |
 | A sponsor: what you owe, pipeline status, how you met | A vendor receipt: no reply needed, an unrelated match flagged as unrelated |
 | ![More context](images/more-context.webp) | ![Panel hidden](images/panel-hidden.webp) |
-| More context: a cited web lookup, only when you press it | The panel hidden: the thread at full width, and **Context** brings it back |
+| More context: a cited web lookup, only when you press it | The panel closed to a slim **Context** strip; click it to open the panel again |
 
 ## Routing · [route-and-next-steps.md](route-and-next-steps.md)
 

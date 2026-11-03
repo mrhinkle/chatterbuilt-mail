@@ -28,7 +28,7 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 
 - **The thread header.** The subject takes at most two lines. On a narrow reading pane the thread buttons turn into icons on one line (hover for the name), and the chevron at the right of the subject hides them altogether. The context card's header folds it with a click.
 - **More mail.** The list shows 25 at a time. Scroll to the end, or press **Load older mail**, for the next batch. The footer shows how many are loaded out of Gmail's estimate.
-- **It updates, it doesn't reload.** **Refresh**, and the refresh after you archive, snooze, move or undo, fetches the newest page and merges it into the list on screen. New mail slides in at the top with a moment of highlight, threads that left the view drop out, and your scroll position, open thread and selection stay where they were. The list also checks quietly every few minutes while the page is open, and when you come back to the tab.
+- **It updates, it doesn't reload.** **Refresh**, and the refresh after you archive, snooze, move or undo, fetches the newest page and merges it into the list on screen. New mail slides in at the top with a moment of highlight, threads that left the view drop out, and your scroll position, open thread and selection stay where they were. The list never changes on its own, though: every few minutes, and when you come back to the tab, it checks Gmail quietly, and if there's new mail the header shows **Updates available** (or **3 new · Update**). Click it, or **Refresh**, when you're ready.
 - **Views come back at once.** Inbox, Unread, Primary, each account and each search keep their last list, so switching shows it straight away and refreshes behind it. The latest list is also kept for this browser session, so reopening the page shows your list before Gmail answers. If a refresh fails, the list stays as it was and a note says so.
 
 ## Triage
@@ -108,11 +108,15 @@ The viewer reads the message's source through the same Gmail read the page alrea
 
 ## Formatted view
 
-Messages show as plain text by default. **More → Formatted view** shows them with their links, headings, lists and tables.
+Messages open formatted: their own layout, colors, fonts, links, headings, lists and tables. The thread shows as text for a moment, then the formatted version replaces it. **More → Formatted view** switches to plain text and back, and the page remembers your choice.
 
 ![A newsletter in Formatted view, with headings, a link and a table](images/formatted.webp)
 
-Before anything is shown, it removes scripts, styles, forms, images (tracking pixels included) and `javascript:` links. Links open in a new tab, and quoted history folds away. Turn it off from the same menu.
+- Each message renders in its own sealed-off box, so its styles and the page's never mix.
+- Scripts, style sheets, forms and `javascript:` links are removed before anything shows. Only safe inline styles are kept.
+- Pictures can't load inside the artifact, so each shows as a box of its real size with its description. Tracking pixels (images with no size) show nothing.
+- Links open in a new tab, and quoted history folds under **Earlier messages**.
+- A message sent as plain text stays plain text.
 
 ## What it touches
 

@@ -14,7 +14,7 @@ Each card is a shortcut:
 
 | Card | What it shows | Click to |
 |---|---|---|
-| **Drafts waiting in Gmail** | Threads in this view that already have a Gmail draft, from the [morning run](morning-run.md) or from you in Gmail. Up to six. | Open the thread, then press **Load it** to put the draft in the reply box. |
+| **Drafts waiting in Gmail** | Every draft in Gmail (all your accounts in All inboxes), from the [morning run](morning-run.md) or from you, whatever view you're on. The first six show who each is to and its subject, wrapped in full; the count shows them all. | Click one to open it in the **Drafts** tab, or **Review drafts one at a time**. |
 | **Needs you** | Before Triage: a **Triage this view** button. After: up to six threads marked *reply*, each with the next step Triage suggests (Say yes, Ask a question, Hand off to…). | Open a thread, or run Triage. |
 | **Review** | Shows only when Triage or your rules have suggested archives and moves. | Open the review queue. See [organizing.md](organizing.md#review-and-undo). |
 | **Waiting on others** | A button. | Switch to the Waiting tab: sent mail nobody has answered. See [following-up.md](following-up.md). |
