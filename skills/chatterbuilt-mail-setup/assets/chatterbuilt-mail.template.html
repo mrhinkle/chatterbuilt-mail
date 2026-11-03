@@ -499,6 +499,7 @@ body:not(.thread-open) .headtog { display: none; }
 .chip.on { box-shadow: inset 0 0 0 1px var(--line-2); }
 .rowbar { box-shadow: none; border: 1px solid var(--line-2); }
 .thread.sel .rowbar { border-color: transparent; }
+.bookset .mrow { margin-top: 8px; } .bookset .btn[aria-pressed="true"] { pointer-events: none; }
 .rtadd { margin-top: 12px; } .rtadd summary { cursor: pointer; } .rtadd .mrow { margin-top: 8px; }
 /* Select several threads: a box on each row (on hover, or always once something is picked) and a bar over the list */
 .thread .rsel { position: absolute; left: 3px; top: 8px; width: 20px; height: 20px; display: none; place-items: center; z-index: 1; cursor: pointer; }
@@ -525,7 +526,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dctx .body { white-space: pre-wrap; margin-top: 6px; max-height: 220px; overflow: auto; }
 .dfields { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 13px; }
 .dfields span { color: var(--muted); font-weight: 600; font-size: 12px; }
-.dfields input { width: 100%; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+.dfields > input { width: 100%; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+.rfwrap { position: relative; min-width: 0; } .rfwrap .sug { left: 0; }
 .rtbar { display: flex; flex-wrap: wrap; gap: 2px; padding: 3px; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; background: var(--hover); }
 .rtbar button { min-width: 30px; height: 28px; padding: 0 8px; border: 0; border-radius: 5px; background: transparent; color: var(--fg); font-size: 13px; }
 .rtbar button:hover, .rtbar button.on { background: var(--glass-strong); }
@@ -538,7 +540,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dcheck .dchead { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 650; font-size: 13px; }
 .dcheck label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
 .dcheck label input { margin-top: 2px; } .dcheck .dn { display: block; font-size: 12px; color: var(--muted); } .dcheck .dn.warn { color: var(--warm); }
-.dfoot { position: sticky; bottom: 0; background: var(--glass-strong); padding: 8px 0; flex-wrap: wrap; }
+.dfoot { position: sticky; bottom: 0; z-index: 2; background: #ffffff; border-top: 1px solid var(--line-2); box-shadow: 0 -8px 12px -8px rgba(15, 23, 42, 0.08); padding: 8px 0 calc(10px + env(safe-area-inset-bottom, 0px)); flex-wrap: wrap; }
+/* A sticky bar stops at its scroller's padding edge, so the draft pane drops its bottom padding and the bar sits on the edge */
+.dedit { padding-bottom: 0; } .reading:has(> .dedit) { padding-bottom: 0; }
+.dfoot .dnote, .dfoot .confirmbox { flex: 1 1 100%; } .dfoot .dnote:empty { display: none; }
+.dsig { display: flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-left: 2px solid var(--line-2); }
+.dsig .dsigbody { white-space: pre-line; font-size: 12px; color: var(--muted); max-height: 9em; overflow: auto; }
 
 /* Cc and Bcc */
 .rcpts { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
@@ -1198,6 +1205,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function gxPart(p, mime) { if (!p) return null; if (p.mimeType === mime && p.body && p.body.data) return p; for (const c of p.parts || []) { const f = gxPart(c, mime); if (f) return f; } return null; }
   const gxGmailUrl = (A, hash) => "https://mail.google.com/mail/" + (A && A.email ? "?authuser=" + encodeURIComponent(A.email) : "u/0/") + "#" + hash;
   const gxView = (id, A) => gxGmailUrl(A || curAcct(), "all/" + encodeURIComponent(id || ""));
+  // Some Composio messages carry their HTML in messageText, with no text/html part: treat that as HTML, not text.
+  const looksHtml = (t) => /<(br|div|p|span|table|td|ul|ol|li|a|b|strong|i|em|font|html|body)\b[^>]*>/i.test(String(t || "")) && /<\/(div|p|span|td|li|a|b|strong|font|body)>|<br\s*\/?>/i.test(String(t || ""));
   function gxNorm(m, full, A) {
     A = A || curAcct();
     const id = m.messageId || m.id;
@@ -1209,6 +1218,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (m.messageText) o.plaintextBody = String(m.messageText).replace(/\r\n/g, "\n");
     else { const tp = gxPart(m.payload, "text/plain"); if (tp) o.plaintextBody = b64uText(tp.body.data); else if (hp) o.plaintextBody = (new DOMParser().parseFromString(b64uText(hp.body.data), "text/html").body.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); }
     if (full && hp) o.htmlBody = b64uText(hp.body.data);
+    // A message sent as HTML only (a single text/html payload, as Gmail saves many drafts) comes back with that HTML
+    // in messageText too: keep the HTML as HTML and give everything else its text.
+    if (o.plaintextBody && looksHtml(o.plaintextBody)) { if (full && !o.htmlBody) o.htmlBody = o.plaintextBody; o.plaintextBody = htmlToText(o.plaintextBody); }
     if (id && (o.plaintextBody || !gxMsg[id])) gxMsg[id] = o;
     if (A) { if (id) gxOwner["m:" + id] = A.id; if (m.threadId) gxOwner["t:" + m.threadId] = A.id; }
     return o;
@@ -2111,12 +2123,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
   }
 
-  // ---------- Cc and Bcc ----------
-  // Extra people on a reply. Suggestions come from the threads you've loaded and, when it's set up, your address book.
-  state.rcpt = { cc: [], bcc: [] };
+  // ---------- Cc and Bcc (and the Drafts editor's To, Cc and Bcc) ----------
+  // People fields: chips you add by typing a name or address. Suggestions come from the threads you've loaded and,
+  // when one is connected, your address book. The reply box has cc and bcc; the Drafts editor has dto, dcc and dbcc.
+  state.rcpt = { cc: [], bcc: [], dto: [], dcc: [], dbcc: [] };
   const EMAIL_RE = /^[^\s@<>(),;:"]+@[^\s@<>(),;:"]+\.[^\s@<>(),;:"]+$/;
+  const rcptGroup = (k) => (k[0] === "d" ? ["dto", "dcc", "dbcc"] : ["cc", "bcc"]);
+  const rcptLabel = { cc: "Cc", bcc: "Bcc", dto: "To", dcc: "Cc", dbcc: "Bcc" };
   function resetRcpts() {
-    state.rcpt = { cc: [], bcc: [] };
+    state.rcpt.cc = []; state.rcpt.bcc = [];
     ["cc", "bcc"].forEach((k) => { if (!$(k + "Row")) return; $(k + "Row").hidden = true; $(k + "Tog").setAttribute("aria-expanded", "false"); $(k + "In").value = ""; $(k + "Sug").hidden = true; renderRcpt(k); });
   }
   function updateToLine() {
@@ -2131,22 +2146,25 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const box = document.querySelector('.rbox[data-rk="' + k + '"]'); if (!box) return; const inp = $(k + "In");
     box.querySelectorAll(".rchip").forEach((c) => c.remove());
     state.rcpt[k].forEach((r, i) => { const s = document.createElement("span"); s.className = "rchip"; s.title = r.email; s.innerHTML = '<span>' + esc(r.name || r.email) + '</span><button type="button" data-rx="' + k + ":" + i + '" aria-label="Remove ' + esc(r.name || r.email) + '">×</button>'; box.insertBefore(s, inp); });
-    const n = state.rcpt[k].length; const tog = $(k + "Tog"); tog.classList.toggle("on", n > 0); tog.textContent = (k === "cc" ? "Cc" : "Bcc") + (n ? " " + n : "");
+    const tog = $(k + "Tog"); if (tog) { const n = state.rcpt[k].length; tog.classList.toggle("on", n > 0); tog.textContent = rcptLabel[k] + (n ? " " + n : ""); }
   }
   function knownPeople() {
     const map = new Map();
     const put = (a) => { const e = emailOf(a).toLowerCase(); if (!EMAIL_RE.test(e) || isMe(e)) return; const n = nameOf(a); const nm = n && !n.includes("@") ? n : ""; const was = map.get(e); if (!was || (!was.name && nm)) map.set(e, { email: e, name: nm }); };
     ((state.thread && state.thread.messages) || []).forEach((m) => [m.sender].concat(m.toRecipients || [], m.ccRecipients || []).forEach(put));
+    if (state.dCur && state.dCur.theirs) { const m = state.dCur.theirs; [m.sender].concat(m.toRecipients || [], m.ccRecipients || []).forEach(put); }
     state.threads.forEach((t) => (t.messages || []).forEach((m) => [m.sender].concat(m.toRecipients || []).forEach(put)));
+    (state.drafts || []).forEach((d) => [].concat((d._meta && d._meta.to) || d.toRecipients || []).forEach(put));
     return [...map.values()];
   }
+  const rcptTaken = (k) => rcptGroup(k).flatMap((g) => state.rcpt[g].map((r) => r.email));
   function addRcpt(k, raw, name) {
-    let added = 0; const taken = () => state.rcpt.cc.concat(state.rcpt.bcc).map((r) => r.email);
+    let added = 0;
     String(raw || "").split(/[,;\n]+/).forEach((part) => {
-      const p = part.trim(); if (!p) return; const e = emailOf(p).toLowerCase(); if (!EMAIL_RE.test(e) || taken().includes(e)) return;
+      const p = part.trim(); if (!p) return; const e = emailOf(p).toLowerCase(); if (!EMAIL_RE.test(e) || rcptTaken(k).includes(e)) return;
       const n = name || nameOf(p); state.rcpt[k].push({ email: e, name: n && !n.includes("@") ? n : ((knownPeople().find((x) => x.email === e) || {}).name || "") }); added++;
     });
-    if (added) renderRcpt(k); return added;
+    if (added) { renderRcpt(k); if (k[0] === "d") state.dDirty = true; } return added;
   }
   function rcptExtras(last) {
     const cc = state.rcpt.cc.map((r) => r.email), bcc = state.rcpt.bcc.map((r) => r.email); const o = {};
@@ -2163,7 +2181,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   async function showSug(k) {
     const inp = $(k + "In"), box = $(k + "Sug"); const q = inp.value.trim().toLowerCase(); const run = ++sugRun;
     if (!q || q.includes(",")) { box.hidden = true; return; }
-    const B = contactAdapter(); const taken = new Set(state.rcpt.cc.concat(state.rcpt.bcc).map((r) => r.email));
+    const B = contactAdapter(); const taken = new Set(rcptTaken(k));
     let l = knownPeople().filter((p) => !taken.has(p.email) && (p.email.includes(q) || p.name.toLowerCase().includes(q))).slice(0, 6);
     const paint = () => { box.innerHTML = l.map((p, i) => '<button type="button" class="sg' + (i === 0 ? " on" : "") + '" role="option" data-sg="' + esc(p.email) + '" data-sn="' + esc(p.name) + '"><span class="mt">' + esc(p.name || p.email) + '</span>' + (p.name || p.book ? '<span class="md">' + esc(p.name ? p.email : "") + (p.book ? (p.name ? " · " : "") + esc(B.label) : "") + '</span>' : "") + '</button>').join(""); box.hidden = !l.length; };
     paint();
@@ -2173,21 +2191,25 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
   }
   function pickSug(k, b) { addRcpt(k, b.dataset.sg, b.dataset.sn); $(k + "In").value = ""; $(k + "Sug").hidden = true; $(k + "In").focus(); }
-  ["cc", "bcc"].forEach((k) => {
-    const inp = $(k + "In"), box = $(k + "Sug");
-    $(k + "Tog").addEventListener("click", () => { const row = $(k + "Row"); row.hidden = false; $(k + "Tog").setAttribute("aria-expanded", "true"); inp.focus(); });
+  // Wires one people field. The reply box's are wired once; the Drafts editor's each time a draft opens.
+  function wireRcpt(k, onBad) {
+    const inp = $(k + "In"), box = $(k + "Sug"); if (!inp || !box) return;
     inp.addEventListener("input", () => { if (/[,;]/.test(inp.value)) { const parts = inp.value.split(/[,;]/); const rest = parts.pop(); addRcpt(k, parts.join(",")); inp.value = rest.trim(); } showSug(k); });
     inp.addEventListener("keydown", (ev) => {
       const opts = [...box.querySelectorAll(".sg")]; const on = box.querySelector(".sg.on");
       if ((ev.key === "ArrowDown" || ev.key === "ArrowUp") && !box.hidden && opts.length) { ev.preventDefault(); const i = opts.indexOf(on); const j = (i + (ev.key === "ArrowDown" ? 1 : -1) + opts.length) % opts.length; opts.forEach((o) => o.classList.remove("on")); opts[j].classList.add("on"); opts[j].scrollIntoView({ block: "nearest" }); return; }
-      if (ev.key === "Enter" || (ev.key === "Tab" && inp.value.trim())) { if (!box.hidden && on) { ev.preventDefault(); pickSug(k, on); return; } if (inp.value.trim()) { ev.preventDefault(); if (addRcpt(k, inp.value)) inp.value = ""; else { note("That doesn't look like an email address.", "err"); } box.hidden = true; } return; }
+      if (ev.key === "Enter" || (ev.key === "Tab" && inp.value.trim())) { if (!box.hidden && on) { ev.preventDefault(); pickSug(k, on); return; } if (inp.value.trim()) { ev.preventDefault(); if (addRcpt(k, inp.value)) inp.value = ""; else onBad("That doesn't look like an email address."); box.hidden = true; } return; }
       if (ev.key === "Escape" && !box.hidden) { ev.preventDefault(); ev.stopPropagation(); box.hidden = true; return; }
-      if (ev.key === "Backspace" && !inp.value && state.rcpt[k].length) { state.rcpt[k].pop(); renderRcpt(k); }
+      if (ev.key === "Backspace" && !inp.value && state.rcpt[k].length) { state.rcpt[k].pop(); renderRcpt(k); if (k[0] === "d") state.dDirty = true; }
     });
     inp.addEventListener("blur", () => setTimeout(() => { if (document.activeElement === inp) return; box.hidden = true; if (inp.value.trim() && addRcpt(k, inp.value)) inp.value = ""; }, 150));
     box.addEventListener("mousedown", (ev) => { if (ev.target.closest(".sg")) ev.preventDefault(); });
     box.addEventListener("click", (ev) => { const b = ev.target.closest(".sg"); if (b) pickSug(k, b); });
-    document.querySelector('.rbox[data-rk="' + k + '"]').addEventListener("click", (ev) => { const x = ev.target.closest("[data-rx]"); if (x) { const [kk, i] = x.dataset.rx.split(":"); state.rcpt[kk].splice(+i, 1); renderRcpt(kk); inp.focus(); return; } if (ev.target.classList.contains("rbox")) inp.focus(); });
+    document.querySelector('.rbox[data-rk="' + k + '"]').addEventListener("click", (ev) => { const x = ev.target.closest("[data-rx]"); if (x) { const [kk, i] = x.dataset.rx.split(":"); state.rcpt[kk].splice(+i, 1); renderRcpt(kk); if (kk[0] === "d") state.dDirty = true; inp.focus(); return; } if (ev.target.classList.contains("rbox")) inp.focus(); });
+  }
+  ["cc", "bcc"].forEach((k) => {
+    $(k + "Tog").addEventListener("click", () => { $(k + "Row").hidden = false; $(k + "Tog").setAttribute("aria-expanded", "true"); $(k + "In").focus(); });
+    wireRcpt(k, (msg) => note(msg, "err"));
   });
   $("replyAll").addEventListener("change", updateToLine);
 
@@ -3370,6 +3392,39 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     enrich: "Set up contact enrichment for Add contact. Show me which enrichment apps I have connected or could connect (Clay, Apollo, People Data Labs, ZoomInfo, Lusha, or one through Composio), let me pick one, and republish my copy.",
     action: "Add a Route action: "
   };
+  // A link that opens a new Claude chat with the setup request already typed in (claude.ai/new?q=). Copy is the fallback.
+  const setupPrompt = (k, extra) => "Run chatterbuilt-mail-setup for my Chatterbuilt Mail. " + SETUP_ASK[k] + (extra || "");
+  const claudeLink = (text) => "https://claude.ai/new?q=" + encodeURIComponent(text);
+  // Where contacts go is your call. The picker remembers it and writes the setup request for that app.
+  const BOOKS = [["google", "Google Contacts"], ["outlook", "Outlook"], ["notion", "Notion"], ["hubspot", "HubSpot"], ["other", "Something else"]];
+  const BOOK_ASK = {
+    google: "Save contacts to Google Contacts, in the account each email came to. It goes through Composio's Google Contacts toolkit, which needs my own Google OAuth client the first time: walk me through that, then switch my contacts to Google Contacts.",
+    outlook: "Save contacts to my Outlook contacts, through my Microsoft connector or Composio's Outlook toolkit.",
+    notion: "Save contacts to a Notion database. Use the one I have, or create one with Name, Email, Company, Title, How we met, Background, First contact and Notes.",
+    hubspot: "Save contacts to HubSpot, with How we met, Background and First contact as properties; if they're missing, ask me before adding them.",
+    other: "Save contacts to "
+  };
+  const bookPref = () => { const p = ls.get("cm.bookPref"); return p && BOOK_ASK[p] ? p : "google"; };
+  function bookAsk() { const k = bookPref(); const app = ($("cBookApp") && $("cBookApp").value.trim()) || "the app I name"; return "Run chatterbuilt-mail-setup for my Chatterbuilt Mail. " + (k === "other" ? BOOK_ASK.other + app + ", with How we met, Background and First contact; if fields are missing, ask me before adding them." : BOOK_ASK[k]) + " Then republish my copy."; }
+  function bookPanel(reason) {
+    const k = bookPref();
+    return '<div class="banner bookset" id="cBook">' + (reason ? '<strong>' + esc(reason) + '</strong> ' : "") + 'Where do you keep your contacts?'
+      + '<div class="mrow" role="group" aria-label="Address book">' + BOOKS.map(([b, l]) => '<button type="button" class="btn sm' + (b === k ? " primary" : "") + '" data-book="' + b + '" aria-pressed="' + (b === k) + '">' + esc(l) + '</button>').join("") + '</div>'
+      + '<div class="mrow" id="cBookOther"' + (k === "other" ? "" : " hidden") + '><input type="text" id="cBookApp" placeholder="Which app? Airtable, Attio, Salesforce…" aria-label="Which app" style="flex:1;min-width:0"></div>'
+      + '<div class="mrow"><a class="btn sm primary" id="cBookGo" target="_blank" rel="noopener" href="' + esc(claudeLink(bookAsk())) + '">Set it up in Claude ↗</a><button type="button" class="btn sm" id="cBookCopy">Copy the request</button><span class="note" id="cBookNote">Opens a new Claude chat that connects it and republishes your copy.</span></div></div>';
+  }
+  function wireBookPanel() {
+    const box = $("cBook"); if (!box) return;
+    const sync = () => { $("cBookGo").href = claudeLink(bookAsk()); };
+    box.querySelectorAll("[data-book]").forEach((b) => b.addEventListener("click", () => {
+      ls.set("cm.bookPref", b.dataset.book);
+      box.querySelectorAll("[data-book]").forEach((x) => { const on = x === b; x.classList.toggle("primary", on); x.setAttribute("aria-pressed", String(on)); });
+      $("cBookOther").hidden = b.dataset.book !== "other"; if (b.dataset.book === "other") $("cBookApp").focus(); sync();
+    }));
+    $("cBookApp").addEventListener("input", sync);
+    $("cBookCopy").addEventListener("click", () => copyText(bookAsk(), $("cBookNote"), "Copied. Paste it into a chat with Claude: it connects the address book and republishes your copy."));
+  }
+  function showBookPanel(reason) { const at = $("cBookSlot"); if (!at) return; at.innerHTML = bookPanel(reason); wireBookPanel(); }
   function setupAsk(k, noteEl, extra) {
     copyText("Run chatterbuilt-mail-setup for my Chatterbuilt Mail. " + SETUP_ASK[k] + (extra || ""), noteEl, "Copied. Paste it into a chat with Claude: it runs setup and republishes your copy.");
   }
@@ -3403,15 +3458,18 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     openModal("Add contact",
       (state.readOnly ? '<p class="note err">Read-only is on. You can fill this in and copy it as a vCard, but saving is off until you turn it off.</p>' : "")
       + (cands.length > 1 ? '<div class="mrow"><span class="note">Who</span><select id="cWho" style="flex:1;width:auto;min-width:0">' + cands.map((c, i) => '<option value="' + i + '">' + esc((c.name ? c.name + " \u00b7 " : "") + c.email) + '</option>').join("") + '</select></div>' : "")
+      + '<div id="cBookSlot"></div>'
       + '<p class="note" id="cStatus"><span class="spin"></span>Reading every email they\'ve sent you for their signature and social handles, and finding your first thread together…</p>'
       + '<div class="fields">' + f("cName", "Name") + f("cEmail", "Email", "email") + f("cCompany", "Company") + f("cTitle", "Title") + f("cPhone", "Phone", "tel") + f("cLocation", "Location") + f("cWebsite", "Website", "url") + f("cLinkedIn", "LinkedIn", "url", "linkedin.com/in/\u2026") + f("cX", "X", "url", "x.com/\u2026") + f("cBluesky", "Bluesky", "url", "bsky.app/profile/\u2026") + f("cGitHub", "GitHub", "url", "github.com/\u2026") + f("cInstagram", "Instagram", "url", "instagram.com/\u2026") + '</div>'
       + '<label class="field"><span>How we met</span><textarea id="cMet" style="min-height:72px" placeholder="Looking up your first email together\u2026"></textarea></label>'
       + '<p class="note" id="cFirst"></p>'
       + '<label class="field"><span>Background</span><textarea id="cBackground" style="min-height:60px" placeholder="Work history and what they focus on. Clay can fill this."></textarea></label>'
       + '<label class="field"><span>Notes</span><textarea id="cNotes" style="min-height:60px" placeholder="Anything worth remembering"></textarea></label>'
-      + '<div class="mrow"><button class="btn" id="cSig" type="button">Look again in their emails</button>' + (CONFIG.clay ? '<button class="btn" id="cClay" type="button" title="Looks the person up in Clay: title, LinkedIn, social profiles and work history. Uses Clay credits.">Enrich with Clay</button>' : CONFIG.enrich ? '<button class="btn" id="cEnrich" type="button" title="Looks the person up in ' + esc(CONFIG.enrich.label || "your enrichment app") + '. May use credits there.">Enrich with ' + esc(CONFIG.enrich.label || "your app") + '</button>' : '<button class="btn" type="button" data-setup="enrich" title="No enrichment app is set up yet. Copies a setup request to paste into Claude.">Set up enrichment</button>') + '<span class="note" id="cNote"></span></div>'
+      + '<div class="mrow"><button class="btn" id="cSig" type="button">Look again in their emails</button>' + (CONFIG.clay ? '<button class="btn" id="cClay" type="button" title="Looks the person up in Clay: title, LinkedIn, social profiles and work history. Uses Clay credits.">Enrich with Clay</button>' : CONFIG.enrich ? '<button class="btn" id="cEnrich" type="button" title="Looks the person up in ' + esc(CONFIG.enrich.label || "your enrichment app") + '. May use credits there.">Enrich with ' + esc(CONFIG.enrich.label || "your app") + '</button>' : '<a class="btn" data-setup-link="enrich" target="_blank" rel="noopener" href="' + esc(claudeLink(setupPrompt("enrich"))) + '" title="No enrichment app is set up yet. Opens a new Claude chat that sets one up.">Set up enrichment ↗</a><button class="btn sm ghost" type="button" data-setup="enrich" title="Copy the setup request instead">Copy request</button>') + '<span class="note" id="cNote"></span></div>'
       + '<div id="cDup"></div>'
-      + '<div class="mrow">' + (A ? '<button class="btn primary" id="cSave" type="button" data-mut>Save to ' + esc(A.label || "Contacts") + '</button>' : "") + '<button class="btn' + (A ? "" : " primary") + '" id="cVcard" type="button">Copy as vCard</button>' + (A ? "" : '<button class="btn" type="button" data-setup="contacts" title="Copies a setup request to paste into Claude">Set up an address book</button>') + '<span class="note" id="cSaveNote">' + (A ? "" : "No address book is set up yet. Copy as vCard works anywhere.") + '</span></div>', "wide");
+      + '<div class="mrow">' + (A ? '<button class="btn primary" id="cSave" type="button" data-mut>Save to ' + esc(A.label || "Contacts") + '</button>' : "") + '<button class="btn' + (A ? "" : " primary") + '" id="cVcard" type="button">Copy as vCard</button>' + (A ? '<button class="btn ghost" type="button" id="cBookChange" title="Pick where contacts go, and set it up in Claude">Change address book…</button>' : "") + '<span class="note" id="cSaveNote">' + (A ? "" : "Copy as vCard works anywhere in the meantime.") + '</span></div>', "wide");
+    if (!A) showBookPanel("Contacts aren't connected yet.");
+    if ($("cBookChange")) $("cBookChange").addEventListener("click", () => { if ($("cBook")) { $("cBookSlot").innerHTML = ""; return; } showBookPanel(""); $("cBookSlot").scrollIntoView({ block: "nearest" }); });
     const pick = () => {
       const c = cands[+(($("cWho") || {}).value || 0)]; contactCtx.who = c; contactCtx.firstDate = null; contactCtx.firstUrl = ""; contactCtx.firstThreadId = null; contactCtx.dup = null;
       $("cName").value = c.name || ""; $("cEmail").value = c.email; CFIELDS.forEach((id) => { $(id).value = ""; });
@@ -3482,8 +3540,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       catch (e) {
         // Not connected yet (Google Contacts needs a one-time setup in Composio): offer setup instead of a Save that would fail.
         if (!stillOn(ctx, who) || !bookDown(e)) return;
-        const sv = $("cSave"); if (sv) sv.outerHTML = '<button class="btn" type="button" data-setup="contacts" title="Copies a setup request to paste into Claude">Set up ' + esc(A.label) + '</button>';
-        $("cSaveNote").className = "note"; $("cSaveNote").textContent = A.label + " isn't connected yet. Copy as vCard works anywhere, and Google Contacts can import it.";
+        const sv = $("cSave"); if (sv) sv.remove(); if (A.google && !ls.get("cm.bookPref")) ls.set("cm.bookPref", "google");
+        showBookPanel(A.label + " isn't connected yet.");
+        $("cSaveNote").className = "note"; $("cSaveNote").textContent = "Copy as vCard works anywhere in the meantime, and Google Contacts can import it.";
       }
       return;
     }
@@ -3597,7 +3656,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     } catch (e) {
       if ($("cSaveNote")) {
         const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); sn.className = "note err"; sn.textContent = mcpCopy(e, A.server) + (amb ? " Check " + (A.label || "it") + " before saving again." : "");
-        if (bookDown(e)) { sn.textContent = (A.label || "That address book") + " isn't connected yet. Connect it in Composio, or set up another one. "; sn.insertAdjacentHTML("beforeend", '<button type="button" class="btn sm" data-setup="contacts">Copy a setup request</button>'); }
+        if (bookDown(e)) { sn.textContent = (A.label || "That address book") + " isn't connected yet."; showBookPanel(""); }
       }
       if ($("cSave")) $("cSave").disabled = false;
     }
@@ -3668,7 +3727,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function ctxTarget() { return sidePanel() ? $("sideBody") : $("ctxBox"); }
   function setSideOff(off) {
     state.sideOff = off; ls.set("cm.sideOff", off ? "1" : "0");
-    showSide(true); if (state.thread) renderContext();
+    showSide(true); if (state.thread || inDraftCtx()) renderContext();
     const f = off ? $("sideTog") : $("sideHide"); if (f && !f.hidden) f.focus();
   }
   $("sideTog").addEventListener("click", () => setSideOff(false));
@@ -3747,8 +3806,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (wideMQ.matches) { setSideOff(!state.sideOff); return; }
     state.ctxFold = !state.ctxFold; ls.set("cm.ctxFold", state.ctxFold ? "1" : "0"); renderContext();
   }
+  // The context panel follows the open thread, or in the Drafts tab the open draft (its thread, or the person it's to).
+  const inDraftCtx = () => state.mode === "drafts" && !!(state.dCur && state.dCur.ctxT);
+  const ctxKey = () => (inDraftCtx() ? "draft:" + state.dCur.d.id : state.selectedId);
   async function loadContext(force) {
-    const t = state.thread; const id = state.selectedId;
+    const t = inDraftCtx() ? state.dCur.ctxT : state.thread; const id = ctxKey();
     if (!t || !panelOn()) { if ($("ctxBox")) $("ctxBox").innerHTML = ""; $("sideBody").innerHTML = ""; return; }
     const who = personOf(t); if (!who) { state.ctx[id] = { nowho: true, who: {} }; renderContext(); return; }
     if (state.ctx[id] && !force) { renderContext(); return; }
@@ -3761,7 +3823,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p };
       } catch (e) { return { label: s.label || s.server, ok: false, err: mcpCopy(e, s.server) || (e && e.code) || "error" }; }
     }));
-    if (state.selectedId !== id) return;
+    if (ctxKey() !== id) return;
     const usable = results.filter((r) => r.ok && !r.empty);
     let text = "Nothing relevant in your connected systems.";
     if (usable.length) {
@@ -3775,7 +3837,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
           { max_tokens: 2500 })).trim();
       } catch (e) { text = "Couldn't summarize: " + (mcpCopy(e, aiLabel()) || "stopped"); }
     }
-    if (state.selectedId !== id) return;
+    if (ctxKey() !== id) return;
     state.ctx[id] = { text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
     renderContext();
   }
@@ -3788,7 +3850,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }).join("");
   }
   function renderContext() {
-    const id = state.selectedId; const c = state.ctx[id]; const el = ctxTarget(); const other = sidePanel() ? $("ctxBox") : $("sideBody");
+    const id = ctxKey(); const c = state.ctx[id]; const el = ctxTarget(); const other = sidePanel() ? $("ctxBox") : $("sideBody");
     if (other) other.innerHTML = "";
     if (!el) return;
     if (!c) { el.innerHTML = ""; return; }
@@ -3804,7 +3866,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       sys = '<div class="sec"><div class="cap">From your systems<button type="button" class="btn sm ghost" data-ctx="refresh">Refresh</button></div>' + sys + '</div>';
     }
     let web = "";
-    if (featOn("more")) {
+    if (featOn("more") && !inDraftCtx()) {
       const w = state.web[id];
       if (!w) web = '<button type="button" class="morectx" data-ctx="more"><strong>More context</strong><span>Look ' + esc(who.name || who.email || "them") + (who.org ? " and " + esc(who.org) : "") + ' up on the public web. Runs only when you press it.</span></button>';
       else if (w.loading) web = '<div class="webbox"><div class="note"><span class="spin"></span>Looking on the web…</div></div>';
@@ -3816,7 +3878,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       web = '<div class="sec">' + web + '</div>';
     }
     let steps = "";
-    if (featOn("route") && routeCatalog().length) {
+    if (featOn("route") && routeCatalog().length && !inDraftCtx()) {
       const st = state.steps[id];
       let body;
       if (!st) body = '<button type="button" class="btn sm" data-ctx="steps">Suggest next steps</button>';
@@ -3841,7 +3903,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     else if (k === "steps") suggestSteps();
     else if (k === "route") openRoute();
   });
-  wideMQ.addEventListener("change", () => { if (state.thread) { showSide(true); renderContext(); } });
+  wideMQ.addEventListener("change", () => { if (state.thread || inDraftCtx()) { showSide(true); renderContext(); } });
 
   // ---------- More context: a web lookup you ask for ----------
   function webItems(p) {
@@ -3916,6 +3978,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function renderTodaySoon() { clearTimeout(todayTimer); todayTimer = setTimeout(() => { if (!state.selectedId && !state.thread) renderToday(); }, 120); }
   function renderToday(word) {
     if (state.selectedId || state.thread) return;
+    if (state.mode === "drafts") { if (!state.dSel) renderDraftsHome(word); return; }
     $("subject").textContent = featOn("today") ? "Today" : "Pick a thread";
     if (!featOn("today")) { reading.innerHTML = '<div class="empty"><h2>' + esc(word || "Nothing open yet") + '</h2><p>Pick a thread on the left.</p></div>'; return; }
     const row = (t, extra) => { const m = (t.messages && t.messages[0]) || {}; return '<button type="button" class="trow" data-open="' + esc(t.id) + '"><span class="w">' + esc(nameOf(m.sender) || "(unknown)") + '</span><span class="s">' + esc(m.subject || "(no subject)") + '</span>' + (extra || "") + '</button>'; };
@@ -4209,7 +4272,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   const htmlToText = (h) => { const el = sanitizeHtml(h); el.querySelectorAll("br").forEach((b) => b.replaceWith("\n")); el.querySelectorAll("p,div,li,tr").forEach((b) => b.append("\n")); return el.textContent.replace(/\n{3,}/g, "\n\n").trim(); };
   function draftText(d) {
-    let t = d.plaintextBody || (d.htmlBody ? htmlToText(d.htmlBody) : "") || "";
+    let t = d.plaintextBody || (d.htmlBody ? htmlToText(d.htmlBody) : "") || ""; if (looksHtml(t)) t = htmlToText(t);
     const cut = t.search(/\n\[(image|Website|LinkedIn)[^\]]*\]/); if (cut > 0) t = t.slice(0, cut);
     return t.trim();
   }
@@ -4271,8 +4334,17 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const ids = new Set(state.drafts.map((d) => d.id)); const ck = dChecked(); let gone = false;
       Object.keys(ck).forEach((k) => { if (!ids.has(k)) { delete ck[k]; gone = true; } }); if (gone) ls.set("cm.draftsChecked", JSON.stringify(ck));
       $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
-      renderDrafts(); loadDraftMetas(token);
+      renderDrafts(); if (!state.dSel) renderDraftsHome(); loadDraftMetas(token);
     } catch (e) { if (token === state.loadToken) list.innerHTML = '<div class="empty"><h2>Couldn\'t load your drafts</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; }
+  }
+  // With no draft open, the desk says how many are left to review and starts you on the first.
+  function renderDraftsHome(word) {
+    $("subject").textContent = "Drafts";
+    const all = state.drafts || [], left = all.filter((d) => !dChecked()[d.id]);
+    reading.innerHTML = '<div class="empty"><h2>' + esc(word || (all.length ? (left.length ? left.length + " of " + all.length + " draft" + (all.length === 1 ? "" : "s") + " to review" : "Every draft is checked") : "No drafts")) + '</h2>'
+      + '<p>' + (all.length ? "Open one on the left, or go through them in order. Each one gets the review checklist before it goes." : "Drafts from the morning run, from chat or from Gmail show up here.") + '</p>'
+      + (left.length ? '<p><button type="button" class="btn primary" id="dStart">Start with the first one</button></p>' : "") + '</div>';
+    const b = $("dStart"); if (b) b.addEventListener("click", () => openDraft(left[0].id));
   }
   // The list call carries no subjects, so each row's subject and first line are fetched on their own, three at a time.
   async function loadDraftMetas(token) {
@@ -4337,14 +4409,25 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     })(doc.body, out);
     return out.innerHTML;
   }
+  // Blank lines and breaks left at the end of the editor (where a signature was) come off.
+  const rteTrim = (h) => {
+    const box = document.createElement("div"); box.innerHTML = String(h || "");
+    const empty = (n) => n.nodeType === 3 ? !n.nodeValue.replace(/\u00a0/g, " ").trim() : n.nodeName === "BR" || (/^(DIV|P|SPAN)$/.test(n.nodeName) && !n.textContent.replace(/\u00a0/g, " ").trim() && !n.querySelector("img, a"));
+    (function trim(el) { let n; while ((n = el.lastChild)) { if (empty(n)) { n.remove(); continue; } if (/^(DIV|P|SPAN)$/.test(n.nodeName)) trim(n); break; } })(box);
+    return box.innerHTML;
+  };
   const textToHtml = (t) => String(t || "").split(/\n{2,}/).map((p) => "<p>" + esc(p).replace(/\n/g, "<br>") + "</p>").join("");
   function draftHtml(full) {
-    if (full.htmlBody) {
-      const doc = new DOMParser().parseFromString(full.htmlBody, "text/html"); const q = doc.querySelector(".gmail_quote");
+    const html = full.htmlBody || (looksHtml(full.plaintextBody) ? full.plaintextBody : "");
+    if (html) {
+      const doc = new DOMParser().parseFromString(html, "text/html"); const q = doc.querySelector(".gmail_quote");
       state.dQuote = q ? q.outerHTML : ""; if (q) q.remove();
-      return rteClean(doc.body.innerHTML);
+      // Signatures are tables and images the editor would flatten, so they stay as they are and go back on when you save.
+      const sig = doc.querySelector('.gmail_signature, [data-smartmail="gmail_signature"]'); const pre = doc.querySelector(".gmail_signature_prefix");
+      state.dSig = sig ? (pre ? pre.outerHTML + "<br>" : "") + sig.outerHTML : ""; if (sig) sig.remove(); if (pre) pre.remove();
+      return rteTrim(rteClean(doc.body.innerHTML));
     }
-    state.dQuote = ""; return textToHtml(draftText(full));
+    state.dQuote = ""; state.dSig = ""; return textToHtml(draftText(full));
   }
   const addrList = (v) => String(v || "").split(/[,;\n]+/).map((x) => emailOf(x.trim()).toLowerCase()).filter((x) => EMAIL_RE.test(x));
   async function openDraft(id) {
@@ -4356,38 +4439,49 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     let full; try { full = await draftWhole(d); } catch (e) { if (state.dSel === id) reading.innerHTML = '<div class="empty"><h2>Couldn\'t open this draft</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; return; }
     if (state.dSel !== id) return;
     if (!full) { reading.innerHTML = '<div class="empty"><h2>Couldn\'t read this draft here</h2>' + (d.viewUrl ? '<p><a href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open it in Gmail</a></p>' : "") + '</div>'; return; }
-    let theirs = null;
-    if (d.threadId) { try { const t = await fetchThread(d.threadId); theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
+    let theirs = null, thr = null;
+    if (d.threadId) { try { const t = await fetchThread(d.threadId); thr = t; theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
     if (state.dSel !== id) return;
-    state.dCur = { d: d, full: full, theirs: theirs, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
+    state.dCur = { d: d, full: full, theirs: theirs, thread: thr, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
+    state.rcpt.dto = toRc(full.toRecipients || d.toRecipients); state.rcpt.dcc = toRc(full.ccRecipients || d.ccRecipients); state.rcpt.dbcc = toRc(full.bccRecipients || d.bccRecipients);
     renderDraftEditor();
+    // Check it for me runs on its own the first time a draft opens; your own ticks are never overwritten.
+    if (featOn("context") || featOn("more")) {
+      // A reply uses its thread; a new email gets a stand-in thread so the panel looks up the person it's to.
+      const c0 = state.dCur; c0.ctxT = c0.thread || { id: "draft:" + d.id, _id: "draft:" + d.id, messages: [{ id: "draft-" + d.id, sender: CONFIG.ownEmail || OWN, toRecipients: full.toRecipients || d.toRecipients || [], subject: full.subject || "", plaintextBody: draftText(full), labelIds: [] }] };
+      showSide(true); var ctxP = loadContext();
+    }
+    // The check waits for the context brief, so it can catch a draft that forgets what your systems know.
+    const unticked = () => !Object.keys(state.dTicks[id] || {}).length;
+    if (featOn("precheck") && unticked()) Promise.resolve(ctxP).catch(() => {}).then(() => { if (state.dSel === id && unticked()) checkDraft(true); });
   }
   function renderDraftEditor() {
     const c = state.dCur; if (!c) return; const { d, full, theirs } = c; const ticks = state.dTicks[d.id] || (state.dTicks[d.id] = {});
     const subj = full.subject || ""; $("subject").textContent = subj || "Draft";
     const ck = dChecked()[d.id]; const ds = state.drafts; const pos = ds.findIndex((x) => x.id === d.id) + 1;
     const addr = (l) => (l || []).map((a) => emailOf(a)).join(", ");
+    const startHtml = c.html != null ? c.html : draftHtml(full); // sets state.dSig and state.dQuote for this draft
     reading.innerHTML = '<div class="dedit">'
       + (state.readOnly ? '<p class="note err">Read-only is on. You can read and edit here, but Save and Send are off.</p>' : "")
+      + '<div id="ctxBox"></div>'
       + (theirs ? '<details class="dctx"' + (pos <= 1 ? " open" : "") + '><summary>Replying to <strong>' + esc(nameOf(theirs.sender)) + '</strong> · ' + esc(fmtDate(theirs.date)) + '</summary><div class="body">' + esc(splitQuoted(String(theirs.plaintextBody || theirs.snippet || "").replace(/\r/g, "")).main.slice(0, 4000)) + '</div></details>' : (d.threadId ? "" : '<p class="note">A new email, not a reply.</p>'))
-      + '<div class="dfields"><span>To</span><input id="dTo" value="' + esc(addr(full.toRecipients || d.toRecipients)) + '" aria-label="To"><span>Cc</span><input id="dCc" value="' + esc(addr(full.ccRecipients || d.ccRecipients)) + '" aria-label="Cc"><span>Bcc</span><input id="dBcc" value="' + esc(addr(full.bccRecipients || d.bccRecipients)) + '" aria-label="Bcc"><span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
+      + '<div class="dfields">' + ["dto", "dcc", "dbcc"].map((k) => '<span>' + rcptLabel[k] + '</span><div class="rfwrap"><div class="rbox" data-rk="' + k + '"><input type="text" id="' + k + 'In" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="' + rcptLabel[k] + '" aria-autocomplete="list" aria-controls="' + k + 'Sug"></div><div class="sug" id="' + k + 'Sug" role="listbox" aria-label="Suggestions" hidden></div></div>').join("") + '<span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
       + '<div><div class="rtbar" role="toolbar" aria-label="Formatting">'
       + [["bold", "<b>B</b>", "Bold (Ctrl B)"], ["italic", "<i>I</i>", "Italic (Ctrl I)"], ["underline", "<u>U</u>", "Underline (Ctrl U)"], ["link", "Link", "Add a link"], ["insertUnorderedList", "• List", "Bulleted list"], ["insertOrderedList", "1. List", "Numbered list"], ["removeFormat", "Clear", "Clear formatting"]].map((b) => '<button type="button" data-cmd="' + b[0] + '" title="' + b[2] + '" aria-label="' + b[2] + '">' + b[1] + '</button>').join("")
       + '</div><div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text"></div></div>'
+      + (state.dSig ? '<div class="dsig"><span class="note">Signature · kept as it is</span><div class="dsigbody">' + esc(htmlToText(state.dSig).split("\n").map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n")) + '</div></div>' : "")
       + '<div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
       + (c.hasAtt ? '<p class="note">This draft has attachments. Saving from here would drop them, so edit and send it in Gmail.</p>' : "")
       + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
-      + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm" id="dAutoCheck">Check it for me</button></div>'
-      + DRAFT_CHECKS.map(([k, label]) => '<label><input type="checkbox" data-dtick="' + k + '"' + (ticks[k] && ticks[k].on ? " checked" : "") + '><span>' + esc(label) + (ticks[k] && ticks[k].note ? '<span class="dn' + (ticks[k].on ? "" : " warn") + '">' + esc(ticks[k].note) + '</span>' : "") + '</span></label>').join("")
-      + '</div>'
-      + '<div class="mrow dfoot"><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
+      + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm primary" id="dAutoCheck">Check it for me</button></div><p class="note dhow">Claude reads the draft against the message it answers, what your systems know about this person and your writing rules. It ticks what passes and says what to fix. It never changes the draft.</p>'
+      + '<div id="dChecks">' + dChecksHtml(d.id) + '</div></div>'
+      + '<div class="mrow dfoot"><span class="note dnote" id="dNote"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
       + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
-      + '<button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div>'
-      + '<div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div>'
-      + '<span class="note" id="dNote"></span></div>';
-    const ed = $("dEditor"); ed.innerHTML = draftHtml(full); c.base = ed.innerHTML;
-    const dirty = () => { state.dDirty = true; };
-    ed.addEventListener("input", dirty); ["dTo", "dCc", "dBcc", "dSubj"].forEach((k) => $(k).addEventListener("input", dirty));
+      + '<button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
+    const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML;
+    const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; };
+    ed.addEventListener("input", dirty); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
+    ["dto", "dcc", "dbcc"].forEach((k) => { renderRcpt(k); wireRcpt(k, (msg) => dNote(msg, "err")); });
     ed.addEventListener("paste", (ev) => { ev.preventDefault(); const t = (ev.clipboardData || window.clipboardData).getData("text/plain"); document.execCommand("insertText", false, t); });
     let saved = null;
     reading.querySelector(".rtbar").addEventListener("mousedown", (ev) => { if (ev.target.closest("button")) ev.preventDefault(); });
@@ -4397,17 +4491,14 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       document.execCommand(b.dataset.cmd, false, null); dirty();
     });
     const addLink = () => {
-      const u = $("dLinkUrl").value.trim(); const url = /^mailto:/i.test(u) ? u : normUrl(u); if (!/^(https?:|mailto:)/i.test(url)) { $("dNote").className = "note err"; $("dNote").textContent = "Links need to start with https:// or mailto:"; return; }
+      const u = $("dLinkUrl").value.trim(); const url = /^mailto:/i.test(u) ? u : normUrl(u); if (!/^(https?:|mailto:)/i.test(url)) { dNote("Links need to start with https:// or mailto:", "err"); return; }
       ed.focus(); if (saved) { const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(saved); }
       if (window.getSelection().isCollapsed) document.execCommand("insertText", false, u);
       document.execCommand("createLink", false, url); ed.querySelectorAll('a[href]').forEach((a) => { a.target = "_blank"; a.rel = "noopener"; });
       $("dLinkRow").hidden = true; $("dLinkUrl").value = ""; dirty();
     };
     $("dLinkAdd").addEventListener("click", addLink); $("dLinkUrl").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); addLink(); } else if (ev.key === "Escape") { $("dLinkRow").hidden = true; ed.focus(); } });
-    reading.querySelectorAll("[data-dtick]").forEach((x) => x.addEventListener("change", () => {
-      const t = state.dTicks[d.id] || (state.dTicks[d.id] = {}); t[x.dataset.dtick] = Object.assign({}, t[x.dataset.dtick], { on: x.checked });
-      if (DRAFT_CHECKS.every(([k]) => t[k] && t[k].on) && !dChecked()[d.id]) { setDChecked(d.id, true); renderDrafts(); $("dDone").textContent = "Checked ✓ · next"; $("dNote").className = "note ok"; $("dNote").textContent = "Every item checked. This draft is marked checked."; }
-    }));
+    wireDChecks(d);
     reading.querySelectorAll("[data-drev]").forEach((b) => b.addEventListener("click", () => reviseDraft(b.dataset.drev)));
     $("dReviseGo").addEventListener("click", () => { const v = $("dRevise").value.trim(); if (v) reviseDraft(v); });
     $("dRevise").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); const v = $("dRevise").value.trim(); if (v) reviseDraft(v); } });
@@ -4420,17 +4511,30 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("dConfirmNo").addEventListener("click", () => { $("dConfirm").hidden = true; });
     $("dConfirmGo").addEventListener("click", sendDraftEdit);
   }
-  function dNote(text, cls) { const n = $("dNote"); if (n) { n.className = "note " + (cls || ""); n.textContent = text; } }
+  function dChecksHtml(id) {
+    const ticks = state.dTicks[id] || {};
+    return DRAFT_CHECKS.map(([k, label]) => '<label><input type="checkbox" data-dtick="' + k + '"' + (ticks[k] && ticks[k].on ? " checked" : "") + '><span>' + esc(label) + (ticks[k] && ticks[k].note ? '<span class="dn' + (ticks[k].on ? "" : " warn") + '">' + esc(ticks[k].note) + '</span>' : "") + '</span></label>').join("");
+  }
+  function wireDChecks(d) {
+    reading.querySelectorAll("[data-dtick]").forEach((x) => x.addEventListener("change", () => {
+      const t = state.dTicks[d.id] || (state.dTicks[d.id] = {}); t[x.dataset.dtick] = Object.assign({}, t[x.dataset.dtick], { on: x.checked });
+      if (DRAFT_CHECKS.every(([k]) => t[k] && t[k].on) && !dChecked()[d.id]) { setDChecked(d.id, true); renderDrafts(); $("dDone").textContent = "Checked ✓ · next"; dNote("Every item checked. This draft is marked checked.", "ok"); }
+    }));
+  }
+  // The people in a draft field, including anything still typed in its box.
+  function dAddrs(k) { const i = $(k + "In"); if (i && i.value.trim() && addRcpt(k, i.value)) i.value = ""; return state.rcpt[k].map((r) => r.email); }
+  const toRc = (l) => (l || []).map((a) => { const e = emailOf(a).toLowerCase(); const n = nameOf(a); return { email: e, name: n && !n.includes("@") ? n : "" }; }).filter((r) => EMAIL_RE.test(r.email));
+  function dNote(text, cls) { const n = $("dNote"); if (n) { n.className = "note dnote " + (cls || ""); n.textContent = text; } }
   async function saveDraftEdit(quiet) {
     const c = state.dCur; if (!c) return false; const { d, full } = c;
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return false; }
     if (c.hasAtt) { dNote("This draft has attachments; edit it in Gmail so they aren't dropped.", "err"); return false; }
-    const to = addrList($("dTo").value); if (!to.length) { dNote("Add at least one person on To.", "err"); return false; }
-    const html = rteClean($("dEditor").innerHTML) + (state.dQuote || ""); const text = htmlToText(html);
+    const to = dAddrs("dto"), cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); if (!to.length) { dNote("Add at least one person on To.", "err"); return false; }
+    const html = rteTrim(rteClean($("dEditor").innerHTML)) + (state.dSig ? "<br><br>" + state.dSig : "") + (state.dQuote || ""); const text = htmlToText(html);
     $("dSave").disabled = true; dNote("Saving…");
     try {
       // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
-      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id, to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, addrList($("dCc").value).length ? { cc: addrList($("dCc").value) } : {}, addrList($("dBcc").value).length ? { bcc: addrList($("dBcc").value) } : {}), { cache: false });
+      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id, to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false });
       state.dDirty = false; d._meta = null; full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
       dNote(quiet ? "" : "Saved to Gmail.", "ok"); if (quiet) toast("Saved your changes to the draft to " + esc(to.join(", ")) + ".", "ok", 4000);
       draftMeta(d).then(renderDrafts).catch(() => {});
@@ -4440,8 +4544,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   function askSendDraft() {
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
-    const to = addrList($("dTo").value); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
-    const cc = addrList($("dCc").value), bcc = addrList($("dBcc").value); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
+    const to = dAddrs("dto"); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
+    const cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
     $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "");
     $("dConfirm").hidden = false; $("dConfirmGo").focus();
   }
@@ -4471,26 +4575,27 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); } finally { ed.removeAttribute("aria-busy"); }
   }
   // The AI goes through the same checklist and ticks what passes, with a short note on anything that doesn't.
-  async function checkDraft() {
+  async function checkDraft(auto) {
     const c = state.dCur; if (!c) return; const id = c.d.id; const b = $("dAutoCheck"); b.disabled = true; b.textContent = "Checking…";
+    const ppl = (k) => state.rcpt[k].map((r) => (r.name ? r.name + " <" + r.email + ">" : r.email)).join(", ");
     try {
       const text = await ask(MARK + " You review an email draft before " + OWNER + " sends it. Reply with JSON only.",
-        "Go through this checklist for the draft below. For each key, ok is true only when it clearly passes; note says why in at most 15 words (say what's wrong when it fails).\n"
+        "Go through this checklist for the draft below. Mark an item ok: false only for a concrete problem " + OWNER + " would want to fix before sending: a question left unanswered, a wrong name, date or number, a promise they likely didn't mean, a missing or wrong recipient, a tone that would land badly with this person, a typo or a missing attachment or link. Something you can't verify from what's here is not a failure: keep ok true and, if it matters, say so in the note. Don't fail an item over wording or tone " + OWNER + " plainly chose. Before failing an item, ask whether " + OWNER + " would change the draft because of it; if not, it passes. The signature is kept as it is and isn't shown; don't judge it. note: at most 15 words; when it fails, say what to fix.\n"
         + DRAFT_CHECKS.map(([k, l]) => "- " + k + ": " + l).join("\n")
         + "\nReply with {" + DRAFT_CHECKS.map(([k]) => "\"" + k + "\": {\"ok\": boolean, \"note\": string}").join(", ") + "}.\n\n"
         + (CONFIG.rules ? OWNER + "'s writing rules: " + CONFIG.rules + "\n\n" : "")
-        + "TO: " + $("dTo").value + (addrList($("dCc").value).length ? "\nCC: " + $("dCc").value : "") + (addrList($("dBcc").value).length ? "\nBCC: " + $("dBcc").value : "") + "\nSUBJECT: " + $("dSubj").value
+        + "TO: " + ppl("dto") + (state.rcpt.dcc.length ? "\nCC: " + ppl("dcc") : "") + (state.rcpt.dbcc.length ? "\nBCC: " + ppl("dbcc") : "") + "\nSUBJECT: " + $("dSubj").value
         + "\n\nDRAFT:\n" + htmlToText($("dEditor").innerHTML)
+        + (state.ctx[ctxKey()] && state.ctx[ctxKey()].text && !/^Nothing relevant/i.test(state.ctx[ctxKey()].text) ? "\n\nWHAT " + OWNER.toUpperCase() + "'S OTHER SYSTEMS SAY ABOUT THIS PERSON (flag a draft that contradicts it or forgets a commitment in it):\n" + state.ctx[ctxKey()].text : "")
         + (c.theirs ? "\n\nTHE MESSAGE IT ANSWERS (from " + c.theirs.sender + "):\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 8000) : "\n\n(It's a new email, not a reply.)"),
         { max_tokens: 2000 });
       if (!state.dCur || state.dCur.d.id !== id) return;
       const o = parseJsonObject(text); if (!o) throw { code: "tool_error", message: "the check didn't come back in the expected shape" };
       const t = state.dTicks[id] || (state.dTicks[id] = {});
-      DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; t[k] = { on: r.ok === true, note: String(r.note || "") }; });
-      const keep = $("dEditor").innerHTML, vals = ["dTo", "dCc", "dBcc", "dSubj"].map((k) => $(k).value), dirty = state.dDirty;
-      renderDraftEditor(); $("dEditor").innerHTML = keep; ["dTo", "dCc", "dBcc", "dSubj"].forEach((k, i) => { $(k).value = vals[i]; }); state.dDirty = dirty;
+      DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; if (auto && t[k] && t[k].on) return; t[k] = { on: r.ok === true, note: String(r.note || "") }; });
+      $("dChecks").innerHTML = dChecksHtml(id); wireDChecks(c.d);
       const bad = DRAFT_CHECKS.filter(([k]) => !t[k].on).length;
-      dNote(bad ? bad + " thing" + (bad === 1 ? "" : "s") + " to look at, marked below." : "Everything on the checklist passes.", bad ? "" : "ok");
+      dNote(bad ? bad + " thing" + (bad === 1 ? "" : "s") + " to look at, marked in the checklist." : "Everything on the checklist passes.", bad ? "" : "ok");
       if (!bad && !dChecked()[id]) { setDChecked(id, true); renderDrafts(); }
     } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); }
     finally { const x = $("dAutoCheck"); if (x) { x.disabled = false; x.textContent = "Check it for me"; } }

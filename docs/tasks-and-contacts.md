@@ -51,7 +51,7 @@ Press **Contact** above the thread, or `c`. If several people are on the thread,
 - **How we met.** It finds your earliest thread together and writes a one- or two-sentence note: month and year, who reached out, what it was about, and who introduced you. **First thread together** links that thread, and its date is saved as **First contact**.
 - **Background.** Two or three sentences on their work history and what they focus on now, from your enrichment app.
 - **Notes.** Yours: what you want to remember next time.
-- **Enrich.** **Enrich with Clay**, or with whichever app you set up (Apollo, People Data Labs, ZoomInfo, Lusha…), looks the person up and fills title, company, location, profiles and Background. It runs only when you press it and uses credits in that app. If no enrichment app is set up, the button says **Set up enrichment** and copies a request you paste into a chat with Claude, which sets it up for you.
+- **Enrich.** **Enrich with Clay**, or with whichever app you set up (Apollo, People Data Labs, ZoomInfo, Lusha…), looks the person up and fills title, company, location, profiles and Background. It runs only when you press it and uses credits in that app. If no enrichment app is set up, **Set up enrichment ↗** opens a new Claude chat with the setup request already written; Claude sets it up and republishes your copy. (**Copy request** is there if you'd rather paste it yourself.)
 - **Already there?** The dialog checks your address book and warns when the email is already on file, links the record, and asks before saving a second entry.
 
 ![The bottom of Add contact: how you met, the first thread together, background, notes and Save to Google Contacts](images/contact-story.webp)
@@ -68,7 +68,9 @@ By default, the address book that comes with your mail account. For Gmail that's
 
 Google Contacts has no fields for how you met or a background, so they're added as **custom fields** on each contact. The first email together becomes a dated **First contact** event, your notes go in the **Notes** field, and LinkedIn, X and GitHub become labeled links. Nothing needs setting up in Google first.
 
-You can pick any other address book or CRM instead: Notion, HubSpot, Airtable, Outlook contacts, anything with a connector. If it's missing fields such as How we met or Background, setup lists them and offers to add them, and only adds them after you say yes. If nothing is set up, the dialog shows **Set up an address book**, which copies a setup request for Claude.
+You can pick any other address book or CRM instead: Notion, HubSpot, Airtable, Outlook contacts, anything with a connector. If it's missing fields such as How we met or Background, setup lists them and offers to add them, and only adds them after you say yes.
+
+**Setting it up from the dialog.** If no address book is connected, or the one you picked isn't connected yet, Add contact asks **Where do you keep your contacts?** Pick Google Contacts, Outlook, Notion, HubSpot or something else (then name it). The app remembers your answer, and **Set it up in Claude ↗** opens a new Claude chat with the right setup request already written: Claude connects it, adds any missing fields after you say yes, and republishes your copy. **Copy the request** does the same by paste. Already set up and want to switch? **Change address book…** at the bottom of the dialog brings the question back.
 
 ### Clean up the address book you already have
 

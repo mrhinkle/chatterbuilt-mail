@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.6.6 (2026-11-03)
+
+### New
+- **Check it for me runs on its own** the first time a draft opens in the Drafts tab, after the context brief loads, and now reads what your systems know about the person too, so it can catch a draft that forgets a commitment. A line under the checklist says what it reads and that it never changes the draft. Your own ticks are left alone.
+- **The context panel in Drafts.** The open draft gets the same brief as a thread: from its thread for a reply, or from the person it's to for a new email. More context and Route stay with threads.
+- **Address fields in Drafts.** To, Cc and Bcc are chips with suggestions from your threads and, once connected, your address book, the same as Cc and Bcc on a reply.
+- **Contacts set up from the dialog.** When no address book is connected (or the one you picked isn't connected yet), Add contact asks where you keep contacts (Google Contacts, Outlook, Notion, HubSpot or something else), remembers the answer, and **Set it up in Claude ↗** opens a new Claude chat with the setup request already written. **Copy the request** is there too. **Change address book…** reopens it later. **Set up enrichment ↗** opens a new chat the same way.
+
+### Fixed
+- A draft saved as HTML only (Gmail stores many drafts as a single HTML part, and Composio also returns that HTML as the message text) showed its tags, entities like `&#x27;` and its signature's table markup in the editor. It now shows as formatted text, and list rows, previews and replies get its text, not its markup.
+- **Signatures stay as they are in Drafts.** The editor used to flatten a signature's table and images into a run-on line of `[Website]` links, and saving would have kept it that way. The signature now sits under the editor as it is, stays out of edits, revisions and the check, and goes back on untouched when you save.
+- **Check it for me flags what's worth fixing.** It used to fail items it couldn't verify and wording you chose, so on a real draft it could flag all six. Now it fails only concrete problems (an unanswered question, a wrong date, a stray promise, a missing person, a tone that would land badly, a typo); anything it can't confirm stays ticked with a note.
+- In the Drafts tab with nothing open, the desk said "Drafts waiting in Gmail: 0" from Today. It now counts the drafts left to review, with **Start with the first one**.
+- The check's result and the send confirmation now show in the bar beside Save and Send, not below it.
+- The Drafts action bar (Previous, Next, Save, Send) was see-through and sat a little above the bottom of the pane, so the checklist showed behind and below it. It's solid now and sits on the edge.
+
 ## 0.6.5 (2026-11-03)
 
 ### New

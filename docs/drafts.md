@@ -8,13 +8,29 @@ The **Drafts** tab is for going through your Gmail drafts one at a time: the one
 
 ## How to use it
 
-1. Press **Drafts** in the tabs over the list. Every Gmail draft shows with who it's to, the subject and its first line, newest first. In All inboxes, each row carries its account.
-2. Open one. The message it answers sits on top (fold it away if you don't need it), then To, Cc, Bcc and Subject, then the draft in a rich-text editor.
+1. Press **Drafts** in the tabs over the list. Every Gmail draft shows with who it's to, the subject and its first line, newest first. In All inboxes, each row carries its account. With none open, the desk says how many are left to review, and **Start with the first one** opens it.
+2. Open one. The message it answers sits on top (fold it away if you don't need it), then To, Cc, Bcc and Subject, then the draft in a rich-text editor. The **context panel** on the right shows what your systems know about the person it's to, the same brief you get beside a thread.
+   - **To, Cc and Bcc** are address fields: start typing a name and pick from the people in your threads and, once one is connected, your address book (Google Contacts, for example). Enter, Tab or a comma adds someone; × removes them.
 3. Edit it. The toolbar has **bold**, *italic*, underline, links and bulleted or numbered lists; Ctrl or ⌘ B, I and U work too. Pasted text comes in plain, so you don't drag in someone else's fonts.
 4. **Revise** it if you like: Shorter, Warmer, More direct, Polish, or say what to change. It keeps every fact, name, date and link. **Undo** puts the old version back. A revision resets formatting.
-5. Go through **Before you send**, or press **Check it for me** and the AI ticks what passes, with a short note on anything that doesn't.
+5. Look at **Before you send**. **Check it for me** has usually already run (see below): what passes is ticked, and anything that doesn't has a short note saying what to fix.
 6. **Save** writes your changes to the Gmail draft. **Send** asks once, naming everyone on it and how many checklist items aren't ticked, then sends the draft and opens the next one.
 7. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list.
+
+## Check it for me
+
+This is the part worth slowing down for. Every draft gets a second read before it goes, and you don't have to remember to ask for it.
+
+- **When it runs:** on its own the first time you open a draft, right after the context panel loads. Press **Check it for me** again after you edit, or any time you like.
+- **What it reads:** the draft, who it's going to (To, Cc and Bcc) and the subject; the message it answers; what your systems know about this person (the context brief: meetings, open commitments, the pipeline); and your writing rules.
+- **What it checks:** the six items below. Each one comes back ticked, or unticked with a note of at most 15 words saying what's wrong: "Doesn't answer her question about the fee", "Says Tuesday; she offered Wednesday", "You promised the deck on the last call; it isn't mentioned".
+- **What it flags:** only problems you'd want to fix before sending. Something it can't confirm from what it has (whether a slot is free, say) stays ticked, with a note if it matters. Wording you plainly chose isn't marked down, and your signature isn't judged. A check that flags everything gets ignored, so it doesn't.
+- **What it does with the result:** ticks and notes, nothing else. It never rewrites the draft, never sends, never saves. The count of things to look at shows in the bar beside Save and Send. If everything passes, the draft is marked checked in the list. If you've already ticked an item yourself, the automatic run leaves your tick alone.
+- **What it sends to the AI:** the draft and its recipients, the message it answers, the context brief and your rules. Nothing else from your mailbox.
+
+![Check it for me: five items ticked and one flagged with a note, with the count in the bar by Save and Send](images/drafts-check.webp)
+
+It's the same idea as the [pre-send check](replying.md#the-pre-send-check) on a reply, laid out as a checklist so you can see exactly what was checked.
 
 ## The checklist
 
@@ -37,7 +53,7 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 - **Attachments:** a draft with attachments opens read-only here, because saving from the page would drop them. Edit and send it in Gmail (**Open in Gmail ↗**).
 - **Emptying Cc or Bcc:** Gmail keeps a field's old value when it's saved empty, so to take everyone off Cc, do it in Gmail.
 - **The quoted earlier messages** in a reply draft stay attached; the editor shows only your part.
-- **Signature:** whatever signature is already in the draft stays as text you can see and edit. Saving from here doesn't add a second one.
+- **Signature:** the signature in the draft stays exactly as it is, tables, images and links included. It shows under the editor, stays out of edits, revisions and the check, and goes back on when you save. Saving from here doesn't add a second one.
 
 ## What it touches
 
@@ -46,7 +62,9 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 | The list | Gmail drafts (`list_drafts`, then `get_draft` for each subject) | nothing | nothing |
 | Opening a draft | the draft (`get_draft`) and the thread it answers (`get_thread`) | nothing | nothing |
 | Revise | | nothing until you Save | the draft and the message it answers |
-| Check it for me | | nothing | the draft, its recipients and subject, the message it answers, your writing rules |
+| Check it for me | | nothing | the draft, its recipients and subject, the message it answers, the context brief, your writing rules |
+| Context panel | your context sources, for the person the draft is to | nothing | what those sources return, to write the brief |
+| To, Cc and Bcc suggestions | the threads you've loaded; your address book's search, when one is connected | nothing | nothing |
 | Save | | the Gmail draft (`update_draft`) | |
 | Send | | sends the draft (`send_message` with the draft) | |
 
