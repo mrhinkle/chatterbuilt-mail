@@ -95,8 +95,11 @@ module.exports = function fake() {
       let ids;
       if (personal) ids = /before:|label:|in:sent/.test(a.query || '') ? [] : ['p1', 'p2', 'p3'];
       else ids = (search(a.query || '').threads || []).map((t) => t.id);
-      if (slug === 'GMAIL_LIST_THREADS') return { threads: ids.map((id) => ({ id, historyId: '1', snippet: String(last(box[id]).plaintextBody || '').slice(0, 120) })), resultSizeEstimate: ids.length };
-      return { messages: ids.map((id) => cmsg(last(box[id]), id, false)), resultSizeEstimate: ids.length };
+      // Pages like Gmail's: max_results per page, an opaque token for the next one (window.__pageMax caps it in tests).
+      const total = ids.length, off = +(a.page_token || 0) || 0, max = Math.min(a.max_results || 500, window.__pageMax || 500);
+      ids = ids.slice(off, off + max); const next = off + ids.length < total ? String(off + ids.length) : undefined;
+      if (slug === 'GMAIL_LIST_THREADS') return { threads: ids.map((id) => ({ id, historyId: '1', snippet: String(last(box[id]).plaintextBody || '').slice(0, 120) })), nextPageToken: next, resultSizeEstimate: total };
+      return { messages: ids.map((id) => cmsg(last(box[id]), id, false)), nextPageToken: next, resultSizeEstimate: total };
     }
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_THREAD_ID') { const t = box[a.thread_id]; return t ? { threadId: t.id, display_url: '', messages: t.messages.map((m) => cmsg(m, t.id, true)) } : { messages: [] }; }
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID' && a.format === 'raw') return { messageId: a.message_id, raw: a.message_id === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') };
@@ -110,6 +113,22 @@ module.exports = function fake() {
   const INVOICE_PDF = 'JVBERi0xLjQKJZOMi54gUmVwb3J0TGFiIEdlbmVyYXRlZCBQREYgZG9jdW1lbnQgKG9wZW5zb3VyY2UpCjEgMCBvYmoKPDwKL0YxIDIgMCBSIC9GMiAzIDAgUgo+PgplbmRvYmoKMiAwIG9iago8PAovQmFzZUZvbnQgL0hlbHZldGljYSAvRW5jb2RpbmcgL1dpbkFuc2lFbmNvZGluZyAvTmFtZSAvRjEgL1N1YnR5cGUgL1R5cGUxIC9UeXBlIC9Gb250Cj4+CmVuZG9iagozIDAgb2JqCjw8Ci9CYXNlRm9udCAvSGVsdmV0aWNhLUJvbGQgL0VuY29kaW5nIC9XaW5BbnNpRW5jb2RpbmcgL05hbWUgL0YyIC9TdWJ0eXBlIC9UeXBlMSAvVHlwZSAvRm9udAo+PgplbmRvYmoKNCAwIG9iago8PAovQ29udGVudHMgOCAwIFIgL01lZGlhQm94IFsgMCAwIDYxMiA3OTIgXSAvUGFyZW50IDcgMCBSIC9SZXNvdXJjZXMgPDwKL0ZvbnQgMSAwIFIgL1Byb2NTZXQgWyAvUERGIC9UZXh0IC9JbWFnZUIgL0ltYWdlQyAvSW1hZ2VJIF0KPj4gL1JvdGF0ZSAwIC9UcmFucyA8PAoKPj4gCiAgL1R5cGUgL1BhZ2UKPj4KZW5kb2JqCjUgMCBvYmoKPDwKL1BhZ2VNb2RlIC9Vc2VOb25lIC9QYWdlcyA3IDAgUiAvVHlwZSAvQ2F0YWxvZwo+PgplbmRvYmoKNiAwIG9iago8PAovQXV0aG9yIChhbm9ueW1vdXMpIC9DcmVhdGlvbkRhdGUgKEQ6MjAyNjExMDIxODQyNDktMDUnMDAnKSAvQ3JlYXRvciAoYW5vbnltb3VzKSAvS2V5d29yZHMgKCkgL01vZERhdGUgKEQ6MjAyNjExMDIxODQyNDktMDUnMDAnKSAvUHJvZHVjZXIgKFJlcG9ydExhYiBQREYgTGlicmFyeSAtIFwob3BlbnNvdXJjZVwpKSAKICAvU3ViamVjdCAodW5zcGVjaWZpZWQpIC9UaXRsZSAoQ2xvdWR3YXkgaW52b2ljZSBDVy0yMDI2LTExNDIpIC9UcmFwcGVkIC9GYWxzZQo+PgplbmRvYmoKNyAwIG9iago8PAovQ291bnQgMSAvS2lkcyBbIDQgMCBSIF0gL1R5cGUgL1BhZ2VzCj4+CmVuZG9iago4IDAgb2JqCjw8Ci9GaWx0ZXIgWyAvQVNDSUk4NURlY29kZSAvRmxhdGVEZWNvZGUgXSAvTGVuZ3RoIDY2OQo+PgpzdHJlYW0KR2F0JHViQVEmZyZBNzxaaylfcUMsVjZLUkxxOiE7aCZuc1woVEdiZkVoUCkpOzUmYWdlI0U2PUtkOS9jU1tvPTsrRVo4LFJAU2EzRSxeWCQ/J2A4T2BMQEE+SnJpL10uJk4qX0AkWDhVLipXRDUtRVNTbl8lSUM3LFxVNFUiY2VyYE4kJ0FjTlE4cV4sZ18iYi5kQCE/VWZwJGhiakdLWmwoMW0/LyZZPS8vVEVnJ2w+PzdOckFbMUAlSSpbUFlZdWYuNz9aJjYhJHNLOSchXkY6YVMhUyxvQllXTGUkIytWYV1vMUhrWj5QQzskZ2lnNzgsbEMtXlNKVS1QTCIoJS8lSXJPUSQ8bmE9KlxOaD9lKFkwZWpNQFw0RmlCZWl1YVYkSD5uNDJUXmxvQiplMjEoIydvXGRpbU4uOlZMaFlFSnIqMWxZQyIsa1tJaVZHQWlzJ1RsPm8hby9nJFYkXC03cj03dDtAbEpNS2BaSDpdQVlIJm8nX0QlaEpPUlRFU1tvRjpCQlNBQHFKNkFqIzsuLWdrb140My8zaTYjUUtcIVUvLytFP1ZoOWdPKjk2ZE5zK2c0b184QS1PWS9tTywtZStrYWErT2s3dExESmQ+KkBvJmA7SipeLStqTHRnN2lnNFk9ZT4iSWowL2k0aiZXbWppNCwzcWFXZV4iVGNzKHMqQUksPyY6WlRrcGtwPGZIPFVtX25VPC4+M2ssNixRWTQ+RzxRbXVQaV9TYzdga0RJRjgmcEJqQiFROUxIb1ZbL2BFWGVmUG8pJTliSV9uYl5ZR3VTPSYzdFFvUVs7UktMXypmVUM0bXNNZXVjJ2dxKC1gazAnNFBxJ3MwWykrSHQoZixnRS9mYWFdK2ZMUkViVERKKCZJZn4+ZW5kc3RyZWFtCmVuZG9iagp4cmVmCjAgOQowMDAwMDAwMDAwIDY1NTM1IGYgCjAwMDAwMDAwNjEgMDAwMDAgbiAKMDAwMDAwMDEwMiAwMDAwMCBuIAowMDAwMDAwMjA5IDAwMDAwIG4gCjAwMDAwMDAzMjEgMDAwMDAgbiAKMDAwMDAwMDUxNCAwMDAwMCBuIAowMDAwMDAwNTgyIDAwMDAwIG4gCjAwMDAwMDA4NjQgMDAwMDAgbiAKMDAwMDAwMDkyMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9JRCAKWzxmM2YyNmFkNzZhNGQwOGVhMjQzYjlmNTE3ZTJjODhkYj48ZjNmMjZhZDc2YTRkMDhlYTI0M2I5ZjUxN2UyYzg4ZGI+XQolIFJlcG9ydExhYiBnZW5lcmF0ZWQgUERGIGRvY3VtZW50IC0tIGRpZ2VzdCAob3BlbnNvdXJjZSkKCi9JbmZvIDYgMCBSCi9Sb290IDUgMCBSCi9TaXplIDkKPj4Kc3RhcnR4cmVmCjE2ODIKJSVFT0YK';
   const cwRaw = b64('From: Cloudway Billing <billing@notify.cloudway.example>\r\nTo: Alex Rivera <alex@riveralabs.example>\r\nSubject: Payment received for invoice CW-2026-1142\r\nMIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="cwb"\r\n\r\n--cwb\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\nThanks for your payment.\r\n--cwb\r\nContent-Type: application/pdf; name="CW-2026-1142.pdf"\r\nContent-Disposition: attachment; filename="CW-2026-1142.pdf"\r\nContent-Transfer-Encoding: base64\r\n\r\n' + INVOICE_PDF.replace(/(.{76})/g, '$1\r\n') + '\r\n--cwb--\r\n');
   const unsubRaw = b64('List-Unsubscribe: <https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>\r\nSubject: This week in AI\r\n\r\nbody');
+  // Composio shortens big replies: past window.__offloadAt characters (about 8K tokens) only a preview comes back and
+  // the full response goes to a file in its sandbox, for COMPOSIO_REMOTE_BASH_TOOL to read. A test harness can back
+  // that sandbox with a real folder and real bash and jq (window.__sbWrite and window.__bash); without one, bash fails.
+  let offN = 0;
+  const offload = async (res) => {
+    if (!res || !res.data || !Array.isArray(res.data.results) || JSON.stringify(res).length <= (window.__offloadAt || 32000)) return res;
+    const file = '/mnt/files/mex/f' + (++offN) + '.json';
+    if (window.__sbWrite) await window.__sbWrite(file, JSON.stringify({ results: res.data.results.map((r, i) => ({ response: r.response, tool_slug: r.tool_slug, index: i })) }));
+    return { successful: true, data: { results: res.data.results.map((r, i) => ({ response: { successful: true, data_preview: { note: '...more items' } }, tool_slug: r.tool_slug, index: i, structure_info: {} })), total_count: 1, remote_file_info: { message: 'Complete response was large. Full data saved to sandbox in ' + file + '.', file_path: file } }, error: null };
+  };
+  const bashTool = async (command) => {
+    if (!window.__bash) return { successful: false, data: { stdout: '', stderr: 'no sandbox in this demo' }, error: 'no sandbox' };
+    const r = await window.__bash(command);
+    if (r.stdout.length > 45000) return { successful: true, data: { stdout: r.stdout.slice(0, 2000) + '\n... (output truncated, full output saved to: /mnt/files/.composio/output/bash_x_stdout.txt)', stdout_file_path: '/mnt/files/.composio/output/bash_x_stdout.txt', stderr: r.stderr }, error: null };
+    return { successful: true, data: { stdout: r.stdout, stdoutLines: r.stdout.split('\n').length, stderr: r.stderr, sandbox_id_suffix: 'demo' }, error: null };
+  };
   window.__calls = [];
   const mcp = {
     async listTools() { return { servers: ['Gmail', 'Composio', 'Google Calendar'].map((s) => ({ server: s, authStatus: 'ok' })) }; },
@@ -134,8 +153,9 @@ module.exports = function fake() {
         { status: 'confirmed', start: { dateTime: iso(now + D) }, end: { dateTime: iso(now + D + H) } }
       ] });
       if (server === 'Composio') {
+        if (tool === 'COMPOSIO_REMOTE_BASH_TOOL') return P(await bashTool(String((input || {}).command || '')));
         const it = (input.tools || [])[0] || {}; const slug = it.tool_slug;
-        if (/^GMAIL_/.test(slug)) return P(env(gmailBridge(slug, it.arguments || {}, it.account)));
+        if (/^GMAIL_/.test(slug)) return P(await offload(env(gmailBridge(slug, it.arguments || {}, it.account))));
         if (slug === 'FIRECRAWL_SEARCH') return P(env({ data: { web: web(it.arguments.q) } }));
         const c = ctx(slug, it.arguments); if (c !== undefined) return P(env(c));
         if (slug === 'ASANA_CREATE_A_TASK') return P(env({ data: { gid: '1200000000000001', permalink_url: 'https://app.asana.com/0/0/1200000000000001' } }));

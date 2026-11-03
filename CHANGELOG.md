@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.6.1 (2026-11-02)
+
+### Fixed
+- **Gmail through Composio showed an empty inbox.** Composio sends back only a preview when a reply runs past about 8K tokens and saves the full reply in its sandbox. The page asked for 50 messages a page (about 9K tokens), so every inbox came back as a preview, which the page read as no mail. Lists now come 25 messages at a time, and any reply Composio still saves to its sandbox (long threads, big drafts, attachments) is read from that file with `COMPOSIO_REMOTE_BASH_TOOL`: one fixed `jq` command that keeps the fields the page uses, read back in pieces. The setup skill declares that tool alongside `COMPOSIO_MULTI_EXECUTE_TOOL`.
+- **Lists could stay stale after a change on the Gmail connector.** Clearing the cache after an archive, move or refresh failed silently, so the list could show the old threads until the cache timed out.
+- **Rules with a folder matched it by label id first.** Label ids are per account, so in another account the same id can be a different folder. Rules match by folder name first now.
+- Mail between your own accounts counts as yours (for Waiting, contacts and replies), and thread messages through Composio are shown oldest first.
+
+### New
+- **All inboxes.** With two or more Gmail accounts through Composio, the page opens on one list that merges them, newest first, and the account menu gains **All inboxes** (also **Show All inboxes** in the command palette). Each row names its account. Chips over the list turn an account off and on. Replies, drafts, moves, archives and snoozes go through the account the thread belongs to, with its signature; folders show by name across accounts, and moving into a folder an account doesn't have creates it there. A message in two of your mailboxes shows once. `start: "first"` opens on the first account instead.
+- **Account colors.** `color` on each account (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`) tints its rows in All inboxes. **Settings → Accounts** changes them in the page, and Copy for Claude carries them into your copy through chatterbuilt-mail-improve.
+
 ## 0.6.0 (2026-11-02)
 
 ### New

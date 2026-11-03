@@ -44,7 +44,7 @@ Guide: [reading-and-triage.md](reading-and-triage.md).
 
 **Links and attachments.** Links in a message open in a new browser tab. Click an attachment to open it in the page: PDFs page by page, images, and text files. Anything else gets **Save** (it asks first) and **Open in Gmail**.
 
-**Several Gmail accounts.** With Gmail through Composio, the address under the app name is a menu: switch between work, side projects and personal mail in one copy. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy).
+**All your inboxes in one list.** With Gmail through Composio and two or more accounts, the page opens on **All inboxes**: every account merged, newest first, each row tinted with its account's color (pick them in **Settings → Accounts**). Chips over the list turn an account off and on, and the menu under the app name switches to one account at a time. Replies, moves and drafts go through the account the thread belongs to. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy).
 
 **Summarize.** Two or three sentences on where the thread stands, then any asks of you as a list.
 
@@ -294,7 +294,7 @@ Sources:
 | Drafting, 3 options, Pre-draft, pre-send check | Gmail; your sent mail to that person (tone); Calendar free/busy (times); the context card | nothing until Save or Send |
 | Send / Save draft / Nudge / attachments | | Gmail send or draft; removes a loaded Gmail draft after sending |
 | Opening an attachment | the message source from Gmail | nothing; Save asks before it downloads |
-| Switching accounts (Gmail through Composio) | the other account's Gmail | nothing |
+| Switching accounts, or All inboxes (Gmail through Composio) | each account's Gmail | nothing |
 | Route | Gmail; the context card | whatever you tick: your task app, contacts, Gmail labels, or a `CONFIG.actions` tool |
 | Snooze, remind-me | Gmail labels | Gmail labels under `CB/` (undoable) |
 | Morning run | Gmail; every system in `CONFIG.context`, read-only | Gmail drafts and `CB/` labels only |

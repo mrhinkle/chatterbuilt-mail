@@ -45,7 +45,7 @@ Chatterbuilt Mail is built on Gmail because that's where my mail lives. The page
 | `create_draft`, `list_drafts`, `delete_draft` | Save draft, drafts waiting, replacing a draft on send (plus `get_draft` through Composio) |
 | `label_thread`, `unlabel_thread`, `list_labels`, `create_label` | Archive, move, star, read, snooze and remind-me labels |
 
-`gmailComposio()` in the template is a working example of this kind of adapter: it maps every tool above onto Composio's Gmail tools (`GMAIL_FETCH_EMAILS`, `GMAIL_FETCH_MESSAGE_BY_THREAD_ID`, `GMAIL_MODIFY_THREAD_LABELS`, `GMAIL_REPLY_TO_THREAD` and the rest) and reshapes the replies so the rest of the page doesn't change. Start from it.
+`gmailComposio()` in the template is a working example of this kind of adapter: it maps every tool above onto Composio's Gmail tools (`GMAIL_FETCH_EMAILS`, `GMAIL_FETCH_MESSAGE_BY_THREAD_ID`, `GMAIL_MODIFY_THREAD_LABELS`, `GMAIL_REPLY_TO_THREAD` and the rest) and reshapes the replies so the rest of the page doesn't change. Start from it. Two parts carry over to any platform with more than one mailbox: `gxAllSearch()` merges several accounts into one list without skipping mail, and `gxAcctFor()` sends each call to the account that owns the thread. One part is Composio's own: `gxBig()` reads a reply Composio saved to its sandbox instead of sending it back.
 
 To add a platform, such as Outlook through a Microsoft 365 connector, Fastmail, or IMAP through a custom MCP server:
 

@@ -27,7 +27,7 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 
 **Gmail.** Use claude.ai's Gmail connector by default. Use Gmail through Composio when the user wants more than one Gmail account in one copy, or prefers Composio:
 - list their Composio Gmail connections with Composio's tool search (its connection status lists each account's `id`, email and alias); ask which to include and a short label for each;
-- set `CONFIG.gmail = { via: "composio", accounts: [{ id, email, label }, ...] }`, with the account they use most first;
+- set `CONFIG.gmail = { via: "composio", accounts: [{ id, email, label, color }, ...] }`, with the account they use most first. With two or more accounts the page opens on All inboxes, which merges them; ask whether they'd like a color per account so they can tell them apart there (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`; leave it out for none), and whether to open on All inboxes or the first account (`start: "first"`);
 - one read-only check per account (a `GMAIL_FETCH_EMAILS` search with `max_results: 1`) confirms each connection works;
 - tell them attaching files to replies isn't available through Composio yet, and that `COMPOSIO_MULTI_EXECUTE_TOOL` can send from every Gmail account connected there.
 
@@ -114,7 +114,7 @@ Declare capabilities from CONFIG, and only what's used:
 | When | Server | Tools |
 |---|---|---|
 | `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `delete_draft` |
-| `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL` |
+| `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline) |
 | `tasks` is set | its `server` | its `tool` |
 | `contacts` uses the Notion short form | `Notion` | `notion-create-pages`, `notion-search` |
 | `contacts` is a custom adapter | its `server` (and `dupCheck.server`) | its `tool` (and `dupCheck.tool`) |

@@ -12,6 +12,7 @@ Everything that controls the app itself sits in one **Settings** menu in the top
 |---|---|
 | **Voice** | How drafts sound, and what the app has learned from your edits. See [voice.md](voice.md). |
 | **Skills** | Every feature with a description, how to use it, and an on/off switch. |
+| **Accounts** | Gmail through Composio only. A color for each account (it tints that account's rows in All inboxes) and which accounts All inboxes shows. Saved in this browser; Copy for Claude carries it into your copy. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy). |
 | **Read-only** | A switch that blocks every change. See below. |
 | **Model** | Which model drafts and sorts. Shows only when your copy lists extra models. |
 | **Keyboard shortcuts** `?` | Opens Skills at the keyboard list. |
@@ -83,7 +84,7 @@ Shortcuts don't fire while you're typing in a box. Turn them off in Skills (**Ke
 
 ## What it touches
 
-- **Settings, Skills, Model and the palette** change nothing outside this browser. Switches and the model choice are saved in browser storage.
+- **Settings, Skills, Accounts, Model and the palette** change nothing outside this browser. Switches and the model choice are saved in browser storage.
 - **Read-only** blocks every write the page can make: Gmail sends, replies, drafts, labels, moves and forwards; tasks; contacts; and Route actions.
 - To make settings permanent across browsers, use the setup skill or **Voice → Copy for Claude** with the improve skill.
 

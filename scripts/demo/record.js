@@ -63,7 +63,7 @@ const voDur = VO ? Array.from({ length: 10 }, (_, k) => +execFileSync('ffprobe',
   await beat(9); await pg.click('#reading .attbtn'); await hold(2800);
   await finishBeat(); await caption(''); await shot('attachment');
   await pg.keyboard.press('Escape'); await hold(300);
-  await beat(10); await caption('Switch between your Gmail accounts'); await pg.selectOption('#acctSel', '1'); await hold(2600); await clearToasts();
+  await beat(10); await caption('All your Gmail accounts in one list, color-coded'); await pg.selectOption('#acctSel', '-1'); await hold(2600); await clearToasts();
   await finishBeat();
   if (VO) { await caption("Narrated with Mark's ElevenLabs voice clone"); await hold(2600); }
   await caption(''); await hold(600);

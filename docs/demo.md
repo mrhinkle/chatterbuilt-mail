@@ -2,7 +2,7 @@
 
 Every image and the video here use made-up people and companies: Alex Rivera at Rivera Labs, Dana Ruiz at Acme Robotics, Jordan Blake at the makerspace. No real inbox, connector or account was touched to make them. The demo copy reaches everything except Gmail through [Composio](composio.md).
 
-**Video:** [demo.mp4](media/demo.mp4), about 45 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, the pre-send check catching a forgotten promise, resizing a pane, a PDF attachment opening in the page, and switching Gmail accounts.
+**Video:** [demo.mp4](media/demo.mp4), about 45 seconds. It shows Today, Triage, the context panel, More context, Next steps and Route, a draft, the pre-send check catching a forgotten promise, resizing a pane, a PDF attachment opening in the page, and All inboxes: two Gmail accounts in one list, color-coded.
 
 Each section links to its guide.
 
@@ -26,7 +26,7 @@ Each section links to its guide.
 | ![List hidden](images/list-hidden.webp) | ![Resized](images/resize.webp) |
 | The thread list hidden (`[`): the thread gets the full width | Drag the grip between panes to resize them |
 | ![Attachment](images/attachment.webp) | ![Accounts](images/accounts.webp) |
-| A PDF attachment open in the page | A second Gmail account, through Composio |
+| A PDF attachment open in the page | All inboxes: two Gmail accounts through Composio, color-coded |
 
 ## Context · [context-panel.md](context-panel.md) · [more-context.md](more-context.md)
 

@@ -35,7 +35,7 @@ const scenes = [
   ['resize', DESK, async (pg) => { await open(pg, 't1'); const b = await pg.$eval('#sideSplit', (h) => { const r = h.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; }); await pg.mouse.move(b.x, b.y); await pg.mouse.down(); await pg.mouse.move(b.x - 60, b.y, { steps: 6 }); await pg.mouse.move(b.x - 120, b.y, { steps: 6 }); await pg.mouse.up(); await pg.$eval('#sideSplit', (h) => h.classList.add('drag')); await pg.waitForTimeout(200); }],
   ['receipt-context', DESK, async (pg) => { await open(pg, 't8'); }],
   ['attachment', DESK, async (pg) => { await open(pg, 't8'); await pg.click('#reading .attbtn'); await pg.waitForTimeout(2500); }],
-  ['accounts', DESK, async (pg) => { await pg.selectOption('#acctSel', '1'); await pg.waitForTimeout(2200); await open(pg, 'p1'); }, { accounts: true }],
+  ['accounts', DESK, async (pg) => { await pg.selectOption('#acctSel', '-1'); await pg.waitForTimeout(2200); await open(pg, 'p1'); }, { accounts: true }],
   ['more-context', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="more"]'); await pg.waitForTimeout(3200); }],
   ['next-steps', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#sideBody [data-ctx="steps"]'); await pg.waitForTimeout(2800); }],
   ['route', DESK, async (pg) => { await open(pg, 't1'); await pg.click('#routeBtn'); await pg.waitForTimeout(2800); }],

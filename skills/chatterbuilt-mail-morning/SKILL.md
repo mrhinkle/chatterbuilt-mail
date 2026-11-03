@@ -43,11 +43,13 @@ If `CONFIG.gmail.via` is `"composio"`, run the steps below once per account in `
 | Step uses | Composio tool |
 |---|---|
 | `list_labels` | `GMAIL_LIST_LABELS` |
-| `search_threads` | `GMAIL_FETCH_EMAILS` (`verbose: false`, `include_payload: false`), grouped by `threadId` |
+| `search_threads` | `GMAIL_FETCH_EMAILS` (`verbose: false`, `include_payload: false`, `max_results` 25 or less), grouped by `threadId` |
 | `get_thread` | `GMAIL_FETCH_MESSAGE_BY_THREAD_ID` (the plain text is `messageText`) |
 | `label_thread` / `unlabel_thread` | `GMAIL_MODIFY_THREAD_LABELS` (`add_label_ids` / `remove_label_ids`) |
 | `list_drafts` | `GMAIL_LIST_DRAFTS` (each draft's `message.threadId`) |
 | `create_draft` | `GMAIL_CREATE_EMAIL_DRAFT` with `thread_id`, `recipient_email` and `include_signature: true` |
+
+Composio sends back only a preview when a reply runs past about 8K tokens (long threads often do), with the full reply saved to the file named in `remote_file_info.file_path`. Read what you need from that file with `COMPOSIO_REMOTE_BASH_TOOL` and `jq` (for a thread: each message's `messageId`, `sender`, `to`, `subject`, `messageTimestamp`, `labelIds` and the first few thousand characters of `messageText`). Never treat a preview as the whole answer.
 
 The hard limits are the same: never call `GMAIL_SEND_EMAIL`, `GMAIL_REPLY_TO_THREAD`, `GMAIL_FORWARD_MESSAGE`, `GMAIL_SEND_DRAFT`, `GMAIL_DELETE_DRAFT` or any trash, spam or delete tool. In the summary, group results by account.
 

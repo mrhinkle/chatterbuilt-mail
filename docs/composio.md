@@ -12,7 +12,7 @@ Almost every screenshot in these docs comes from a demo copy set up this way: Gm
 
 | Part | Connector | Why |
 |---|---|---|
-| Your mailbox | **Gmail**, the native claude.ai connector, or **Gmail through Composio** | Composio can hold several Gmail accounts, and the page switches between them. See below. |
+| Your mailbox | **Gmail**, the native claude.ai connector, or **Gmail through Composio** | Composio can hold several Gmail accounts. The page shows them in one list (All inboxes) or one at a time. See below. |
 | Drafting, triage, checks | **Claude** (built in) | No connector needed. |
 | Everything else | **Composio**, or native connectors, or a mix | Context sources, tasks, contacts, Route actions, More context. |
 
@@ -24,22 +24,25 @@ Connect each Gmail account in Composio (work, a second business, personal), then
 gmail: {
   via: "composio",
   accounts: [
-    { id: "gmail_xxxx", email: "you@work.example", label: "Work" },
-    { id: "gmail_yyyy", email: "you@side.example", label: "Side project" },
+    { id: "gmail_xxxx", email: "you@work.example", label: "Work", color: "blue" },
+    { id: "gmail_yyyy", email: "you@side.example", label: "Side project", color: "red" },
     { id: "gmail_zzzz", email: "you@personal.example", label: "Personal" }
   ]
 }
 ```
 
-![A second Gmail account open: the account menu under the app name shows Personal](images/accounts.webp)
+![All inboxes: two accounts in one list, each tinted with its color, with account chips over the list](images/accounts.webp)
 
-`id` is Composio's connected-account id. The setup skill finds them for you, or look in Composio under Connected accounts. The first account opens by default.
+`id` is Composio's connected-account id. The setup skill finds them for you, or look in Composio under Connected accounts.
 
-- **Switching.** The address under the app name becomes a menu. Pick an account and the list, labels, drafts and Today reload for it. The command palette has **Switch to …** for each one. The app remembers the last account you used.
+- **All inboxes.** With two or more accounts, the page opens on one list that merges them, newest first. Each row carries its account's name, and its color if you gave it one (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray`, or a `#hex`). Chips over the list turn an account off and on, so you can look at two of three. Everything you do on a thread (reply, draft, move, archive, snooze) goes through the account it belongs to, with that account's signature. Folders show by name across accounts; moving a thread into a folder its account doesn't have yet creates it there. A message that landed in two of your mailboxes shows once, under the account it was sent to.
+- **One account at a time.** The menu under the app name lists All inboxes and each account. Pick one and the list, labels, drafts and Today reload for it. The command palette has **Show All inboxes** and **Switch to …** too. The app remembers your choice; add `start: "first"` to `gmail` to open on the first account instead of All inboxes.
+- **Colors.** **Settings → Accounts** picks a color for each account and which accounts All inboxes shows. That's saved in your browser; **Copy for Claude** (under Settings → Voice) carries it into your copy when you run chatterbuilt-mail-improve.
 - **Same features.** Reading, Triage, Ask, replies, drafts, Move, Archive, Snooze, Remind me, unsubscribe, Waiting, Pre-draft, opening attachments and your Gmail signature all work through Composio. Each account uses its own labels, drafts and signature.
 - **What's missing.** Attaching files to a reply doesn't go through Composio yet, so **Attach** is hidden. Attach from Gmail for now.
-- **Speed.** Each call takes one extra hop through Composio. The list uses one metadata-only search per page, so it stays quick. Waiting checks each sent thread in full, so it takes a little longer than with the native connector.
-- **Permissions.** The page holds `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, including sending from every Gmail account there. The page only calls the Gmail tools listed in [CONTRIBUTING.md](../CONTRIBUTING.md#add-another-email-platform), read-only mode blocks every change, and writes are never retried.
+- **Speed.** Each call takes one extra hop through Composio. The list uses one metadata-only search per page per account, 25 messages at a time, so it stays quick; All inboxes asks every account at once. Waiting checks each sent thread in full, so it takes a little longer than with the native connector.
+- **Large replies.** Composio sends back only a preview when a reply runs past about 8K tokens, and saves the full reply to a file in its sandbox. Long threads, big drafts and attachments do that. The page then reads the file with `COMPOSIO_REMOTE_BASH_TOOL`: one fixed `jq` command keeps the fields it needs (long bodies trimmed) and writes them next to Composio's file, and it reads that back in 30,000-character pieces. It never runs anything else there.
+- **Permissions.** The page holds `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, including sending from every Gmail account there, and `COMPOSIO_REMOTE_BASH_TOOL`, which runs commands in your Composio sandbox. The page only calls the Gmail tools listed in [CONTRIBUTING.md](../CONTRIBUTING.md#add-another-email-platform) and the read commands above, read-only mode blocks every change, and writes are never retried.
 
 ## Native connectors or Composio?
 
@@ -117,6 +120,7 @@ The first time the page calls Composio, claude.ai asks you to allow it.
 
 Composio wraps each action's result: `{ successful, data: { results: [{ response: { successful, data, error } }] } }`. The page:
 - hands the inner `data` to the rest of the app, so an empty search shows as a grey "nothing found" chip and isn't sent to the model;
+- for Gmail, reads a reply Composio saved to its sandbox instead of sending back (see Large replies above), so a long thread never looks empty;
 - turns a failed inner call into an error you see ("Composio reported an error: No active connection for toolkit=asana"), so a task is never reported as filed when it wasn't.
 
 ## Troubleshooting
@@ -125,4 +129,6 @@ Composio wraps each action's result: `{ successful, data: { results: [{ response
 |---|---|
 | "No active connection for toolkit=…" | Connect that app inside Composio, then try again. |
 | "This page isn't allowed to use COMPOSIO_MULTI_EXECUTE_TOOL" | Allow it in the artifact's Permissions menu, or ask Claude to republish with it declared. |
+| Gmail through Composio shows an empty inbox, or a thread with no text | Update to 0.6.1 or later. Earlier versions asked for 50 messages a page, which Composio cut to a preview the page read as empty. Then make sure the page declares `COMPOSIO_REMOTE_BASH_TOOL` (ask Claude to republish with chatterbuilt-mail-setup). |
+| "couldn't read the large reply Composio saved" | The page couldn't reach Composio's sandbox. Try again; if it keeps happening, open that thread in Gmail. |
 | A Composio source is always grey | It's returning nothing. Check the action and its arguments with Claude; Notion search, for example, matches titles, not page text. |

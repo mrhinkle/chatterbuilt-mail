@@ -241,6 +241,25 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .pill.skip { opacity: 0.75; }
 .pill.wait { background: var(--violet-soft); color: var(--violet); }
 .pill.drafted { background: var(--ok-soft); color: var(--ok); }
+/* All inboxes: each account's rows carry its color (Settings → Accounts) */
+.thread.acc { box-shadow: inset 3px 0 0 var(--acc); }
+.thread.acc:not(.sel) { background-color: color-mix(in srgb, var(--acc) 12%, transparent); }
+.thread.acc:not(.sel):hover { background-color: color-mix(in srgb, var(--acc) 20%, transparent); }
+.thread.acc.sel { box-shadow: inset 4px 0 0 var(--acc), 0 6px 16px rgba(37, 99, 235, 0.24); }
+.pill.acct { background: color-mix(in srgb, var(--acc, #94a3b8) 26%, transparent); color: var(--fg); text-transform: none; letter-spacing: 0; }
+.acctchips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: -2px; }
+.achip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: transparent; border-radius: 999px; padding: 3px 10px 3px 8px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.achip::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--acc, var(--faint)); }
+.achip[aria-pressed="true"] { color: var(--fg); background: color-mix(in srgb, var(--acc, #94a3b8) 16%, transparent); border-color: color-mix(in srgb, var(--acc, #94a3b8) 50%, transparent); }
+.achip[aria-pressed="false"] { opacity: 0.6; }
+.achip[aria-pressed="false"]::before { background: transparent; box-shadow: inset 0 0 0 1.5px var(--acc, var(--faint)); }
+.acctrow { display: grid; gap: 8px; padding: 12px 0; border-top: 1px solid var(--line); }
+.acctrow .an { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; min-width: 0; }
+.swatches { display: flex; gap: 8px; flex-wrap: wrap; }
+.swatch { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; background: var(--acc, transparent); box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.18); cursor: pointer; }
+.swatch.none { background: repeating-linear-gradient(45deg, transparent 0 4px, rgba(15, 23, 42, 0.14) 4px 6px); }
+.swatch.on { border-color: var(--fg); }
+.ainc { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
 .list-foot { padding: 9px 12px; display: flex; gap: 8px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
 .progress { font-size: 12.5px; color: var(--muted); }
 
@@ -502,6 +521,7 @@ body.ro [data-mut] { opacity: 0.4; }
           <button class="chip" data-q="is:starred" data-key="starred" type="button">Starred</button>
           <button class="chip" data-q="in:inbox has:attachment" data-key="files" type="button">Files</button>
         </div>
+        <div class="acctchips" id="acctChips" role="group" aria-label="Accounts in All inboxes" hidden></div>
         <form class="search" id="searchForm">
           <div class="searchbox">
             <button class="go" type="submit" aria-label="Search" title="Search (Enter)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6"/><path d="m15 15 4.5 4.5"/></svg></button>
@@ -640,6 +660,7 @@ body.ro [data-mut] { opacity: 0.4; }
 <div class="menu glass-strong narrow" id="setMenu" role="menu" aria-label="Settings" hidden>
   <button class="mi" role="menuitem" id="voiceBtn" type="button" data-feat="voice"><span class="mt">Voice</span><span class="md">How drafts sound, and what it has learned</span></button>
   <button class="mi" role="menuitem" id="skillsBtn" type="button"><span class="mt">Skills</span><span class="md">Every feature, with on/off switches and help</span></button>
+  <button class="mi" role="menuitem" id="acctBtn" type="button" hidden><span class="mt">Accounts</span><span class="md">A color for each account, and which ones All inboxes shows</span></button>
   <div class="msep"></div>
   <button class="mi" role="menuitemcheckbox" id="roToggle" type="button" aria-checked="false" title="Block every send, move, label change, draft, task and contact">Read-only</button>
   <label class="mrowsel model">Model<select id="modelSel" aria-label="Model"></select></label>
@@ -698,8 +719,10 @@ body.ro [data-mut] { opacity: 0.4; }
     ownerName: "",            // your name, e.g. "Alex Rivera"
     ownEmail: "",             // your Gmail address (used to skip yourself when unsubscribing/copying)
     gmail: null,              // null: claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts:
-                              //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.example", label: "Work" }, ...] }
-                              //   id is the Composio connected-account id; the first account opens by default.
+                              //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.example", label: "Work", color: "blue" }, ...] }
+                              //   id is the Composio connected-account id. With two or more, All inboxes merges them and opens
+                              //   by default; color (blue, red, green, amber, purple, teal, pink, gray or #hex) tints that
+                              //   account's rows there. Settings → Accounts changes colors in the page.
     about: "",                // one or two sentences on who you are and what you do
     voice: "",                // how you write, e.g. "Warm, brief, a little dry. Short paragraphs."
     rules: "",                // hard rules, e.g. "Never use the word 'synergy'. US spelling."
@@ -731,14 +754,32 @@ body.ro [data-mut] { opacity: 0.4; }
   const GMAIL = "Gmail", ROUTER = "OpenRouter", NOTION = "Notion", CAL = "Google Calendar", CLAY = "Clay";
   const aiLabel = () => (state.model === "claude" ? "Claude" : "OpenRouter");
   const OWNER = CONFIG.ownerName || "the user";
-  // Gmail through Composio, with one or more accounts (see CONFIG.gmail). acctIdx is the account on screen.
+  // Gmail through Composio, with one or more accounts (see CONFIG.gmail). acctIdx is the account on screen; -1 is
+  // All inboxes, which merges the accounts you've left on, newest first, and sends each action to the thread's own account.
   const GX = CONFIG.gmail && CONFIG.gmail.via === "composio" && Array.isArray(CONFIG.gmail.accounts) && CONFIG.gmail.accounts.some((a) => a && a.id) ? Object.assign({}, CONFIG.gmail, { accounts: CONFIG.gmail.accounts.filter((a) => a && a.id) }) : null;
   const GX_SERVER = GX ? (GX.server || "Composio") : "";
+  const MULTI = !!GX && GX.accounts.length > 1;
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
+  const lsJson = (k, d) => { try { const v = JSON.parse(lsGet(k) || "null"); return v == null ? d : v; } catch { return d; } };
   let acctIdx = 0;
-  if (GX) { try { const want = localStorage.getItem("cm.acct"); const i = GX.accounts.findIndex((a) => a.id === want); if (i > 0) acctIdx = i; } catch {} }
-  const curAcct = () => (GX ? GX.accounts[acctIdx] || GX.accounts[0] : null);
+  if (GX) { const want = lsGet("cm.acct"); const i = GX.accounts.findIndex((a) => a.id === want); if (i > 0) acctIdx = i; else if (MULTI && (want === "all" || (want === null && GX.start !== "first"))) acctIdx = -1; }
+  const ACC_COLORS = { blue: "#4f9cf9", red: "#f06a6a", green: "#3fbf7f", amber: "#f2a93b", purple: "#a07cf6", teal: "#2fbdb8", pink: "#ef6fae", gray: "#94a3b8" };
+  let acctColorPref = lsJson("cm.acctColors", {}); if (!acctColorPref || typeof acctColorPref !== "object") acctColorPref = {};
+  const acctColorName = (a) => { if (!a) return ""; const v = acctColorPref[a.id] !== undefined ? acctColorPref[a.id] : a.color; return String(v || "").trim().toLowerCase(); };
+  const acctColor = (a) => { const v = acctColorName(a); return ACC_COLORS[v] || (/^#[0-9a-f]{3}([0-9a-f]{3})?$/.test(v) ? v : ""); };
+  let allOff = lsJson("cm.allOff", []); if (!Array.isArray(allOff)) allOff = [];
+  const allAccts = () => { if (!GX) return []; const on = GX.accounts.filter((a) => !allOff.includes(a.id)); return on.length ? on : GX.accounts.slice(); };
+  const isAll = () => !!GX && acctIdx < 0;
+  const gxOwner = {}; // "t:" / "m:" / "d:" + id -> account id, so All inboxes knows whose thread, message or draft it is
+  const acctById = (id) => (GX && id ? GX.accounts.find((a) => a.id === id) || null : null);
+  const ownerOf = (kind, id) => (id ? acctById(gxOwner[kind + ":" + id]) : null);
+  const homeAcct = () => (!GX ? null : acctIdx >= 0 ? GX.accounts[acctIdx] || GX.accounts[0] : allAccts()[0]);
+  // The account in play: the one on screen, or in All inboxes the open thread's account.
+  const curAcct = () => (isAll() && state.selectedId && ownerOf("t", state.selectedId)) || homeAcct();
   const curEmail = () => ((curAcct() && curAcct().email) || CONFIG.ownEmail || "");
-  let OWN = curEmail().toLowerCase();
+  let OWN = ((homeAcct() && homeAcct().email) || CONFIG.ownEmail || "").toLowerCase();
+  // Every address that's you, across accounts, so mail between your own accounts never counts as someone else's.
+  const OWN_ALL = new Set([CONFIG.ownEmail].concat(GX ? GX.accounts.map((a) => a.email) : []).filter(Boolean).map((e) => String(e).toLowerCase()));
   if (!taskAdapter()) document.body.classList.add("no-tasks");
   if (!CONFIG.models.length) document.body.classList.add("no-model-pick");
   const $ = (id) => document.getElementById(id);
@@ -839,8 +880,9 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- who's who ----------
-  const isOwn = (m) => !!m && (((m.labelIds || []).includes("SENT")) || (!!OWN && emailOf(m.sender).toLowerCase() === OWN));
-  function counterpart(m) { return [].concat((m && m.toRecipients) || []).map((a) => emailOf(a)).filter((a) => a && a.toLowerCase() !== OWN); }
+  const isMe = (addr) => { const e = emailOf(addr).toLowerCase(); return !!e && (e === OWN || OWN_ALL.has(e)); };
+  const isOwn = (m) => !!m && (((m.labelIds || []).includes("SENT")) || isMe(m.sender));
+  function counterpart(m) { return [].concat((m && m.toRecipients) || []).map((a) => emailOf(a)).filter((a) => a && !isMe(a)); }
   function parseJsonObject(text) { const a = text.indexOf("{"), b = text.lastIndexOf("}"); if (a === -1 || b <= a) return null; try { return JSON.parse(text.slice(a, b + 1)); } catch { return null; } }
   const decodeEnt = (s) => { const d = document.createElement("textarea"); d.innerHTML = String(s || ""); return d.value; };
   const normUrl = (u) => (!u ? "" : /^https?:\/\//i.test(u) ? u : "https://" + u.replace(/^\/+/, ""));
@@ -900,6 +942,7 @@ body.ro [data-mut] { opacity: 0.4; }
       voice: ls.get("cm.voice") || "", voiceSource: voiceSrc(), lessons: o.lessons || "",
       rules: loadRules().map((r) => Object.assign({ text: r.text, op: r.op, labelName: r.labelName || null }, r.from ? { from: r.from } : {})),
       snippets: ls.get("cm.snippets") ? loadSnippets() : null,
+      accounts: GX ? GX.accounts.map((a) => ({ id: a.id, label: a.label || "", color: acctColorName(a) || null, inAllInboxes: !allOff.includes(a.id) })) : null,
       features: featState, stats: { editedDrafts: o.edits.length, sentAsWritten: o.accepts || 0, rejectedSuggestions: o.rejects.length },
       recentEdits: o.edits.slice(-8), recentRejects: o.rejects.slice(-15)
     }, null, 2);
@@ -962,19 +1005,26 @@ body.ro [data-mut] { opacity: 0.4; }
   }
   // Composio's multi-execute wraps each tool: { successful, data: { results: [{ response: { successful, data, error } }] } }.
   // Hand back the inner data (so "nothing found" checks work) and turn a failed inner call into an error the page shows.
+  // A reply over about 8K tokens comes back as a preview only, with the full data saved to a file in Composio's sandbox
+  // (data.remote_file_info). Then the result comes back as it is, with __offload set, so gx() can read the file.
   function unwrapComposio(p) {
     if (!p || typeof p !== "object") return p;
     const rs = p.data && Array.isArray(p.data.results) ? p.data.results : null;
     if (!rs) { if (p.successful === false) throw { code: "tool_error", message: String(p.error || "the Composio call failed").slice(0, 240) }; return p; }
     const bad = rs.find((x) => x && ((x.response && x.response.successful === false) || x.error));
     if (bad) throw { code: "tool_error", message: String((bad.response && (bad.response.error || bad.response.message)) || bad.error || "the Composio call failed").slice(0, 240) };
-    const out = rs.map((x) => (x && x.response && x.response.data !== undefined ? x.response.data : x));
+    const file = p.data.remote_file_info && p.data.remote_file_info.file_path;
+    const out = rs.map((x, i) => {
+      if (x && x.response && x.response.data !== undefined) return x.response.data;
+      if (x && x.response && file) return Object.assign({}, x, { __offload: { path: String(file), index: typeof x.index === "number" ? x.index : i } });
+      return x;
+    });
     return out.length === 1 ? out[0] : out;
   }
   // ---------- Gmail through Composio (CONFIG.gmail.via === "composio") ----------
   // The page speaks claude.ai's Gmail connector everywhere (same tool names and inputs). When CONFIG.gmail routes Gmail
-  // through Composio, gmailComposio() turns each call into the matching Composio Gmail tool for the account you're
-  // on, and reshapes the answer to look like the connector's, so nothing else in the page has to know.
+  // through Composio, gmailComposio() turns each call into the matching Composio Gmail tool for the right account,
+  // and reshapes the answer to look like the connector's, so nothing else in the page has to know.
   const gxMsg = {}; // messageId -> normalized message, so replies, drafts and forwards can find their thread
   const deEnt = (v) => { const t = String(v || ""); if (!/&(#\d+|#x[0-9a-f]+|[a-z]+);/i.test(t)) return t; const ta = document.createElement("textarea"); ta.innerHTML = t; return ta.value; };
   function splitAddrs(v) {
@@ -990,89 +1040,252 @@ body.ro [data-mut] { opacity: 0.4; }
   const gxHdr = (m, name) => { const h = ((m && m.payload && m.payload.headers) || []).find((x) => x && String(x.name).toLowerCase() === name); return h ? String(h.value || "") : ""; };
   function b64uText(v) { try { const bin = atob(String(v).replace(/-/g, "+").replace(/_/g, "/")); return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0))); } catch { return ""; } }
   function gxPart(p, mime) { if (!p) return null; if (p.mimeType === mime && p.body && p.body.data) return p; for (const c of p.parts || []) { const f = gxPart(c, mime); if (f) return f; } return null; }
-  const gxView = (id) => { const a = curAcct(); return "https://mail.google.com/mail/" + (a && a.email ? "?authuser=" + encodeURIComponent(a.email) : "u/0/") + "#all/" + encodeURIComponent(id || ""); };
-  function gxNorm(m, full) {
+  const gxGmailUrl = (A, hash) => "https://mail.google.com/mail/" + (A && A.email ? "?authuser=" + encodeURIComponent(A.email) : "u/0/") + "#" + hash;
+  const gxView = (id, A) => gxGmailUrl(A || curAcct(), "all/" + encodeURIComponent(id || ""));
+  function gxNorm(m, full, A) {
+    A = A || curAcct();
     const id = m.messageId || m.id;
-    const o = { id: id, threadId: m.threadId, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")),
+    const o = { id: id, threadId: m.threadId, acct: A && A.id, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")),
       date: m.messageTimestamp || m.date || "", subject: m.subject || (m.preview && m.preview.subject) || gxHdr(m, "subject"), labelIds: Array.isArray(m.labelIds) ? m.labelIds : [],
-      snippet: deEnt((m.preview && m.preview.body) || m.snippet || ""), viewUrl: gxView(m.threadId || id),
+      snippet: deEnt((m.preview && m.preview.body) || m.snippet || ""), viewUrl: gxView(m.threadId || id, A),
       attachments: (m.attachmentList || []).filter((x) => x && x.filename).map((x) => ({ id: x.attachmentId, filename: x.filename, mimeType: x.mimeType })) };
     const hp = gxPart(m.payload, "text/html");
     if (m.messageText) o.plaintextBody = String(m.messageText).replace(/\r\n/g, "\n");
     else { const tp = gxPart(m.payload, "text/plain"); if (tp) o.plaintextBody = b64uText(tp.body.data); else if (hp) o.plaintextBody = (new DOMParser().parseFromString(b64uText(hp.body.data), "text/html").body.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); }
     if (full && hp) o.htmlBody = b64uText(hp.body.data);
     if (id && (o.plaintextBody || !gxMsg[id])) gxMsg[id] = o;
+    if (A) { if (id) gxOwner["m:" + id] = A.id; if (m.threadId) gxOwner["t:" + m.threadId] = A.id; }
     return o;
   }
-  async function gx(slug, args, opts, read) {
+  // Reading an offloaded reply: jq keeps only the fields the page uses (long bodies trimmed) and writes them, as ASCII,
+  // next to Composio's file. It comes back in pieces under the bash tool's output limit, each wrapped in < >
+  // so nothing at the edges gets trimmed.
+  const GX_JQ_DEFS = 'def hp: [.. | objects | select(.mimeType? == "text/html" and ((.body.data? // "") | length) > 0)][0];'
+    + ' def tp: [.. | objects | select(.mimeType? == "text/plain" and ((.body.data? // "") | length) > 0)][0];'
+    + ' def msg: {messageId, id, threadId, sender, to, subject, messageTimestamp, labelIds, preview, attachmentList: [(.attachmentList // [])[] | {filename, mimeType, attachmentId}],'
+    + ' messageText: ((.messageText // "") | .[0:20000]), payload: {headers: [(.payload.headers // [])[] | select(.name | ascii_downcase | IN("from","to","cc","reply-to","subject","date","list-unsubscribe","list-unsubscribe-post"))],'
+    + ' parts: ([(if $full or ((.messageText // "") == "") then (.payload | hp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:200000])}}) else empty end),'
+    + ' (if ((.messageText // "") == "") then (.payload | tp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:40000])}}) else empty end)])}};';
+  const GX_JQ = {
+    GMAIL_FETCH_EMAILS: '{messages: [(.messages // [])[] | msg], nextPageToken, resultSizeEstimate}',
+    GMAIL_LIST_THREADS: '{threads: [(.threads // [])[] | {id, snippet: ((.snippet // "") | .[0:400])}], nextPageToken, resultSizeEstimate}',
+    GMAIL_FETCH_MESSAGE_BY_THREAD_ID: '{threadId, messages: [(.messages // [])[] | msg]}',
+    GMAIL_LIST_DRAFTS: '{drafts: [(.drafts // [])[] | {id, message: (.message | if . == null then null else msg end)}], next_page_token}',
+    GMAIL_GET_DRAFT: '{id, message: (.message | if . == null then null else msg end)}',
+    GMAIL_LIST_LABELS: '{labels: [(.labels // [])[] | {id, name, type}]}'
+  };
+  const GX_CHUNK = 30000;
+  async function gxBash(command, opts) {
+    const p = await call(GX_SERVER, "COMPOSIO_REMOTE_BASH_TOOL", { command: command }, { cache: false, signal: opts && opts.signal });
+    const d = (p && p.data) || {}; const out = String(d.stdout || "");
+    if ((p && p.successful === false) || d.stdout_file_path || /\(output truncated/.test(out)) throw { code: "tool_error", message: "couldn't read the large reply Composio saved" + (d.stderr ? " (" + String(d.stderr).slice(0, 160) + ")" : "") };
+    return { out: out, err: String(d.stderr || "") };
+  }
+  const gxCut = (s) => { const a = s.indexOf("<"), b = s.lastIndexOf(">"); return a >= 0 && b > a ? s.slice(a + 1, b) : null; };
+  async function gxBig(off, slug, args, opts) {
+    const path = off.path, idx = off.index;
+    if (!/^\/mnt\/files\/[A-Za-z0-9_.\/-]+\.json$/.test(path) || path.includes("..") || !Number.isInteger(idx) || idx < 0 || idx > 49) throw { code: "tool_error", message: "Composio saved a large reply somewhere this page won't read" };
+    const filter = slug === "GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID" ? (args.format === "raw" ? "{raw}" : "{payload: {headers: (.payload.headers // [])}}") : GX_JQ[slug];
+    if (!filter) throw { code: "tool_error", message: "that reply was too large for Composio to send back" };
+    const full = !!(opts && opts.full);
+    const out = path.replace(/\.json$/, ".cb" + (full ? "f" : "") + ".json");
+    const first = await gxBash("F='" + path + "'; O='" + out + "'; jq -c -a --argjson full " + full + " '" + GX_JQ_DEFS + " .results[" + idx + "].response.data | " + filter + "' \"$F\" > \"$O\" && wc -c < \"$O\" && printf '<' && head -c " + GX_CHUNK + " \"$O\" && printf '>'", opts);
+    const size = parseInt(first.out, 10), head = gxCut(first.out);
+    if (!(size >= 0) || head === null) throw { code: "tool_error", gone: /No such file/i.test(first.err), message: "couldn't read the large reply Composio saved" + (first.err ? " (" + first.err.slice(0, 160) + ")" : "") };
+    const n = Math.ceil(size / GX_CHUNK);
+    if (n > 60) throw { code: "tool_error", message: "that's too large to open here. Open it in Gmail instead" };
+    const parts = [head]; let k = 1;
+    const worker = async () => { while (k < n) { const i = k++; const r = await gxBash("printf '<' && tail -c +" + (i * GX_CHUNK + 1) + " '" + out + "' | head -c " + GX_CHUNK + " && printf '>'", opts); const c = gxCut(r.out); if (c === null) throw { code: "tool_error", message: "couldn't read the large reply Composio saved" }; parts[i] = c; } };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+    try { return JSON.parse(parts.join("")); } catch { throw { code: "tool_error", message: "couldn't read the large reply Composio saved" }; }
+  }
+  async function gx(slug, args, opts, read, A) {
     Object.keys(args).forEach((k) => { if (args[k] === undefined || args[k] === null || args[k] === "") delete args[k]; });
-    const a = curAcct();
-    const input = { tools: [{ tool_slug: slug, arguments: args, account: a.id }], sync_response_to_workbench: false, current_step: "CHATTERBUILT_MAIL", thought: "Chatterbuilt Mail: " + slug.toLowerCase().replace(/_/g, " ") };
-    const d = await call(GX_SERVER, "COMPOSIO_MULTI_EXECUTE_TOOL", input, Object.assign({}, opts || {}, { read: !!read }));
+    A = A || curAcct();
+    const input = { tools: [{ tool_slug: slug, arguments: args, account: A.id }], sync_response_to_workbench: false, current_step: "CHATTERBUILT_MAIL", thought: "Chatterbuilt Mail: " + slug.toLowerCase().replace(/_/g, " ") };
+    const go = (o) => call(GX_SERVER, "COMPOSIO_MULTI_EXECUTE_TOOL", input, Object.assign({}, o || {}, { read: !!read }));
+    let d = await go(opts);
+    if (d && d.__offload) {
+      // A write already ran; its preview holds the ids the page needs.
+      if (!read) return (d.response && d.response.data_preview) || {};
+      try { return await gxBig(d.__offload, slug, args, opts); }
+      catch (e) {
+        if (!e || !e.gone) throw e;
+        // A cached answer can point at a file the sandbox has since dropped: ask again, fresh.
+        d = await go(Object.assign({}, opts || {}, { cache: false }));
+        if (d && d.__offload) return gxBig(d.__offload, slug, args, opts);
+      }
+    }
     return d && typeof d === "object" ? d : {};
   }
   const gxNoAtt = (input) => { if (input.attachments && input.attachments.length) throw { code: "tool_error", message: "attachments don't go through Composio yet. Remove them, or send this one from Gmail" }; };
   const gxThreadOf = (msgId) => (gxMsg[msgId] && gxMsg[msgId].threadId) || "";
+  // Which account a call belongs to: the one on screen, or in All inboxes whoever owns the thread, message or draft.
+  function gxAcctFor(input) {
+    if (!isAll()) return homeAcct();
+    return ownerOf("t", input.threadId) || ownerOf("m", input.messageId) || ownerOf("m", input.replyToMessageId) || ownerOf("d", input.draftId) || curAcct();
+  }
+  // Up to n message summaries, in pages of 25 so each reply stays under Composio's inline limit.
+  async function gxFetch(A, query, n, pageToken, opts) {
+    let msgs = [], tok = pageToken, est = 0;
+    do {
+      const d = await gx("GMAIL_FETCH_EMAILS", { query: query || "", max_results: Math.min(25, n - msgs.length), page_token: tok, verbose: false, include_payload: false }, opts, true, A);
+      msgs = msgs.concat(d.messages || []); tok = d.nextPageToken || null; est = Math.max(est, +d.resultSizeEstimate || 0);
+    } while (tok && msgs.length < n);
+    return { messages: msgs, nextPageToken: tok, resultSizeEstimate: est };
+  }
+  // Labels per account, cached. In All inboxes the page sees folders by name ("gxname:Finance"), and each label
+  // change is turned into that account's own label id here (creating the folder there if it's new).
+  let gxLabelCache = {};
+  async function gxLabelsOf(A, opts) {
+    if (gxLabelCache[A.id]) return gxLabelCache[A.id];
+    const d = await gx("GMAIL_LIST_LABELS", {}, { cache: { staleTime: 300000, gcTime: 600000 }, signal: opts && opts.signal }, true, A);
+    gxLabelCache[A.id] = (d.labels || []).filter((l) => l && l.id);
+    return gxLabelCache[A.id];
+  }
+  async function gxLabelIds(A, ids, create, opts) {
+    const out = [];
+    for (const id of ids || []) {
+      const s = String(id);
+      if (!s.startsWith("gxname:")) { out.push(s); continue; }
+      const name = s.slice(7);
+      let l = (await gxLabelsOf(A, opts)).find((x) => String(x.name).toLowerCase() === name.toLowerCase());
+      if (!l && create) { const d = await gx("GMAIL_CREATE_LABEL", { label_name: name }, { cache: false }, false, A); gxLabelCache[A.id] = null; l = { id: d.id, name: name }; }
+      if (l && l.id) out.push(l.id);
+    }
+    return out;
+  }
+  // All inboxes: a search asks every account at once and merges the answers newest first. Paging keeps each
+  // account's own page token, and holds back anything older than the newest place an account stopped, so the
+  // merged list never skips mail. The same message in two of your mailboxes shows once.
+  const gxPages = {}; let gxPageSeq = 0;
+  const gxWhen = (t) => Date.parse(((t.messages && t.messages[0]) || {}).date || "") || 0;
+  const gxKey = (t) => { const m = (t.messages && t.messages[0]) || {}; return [emailOf(m.sender).toLowerCase(), String(m.subject || ""), m.date || ""].join("|"); };
+  const gxAddressed = (t) => { const A = acctById(t.acct); const m = (t.messages && t.messages[0]) || {}; const e = A && A.email && A.email.toLowerCase(); return !!e && [].concat(m.toRecipients || [], m.ccRecipients || []).some((x) => emailOf(x).toLowerCase() === e); };
+  function gxFailed(fails) { return fails.map((f) => ({ label: f.A.label || f.A.email || f.A.id, message: mcpCopy(f.e, GX_SERVER) })); }
+  async function gxAllSearch(input, opts) {
+    const accts = allAccts();
+    if (input.view === "THREAD_VIEW_IDS_ONLY") {
+      const rs = await Promise.allSettled(accts.map((A) => gxOne("search_threads", Object.assign({}, input, { pageToken: undefined }), opts, A)));
+      const ok = rs.filter((r) => r.status === "fulfilled").map((r) => r.value);
+      if (!ok.length) throw rs[0].reason;
+      return { threads: [].concat(...ok.map((v) => v.threads)), nextPageToken: null, resultCountEstimate: ok.reduce((s, v) => s + (+v.resultCountEstimate || 0), 0) };
+    }
+    const st = (input.pageToken && gxPages[input.pageToken]) || { toks: {}, done: {}, low: {}, est: {}, buf: [], shown: new Set() };
+    if (input.pageToken) delete gxPages[input.pageToken];
+    const todo = accts.filter((A) => !st.done[A.id]);
+    const rs = await Promise.allSettled(todo.map((A) => gxOne("search_threads", Object.assign({}, input, { pageToken: st.toks[A.id] || undefined }), opts, A)));
+    const fails = [];
+    rs.forEach((r, i) => {
+      const A = todo[i];
+      if (r.status === "rejected") { fails.push({ A: A, e: r.reason }); st.done[A.id] = true; return; }
+      const v = r.value, ts = v.threads || [];
+      st.buf = st.buf.concat(ts); st.toks[A.id] = v.nextPageToken || null; if (!v.nextPageToken) st.done[A.id] = true;
+      st.est[A.id] = +v.resultCountEstimate || 0;
+      if (ts.length) st.low[A.id] = Math.min(...ts.map(gxWhen));
+    });
+    if (fails.length === todo.length && todo.length && !st.buf.length) throw fails[0].e;
+    const keep = new Map();
+    st.buf.forEach((t) => { const k = gxKey(t); if (st.shown.has(k)) return; const prev = keep.get(k); if (!prev || (gxAddressed(t) && !gxAddressed(prev))) keep.set(k, t); });
+    const merged = [...keep.values()].sort((a, b) => gxWhen(b) - gxWhen(a));
+    const open = accts.filter((A) => !st.done[A.id] && st.low[A.id] !== undefined);
+    const cut = open.length ? Math.max(...open.map((A) => st.low[A.id])) : -Infinity;
+    let show = merged.filter((t) => gxWhen(t) >= cut), rest = merged.filter((t) => gxWhen(t) < cut);
+    if (!show.length && rest.length) { show = rest.slice(0, input.pageSize || 25); rest = rest.slice(show.length); }
+    show.forEach((t) => st.shown.add(gxKey(t)));
+    st.buf = rest;
+    let next = null;
+    if (rest.length || accts.some((A) => !st.done[A.id])) { next = "gxall:" + (++gxPageSeq); gxPages[next] = st; }
+    return { threads: show, nextPageToken: next, resultCountEstimate: Object.values(st.est).reduce((s, x) => s + x, 0), failed: fails.length ? gxFailed(fails) : undefined };
+  }
   async function gmailComposio(tool, input, opts) {
-    const me = ((curAcct() || {}).email || OWN || "").toLowerCase();
+    if (isAll()) {
+      if (tool === "search_threads") return gxAllSearch(input, opts);
+      if (tool === "list_drafts") {
+        const rs = await Promise.allSettled(allAccts().map((A) => gxOne(tool, input, opts, A)));
+        const ok = rs.filter((r) => r.status === "fulfilled"); if (!ok.length) throw rs[0].reason;
+        return { drafts: [].concat(...ok.map((r) => r.value.drafts || [])) };
+      }
+      if (tool === "list_labels") {
+        const rs = await Promise.allSettled(allAccts().map((A) => gxLabelsOf(A, opts)));
+        const ok = rs.filter((r) => r.status === "fulfilled"); if (!ok.length) throw rs[0].reason;
+        const by = new Map();
+        ok.forEach((r) => r.value.forEach((l) => { const user = String(l.type || "").toLowerCase() === "user"; const k = user ? "u:" + String(l.name).toLowerCase() : "s:" + l.id; if (!by.has(k)) by.set(k, { labelId: user ? "gxname:" + l.name : l.id, name: l.name, labelType: user ? "USER" : "SYSTEM" }); }));
+        return { labels: [...by.values()] };
+      }
+      if (tool === "create_label") {
+        const A = curAcct(); await gx("GMAIL_CREATE_LABEL", { label_name: input.displayName }, opts, false, A); gxLabelCache[A.id] = null;
+        return { labelId: "gxname:" + input.displayName, name: input.displayName };
+      }
+    }
+    return gxOne(tool, input, opts, gxAcctFor(input));
+  }
+  async function gxOne(tool, input, opts, A) {
+    const me = String((A && A.email) || OWN || "").toLowerCase();
     const mine = (x) => !!me && emailOf(x).toLowerCase() === me;
     switch (tool) {
       case "search_threads": {
         if (input.view === "THREAD_VIEW_IDS_ONLY") {
-          const d = await gx("GMAIL_LIST_THREADS", { query: input.query || "", max_results: input.pageSize || 20, page_token: input.pageToken, verbose: false }, opts, true);
-          return { threads: (d.threads || []).map((t) => ({ id: t.id, snippet: deEnt(t.snippet) })), nextPageToken: d.nextPageToken || null, resultCountEstimate: d.resultSizeEstimate };
+          const d = await gx("GMAIL_LIST_THREADS", { query: input.query || "", max_results: input.pageSize || 20, page_token: input.pageToken, verbose: false }, opts, true, A);
+          return { threads: (d.threads || []).map((t) => { gxOwner["t:" + t.id] = A.id; return { id: t.id, acct: A.id, snippet: deEnt(t.snippet) }; }), nextPageToken: d.nextPageToken || null, resultCountEstimate: d.resultSizeEstimate };
         }
-        // One metadata-only message search, grouped by thread. Each row shows the newest message that matched, which
+        // A metadata-only message search, grouped by thread. Each row shows the newest message that matched, which
         // may not be the thread's newest message, so threads are marked approx and Waiting checks them in full.
-        const n = input.pageSize || 20;
-        const d = await gx("GMAIL_FETCH_EMAILS", { query: input.query || "", max_results: Math.min(100, n * 2), page_token: input.pageToken, verbose: false, include_payload: false }, opts, true);
+        const d = await gxFetch(A, input.query, input.pageSize || 20, input.pageToken, opts);
         const by = new Map();
-        (d.messages || []).forEach((m) => { const t = m.threadId || m.messageId; if (!t) return; if (!by.has(t)) by.set(t, { id: t, messageCount: 0, approx: true, viewUrl: gxView(t), messages: [gxNorm(m, false)] }); by.get(t).messageCount++; });
+        d.messages.forEach((m) => { const t = m.threadId || m.messageId; if (!t) return; if (!by.has(t)) by.set(t, { id: t, acct: A.id, messageCount: 0, approx: true, viewUrl: gxView(t, A), messages: [gxNorm(m, false, A)] }); by.get(t).messageCount++; });
         return { threads: [...by.values()], nextPageToken: d.nextPageToken || null, resultCountEstimate: d.resultSizeEstimate };
       }
       case "get_thread": {
-        const d = await gx("GMAIL_FETCH_MESSAGE_BY_THREAD_ID", { thread_id: input.threadId }, opts, true);
+        const full = input.messageFormat === "FULL_CONTENT";
+        const d = await gx("GMAIL_FETCH_MESSAGE_BY_THREAD_ID", { thread_id: input.threadId }, Object.assign({}, opts || {}, { full: full }), true, A);
         const id = d.threadId || input.threadId;
-        return { id: id, viewUrl: gxView(id), messages: (d.messages || []).map((m) => gxNorm(m, input.messageFormat === "FULL_CONTENT")) };
+        const ms = (d.messages || []).map((m) => gxNorm(m, full, A)).sort((a, b) => (Date.parse(a.date) || 0) - (Date.parse(b.date) || 0));
+        return { id: id, acct: A.id, viewUrl: gxView(id, A), messages: ms };
       }
       case "get_message": {
-        if (opts && opts.full) { const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "raw" }, opts, true); return { id: input.messageId, raw: d.raw || "" }; }
+        if (opts && opts.full) { const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "raw" }, opts, true, A); return { id: input.messageId, raw: d.raw || "" }; }
         // Unsubscribe only needs the headers (List-Unsubscribe), so fetch metadata and hand back the header block as raw.
-        const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "metadata" }, opts, true);
+        const d = await gx("GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID", { message_id: input.messageId, format: "metadata" }, opts, true, A);
         const head = ((d.payload && d.payload.headers) || []).map((h) => h.name + ": " + h.value).join("\r\n") + "\r\n\r\n";
         return { id: input.messageId, raw: btoa(unescape(encodeURIComponent(head))).replace(/\+/g, "-").replace(/\//g, "_") };
       }
-      case "list_labels": {
-        const d = await gx("GMAIL_LIST_LABELS", {}, opts, true);
-        return { labels: (d.labels || []).map((l) => ({ labelId: l.id, name: l.name, labelType: String(l.type || "").toUpperCase() })) };
-      }
+      case "list_labels": return { labels: (await gxLabelsOf(A, opts)).map((l) => ({ labelId: l.id, name: l.name, labelType: String(l.type || "").toUpperCase() })) };
       case "create_label": {
-        const d = await gx("GMAIL_CREATE_LABEL", { label_name: input.displayName }, opts, false);
+        const d = await gx("GMAIL_CREATE_LABEL", { label_name: input.displayName }, opts, false, A); gxLabelCache[A.id] = null;
         return { labelId: d.id, name: d.name || input.displayName };
       }
-      case "label_thread": return gx("GMAIL_MODIFY_THREAD_LABELS", { thread_id: input.threadId, add_label_ids: input.labelIds || [] }, opts, false);
-      case "unlabel_thread": return gx("GMAIL_MODIFY_THREAD_LABELS", { thread_id: input.threadId, remove_label_ids: input.labelIds || [] }, opts, false);
+      case "label_thread": case "unlabel_thread": {
+        const ids = isAll() ? await gxLabelIds(A, input.labelIds, tool === "label_thread", opts) : (input.labelIds || []);
+        if (!ids.length) return {};
+        return gx("GMAIL_MODIFY_THREAD_LABELS", Object.assign({ thread_id: input.threadId }, tool === "label_thread" ? { add_label_ids: ids } : { remove_label_ids: ids }), opts, false, A);
+      }
       case "list_drafts": {
-        const d = await gx("GMAIL_LIST_DRAFTS", { max_results: input.pageSize || 20, verbose: input.view === "DRAFT_VIEW_FULL" }, opts, true);
-        return { drafts: (d.drafts || []).map((x) => { const m = x.message || {}; if (m.messageId || m.payload) { const o = gxNorm(m, true); return Object.assign({}, o, { id: x.id, messageId: o.id }); } return { id: x.id, messageId: m.id, threadId: m.threadId }; }) };
+        const d = await gx("GMAIL_LIST_DRAFTS", { max_results: input.pageSize || 20, verbose: input.view === "DRAFT_VIEW_FULL" }, opts, true, A);
+        return { drafts: (d.drafts || []).map((x) => {
+          gxOwner["d:" + x.id] = A.id;
+          const m = x.message || {}; if (m.messageId || m.payload) { const o = gxNorm(m, true, A); return Object.assign({}, o, { id: x.id, messageId: o.id }); }
+          if (m.threadId) gxOwner["t:" + m.threadId] = gxOwner["t:" + m.threadId] || A.id;
+          return { id: x.id, acct: A.id, messageId: m.id, threadId: m.threadId, viewUrl: gxGmailUrl(A, "drafts") };
+        }) };
       }
       case "get_draft": {
-        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: "full" }, opts, true);
-        const o = gxNorm(d.message || {}, true); return Object.assign({}, o, { id: d.id || input.draftId, messageId: o.id });
+        const d = await gx("GMAIL_GET_DRAFT", { draft_id: input.draftId, format: "full" }, opts, true, A);
+        const o = gxNorm(d.message || {}, true, A); return Object.assign({}, o, { id: d.id || input.draftId, messageId: o.id });
       }
-      case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false);
+      case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false, A);
       case "create_draft": {
         gxNoAtt(input);
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
-        const d = await gx("GMAIL_CREATE_EMAIL_DRAFT", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, thread_id: tid, include_signature: !!input.includeSignature }, opts, false);
-        const a = curAcct();
-        return { id: d.id || (d.draft && d.draft.id) || "", threadId: tid, viewUrl: "https://mail.google.com/mail/" + (a && a.email ? "?authuser=" + encodeURIComponent(a.email) : "u/0/") + "#drafts" };
+        const d = await gx("GMAIL_CREATE_EMAIL_DRAFT", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, thread_id: tid, include_signature: !!input.includeSignature }, opts, false, A);
+        const did = d.id || (d.draft && d.draft.id) || ""; if (did) gxOwner["d:" + did] = A.id;
+        return { id: did, threadId: tid, viewUrl: gxGmailUrl(A, "drafts") };
       }
       case "send_message": {
         gxNoAtt(input);
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
-        if (tid) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), message_body: input.body, include_signature: !!input.includeSignature }, opts, false);
-        return gx("GMAIL_SEND_EMAIL", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, opts, false);
+        if (tid) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
+        return gx("GMAIL_SEND_EMAIL", { recipient_email: to[0], extra_recipients: to.slice(1), subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
       }
       case "reply": {
         gxNoAtt(input);
@@ -1087,13 +1300,17 @@ body.ro [data-mut] { opacity: 0.4; }
           cc = (m.ccRecipients || []).map(emailOf).filter((x) => x && !mine(x) && !primary.includes(x) && !extra.includes(x));
         }
         if (!primary.length) throw { code: "tool_error", message: "there's no one to reply to on that message" };
-        return gx("GMAIL_REPLY_TO_THREAD", { thread_id: m.threadId, recipient_email: primary[0], extra_recipients: primary.slice(1).concat(extra), cc: cc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false);
+        return gx("GMAIL_REPLY_TO_THREAD", { thread_id: m.threadId, recipient_email: primary[0], extra_recipients: primary.slice(1).concat(extra), cc: cc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
       }
-      case "forward": return gx("GMAIL_FORWARD_MESSAGE", { message_id: input.messageId, recipients: [].concat(input.to || []), include_signature: !!input.includeSignature }, opts, false);
+      case "forward": return gx("GMAIL_FORWARD_MESSAGE", { message_id: input.messageId, recipients: [].concat(input.to || []), include_signature: !!input.includeSignature }, opts, false, A);
       default: throw { code: "bad_request", message: tool + " isn't mapped to Composio yet" };
     }
   }
-  const invalGmail = (tool) => { if (!state.mcp) return Promise.resolve(); return GX ? state.mcp.invalidate(GX_SERVER) : (tool ? invalGmail(tool) : invalGmail()); };
+  const invalGmail = (tool) => {
+    if (!state.mcp) return Promise.resolve();
+    if (GX) { gxLabelCache = {}; return state.mcp.invalidate(GX_SERVER); }
+    return tool ? state.mcp.invalidate(GMAIL, tool) : state.mcp.invalidate(GMAIL);
+  };
   function showBanner(text, cls) { const b = $("banner"); b.hidden = !text; b.textContent = text || ""; b.className = "banner " + (cls || ""); }
 
   // ---------- AI: Claude (sample) or OpenRouter ----------
@@ -1131,11 +1348,13 @@ body.ro [data-mut] { opacity: 0.4; }
       const unread = (m.labelIds || []).includes("UNREAD");
       const who = t.waiting ? "To " + ((m.toRecipients || []).map(nameOf).join(", ") || "(no recipient)") : (nameOf(m.sender) || "(unknown sender)");
       const vs = state.variants[t.id]; const pv = state.preview[t.id]; const snip = m.snippet ? decodeEnt(m.snippet) : "";
-      const tags = (t.waiting ? '<span class="pill wait">waiting ' + Math.max(1, Math.floor(state.age[t.id] || 0)) + 'd</span>' : "")
+      const A = isAll() ? acctById(t.acct) : null; const ac = A ? acctColor(A) : "";
+      const tags = (A ? '<span class="pill acct"' + (ac ? ' style="--acc:' + ac + '"' : "") + '>' + esc(A.label || A.email || "account") + '</span>' : "")
+        + (t.waiting ? '<span class="pill wait">waiting ' + Math.max(1, Math.floor(state.age[t.id] || 0)) + 'd</span>' : "")
         + (vs && vs.length ? '<span class="pill drafted">drafted</span>' : "")
         + (state.draftMap && state.draftMap[t.id] ? '<span class="pill drafted">draft in Gmail</span>' : "")
         + (tri ? '<span class="pill ' + esc(tri.priority) + '">' + esc(tri.priority) + '</span><span class="why">' + esc(tri.why) + '</span>' : "");
-      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + '" data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
+      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
         + '<span class="from">' + esc(who) + '</span>'
         + '<span class="when">' + esc(fmtDate(m.date)) + '</span>'
         + '<span class="rowacts"><button class="mvbtn" data-move="' + esc(t.id) + '" type="button" title="Move to a folder, copy to another account, or unsubscribe">More</button><button class="totask" data-task="' + esc(t.id) + '" type="button" title="Create a task from this thread">Task</button></span>'
@@ -1223,6 +1442,7 @@ body.ro [data-mut] { opacity: 0.4; }
         const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 20000, gcTime: 300000 } });
         if (token !== state.loadToken) return;
         threads = (p && p.threads) || [];
+        if (p && p.failed && p.failed.length) toast("Couldn't load " + p.failed.map((f) => esc(f.label)).join(", ") + ". " + esc(p.failed[0].message), "err", 9000);
         if (append) { const seen = new Set(state.threads.map((t) => t.id)); threads = threads.filter((t) => !seen.has(t.id)); }
         else state.estimate = +(p && p.resultCountEstimate) || 0;
         state.nextToken = (p && p.nextPageToken) || null;
@@ -1425,7 +1645,8 @@ body.ro [data-mut] { opacity: 0.4; }
   }
   let MARK = "";
   const markFor = (email) => "You are an email assistant for " + OWNER + (email ? " (" + email + ")" : "") + "." + (CONFIG.about ? " " + CONFIG.about : "");
-  MARK = markFor(curEmail());
+  const markNow = () => markFor(isAll() ? allAccts().map((a) => a.email).filter(Boolean).join(", ") : curEmail());
+  MARK = markNow();
   async function summarize() {
     if (!state.thread) return;
     const box = $("sumBox"); box.hidden = false; box.className = "summary"; box.innerHTML = '<div class="lbl">Summary</div><span class="spin"></span>Thinking…';
@@ -1757,7 +1978,7 @@ body.ro [data-mut] { opacity: 0.4; }
     try {
       const t = (state.thread && state.thread.id === id) ? state.thread : await fetchThread(id);
       const ms = t.messages || [];
-      const cand = ms.slice().reverse().find((m) => emailOf(m.sender).toLowerCase() !== OWN) || ms[ms.length - 1];
+      const cand = ms.slice().reverse().find((m) => !isMe(m.sender)) || ms[ms.length - 1];
       if (!cand) throw { code: "tool_error", message: "no message found" };
       const p = await call(GMAIL, "get_message", { messageId: cand.id, messageFormat: "RAW" }, { cache: { staleTime: 600000, gcTime: 900000 } });
       if (popTarget !== id || popTab !== "unsub") return;
@@ -1868,12 +2089,12 @@ body.ro [data-mut] { opacity: 0.4; }
       const consider = (t, last, count) => {
         if (!last || !isOwn(last) || !counterpart(last).length) return;
         const age = (Date.now() - new Date(last.date).getTime()) / 864e5;
-        if (age >= state.waitDays) { state.age[t.id] = age; out.push({ id: t.id, messageCount: count || t.messageCount || 1, messages: [last], waiting: true, viewUrl: t.viewUrl }); }
+        if (age >= state.waitDays) { state.age[t.id] = age; out.push({ id: t.id, acct: t.acct, messageCount: count || t.messageCount || 1, messages: [last], waiting: true, viewUrl: t.viewUrl }); }
       };
       async function worker() {
         while (i < cand.length && token === state.loadToken) {
           const t = cand[i++]; const s = (t.messages && t.messages[0]) || null;
-          if (s && s.sender && OWN && emailOf(s.sender).toLowerCase() !== OWN) { /* someone else had the last word */ }
+          if (s && s.sender && !isMe(s.sender)) { /* someone else had the last word */ }
           else if (s && s.date && Array.isArray(s.labelIds) && !t.approx) consider(t, s, t.messageCount);
           else {
             try { const full = await fetchThread(t.id); const ms = (full && full.messages) || []; state.preview[t.id] = makePreview(full); consider(t, ms[ms.length - 1], ms.length); }
@@ -1899,7 +2120,7 @@ body.ro [data-mut] { opacity: 0.4; }
   const toneCache = {};
   async function toneExamples(addr, excludeId) {
     addr = String(addr || "").toLowerCase();
-    if (!addr || addr === OWN) return "";
+    if (!addr || isMe(addr)) return "";
     if (toneCache[addr] !== undefined) return toneCache[addr];
     let out = "";
     try {
@@ -2153,7 +2374,7 @@ body.ro [data-mut] { opacity: 0.4; }
     return m && !isOwn(m) ? { addr: emailOf(m.sender).toLowerCase(), name: nameOf(m.sender), subject: m.subject || "" } : null;
   }
   function recordAction(who, op, label, weight) {
-    if (!featOn("learn") || !who || !who.addr || who.addr === OWN) return;
+    if (!featOn("learn") || !who || !who.addr || isMe(who.addr)) return;
     const o = learnGet(); o.actions = o.actions || [];
     o.actions.push({ addr: who.addr, name: who.name || "", subject: String(who.subject || "").slice(0, 140), op: op, labelId: label ? label.labelId : null, labelName: label ? label.name : null, at: Date.now(), w: weight || 1 });
     o.actions = o.actions.slice(-200); learnSet(o);
@@ -2264,7 +2485,8 @@ body.ro [data-mut] { opacity: 0.4; }
     const queued = new Set(state.queue.map((p) => p.threadId));
     const pool = state.threads.slice(0, 50).filter((t) => !queued.has(t.id) && !t.waiting);
     let labels = []; try { labels = await loadLabels(); } catch {}
-    const labelFor = (rule) => labels.find((x) => x.labelId === rule.labelId) || labels.find((x) => rule.labelName && x.name.toLowerCase() === rule.labelName.toLowerCase()) || null;
+    // By name first: label ids are per account, so the same id can be a different folder in another account.
+    const labelFor = (rule) => labels.find((x) => rule.labelName && x.name.toLowerCase() === rule.labelName.toLowerCase()) || labels.find((x) => x.labelId === rule.labelId) || null;
     const props = []; const hit = new Set();
     pool.forEach((t) => {
       const m = (t.messages && t.messages[0]) || {}; if (isOwn(m)) return; const addr = emailOf(m.sender).toLowerCase();
@@ -2324,7 +2546,7 @@ body.ro [data-mut] { opacity: 0.4; }
       let all = (p && p.threads) || [];
       if (all.length >= 50) { try { all = all.concat((await nextPage(q, all, { pageSize: 50, view: "THREAD_VIEW_SUMMARY" })).threads); } catch {} }
       all.forEach((t) => {
-        const m = (t.messages && t.messages[0]) || {}; const a = emailOf(m.sender).toLowerCase(); if (!a || a === OWN) return;
+        const m = (t.messages && t.messages[0]) || {}; const a = emailOf(m.sender).toLowerCase(); if (!a || isMe(a)) return;
         const g = groups[a] || (groups[a] = { addr: a, name: nameOf(m.sender), count: 0, sample: t.id, subject: m.subject || "" }); g.count++;
       });
       sweep = Object.values(groups).sort((a, b) => b.count - a.count);
@@ -2527,16 +2749,53 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- email accounts (Gmail through Composio) ----------
-  function setAccount(i) {
-    if (!GX || !GX.accounts[i] || i === acctIdx) return;
-    acctIdx = i; ls.set("cm.acct", GX.accounts[i].id);
-    OWN = curEmail().toLowerCase(); MARK = markFor(curEmail());
-    const sel = $("acctSel"); if (sel) sel.value = String(i);
-    // Thread ids, labels and drafts belong to one mailbox, so drop everything that came from the last one.
+  // Thread ids, labels and drafts belong to the mailboxes on screen, so a switch drops everything from the last view.
+  function resetMailbox() {
+    OWN = ((homeAcct() && homeAcct().email) || CONFIG.ownEmail || "").toLowerCase(); MARK = markNow();
     state.labels = null; state.preview = {}; state.full = {}; state.draftMap = {}; draftsAt = 0; state.triage = {}; state.age = {}; state.variants = {}; state.aiDraft = {};
     state.queue = []; state.undo = []; state.ctx = {}; state.loadedDraftId = null; Object.keys(gxMsg).forEach((k) => delete gxMsg[k]);
-    updateReviewBadge(); clearDesk(); loadThreads(false);
-    toast("Now showing " + esc(GX.accounts[i].label || GX.accounts[i].email || "that account") + ".", "ok", 2500);
+    Object.keys(gxPages).forEach((k) => delete gxPages[k]); gxLabelCache = {};
+    updateReviewBadge(); clearDesk();
+  }
+  const acctName = (a) => (a ? a.label || a.email || "that account" : "");
+  function setAccount(i) {
+    if (!GX || i === acctIdx || (i >= 0 && !GX.accounts[i]) || (i < 0 && !MULTI)) return;
+    acctIdx = i < 0 ? -1 : i; ls.set("cm.acct", i < 0 ? "all" : GX.accounts[i].id);
+    const sel = $("acctSel"); if (sel) sel.value = String(acctIdx);
+    resetMailbox(); renderAcctChips(); loadThreads(false);
+    toast("Now showing " + esc(i < 0 ? "All inboxes" : acctName(GX.accounts[i])) + ".", "ok", 2500);
+  }
+  // The chips over the list in All inboxes: tap one to leave that account out, tap again to bring it back.
+  function renderAcctChips() {
+    const box = $("acctChips"); if (!box) return;
+    box.hidden = !isAll();
+    if (box.hidden) { box.innerHTML = ""; return; }
+    box.innerHTML = GX.accounts.map((a) => { const c = acctColor(a), on = !allOff.includes(a.id); return '<button type="button" class="achip" data-acctchip="' + esc(a.id) + '" aria-pressed="' + on + '"' + (c ? ' style="--acc:' + c + '"' : "") + ' title="' + (on ? "Hide " : "Show ") + esc(acctName(a)) + ' in All inboxes">' + esc(acctName(a)) + '</button>'; }).join("");
+  }
+  function setInAll(id, on) {
+    if (!on && GX.accounts.filter((a) => !allOff.includes(a.id) && a.id !== id).length === 0) { toast("Keep at least one account on.", "", 3000); return false; }
+    allOff = on ? allOff.filter((x) => x !== id) : allOff.concat(id);
+    ls.set("cm.allOff", JSON.stringify(allOff));
+    if (isAll()) { resetMailbox(); renderAcctChips(); loadThreads(false); }
+    return true;
+  }
+  $("acctChips").addEventListener("click", (ev) => { const b = ev.target.closest("[data-acctchip]"); if (b) setInAll(b.dataset.acctchip, b.getAttribute("aria-pressed") !== "true"); });
+  // Settings → Accounts: a color per account (saved in this browser; Copy for Claude carries it into your copy).
+  function openAccounts() {
+    if (!GX) return;
+    const sw = (a) => [""].concat(Object.keys(ACC_COLORS)).map((k) => { const on = k ? acctColorName(a) === k : !acctColor(a); return '<button type="button" class="swatch' + (k ? "" : " none") + (on ? " on" : "") + '" data-sw="' + esc(a.id) + '" data-c="' + k + '" aria-pressed="' + on + '" title="' + (k || "No color") + '" aria-label="' + (k || "No color") + '"' + (k ? ' style="--acc:' + ACC_COLORS[k] + '"' : "") + '></button>'; }).join("");
+    const rows = GX.accounts.map((a) => '<div class="acctrow"><div class="an"><strong>' + esc(acctName(a)) + '</strong>' + (a.email && a.label ? '<span class="note">' + esc(a.email) + '</span>' : "") + '</div>'
+      + '<div class="swatches" role="group" aria-label="Color for ' + esc(acctName(a)) + '">' + sw(a) + '</div>'
+      + (MULTI ? '<label class="ainc"><input type="checkbox" data-inc="' + esc(a.id) + '"' + (allOff.includes(a.id) ? "" : " checked") + '> Show in All inboxes</label>' : "") + '</div>').join("");
+    openModal("Accounts", '<p class="note">' + (MULTI ? "In All inboxes, each account's rows are tinted with its color, so you can tell them apart at a glance. " : "") + 'Saved in this browser. To make it permanent in your copy, use Copy for Claude under Settings → Voice and ask Claude to run chatterbuilt-mail-improve.</p>' + rows
+      + '<div class="mrow"><button class="btn ghost" id="acReset" type="button">Use my copy\'s colors</button></div>');
+    const body = $("modalBody");
+    body.querySelectorAll("[data-sw]").forEach((b) => b.addEventListener("click", () => {
+      acctColorPref[b.dataset.sw] = b.dataset.c; ls.set("cm.acctColors", JSON.stringify(acctColorPref));
+      renderList(); renderAcctChips(); openAccounts();
+    }));
+    body.querySelectorAll("[data-inc]").forEach((cb) => cb.addEventListener("change", () => { if (!setInAll(cb.dataset.inc, cb.checked)) cb.checked = true; }));
+    $("acReset").addEventListener("click", () => { acctColorPref = {}; ls.del("cm.acctColors"); renderList(); renderAcctChips(); openAccounts(); });
   }
 
   // ---------- command palette + keys ----------
@@ -2550,7 +2809,8 @@ body.ro [data-mut] { opacity: 0.4; }
     ];
     if (!phoneMQ.matches) c.push([state.railOff ? "Show the thread list" : "Hide the thread list", "[", () => setRailOff(!state.railOff)]);
     if (!phoneMQ.matches && (state.paneW.rail || state.paneW.side)) c.push(["Reset pane sizes", "", resetPanes]);
-    if (GX && GX.accounts.length > 1) GX.accounts.forEach((a, i) => { if (i !== acctIdx) c.push(["Switch to " + (a.label || a.email || a.id), "", () => setAccount(i)]); });
+    if (MULTI) { if (acctIdx >= 0) c.push(["Show All inboxes", "", () => setAccount(-1)]); GX.accounts.forEach((a, i) => { if (i !== acctIdx) c.push(["Switch to " + acctName(a), "", () => setAccount(i)]); }); }
+    if (GX) c.push(["Account colors", "", openAccounts]);
     if (state.thread && panelOn()) c.push([(wideMQ.matches ? !state.sideOff : !state.ctxFold) ? "Hide context" : "Show context", "]", toggleContext]);
     if (state.thread) c.push(["Route to my systems", "o", openRoute, "route"], ["Snooze or remind me", "b", openSnooze, "snooze"], ["Formatted view", "", toggleFormatted, "html"], ["Insert a snippet", "", openSnippets, "snippets"], ["Refresh context", "", () => loadContext(true), "context"], ["Summarize thread", "", summarize], ["Archive thread", "e", () => $("archiveBtn").click()], ["Star or unstar", "s", () => $("starBtn").click()], ["Move to folder", "m", () => openPop(state.selectedId, $("moveBtn"), "move"), "move"], ["Unsubscribe from sender", "", () => openPop(state.selectedId, $("unsubBtn"), "unsub"), "unsub"], ["Three reply options", "", threeOptions, "predraft"], ["Add to contacts", "c", openContact, "contacts"], ["File as a task", "t", () => createTask(state.selectedId), "tasks"]);
     return c.filter((x) => !x[3] || featOn(x[3]));
@@ -2649,7 +2909,7 @@ body.ro [data-mut] { opacity: 0.4; }
   const CFIELDS = ["cCompany", "cTitle", "cPhone", "cLinkedIn", "cX", "cBluesky", "cGitHub", "cInstagram", "cWebsite", "cLocation", "cMet", "cNotes", "cBackground"];
   function contactCandidates(t) {
     const seen = {}; const out = [];
-    const add = (a) => { const e = emailOf(a).toLowerCase(); if (!e || e === OWN || seen[e] || /no-?reply|notifications?@|mailer-daemon|bounce/i.test(e)) return; seen[e] = 1; out.push({ email: e, name: nameOf(a) === emailOf(a) ? "" : nameOf(a) }); };
+    const add = (a) => { const e = emailOf(a).toLowerCase(); if (!e || isMe(e) || seen[e] || /no-?reply|notifications?@|mailer-daemon|bounce/i.test(e)) return; seen[e] = 1; out.push({ email: e, name: nameOf(a) === emailOf(a) ? "" : nameOf(a) }); };
     ((t && t.messages) || []).slice().reverse().forEach((m) => { if (!isOwn(m)) add(m.sender); });
     ((t && t.messages) || []).forEach((m) => (m.toRecipients || []).forEach(add));
     return out;
@@ -3557,6 +3817,7 @@ body.ro [data-mut] { opacity: 0.4; }
   $("askBtn").addEventListener("click", openAsk);
   $("voiceBtn").addEventListener("click", () => openVoice(false));
   $("skillsBtn").addEventListener("click", () => openSkills(false));
+  $("acctBtn").addEventListener("click", openAccounts);
   $("roToggle").addEventListener("click", toggleRO);
   $("paletteBtn").addEventListener("click", openPalette);
   $("variantsBtn").addEventListener("click", threeOptions);
@@ -3576,12 +3837,15 @@ body.ro [data-mut] { opacity: 0.4; }
   $("repoLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
   $("docsLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
   if (curEmail()) $("acct").textContent = curEmail();
-  if (GX && GX.accounts.length > 1) {
+  if (GX) $("acctBtn").hidden = false;
+  if (MULTI) {
     const sel = document.createElement("select"); sel.id = "acctSel"; sel.className = "acctsel"; sel.setAttribute("aria-label", "Email account"); sel.title = "Switch email account";
+    { const o = document.createElement("option"); o.value = "-1"; o.textContent = "All inboxes · " + GX.accounts.length + " accounts"; sel.append(o); }
     GX.accounts.forEach((a, i) => { const o = document.createElement("option"); o.value = String(i); o.textContent = (a.label ? a.label + " · " : "") + (a.email || a.id); sel.append(o); });
     sel.value = String(acctIdx); sel.addEventListener("change", () => setAccount(+sel.value));
     $("acct").replaceWith(sel);
   }
+  renderAcctChips();
   if (CONFIG.searchExample) $("q").placeholder = "Search, e.g. " + CONFIG.searchExample;
   { const ro = ls.get("cm.ro"); setRO(ro === null ? !!CONFIG.readOnly : ro === "1", false); }
   { const wd = +(ls.get("cm.waitDays") || 0); if (wd) state.waitDays = wd; const sel = $("waitDays"); if (![...sel.options].some((o) => +o.value === state.waitDays)) { const o = document.createElement("option"); o.textContent = String(state.waitDays); sel.append(o); } sel.value = String(state.waitDays); }

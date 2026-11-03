@@ -1,14 +1,15 @@
 // Builds the demo page the way the artifact host serves it. With { accounts: true }, Gmail goes through Composio with
-// two made-up accounts (Rivera Labs and Personal), so the account switcher shows.
+// two made-up accounts (Rivera Labs and Personal), so the account switcher and All inboxes show. It opens on the first
+// account; pass { accounts: "all" } to open on All inboxes.
 const fs = require('fs'); const path = require('path'); const os = require('os'); const { execFileSync } = require('child_process');
 const ROOT = path.resolve(__dirname, '..', '..');
-const ACCOUNTS = '    gmail: { via: "composio", accounts: [{ id: "gmail_work", email: "alex@riveralabs.example", label: "Rivera Labs" }, { id: "gmail_personal", email: "alex.rivera@mail.example", label: "Personal" }] },\n';
+const ACCOUNTS = (start) => '    gmail: { via: "composio", ' + (start ? '' : 'start: "first", ') + 'accounts: [{ id: "gmail_work", email: "alex@riveralabs.example", label: "Rivera Labs", color: "blue" }, { id: "gmail_personal", email: "alex.rivera@mail.example", label: "Personal", color: "red" }] },\n';
 module.exports = function buildPage(name, opts) {
   opts = opts || {};
   let cfg = path.join(__dirname, 'demo.config.js');
   if (opts.accounts) {
     const src = fs.readFileSync(cfg, 'utf8'); const at = src.indexOf('\n', src.indexOf('ownEmail:')) + 1;
-    cfg = path.join(os.tmpdir(), name + '.config.js'); fs.writeFileSync(cfg, src.slice(0, at) + ACCOUNTS + src.slice(at));
+    cfg = path.join(os.tmpdir(), name + '.config.js'); fs.writeFileSync(cfg, src.slice(0, at) + ACCOUNTS(opts.accounts === "all") + src.slice(at));
   }
   const built = path.join(os.tmpdir(), name + '.built.html');
   execFileSync('python3', [path.join(ROOT, 'scripts/build.py'), path.join(ROOT, 'skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail.template.html'), cfg, built], { stdio: 'ignore' });
