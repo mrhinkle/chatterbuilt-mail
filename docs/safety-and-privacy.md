@@ -41,6 +41,8 @@
 - **Attachments.** Opening one reads the message source through your Gmail connection and shows it in the page. Nothing from it goes to the model. PDFs are drawn with pdf.js, a script loaded from cdnjs.cloudflare.com; the file itself never leaves the page. **Save** asks before it downloads anything.
 - **Next meeting (Today).** The title and time are shown on the page only; they are never sent to the model.
 - **Your browser.** Voice edits, rules, lessons and switches are stored in that browser's local storage for this artifact. Clearing site data clears them. Copy for Claude is the backup.
+- **The list, for this session.** So the page opens on your list at once, the last 50 rows of each view you opened (sender, subject, first line, date, labels) are kept in the browser's session storage. It's gone when you close the tab; nothing of it goes anywhere else.
+- **Then.** The words you type on the Then line, the reply and the thread's subject and sender go to the model to work out the steps. The steps run only after you confirm the send: a task in your task app, a reminder label, a Slack draft (never sent), or one of your custom actions.
 - **Sharing.** The artifact is private to you. If you share it, the other person uses their own connectors and sees their own mail, never yours. Your browser-stored lessons don't travel with the link.
 
 ## Forks and memory files

@@ -42,7 +42,9 @@ module.exports = function fake() {
     if (/venue|walkthrough/i.test(q)) return { threads: [summ('t2')] };
     if (/stripe/i.test(q)) return { threads: [summ('t4'), summ('t7')] };
     if (/dana@|acmerobotics/i.test(q)) return { threads: [summ('s3'), summ('t1')] };
-    return { resultCountEstimate: '8', threads: order.map(summ) };
+    // window.__newIn adds threads to the top of the inbox and window.__gone takes them out (tests of an in-place refresh).
+    const ids = (window.__newIn || []).concat(order).filter((id) => !(window.__gone || []).includes(id));
+    return { resultCountEstimate: String(ids.length), threads: ids.map(summ) };
   };
   const DRAFTS = { drafts: [{ id: 'd1', threadId: 't2', plaintextBody: 'Hi Lee, Tuesday at 10 works. See you there. Alex', viewUrl: 'https://mail.google.com/d1' }] };
   // The Drafts tab: full drafts by id (get_draft), plus two that aren't replies to anything in the inbox.
@@ -153,7 +155,7 @@ module.exports = function fake() {
       window.__calls.push({ server, tool, input }); await new Promise((r) => setTimeout(r, 120));
       const P = (x) => ({ payload: x });
       if (server === 'Gmail') {
-        if (tool === 'search_threads') return P(search(input.query || ''));
+        if (tool === 'search_threads') { if (window.__failSearch) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); return P(search(input.query || '')); }
         if (tool === 'get_thread') {
           const t = JSON.parse(JSON.stringify(T[input.threadId]));
           if (input.messageFormat !== 'FULL_CONTENT') t.messages.forEach((m) => { delete m.htmlBody; });
@@ -231,6 +233,8 @@ module.exports = function fake() {
     if (p.includes('extract contact details')) return t({ name: 'Dana Ruiz', title: 'VP Marketing', company: 'Acme Robotics', phone: '+1 919 555 0142', website: 'https://acmerobotics.example', location: null, linkedin: 'https://www.linkedin.com/in/danaruiz-example/', x: 'https://x.com/danaruiz_example', bluesky: null, github: null, instagram: null });
     if (p.includes('You map person-enrichment data')) return t({ title: 'VP Marketing', company: 'Acme Robotics', location: 'Raleigh, North Carolina', linkedin: 'https://www.linkedin.com/in/danaruiz-demo', background: 'VP Marketing at Acme Robotics since 2023, leading partnerships and events. Before that, five years running developer marketing at Fieldline Systems.' });
     if (p.includes('first connected with')) return t('Met at the fall meetup in October 2026; Dana followed up about sponsoring the spring summit.');
+    // Then: the follow-ups after a reply sends (made-up).
+    if (p.includes('You turn a short instruction into follow-up steps')) return t(/pizza/i.test(p) ? { steps: [], unmatched: 'order pizza' } : { steps: [{ key: 'slack', fields: { to: 'Sam Ortiz', message: 'Dana is in for gold. Can you hold the big room for the sponsor walkthrough?' } }, { key: 'task', fields: { title: 'Send Dana the sponsor deck' } }], unmatched: '' });
     // Check it for me in the Drafts tab: five pass, one flagged (made-up).
     if (p.includes('You review an email draft before')) return t({ asks: { ok: true, note: 'New email; the ask is clear' }, facts: { ok: true, note: 'March meetup and April summit are consistent' }, commit: { ok: true, note: 'Asks a question, promises nothing yet' }, people: { ok: true, note: 'Riley only' }, tone: { ok: true, note: 'Warm and direct' }, clean: { ok: false, note: 'Give the summit date so Riley can check her calendar' } });
     if (p.includes('one Gmail search query')) return t('venue walkthrough');

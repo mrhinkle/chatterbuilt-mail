@@ -1,3 +1,5 @@
+<img src="docs/images/chatterbuilt-mail-mark.svg" width="64" height="64" alt="Chatterbuilt Mail mark">
+
 # Chatterbuilt Mail
 
 **A fun way to triage your Gmail with Claude.** It reads the room before you reply.

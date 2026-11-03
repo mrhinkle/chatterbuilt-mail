@@ -28,6 +28,8 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 
 - **The thread header.** The subject takes at most two lines. On a narrow reading pane the thread buttons turn into icons on one line (hover for the name), and the chevron at the right of the subject hides them altogether. The context card's header folds it with a click.
 - **More mail.** The list shows 25 at a time. Scroll to the end, or press **Load older mail**, for the next batch. The footer shows how many are loaded out of Gmail's estimate.
+- **It updates, it doesn't reload.** **Refresh**, and the refresh after you archive, snooze, move or undo, fetches the newest page and merges it into the list on screen. New mail slides in at the top with a moment of highlight, threads that left the view drop out, and your scroll position, open thread and selection stay where they were. The list also checks quietly every few minutes while the page is open, and when you come back to the tab.
+- **Views come back at once.** Inbox, Unread, Primary, each account and each search keep their last list, so switching shows it straight away and refreshes behind it. The latest list is also kept for this browser session, so reopening the page shows your list before Gmail answers. If a refresh fails, the list stays as it was and a note says so.
 
 ## Triage
 

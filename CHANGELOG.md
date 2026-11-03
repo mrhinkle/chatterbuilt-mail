@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.0 (2026-11-03)
+
+### Changed
+- **New mark.** Chatterbuilt Mail now uses the Chatterbuilt Blockwork mark, unchanged, with an envelope flap on the node that talks: the first of the Chatterbuilt product marks (one white icon, on that node only). It replaces the blue chat icon in the app header and heads the README. The SVG is `docs/images/chatterbuilt-mail-mark.svg`.
+
+### Fixed
+- An in-place refresh no longer keeps rows from before when you hadn't paged into older mail, so Load older mail in All inboxes stays in date order with no repeats.
+
+## 0.6.9 (2026-11-03)
+
+### New
+- **Then: follow-ups that run after a reply sends.** A line in the reply box takes plain words ("Slack Christine to book the room", "add a task to send the deck Friday"). Send lists the steps in the confirmation, and they run once the reply has gone, through the same actions as Route: your task app, Remind me, a Slack draft (never sent) or a custom action.
+- **A list that updates instead of reloading.** Refresh, and the refresh after archive, snooze, move or undo, merges the newest page into the list on screen: new mail slides in on top, threads that left drop out, and your place, open thread and selection stay. Each view keeps its last list so switching is instant, the list survives a reload for the browser session, it checks quietly every few minutes, and a failed refresh leaves the list alone.
+
+### Changed
+- **The signature preview looks like the signature.** It renders your signature's own HTML (tables, colors, fonts, links), kept apart from the page's styles. Pictures show as boxes of their real size, since the page can't load outside images. The preview no longer scrolls inside itself.
+- After a send, the summary of what happened ("Sent; task added") also shows as a toast, since the reply box resets.
+
 ## 0.6.8 (2026-11-03)
 
 ### Changed

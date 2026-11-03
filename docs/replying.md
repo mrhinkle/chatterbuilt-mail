@@ -86,6 +86,15 @@ Then you choose:
 
 If nothing is wrong, it says so and asks you to confirm. If the check can't run, you can still send. While it runs, **Send without checking** skips it. You can turn the check off in **Settings → Skills**.
 
+## Then: what happens after it sends
+
+The **Then** line in the reply box takes plain words for what should happen once the reply has gone: "Slack Christine to book the room", "add a task to send Dana the deck Friday", "remind me if she doesn't answer by Thursday". The line under it says what your copy can do.
+
+- When you press **Send**, the confirmation lists the steps it worked out ("Slack draft to Christine: …", "Task in Notion: Send Dana the deck") and anything it can't do. Nothing runs until you confirm.
+- After the reply sends, the steps run, and the note says what happened ("Sent; Slack draft for Christine saved, task added.").
+- It uses the same actions as [Route](route-and-next-steps.md): your task app, Remind me, **Message someone in Slack** (left as a draft in Slack, never sent) and your custom actions. Links back to the thread go along.
+- Change the Then line after the confirmation opens and the confirmation closes, so it never runs an old plan. Saving a draft doesn't run it.
+
 ## From: which address it goes from
 
 With Gmail through Composio, a **From** menu sits over the recipients. It lists every address you can send from: each connected account's own address and the aliases you've set up in Gmail under Settings → Accounts → **Send mail as**, grouped by account.
@@ -108,7 +117,7 @@ With the Gmail connector there's one account and no aliases to pick, so the menu
 - **Snippets:** reusable text you insert at the cursor (the foot of the reply box, or **Reply → Insert a snippet**), with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
 - **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. Each account uses its own.
   - **Signature** under the reply box is on by default. Switch it off to leave the signature off one message; the next thread starts with it on again.
-  - **Show** previews the signature that will go on, read from Gmail: through Composio from the account's settings (the From address's own signature when it has one), and with the Gmail connector from the newest message you sent that carries one. Remote images show by their alt text in the preview; the real email gets the real images.
+  - **Show** previews the signature that will go on, laid out as it will look in the email (its tables, colors, fonts and links), read from Gmail: through Composio from the account's settings (the From address's own signature when it has one), and with the Gmail connector from the newest message you sent that carries one. The page can't load outside images, so each picture shows as a box of its real size with its name; the real email gets the real images.
   - If your drafts already end with a signature block, switch it off for that message, or turn **Gmail signature** off in Skills so you don't get two.
 - **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
 - **Reply all:** off by default. The pre-send check warns when reply-all looks risky. The line above the reply says who it goes to.
@@ -125,6 +134,7 @@ With the Gmail connector there's one account and no aliases to pick, so the menu
 |---|---|---|---|
 | Drafting | the thread; your sent mail to this person (tone); the context brief; your calendar (open times only) | nothing | the thread, your voice and lessons, the brief, free time slots |
 | Save draft | | a Gmail draft (`create_draft`, with your Gmail signature unless it's switched off) | |
+| Then | | after the send: your task app, a reminder label, a Slack draft or a custom action | the Then line, the reply, the thread's subject and sender |
 | From | the addresses you can send from (`GMAIL_LIST_SEND_AS` for each account, once per session) | nothing | nothing |
 | Send from another address | | a new email from that address (`GMAIL_SEND_EMAIL` with `from_email`, on that account) | the reply and thread, for the pre-send check |
 | Show signature | your signature: Gmail settings through Composio (`GMAIL_LIST_SEND_AS`), or your newest signed sent message with the Gmail connector (`search_threads`, `get_thread`) | nothing | nothing |

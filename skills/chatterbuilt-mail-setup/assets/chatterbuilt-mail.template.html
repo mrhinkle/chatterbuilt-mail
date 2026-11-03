@@ -63,7 +63,9 @@ code { font-family: var(--font-mono); font-size: 12px; background: rgba(15, 23, 
 .app { height: 100%; display: flex; flex-direction: column; gap: 12px; padding-block: 14px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 header.bar { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 9px 12px 9px 10px; border-radius: var(--radius-lg); }
 .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
-.appicon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; color: #ffffff; flex: none; background: linear-gradient(150deg, #5b93ff 0%, #2563eb 55%, #1e40af 100%); box-shadow: 0 6px 14px rgba(37, 99, 235, 0.33), inset 0 1px 0 rgba(255, 255, 255, 0.35); }
+/* The Chatterbuilt Mail mark: the Chatterbuilt Blockwork mark, unchanged, with an envelope flap on the node that talks. */
+.appicon { width: 34px; height: 34px; display: grid; place-items: center; flex: none; background: none; }
+.appicon svg { display: block; width: 34px; height: 34px; }
 .brandtext { display: flex; flex-direction: column; min-width: 0; line-height: 1.2; }
 .brand h1 { margin: 0; font-size: 15px; font-weight: 650; letter-spacing: -0.012em; }
 .brand h1 a { color: var(--fg); text-decoration: none; }
@@ -347,9 +349,15 @@ body:not(.thread-open) .headtog { display: none; }
 .msg .att .attbtn:hover { border-color: var(--accent); color: var(--accent); }
 .msg .body a, .msg .quoted a { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
 .rfromrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 2px; font-size: 12.5px; } .rfromrow .rl { color: var(--muted); font-weight: 600; } .rfromrow select { max-width: 100%; font: inherit; padding: 3px 6px; border: 1px solid var(--line-2); border-radius: 5px; background: #ffffff; } .rfromrow .note { flex-basis: 100%; color: var(--warm); }
+/* New mail that arrives on a refresh shows a moment of highlight; the refresh button dims while it looks. */
+.thread.fresh:not(.sel) { animation: freshIn 2.6s ease-out; }
+@keyframes freshIn { from { background-color: rgba(37, 99, 235, 0.14); } to { background-color: transparent; } }
+#refreshBtn.busy { opacity: 0.55; cursor: progress; }
+.thenrow { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 0 2px; font-size: 12.5px; } .thenrow .rl { color: var(--muted); font-weight: 600; } .thenrow input { flex: 1 1 220px; min-width: 0; padding: 6px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font: inherit; } .thenrow .note { flex-basis: 100%; font-size: 11.5px; }
+.thenplan { display: flex; flex-direction: column; gap: 4px; margin: 4px 0 6px; font-size: 12.5px; } .thenplan .lbl { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); } .thenplan ul { margin: 0; padding-left: 18px; }
 .sigrow { display: flex; align-items: center; gap: 6px; margin: -2px 2px 2px; font-size: 12px; }
-.sigbox, .dsig .dsigbody { max-height: 14em; overflow: auto; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
-.sigview { font-size: 12px; color: var(--fg); } .sigview table { border-collapse: collapse; } .sigview td { padding: 1px 6px 1px 0; vertical-align: top; } .sigview .imgalt { color: var(--faint); font-size: 11px; }
+.sigbox, .dsig .dsigbody { overflow: visible; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; }
+.sigview { background: #ffffff; } .sigimg { margin: 6px 0 0; font-size: 11px; }
 .modal.attmodal { width: min(980px, 100%); }
 .attview { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
 .attview .attbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
@@ -643,7 +651,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 <div class="app" id="app" data-view="list">
   <header class="bar glass">
     <div class="brand">
-      <span class="appicon" aria-hidden="true"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7.2A2.7 2.7 0 0 1 6.7 4.5h10.6A2.7 2.7 0 0 1 20 7.2v6.6a2.7 2.7 0 0 1-2.7 2.7H11l-4.4 3.3v-3.3h0A2.7 2.7 0 0 1 4 13.8z"/><path d="M7.6 8.6l4.4 2.9 4.4-2.9"/></svg></span>
+      <span class="appicon" title="Chatterbuilt Mail"><svg viewBox="0 0 64 64" width="34" height="34" role="img" aria-label="Chatterbuilt Mail"><rect x="6" y="6" width="23" height="23" rx="5" fill="#6c4cf1"/><rect x="35" y="6" width="23" height="23" rx="5" fill="#00b3d6"/><rect x="6" y="35" width="23" height="23" rx="5" fill="#00b3d6"/><g fill="#6c4cf1"><rect x="35" y="35" width="23" height="23" rx="5"/><path d="M56 50v12l-14-12z"/></g><path d="M39.5 41.5 46.5 47.5 53.5 41.5" fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
       <div class="brandtext">
         <h1><a id="repoLink" href="https://github.com/mrhinkle/chatterbuilt-mail" target="_blank" rel="noopener" title="Chatterbuilt Mail on GitHub: docs, source and updates">Chatterbuilt Mail<span class="gh">GitHub ↗</span></a></h1>
         <span class="acct" id="acct">Gmail</span>
@@ -767,6 +775,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         <textarea id="body" placeholder="Your reply. Type here, or pick Reply above for a first draft."></textarea>
         <div class="sigrow" data-feat="signature"><label class="tog" title="Add the signature you set in Gmail when this sends or saves as a draft"><input type="checkbox" id="sigChk" checked>Signature</label><button class="btn sm ghost" id="sigPeek" type="button" aria-expanded="false" aria-controls="sigBox">Show</button><span class="note" id="sigNote"></span></div>
         <div class="sigbox" id="sigBox" data-feat="signature" hidden></div>
+        <div class="thenrow" id="thenRow" hidden><span class="rl">Then</span><input type="text" id="thenIn" autocomplete="off" placeholder="After it sends: “Slack Christine to book the room”, “add a task to send the deck Friday”" aria-label="What to do after it sends"><span class="note" id="thenNote"></span></div>
         <div class="foot">
           <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
           <label class="btn sm ghost" data-feat="attach" title="Attach files, up to 18 MB">Attach<input type="file" id="fileIn" multiple hidden></label>
@@ -782,6 +791,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         <span class="note" id="composeNote"></span>
         <div class="confirmbox" id="confirmBox" hidden>
           <div id="checkOut"></div>
+          <div id="thenPlan"></div>
           <div class="mrow"><span id="confirmText">Send this reply?</span><button class="btn sm primary" id="confirmSend" type="button">Yes, send it</button><button class="btn sm" id="useFix" type="button" hidden>Use suggested version</button><button class="btn sm ghost" id="cancelSend" type="button">Cancel</button></div>
         </div>
       </div>
@@ -1632,7 +1642,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         + (state.draftMap && state.draftMap[t.id] ? '<span class="pill drafted">draft in Gmail</span>' : "")
         + (tri ? '<span class="pill ' + esc(tri.priority) + '">' + esc(tri.priority) + '</span><span class="why">' + esc(tri.why) + '</span>' + nextChip(t, tri.next) : "");
       const picked = state.picked.has(t.id);
-      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + (tri && tri.next ? " has-nx" : "") + (picked ? " picked" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
+      return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (t._fresh && Date.now() - t._fresh < 4000 ? " fresh" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + (tri && tri.next ? " has-nx" : "") + (picked ? " picked" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
         + (state.mode === "waiting" ? "" : '<label class="rsel" title="Select (x). Shift-click selects a range."><input type="checkbox" data-pick="' + esc(t.id) + '"' + (picked ? " checked" : "") + ' aria-label="Select ' + esc(who) + '"></label>')
         + '<span class="from">' + esc(who) + '</span>'
         + '<span class="when">' + esc(fmtDate(m.date)) + '</span>'
@@ -1711,8 +1721,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.mode !== "drafts" && state.dSel) { if (state.dDirty && !state.readOnly) await saveDraftEdit(true); state.dSel = null; state.dCur = null; state.dDirty = false; if (!state.selectedId) clearDesk(); }
     if (state.mode === "waiting") return loadWaiting(token);
     if (state.mode === "drafts") return loadDraftsList(token);
-    if (!append) { state.picked.clear(); state.threads = []; state.nextToken = null; state.hasMore = false; state.estimate = 0; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
-    $("moreBtn").hidden = true; $("countText").textContent = append ? "loading more…" : "loading";
+    // Same view already on screen: refresh in place and merge. Another view: show its last list at once, then refresh it.
+    const key = viewKey(); let soft = false;
+    if (!append) {
+      if (state.shownKey === key && state.threads.length) soft = true;
+      else { const c = listCache[key] || snapLoad(key); if (c && c.threads && c.threads.length) { state.picked.clear(); Object.assign(state, { threads: c.threads, nextToken: c.nextToken || null, hasMore: !!c.hasMore, estimate: c.estimate || 0 }); state.shownKey = key; renderList(); soft = true; } }
+    }
+    if (!append && !soft) { state.picked.clear(); state.threads = []; state.nextToken = null; state.hasMore = false; state.estimate = 0; state.shownKey = key; list.innerHTML = '<div class="empty"><span class="spin"></span>Loading threads…</div>'; }
+    if (soft) { $("refreshBtn").classList.add("busy"); lastSoft = Date.now(); }
+    else { $("moreBtn").hidden = true; $("countText").textContent = append ? "loading more…" : "loading"; }
     if (append) { state.loadingMore = true; const lm = list.querySelector("[data-loadmore]"); if (lm) lm.closest(".loadmore").innerHTML = '<span class="spin"></span>Loading older mail…'; }
     try {
       let threads, more;
@@ -1723,7 +1740,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       } else {
         const input = { query: state.query, pageSize: 25, view: "THREAD_VIEW_SUMMARY" };
         if (append) input.pageToken = state.nextToken;
-        const p = await call(GMAIL, "search_threads", input, { cache: { staleTime: 20000, gcTime: 300000 } });
+        const p = await call(GMAIL, "search_threads", input, soft ? { cache: false } : { cache: { staleTime: 20000, gcTime: 300000 } });
         if (token !== state.loadToken) return;
         threads = (p && p.threads) || [];
         if (p && p.failed && p.failed.length) toast("Couldn't load " + p.failed.map((f) => esc(f.label)).join(", ") + ". " + esc(p.failed[0].message), "err", 9000);
@@ -1732,22 +1749,56 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         state.nextToken = (p && p.nextPageToken) || null;
         more = !!state.nextToken || ((p && p.threads) || []).length >= input.pageSize || (!append && state.estimate > threads.length);
       }
+      // Keep your place only if you'd paged into older mail; then paging carries on from where you were.
+      if (soft) { const keepOld = (state.pages || 1) > 1, oldTok = state.nextToken0; const m = mergeFresh(state.threads, threads, !more || !keepOld); threads = m.threads; if (m.kept) { more = true; if (oldTok) state.nextToken = oldTok; } else state.pages = 1; }
+      else if (!append) state.pages = 1;
+      if (append) state.pages = (state.pages || 1) + 1;
       state.threads = append ? state.threads.concat(threads) : threads;
-      state.hasMore = !!more;
+      state.hasMore = !!more; if (append || !soft || (state.pages || 1) === 1) state.nextToken0 = state.nextToken;
       $("moreBtn").hidden = !state.hasMore;
       $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate, state.threads.length) : "");
+      if (soft) { const live = new Set(state.threads.map((t) => t.id)); [...state.picked].forEach((id) => { if (!live.has(id)) state.picked.delete(id); }); }
       renderList();
       loadPreviews();
       setStatus("connected", "live");
-      if (!append) { maybeAutoRules(); loadDraftsMap(); }
+      listCache[key] = { threads: state.threads, nextToken: state.nextToken, hasMore: state.hasMore, estimate: state.estimate }; snapSave(key);
+      if (!append && !soft) { maybeAutoRules(); loadDraftsMap(); } else if (soft) loadDraftsMap();
     } catch (e) {
       if (token !== state.loadToken) return;
+      if (soft && !append) { toast("Couldn't refresh: " + esc(mcpCopy(e, GMAIL)) + " The list shows what was there.", "err", 6000); setStatus(e && e.code ? e.code : "error", "err"); return; }
       if (append) { toast("Couldn't load older mail: " + esc(mcpCopy(e, GMAIL)), "err", 6000); $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + state.estimate : ""); $("moreBtn").hidden = !state.hasMore; return; }
       list.innerHTML = '<div class="empty"><h2>Couldn\'t load threads</h2><p>' + esc(mcpCopy(e, GMAIL)) + '</p><button type="button" class="btn sm primary" data-retrylist="1">Try again</button></div>';
       $("countText").textContent = "error";
       setStatus(e && e.code ? e.code : "error", "err");
-    } finally { if (append) { state.loadingMore = false; if (token === state.loadToken) renderList(); } }
+    } finally { if (append) { state.loadingMore = false; if (token === state.loadToken) renderList(); } if (soft && token === state.loadToken) $("refreshBtn").classList.remove("busy"); }
   }
+  // ---------- a list that updates instead of reloading ----------
+  // Each view (account, tab, search) keeps its last list. A refresh fetches the newest page and merges it: new mail goes
+  // on top (highlighted for a moment), threads that left the view drop out, everything else keeps its place, your open
+  // thread and selection included. The latest list per view is kept for this browser session so the page opens on it.
+  const listCache = {}; let lastSoft = Date.now();
+  const viewKey = () => (GX ? (isAll() ? "all" : (curAcct() || {}).id) : "") + "|" + state.mode + "|" + (state.query || "");
+  function mergeFresh(old, fresh, complete) {
+    const ids = new Set(fresh.map((t) => t.id)), had = new Set(old.map((t) => t.id));
+    const oldest = fresh.length ? Math.min(...fresh.map((t) => Date.parse(((t.messages || [])[(t.messages || []).length - 1] || {}).date) || Infinity)) : Infinity;
+    fresh.forEach((t) => { if (!had.has(t.id)) t._fresh = Date.now(); const o = old.find((x) => x.id === t.id); if (o && o._fresh && Date.now() - o._fresh < 4000) t._fresh = o._fresh; });
+    // Older threads past the newest page stay; one that's newer than that page but missing from it has left the view.
+    // When the newest page is the whole view, anything not on it has left.
+    const keep = complete ? [] : old.filter((t) => { if (ids.has(t.id)) return false; const d = Date.parse(((t.messages || [])[(t.messages || []).length - 1] || {}).date) || 0; return d && d < oldest; });
+    return { threads: fresh.concat(keep), kept: keep.length };
+  }
+  const SNAP = "cm.list.";
+  function snapSave(key) {
+    try {
+      const rows = state.threads.slice(0, 50).map((t) => Object.assign({}, t, { _fresh: undefined, messages: (t.messages || []).map((m) => Object.assign({}, m, { plaintextBody: undefined, htmlBody: undefined })) }));
+      sessionStorage.setItem(SNAP + key, JSON.stringify({ at: Date.now(), threads: rows, estimate: state.estimate, hasMore: state.hasMore || state.threads.length > 50 }));
+    } catch { /* storage full or off: the list just loads normally */ }
+  }
+  function snapLoad(key) { try { const v = JSON.parse(sessionStorage.getItem(SNAP + key) || "null"); return v && Date.now() - v.at < 12 * 3600000 ? { threads: v.threads, estimate: v.estimate, hasMore: v.hasMore, nextToken: null } : null; } catch { return null; } }
+  // Quietly pull changes every few minutes while the page is in view, and when you come back to it.
+  function softRefresh() { if (document.hidden || state.loadingMore || state.sending || !state.threads.length || state.mode === "waiting" || state.mode === "drafts" || state.shownKey !== viewKey()) return; loadThreads(false); }
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && Date.now() - lastSoft > 60000) softRefresh(); });
+  setInterval(() => { if (Date.now() - lastSoft > 180000) softRefresh(); }, 30000);
 
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-retrylist]")) loadThreads(false); });
 
@@ -1892,7 +1943,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         + '</article>';
     }).join("");
     compose.hidden = false; $("desk").scrollTop = 0; setCompose(ls.get("cm.composeOpen") === "1", false); updateToLine();
-    $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = ""; resetSigRow(); resetFrom();
+    $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = ""; resetSigRow(); resetFrom(); resetThen();
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
     state.loadedDraftId = null; state.attachments = []; renderAtt();
@@ -2269,7 +2320,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       } else await call(GMAIL, "reply", Object.assign({ messageId: last.id, body: body, replyAll: $("replyAll").checked, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]); delete state.variants[state.selectedId];
       const after = await afterSend(state.selectedId);
-      note("Sent" + (after.length ? "; " + after.join(", ") : "") + ".", "ok"); $("body").value = ""; resetRcpts();
+      const sentMsg = "Sent" + (after.length ? "; " + after.join(", ") : "") + "."; note(sentMsg, "ok"); toast(esc(sentMsg), after.some((x) => /^couldn't|didn't/.test(x)) ? "err" : "ok", after.length ? 9000 : 4000); $("body").value = ""; resetRcpts();
       try { await invalGmail("get_thread"); } catch {}
       openThread(state.selectedId);
     } catch (e) {
@@ -2755,8 +2806,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const who = (own ? counterpart(last).map((a) => a).join(", ") : (nameOf(last.sender) || "the sender") + ($("replyAll").checked ? " and everyone on the thread" : "")) + rcptSummary();
     const verb = (own ? "Send this follow-up" : "Send this reply") + (state.from ? " from " + state.from.email + ", as a new email," : "") + " to ";
     const box = $("confirmBox"), out = $("checkOut"); box.hidden = false; box.className = "confirmbox"; $("useFix").hidden = true;
-    if (!featOn("precheck")) { out.innerHTML = ""; $("confirmText").textContent = verb + who + "?"; $("confirmSend").textContent = "Yes, send it"; return; }
-    const run = ++checkRun;
+    if (!featOn("precheck")) { out.innerHTML = ""; $("confirmText").textContent = verb + who + "?"; $("confirmSend").textContent = "Yes, send it"; showThenPlan(++checkRun); return; }
+    const run = ++checkRun; showThenPlan(run);
     out.innerHTML = '<span class="note"><span class="spin"></span>Checking your reply against the thread…</span>';
     $("confirmText").textContent = ""; $("confirmSend").textContent = "Send without checking";
     try {
@@ -2777,6 +2828,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   $("useFix").addEventListener("click", () => { const r = state.lastCheck; if (!r || !r.revised) return; $("body").value = r.revised; $("confirmBox").hidden = true; note("Applied the suggested version. Read it over, then press Send again."); $("body").focus(); });
   $("body").addEventListener("input", () => { if (!$("confirmBox").hidden) { $("confirmBox").hidden = true; checkRun++; } });
+  $("thenIn").addEventListener("input", () => { state.thenPlan = null; state.thenP = null; if (!$("confirmBox").hidden) { $("confirmBox").hidden = true; checkRun++; } });
 
   // ---------- review queue ----------
   function mkProp(t, op, label, why, source) { const m = (t.messages && t.messages[0]) || {}; return { threadId: t.id, subject: cleanSubject(m.subject), from: nameOf(m.sender) || "", fromEmail: emailOf(m.sender).toLowerCase(), op: op, labelId: label ? label.labelId : null, labelName: label ? label.name : null, why: String(why || ""), source: source }; }
@@ -4106,22 +4158,73 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const fields = {}; document.querySelectorAll('[data-rf="' + i + '"]').forEach((el) => { fields[el.dataset.k] = el.value.trim(); });
       st.innerHTML = '<span class="spin"></span>';
       try {
-        if (c.key === "task") { const ok = await createTask(id, null, fields.title ? { title: fields.title } : {}); if (!ok) throw { code: "tool_error", message: "see the message above" }; }
-        else if (c.key === "contact") openContactAfter = true;
-        else if (c.key === "snooze") await snoozeThread(id, normDate(fields.until, 1));
-        else if (c.key === "remind") await remindThread(id, normDate(fields.until, 3));
-        else if (c.key === "slack") await slackDraft(fields.to, (fields.message || "") + "\n\n" + (last.viewUrl || t.viewUrl || ("https://mail.google.com/mail/#all/" + id)));
-        else {
-          const vals = Object.assign({}, who, { url: last.viewUrl || t.viewUrl || ("https://mail.google.com/mail/#all/" + id), subject: cleanSubject(last.subject), from: last.sender || "", fromEmail: emailOf(last.sender) }, fields);
-          const input = fillTemplate(c.input || {}, vals);
-          Object.keys(input).forEach((k) => { if (typeof input[k] === "string") input[k] = input[k].trim(); });
-          await call(c.server, c.tool, input, { cache: false });
-        }
+        if (c.key === "contact") openContactAfter = true; else await runStep(c, fields, id, t, who);
         st.className = "note ok"; st.textContent = c.key === "contact" ? "opening…" : "done ✓"; done++;
       } catch (e) { st.className = "note err"; st.textContent = mcpCopy(e, c.server || GMAIL) || "failed"; }
     }
     const n = $("rtNote"); if (n) n.textContent = done + " of " + picked.length + " done.";
     if (openContactAfter) setTimeout(() => { closeModal(); openContact(); }, 600);
+  }
+  // One routed action on a thread: a task, a reminder, a Slack draft or one of CONFIG.actions. Route and Then share it.
+  async function runStep(c, fields, id, t, who) {
+    const last = lastMessage(t) || {}; const url = last.viewUrl || t.viewUrl || ("https://mail.google.com/mail/#all/" + id);
+    if (c.key === "task") { const ok = await createTask(id, null, fields.title ? { title: fields.title } : {}); if (!ok) throw { code: "tool_error", message: "see the message above" }; return; }
+    if (c.key === "snooze") return snoozeThread(id, normDate(fields.until, 1));
+    if (c.key === "remind") return remindThread(id, normDate(fields.until, 3));
+    if (c.key === "slack") return slackDraft(fields.to, (fields.message || "") + "\n\n" + url);
+    const vals = Object.assign({}, who || {}, { url: url, subject: cleanSubject(last.subject), from: last.sender || "", fromEmail: emailOf(last.sender) }, fields);
+    const input = fillTemplate(c.input || {}, vals);
+    Object.keys(input).forEach((k) => { if (typeof input[k] === "string") input[k] = input[k].trim(); });
+    await call(c.server, c.tool, input, { cache: false });
+  }
+
+  // ---------- Then: what to do after a reply sends ----------
+  // A line in the reply box takes plain words ("Slack Christine to book the room, and add a task to send the deck
+  // Friday"). Pressing Send turns them into steps from what's set up (Slack, the task app, Remind me, CONFIG.actions)
+  // and lists them in the send confirmation. They run only after the reply has gone. A Slack message is left as a draft.
+  const thenCat = () => routeCatalog().filter((c) => c.key !== "contact" && c.key !== "snooze");
+  function resetThen() {
+    const row = $("thenRow"); if (!row) return; const cat = thenCat();
+    row.hidden = !cat.length || !featOn("route"); $("thenIn").value = ""; state.thenPlan = null; state.thenP = null;
+    $("thenNote").textContent = cat.length ? "Runs after it sends. You can: " + cat.map((c) => c.label.replace(/^Message someone in Slack$/, "Slack someone").replace(/^Remind me if no reply$/, "remind me")).join(", ") + "." : "";
+  }
+  async function planThen(instr, t, body) {
+    const cat = thenCat(); const last = lastMessage(t) || {};
+    const text = await ask(MARK + " You turn a short instruction into follow-up steps that run after " + OWNER + " sends an email reply. Reply with JSON only.",
+      "Instruction: " + instr + "\n\nSteps you can use (key: what it does; fields to fill):\n" + cat.map((c) => "- " + c.key + ": " + c.label + (c.note ? " (" + c.note + ")" : "") + "; fields " + JSON.stringify(c.ai || {})).join("\n")
+      + "\n\nThe thread: \"" + cleanSubject(last.subject) + "\", last message from " + (last.sender || "unknown") + ".\nThe reply being sent:\n" + String(body || "").slice(0, 3000)
+      + "\n\nToday is " + ymd(Date.now()) + ". Reply {\"steps\": [{\"key\": string, \"fields\": {...}}], \"unmatched\": string}. Use only keys from the list, one step per thing asked, and fill every field from the instruction and the thread. Put anything the list can't do in unmatched, in a few words, else \"\".", { max_tokens: 900 });
+    const o = parseJsonObject(text) || {};
+    return { instr: instr, steps: (Array.isArray(o.steps) ? o.steps : []).map((x) => ({ c: cat.find((c) => c.key === (x && x.key)), fields: (x && x.fields) || {} })).filter((x) => x.c), unmatched: String(o.unmatched || "").trim() };
+  }
+  function stepText(x) {
+    const f = x.fields || {};
+    if (x.c.key === "slack") return "Slack draft to " + (f.to || "?") + ": \u201c" + String(f.message || "").slice(0, 140) + "\u201d";
+    if (x.c.key === "task") return x.c.label + ": " + (f.title || "(from the thread)");
+    if (x.c.key === "remind") return "Remind me if no reply by " + niceDate(normDate(f.until, 3));
+    const v = Object.values(f).map(String).filter(Boolean)[0];
+    return x.c.label + (v ? ": " + v.slice(0, 120) : "");
+  }
+  function showThenPlan(run) {
+    const box = $("thenPlan"); const instr = $("thenIn").value.trim(); if (!box) return;
+    if (!instr || $("thenRow").hidden) { box.innerHTML = ""; state.thenP = null; state.thenPlan = null; return; }
+    box.innerHTML = '<span class="note"><span class="spin"></span>Working out what to do after it sends…</span>';
+    const t = state.thread;
+    state.thenP = planThen(instr, t, $("body").value).then((p) => { state.thenPlan = p; return p; });
+    state.thenP.then((p) => {
+      if (run !== checkRun || $("confirmBox").hidden) return;
+      box.innerHTML = '<div class="thenplan"><span class="lbl">Then</span>' + (p.steps.length ? '<ul>' + p.steps.map((x) => '<li>' + esc(stepText(x)) + '</li>').join("") + '</ul>' : '<span class="note">Nothing set up here can do that.</span>')
+        + (p.unmatched ? '<span class="note err">Can\'t do: ' + esc(p.unmatched) + '</span>' : "") + '</div>';
+    }).catch((e) => { if (run === checkRun) box.innerHTML = '<span class="note err">Couldn\'t work out the follow-ups: ' + esc(mcpCopy(e, aiLabel()) || "stopped") + '. The reply still sends; nothing else runs.</span>'; });
+  }
+  async function runThen(threadId, t) {
+    const instr = $("thenIn") ? $("thenIn").value.trim() : ""; if (!instr) return [];
+    let p = state.thenPlan; try { if (!p || p.instr !== instr) p = await (state.thenP && state.thenPlan == null ? state.thenP : planThen(instr, t, $("body").value)); } catch { return ["couldn't work out the follow-ups"]; }
+    const who = { who: nameOf((lastMessage(t) || {}).sender) || emailOf((lastMessage(t) || {}).sender), name: nameOf((lastMessage(t) || {}).sender), email: emailOf((lastMessage(t) || {}).sender) };
+    const out = [];
+    for (const x of p.steps) { try { await runStep(x.c, x.fields, threadId, t, who); out.push(x.c.key === "slack" ? "Slack draft for " + (x.fields.to || "them") + " saved" : x.c.key === "task" ? "task added" : x.c.key === "remind" ? "reminder set" : x.c.label.toLowerCase() + " done"); } catch (e) { out.push("couldn't " + (x.c.key === "slack" ? "leave the Slack draft" : x.c.key === "task" ? "add the task" : "do " + x.c.label) + " (" + (mcpCopy(e, x.c.server || SLACK) || "failed") + ")"); } }
+    $("thenIn").value = ""; state.thenPlan = null; state.thenP = null;
+    return out;
   }
   // Route's built-in Slack message: find the person or channel by name, then leave a draft there. It never sends.
   async function slackDraft(to, message) {
@@ -4338,6 +4441,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   async function afterSend(threadId) {
     const msgs = [];
+    try { msgs.push(...await runThen(threadId, state.thread)); } catch { msgs.push("the follow-ups didn't run"); }
     if (state.loadedDraftId) { try { await call(GMAIL, "delete_draft", { draftId: state.loadedDraftId }, { cache: false }); delete state.draftMap[threadId]; msgs.push("removed the old Gmail draft"); } catch (e) { msgs.push("the old Gmail draft is still there"); } state.loadedDraftId = null; }
     if (featOn("snooze") && $("remindChk").checked) { try { await remindThread(threadId, ymd(Date.now() + (+$("remindDays").value || 3) * 864e5)); msgs.push("reminder set"); } catch (e) { msgs.push("couldn't set the reminder"); } $("remindChk").checked = false; }
     state.attachments = []; renderAtt();
@@ -4401,7 +4505,45 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     return sigCache[key];
   }
   // A signature as it looks, minus remote images (shown by their alt text) and styles.
-  const sigPreview = (h) => '<div class="sigview">' + sanitizeHtml(h).innerHTML + '</div>';
+  // A signature as it will look in the email: its own tables, colors, fonts and links, kept apart from this page's styles
+  // in a shadow root. This page can't load remote images, so each one shows as a box of its real size (round if the
+  // image is), labeled with its alt text. Scripts, event handlers, forms and anything that loads from elsewhere are dropped.
+  const SIG_TAGS = /^(TABLE|THEAD|TBODY|TFOOT|TR|TD|TH|DIV|SPAN|P|BR|A|B|STRONG|I|EM|U|IMG|FONT|HR|SMALL|SUP|SUB|CENTER|UL|OL|LI|H1|H2|H3|H4|H5|H6)$/;
+  const SIG_ATTRS = ["width", "height", "align", "valign", "bgcolor", "cellpadding", "cellspacing", "border", "colspan", "rowspan", "color", "face", "size", "dir"];
+  const SIG_CSS = /^(color|background|background-color|font|font-family|font-size|font-weight|font-style|line-height|letter-spacing|text-align|text-decoration|text-transform|vertical-align|white-space|padding(-(top|right|bottom|left))?|margin(-(top|right|bottom|left))?|border(-(top|right|bottom|left|width|style|color|collapse|spacing|radius))?(-(width|style|color))?|width|height|max-width|min-width|max-height|display|direction)$/;
+  function sigStyle(v) {
+    return String(v || "").split(";").map((d) => { const i = d.indexOf(":"); if (i < 1) return ""; const p = d.slice(0, i).trim().toLowerCase(), val = d.slice(i + 1).trim(); return SIG_CSS.test(p) && val && !/url\(|expression|javascript:|@import|[<>]/i.test(val) && !(p === "display" && !/^(block|inline|inline-block|table|table-cell|table-row|none)$/i.test(val)) ? p + ":" + val : ""; }).filter(Boolean).join(";");
+  }
+  function sigClean(html) {
+    const doc = new DOMParser().parseFromString(String(html || ""), "text/html"); const out = document.createElement("div");
+    (function walk(src, dst) {
+      src.childNodes.forEach((n) => {
+        if (n.nodeType === 3) { dst.append(document.createTextNode(n.nodeValue)); return; }
+        if (n.nodeType !== 1 || DROP_TAGS.test(n.tagName)) return;
+        if (!SIG_TAGS.test(n.tagName)) { walk(n, dst); return; }
+        const st = sigStyle(n.getAttribute("style")), px = (k) => { const m = st.match(new RegExp("(?:^|;)" + k + ":\\s*(\\d+)")); return m ? +m[1] : 0; };
+        if (n.tagName === "IMG") {
+          const w = Math.min(400, parseInt(n.getAttribute("width"), 10) || px("width") || 24), h = Math.min(400, parseInt(n.getAttribute("height"), 10) || px("height") || w);
+          const alt = (n.getAttribute("alt") || "").trim(); const ph = document.createElement("span"); ph.className = "ph"; ph.title = alt || "Image";
+          ph.style.cssText = "width:" + w + "px;height:" + h + "px;" + (/border-radius/.test(st) ? "border-radius:50%;" : "") + (/display:\s*block/.test(st) ? "display:block;" : "");
+          ph.textContent = w >= 40 && h >= 20 ? alt : (alt.charAt(0) || ""); dst.append(ph); return;
+        }
+        const el = document.createElement(n.tagName.toLowerCase());
+        SIG_ATTRS.forEach((a) => { const v = n.getAttribute(a); if (v != null && /^[#\w%. ,-]{0,40}$/.test(v)) el.setAttribute(a, v); });
+        if (st) el.setAttribute("style", st);
+        if (n.tagName === "A") { const href = n.getAttribute("href") || ""; if (/^(https?:|mailto:|tel:)/i.test(href)) { el.setAttribute("href", href); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener noreferrer"); } }
+        walk(n, el); dst.append(el);
+      });
+    })(doc.body, out);
+    return out;
+  }
+  function mountSig(host, html) {
+    if (!host) return; const root = host.shadowRoot || host.attachShadow({ mode: "open" });
+    root.innerHTML = '<style>:host{display:block;overflow-x:auto;font:13px/1.4 Arial,Helvetica,sans-serif;color:#222}a{color:#1155cc}table{border-collapse:collapse}.ph{display:inline-block;box-sizing:border-box;padding:2px;overflow:hidden;vertical-align:middle;text-align:center;background:#eef1f6;border:1px dashed #c5ccd8;border-radius:3px;color:#7a8394;font:600 9px/1.15 system-ui,-apple-system,sans-serif;word-break:break-word}</style>';
+    root.append(sigClean(html));
+  }
+  const SIG_IMGNOTE = '<p class="note sigimg">Pictures show here as boxes of their real size; the email gets the real images.</p>';
+  const sigPreview = () => '<div class="sigview"></div>';
   const acctEmailOf = (id) => { const A = GX && GX.accounts.find((a) => a.id === id); return (A && A.email) || CONFIG.ownEmail || OWN || ""; };
   // ---------- From: the address a reply goes from ----------
   // Through Composio the reply box can send from any address on any connected account: each account's own address and
@@ -4457,13 +4599,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const A = curAcct(); const f = state.from; const addr = f ? f.email : (A && A.email) || ""; box.hidden = false; b.setAttribute("aria-expanded", "true"); b.textContent = "Hide"; box.innerHTML = '<span class="note"><span class="spin"></span>Getting your signature…</span>';
     try {
       const h = await mySignature(f ? f.acct : A && A.id, f ? f.email : "");
-      box.innerHTML = h ? sigPreview(h) : '<span class="note">No signature is set in Gmail' + (addr ? " for " + esc(addr) : "") + '. Add one in Gmail under Settings → Signature and it shows here.</span>';
+      box.innerHTML = h ? sigPreview() + (/<img/i.test(h) ? SIG_IMGNOTE : "") : '<span class="note">No signature is set in Gmail' + (addr ? " for " + esc(addr) : "") + '. Add one in Gmail under Settings → Signature and it shows here.</span>';
+      if (h) mountSig(box.querySelector(".sigview"), h);
     } catch (e) { box.innerHTML = '<span class="note err">' + esc(mcpCopy(e, GMAIL) || "Couldn't read your signature.") + '</span>'; }
   }
   // The Drafts editor: insert your current signature, swap an old one for it, or take it off. Nothing is saved until Save.
   function renderDraftSig() {
     const box = $("dSigBox"); if (!box) return;
-    box.innerHTML = state.dSig ? '<div class="dsig"><div class="dsighead"><span class="note">Signature · kept as it is</span><button type="button" class="btn sm ghost" id="dSigX">Remove</button></div><div class="dsigbody">' + sigPreview(state.dSig) + '</div></div>' : "";
+    box.innerHTML = state.dSig ? '<div class="dsig"><div class="dsighead"><span class="note">Signature · kept as it is</span><button type="button" class="btn sm ghost" id="dSigX">Remove</button></div><div class="dsigbody">' + sigPreview() + (/<img/i.test(state.dSig) ? SIG_IMGNOTE : "") + '</div></div>' : "";
+    if (state.dSig) mountSig(box.querySelector(".sigview"), state.dSig);
     const x = $("dSigX"); if (x) x.addEventListener("click", () => { state.dSig = ""; state.dDirty = true; renderDraftSig(); dNote("Signature removed. Save to keep the change; Insert signature puts it back."); });
   }
   async function insertDraftSig() {
@@ -4758,7 +4902,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("searchForm").addEventListener("submit", (ev) => { ev.preventDefault(); const q = $("q").value.trim(); if (!q) return; document.querySelectorAll("#chips .chip").forEach((x) => x.classList.remove("on")); state.query = q; state.mode = "normal"; $("waitWrap").hidden = true; state.triage = {}; loadThreads(false); });
   $("fromSel").addEventListener("change", pickFrom);
   if ($("sigPeek")) { $("sigPeek").addEventListener("click", peekSig); $("sigChk").addEventListener("change", () => { $("sigNote").textContent = $("sigChk").checked ? "" : "Not added to this one."; }); }
-  $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} state.triage = {}; draftsAt = 0; loadThreads(false); });
+  $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} draftsAt = 0; loadThreads(false); });
   $("moreBtn").addEventListener("click", () => loadThreads(true));
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-loadmore]")) loadThreads(true); });
   list.addEventListener("scroll", () => { if (state.hasMore && !state.loadingMore && list.scrollTop > 0 && list.scrollTop + list.clientHeight > list.scrollHeight - 240) loadThreads(true); }, { passive: true });

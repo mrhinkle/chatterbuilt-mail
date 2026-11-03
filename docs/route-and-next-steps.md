@@ -47,6 +47,10 @@ Everything else is yours to describe. *"Hand off scheduling to Christine in Slac
 
 Each custom action lives in `CONFIG.actions` and names a connector tool, the fields the AI should write (`ai`), and when it applies (`when`). The AI only suggests an action when its `when` fits. See [connectors.md](connectors.md#route-actions) for the format.
 
+## Then, from the reply box
+
+The same actions run from the reply box: type what should happen on the **Then** line ("Slack Christine to book the room") and they run after the reply sends, once you've confirmed. See [Replying](replying.md#then-what-happens-after-it-sends).
+
 ## How it decides
 
 The AI reads the thread (newest last), the brief from your [context panel](context-panel.md), and the raw records behind it, then picks only the actions the thread clearly calls for. Zero is a fine answer. Because it sees the raw records, an action can use an ID from a lookup, such as a pipeline row or a CRM contact, when you tell it to fill one in.
