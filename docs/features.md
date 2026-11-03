@@ -100,9 +100,9 @@ Guides: [replying.md](replying.md), [voice.md](voice.md).
 
 ![3 options: Best fit, Shorter and Polite no](images/options.webp)
 
-**One-click intents.** Say yes, Decline, Ask a question, Offer a call, Follow up later. Or type an instruction ("yes, but only if we can do it in December") and press Draft.
+**Reply menu.** Say yes, Decline, Ask a question, Offer a call, Follow up later. With a draft in the box, type what to change and press **Revise**, or use **Shorter**, **Warmer**, **More direct** and **Polish**; **Undo** steps back a version. Or type an instruction ("yes, but only if we can do it in December") and press Draft.
 
-**3 options.** Three versions: best fit, shorter, and a polite no. If the thread doesn't need a reply (a newsletter, a receipt, an FYI), it says so instead of inventing one.
+**Three options.** Three versions: best fit, shorter, and a polite no. If the thread doesn't need a reply (a newsletter, a receipt, an FYI), it says so instead of inventing one.
 
 **Pre-draft.** **Tools → Pre-draft**. Runs triage if needed, then writes the three options for up to eight threads marked *reply*, two at a time. Threads get a *drafted* tag. Nothing is saved to Gmail or sent.
 

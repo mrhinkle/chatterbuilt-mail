@@ -230,11 +230,21 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .thread .prev { grid-column: 1 / -1; font-size: 12.5px; color: var(--muted); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; min-height: 1.45em; }
 .thread .prev.pending { opacity: 0.5; }
 .thread .tri { grid-column: 1 / -1; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 5px; font-size: 12px; color: var(--muted); }
-.rowacts { position: absolute; right: 8px; top: 7px; display: flex; gap: 4px; opacity: 0; transition: opacity 0.12s; }
-.thread:hover .rowacts, .thread:focus-within .rowacts { opacity: 1; }
-.rowacts button { font-size: 11px; font-weight: 600; color: var(--fg); border: 1px solid var(--line); border-radius: 7px; padding: 2px 8px; background: rgba(255, 255, 255, 0.96); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08); }
-.rowacts button:hover { color: var(--accent); }
-@media (hover: none) { .rowacts { display: none; } }
+.thread.sel .tri { min-height: 24px; padding-right: 150px; } /* room for the action strip, so it never covers the preview */
+/* Row actions: a light icon strip, always on the open thread, on hover for the rest. Right-click a row for the full menu. */
+.rowbar { position: absolute; right: 8px; bottom: 6px; display: flex; gap: 1px; padding: 2px; border-radius: 9px; background: var(--glass-strong); box-shadow: 0 1px 3px rgba(15, 23, 42, 0.12), 0 0 0 0.5px rgba(15, 23, 42, 0.08); opacity: 0; pointer-events: none; transition: opacity 0.12s; }
+.thread:hover .rowbar, .thread:focus-within .rowbar, .thread.sel .rowbar { opacity: 1; pointer-events: auto; }
+.rowbar .ra { width: 26px; height: 24px; display: grid; place-items: center; border: 0; border-radius: 7px; background: transparent; color: var(--muted); padding: 0; cursor: pointer; }
+.rowbar .ra:hover { background: var(--hover); color: var(--fg); }
+.rowbar .ra:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.thread.sel .rowbar { background: rgba(255, 255, 255, 0.14); box-shadow: none; }
+.thread.sel .rowbar .ra { color: rgba(255, 255, 255, 0.92); }
+.thread.sel .rowbar .ra:hover { background: rgba(255, 255, 255, 0.24); color: #ffffff; }
+.thread[aria-expanded="true"]:not(.sel) { box-shadow: inset 0 0 0 2px var(--accent); }
+.thread.leaving { opacity: 0.35; pointer-events: none; transition: opacity 0.2s; }
+@media (hover: none) { .thread:not(.sel) .rowbar { display: none; } }
+@media (max-width: 860px) { .rowbar { display: none; } }
+.rowmenu .mi.row .kbd { font-size: 10.5px; }
 .pill { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 650; letter-spacing: 0.03em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; background: rgba(15, 23, 42, 0.06); color: var(--muted); }
 .pill.reply { background: var(--warm-soft); color: var(--warm); }
 .pill.read { background: var(--accent-soft); color: var(--accent); }
@@ -263,8 +273,8 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .list-foot { padding: 9px 12px; display: flex; gap: 8px; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
 .progress { font-size: 12.5px; color: var(--muted); }
 
-body.no-tasks .taskdrop, body.no-tasks .totask, body.no-tasks #taskBtn,
-body.off-tasks .taskdrop, body.off-tasks .totask, body.off-move .mvbtn, body.off-move #tabMove, body.off-move #tabCopy, body.off-unsub #tabUnsub { display: none; }
+body.no-tasks .taskdrop, body.no-tasks [data-ra="task"], body.no-tasks #taskBtn,
+body.off-tasks .taskdrop, body.off-tasks [data-ra="task"], body.off-move [data-ra="move"], body.off-move #tabMove, body.off-move #tabCopy, body.off-unsub #tabUnsub { display: none; }
 body.no-model-pick .model { display: none; }
 .feat-off { display: none !important; }
 body.ro [data-mut] { opacity: 0.4; }
@@ -273,11 +283,25 @@ body.ro [data-mut] { opacity: 0.4; }
 .empty h2 { font-size: 17px; font-weight: 650; letter-spacing: -0.01em; margin: 0 0 8px; color: var(--fg); }
 .empty p { margin: 0 0 10px; }
 
-.deskhead { display: flex; flex-direction: column; gap: 10px; padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
+.desk { container-type: inline-size; container-name: desk; }
+.deskhead { display: flex; flex-direction: column; gap: 8px; padding: 10px 14px 9px; border-bottom: 1px solid var(--line); }
 .deskhead .titlerow { display: flex; gap: 8px; align-items: center; min-width: 0; }
-.deskhead h2 { margin: 0; font-size: 18px; font-weight: 650; letter-spacing: -0.016em; flex: 1 1 auto; min-width: 0; text-wrap: balance; }
-.deskhead .acts { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-.tgroup { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.deskhead h2 { margin: 0; font-size: 16px; line-height: 1.3; font-weight: 650; letter-spacing: -0.012em; flex: 1 1 auto; min-width: 0; text-wrap: pretty; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+.deskhead .acts { display: flex; gap: 10px; flex-wrap: nowrap; align-items: center; min-width: 0; }
+.tgroup { display: flex; gap: 4px; flex-wrap: nowrap; align-items: center; }
+.headtog { flex: none; padding-inline: 7px; }
+.headtog .chev { transition: transform 0.15s; }
+.desk.headfold .headtog .chev { transform: rotate(-90deg); }
+.desk.headfold .deskhead .acts { display: none; }
+.desk.headfold .deskhead h2 { -webkit-line-clamp: 1; }
+body:not(.thread-open) .headtog { display: none; }
+/* A narrow reading pane gets icon-only buttons on one line; each keeps its name as a tooltip and for screen readers. */
+@container desk (max-width: 660px) {
+  .acts .btn .tl, .listtog .tl { display: none; }
+  .acts .btn, .listtog { padding-inline: 8px; }
+  .acts .btn .ic, .listtog .ic { margin: 0; }
+  .deskhead .acts { gap: 6px; }
+}
 .tgroup.end { margin-left: auto; }
 .acts .btn .ic { margin-left: -2px; color: var(--muted); }
 .acts .btn:hover .ic { color: var(--fg); }
@@ -313,7 +337,18 @@ body.ro [data-mut] { opacity: 0.4; }
 .attview .attstage pre { align-self: stretch; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; }
 .msg .quoted { color: var(--muted); }
 
-.compose { border-top: 1px solid var(--line); background: rgba(255, 255, 255, 0.38); padding: 12px 18px 16px; display: flex; flex-direction: column; gap: 9px; }
+.compose { border-top: 1px solid var(--line); background: rgba(255, 255, 255, 0.38); padding: 10px 14px 14px; display: flex; flex-direction: column; gap: 9px; }
+/* The reply box folds to one line of reply buttons until you use one, so the message gets the room. */
+.compose .row.first { flex-wrap: nowrap; }
+.compose .row.first > .btn { flex: none; }
+.compose .row.first input.custom { flex: 1 1 auto; }
+.compose .ctog { padding-inline: 7px; }
+.compose .ctog .chev, #replyMenuBtn .chev { transition: transform 0.15s; }
+.compose.folded .ctog .chev { transform: rotate(180deg); }
+.compose.folded > :not(.first) { display: none !important; }
+.compose.folded { padding-block: 8px; }
+.compose .row.iter { gap: 4px; }
+.compose .row.iter .lbl { margin-right: 2px; }
 .compose .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 .compose .foot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .compose .foot .spacer { flex: 1 1 auto; }
@@ -400,7 +435,9 @@ body.ro [data-mut] { opacity: 0.4; }
 .palette .opt.on, .palette .opt:hover { background: var(--accent-soft); }
 .palette .opt .note { font-family: var(--font-mono); font-size: 11px; }
 .ctx { background: rgba(255, 255, 255, 0.86); border: 1px solid var(--line); border-left: 3px solid var(--violet); border-radius: 12px; padding: 10px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 13.5px; }
-.ctxhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.ctxhead { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; }
+.ctxhead .chev { transition: transform 0.15s; margin-left: 2px; }
+.ctx.folded .ctxhead .chev { transform: rotate(-90deg); }
 .ctxhead .lbl { color: var(--violet); }
 .ctxlines { display: flex; flex-direction: column; gap: 3px; }
 .srctag { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 650; padding: 1px 6px; border-radius: 5px; background: var(--violet-soft); color: var(--violet); }
@@ -551,22 +588,23 @@ body.ro [data-mut] { opacity: 0.4; }
           <button class="btn sm listtog" id="listTog" type="button" aria-controls="rail" aria-expanded="true" title="Hide the thread list ([)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M9.5 4.5v15"/></svg><span class="tl">Hide list</span></button>
           <button class="btn sm back" id="backBtn" type="button">‹ Back</button>
           <h2 id="subject">Pick a thread</h2>
+          <button class="btn sm ghost headtog" id="headTog" type="button" aria-controls="acts" aria-expanded="true" aria-label="Thread actions" title="Hide the thread actions"><svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
         </div>
         <div class="acts" id="acts" role="toolbar" aria-label="Thread actions" hidden>
           <div class="tgroup" aria-label="Organize">
-            <button class="btn sm" id="archiveBtn" type="button" data-mut title="Archive (e)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/></svg>Archive</button>
-            <button class="btn sm" id="snoozeBtn" type="button" data-feat="snooze" data-mut title="Snooze, or remind me if no reply (b)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg>Snooze</button>
-            <button class="btn sm desk-only" id="moveBtn" type="button" data-feat="move" data-mut title="Move to a folder, or copy to another account (m)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move</button>
+            <button class="btn sm" id="archiveBtn" type="button" aria-label="Archive" data-mut title="Archive (e)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/></svg><span class="tl">Archive</span></button>
+            <button class="btn sm" id="snoozeBtn" type="button" aria-label="Snooze" data-feat="snooze" data-mut title="Snooze, or remind me if no reply (b)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/></svg><span class="tl">Snooze</span></button>
+            <button class="btn sm desk-only" id="moveBtn" type="button" aria-label="Move" data-feat="move" data-mut title="Move to a folder, or copy to another account (m)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg><span class="tl">Move</span></button>
           </div>
           <div class="tgroup" aria-label="Connect">
-            <button class="btn sm hub" id="routeBtn" type="button" data-feat="route" data-mut title="Suggests where this thread should go across your systems (o)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg>Route</button>
-            <button class="btn sm desk-only" id="taskBtn" type="button" data-feat="tasks" data-mut title="File as a task (t)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>Task</button>
-            <button class="btn sm desk-only" id="contactBtn" type="button" data-feat="contacts" data-mut title="Save this person to your contacts (c)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Contact</button>
-            <button class="btn sm" id="sumBtn" type="button" hidden title="The gist and the asks"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
+            <button class="btn sm hub" id="routeBtn" type="button" aria-label="Route" data-feat="route" data-mut title="Suggests where this thread should go across your systems (o)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/></svg><span class="tl">Route</span></button>
+            <button class="btn sm desk-only" id="taskBtn" type="button" aria-label="Task" data-feat="tasks" data-mut title="File as a task (t)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg><span class="tl">Task</span></button>
+            <button class="btn sm desk-only" id="contactBtn" type="button" aria-label="Contact" data-feat="contacts" data-mut title="Save this person to your contacts (c)"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg><span class="tl">Contact</span></button>
+            <button class="btn sm" id="sumBtn" type="button" aria-label="Summarize" hidden title="The gist and the asks"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span class="tl">Summarize</span></button>
           </div>
           <div class="tgroup end">
-            <button class="btn sm" id="sideTog" type="button" aria-controls="side" title="Show the context panel beside the thread (])" hidden><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15"/></svg>Context</button>
-            <button class="btn sm mbtn" id="threadMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu" aria-label="More actions"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="currentColor" stroke="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg>More</button>
+            <button class="btn sm" id="sideTog" type="button" aria-label="Context" aria-controls="side" title="Show the context panel beside the thread (])" hidden><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15"/></svg><span class="tl">Context</span></button>
+            <button class="btn sm mbtn" id="threadMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu" aria-label="More actions"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="currentColor" stroke="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span class="tl">More</span></button>
           </div>
         </div>
       </div>
@@ -580,21 +618,21 @@ body.ro [data-mut] { opacity: 0.4; }
         </div>
       </div>
       <div class="compose" id="compose" hidden>
-        <div class="row">
-          <span class="lbl">Reply</span>
-          <button class="btn sm" data-intent="yes" type="button">Say yes</button>
-          <button class="btn sm" data-intent="no" type="button">Decline</button>
-          <button class="btn sm" data-intent="ask" type="button">Ask a question</button>
-          <button class="btn sm" data-intent="call" type="button">Offer a call</button>
-          <button class="btn sm" data-intent="later" type="button">Follow up later</button>
-          <button class="btn sm" data-intent="nudge" id="nudgeBtn" data-feat="waiting" type="button" hidden>Nudge</button>
-          <button class="btn sm" id="variantsBtn" data-feat="predraft" type="button" title="Three versions: best fit, shorter, and a polite no">3 options</button>
-        </div>
-        <div class="variants" id="variants" hidden></div>
-        <div class="row">
-          <input class="custom" id="custom" type="text" placeholder="Or tell it what to say: 'yes, but only if we can do it in December'" aria-label="Custom instruction">
+        <div class="row first">
+          <button type="button" class="btn sm mbtn" id="replyMenuBtn" aria-haspopup="menu" aria-expanded="false" aria-controls="replyMenu" title="Say yes, decline, ask, offer a call, follow up, or three options">Reply<svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          <input class="custom" id="custom" type="text" placeholder="Tell it what to say: 'yes, but only if we can do it in December'" aria-label="What the reply should say, or what to change">
           <button class="btn sm primary" id="customBtn" type="button">Draft</button>
           <button class="btn sm ghost" id="stopBtn" type="button" hidden>Stop</button>
+          <button type="button" class="btn sm ghost ctog" id="composeTog" aria-controls="compose" aria-expanded="true" aria-label="Reply box" title="Fold the reply box"><svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        </div>
+        <div class="variants" id="variants" hidden></div>
+        <div class="row iter" id="iterRow" aria-label="Revise the draft" hidden>
+          <span class="lbl">Revise</span>
+          <button class="btn sm ghost" type="button" data-rev="Make it shorter. Cut anything that isn't needed.">Shorter</button>
+          <button class="btn sm ghost" type="button" data-rev="Make it warmer and friendlier, without getting longer.">Warmer</button>
+          <button class="btn sm ghost" type="button" data-rev="Make it more direct: lead with the answer or the ask.">More direct</button>
+          <button class="btn sm ghost" type="button" data-rev="Fix grammar, spelling and flow only. Change nothing else.">Polish</button>
+          <button class="btn sm ghost" type="button" id="undoDraft" title="Go back to the previous version" disabled>↶ Undo</button>
         </div>
         <div class="row" aria-label="Draft with">
           <span class="lbl">Draft with</span>
@@ -603,7 +641,7 @@ body.ro [data-mut] { opacity: 0.4; }
           <label class="tog" data-feat="calendar" title="Offer three open times from your calendar"><input type="checkbox" id="calChk">Open times</label>
           <label class="tog" data-feat="more" id="webTog" title="Use what More context found on the public web. Press More context first."><input type="checkbox" id="webChk" disabled>Web context</label>
         </div>
-        <textarea id="body" placeholder="Your reply. Type here, or hit a button above for a first draft."></textarea>
+        <textarea id="body" placeholder="Your reply. Type here, or pick Reply above for a first draft."></textarea>
         <div class="sighint note" data-feat="signature">Your Gmail signature is added below this when it sends or saves as a draft.</div>
         <div class="foot">
           <button class="btn sm ghost" id="snipBtn" type="button" data-feat="snippets">Snippets</button>
@@ -643,10 +681,26 @@ body.ro [data-mut] { opacity: 0.4; }
   <button type="button" class="btn" id="pbMore" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu"><svg class="ic" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="18.5" cy="12" r="1.3"/></svg>More</button>
 </div>
 
+<div class="menu glass-strong narrow rowmenu" id="rowMenu" role="menu" aria-label="Thread actions" hidden></div>
+<div class="menu glass-strong narrow" id="replyMenu" role="menu" aria-label="Draft a reply" hidden>
+  <div class="mhead" aria-hidden="true">Draft a reply</div>
+  <button class="mi row" role="menuitem" type="button" data-intent="yes">Say yes</button>
+  <button class="mi row" role="menuitem" type="button" data-intent="no">Decline</button>
+  <button class="mi row" role="menuitem" type="button" data-intent="ask">Ask a question</button>
+  <button class="mi row" role="menuitem" type="button" data-intent="call">Offer a call</button>
+  <button class="mi row" role="menuitem" type="button" data-intent="later">Follow up later</button>
+  <button class="mi row" role="menuitem" type="button" data-intent="nudge" id="nudgeBtn" data-feat="waiting" hidden>Nudge</button>
+  <div class="msep"></div>
+  <button class="mi row" role="menuitem" type="button" id="variantsBtn" data-feat="predraft" title="Three versions: best fit, shorter, and a polite no">Three options</button>
+  <button class="mi row" role="menuitem" type="button" id="writeBtn">Write it myself<span class="kbd">r</span></button>
+  <button class="mi row" role="menuitem" type="button" data-proxy="snipBtn" data-feat="snippets">Insert a snippet</button>
+  <button class="mclose btn" type="button" data-mclose>Close</button>
+</div>
 <div class="menu glass-strong narrow" id="threadMenu" role="menu" aria-label="More thread actions" hidden>
   <button class="mi row phone-only" role="menuitem" type="button" data-proxy="moveBtn" data-feat="move" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/></svg>Move or copy</button>
   <button class="mi row phone-only" role="menuitem" type="button" data-proxy="taskBtn" data-feat="tasks" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/></svg>File as a task</button>
   <button class="mi row phone-only" role="menuitem" type="button" data-proxy="contactBtn" data-feat="contacts" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/></svg>Add to contacts</button>
+  <button class="mi row" role="menuitem" type="button" id="chatCopyBtn" title="Copy a pointer to this thread, to work on the reply with Claude in chat"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 6.5A2.5 2.5 0 0 1 7.5 4h9A2.5 2.5 0 0 1 19 6.5v6a2.5 2.5 0 0 1-2.5 2.5H11l-4 3.5V15H7.5A2.5 2.5 0 0 1 5 12.5z"/></svg>Work on it in chat</button>
   <button class="mi row" role="menuitem" type="button" data-proxy="sumBtn"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg>Summarize</button>
   <div class="msep phone-only"></div>
   <button class="mi row" role="menuitem" id="starBtn" type="button" data-mut><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m12 4.5 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L4.5 10l5.2-.8z"/></svg><span class="lb">Star</span></button>
@@ -1335,6 +1389,37 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- thread list ----------
+  const RA_ICON = {
+    archive: '<rect x="3.5" y="4.5" width="17" height="4" rx="1"/><path d="M5.5 8.5v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-9"/><path d="M10 12.5h4"/>',
+    snooze: '<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.5 1.7"/><path d="M5 4.5 3 6.5M19 4.5l2 2"/>',
+    move: '<path d="M3.5 7.5a2 2 0 0 1 2-2h3.8l2 2h7.2a2 2 0 0 1 2 2v7.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z"/><path d="M10 13h5M13 11l2 2-2 2"/>',
+    route: '<circle cx="6" cy="18" r="2"/><circle cx="18" cy="6" r="2"/><path d="M8 18h3.5a4.5 4.5 0 0 0 4.5-4.5V8"/>',
+    task: '<rect x="4" y="4" width="16" height="16" rx="3.5"/><path d="m8.5 12.3 2.4 2.4 4.6-4.9"/>',
+    contact: '<circle cx="10" cy="8.5" r="3.2"/><path d="M4 19a6 6 0 0 1 12 0"/><path d="M18.5 8v6M15.5 11h6"/>',
+    star: '<path d="m12 4.5 2.3 4.7 5.2.8-3.8 3.7.9 5.2-4.6-2.4-4.6 2.4.9-5.2L4.5 10l5.2-.8z"/>',
+    read: '<path d="M4 9.5 12 4l8 5.5V18a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 18z"/><path d="m4.5 10 7.5 5 7.5-5"/>',
+    unread: '<rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/>',
+    unsub: '<circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/>',
+    open: '<path d="M4 12h12M12 8l4 4-4 4"/><path d="M20 5v14"/>',
+    gmail: '<path d="M14 5h5v5"/><path d="m19 5-8 8"/><path d="M17 14v4a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 5 18V8.5A1.5 1.5 0 0 1 6.5 7H10"/>'
+  };
+  const raSvg = (k) => '<svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' + RA_ICON[k] + '</svg>';
+  // What a row offers, in menu order: [key, label, shortcut, changes mail]. Off features drop out.
+  function rowActs(t) {
+    const m = (t.messages && t.messages[0]) || {}; const lab = m.labelIds || [];
+    return [
+      ["archive", "Archive", "e", true], featOn("snooze") && ["snooze", "Snooze…", "b", true], featOn("move") && ["move", "Move…", "m", true],
+      featOn("route") && ["route", "Route…", "o", true], featOn("tasks") && taskAdapter() && ["task", "Create task", "t", true], featOn("contacts") && ["contact", "Add contact", "c", true],
+      lab.includes("STARRED") ? ["unstar", "Unstar", "s", true] : ["star", "Star", "s", true],
+      lab.includes("UNREAD") ? ["read", "Mark read", "", true] : ["unread", "Mark unread", "", true],
+      featOn("unsub") && ["unsub", "Unsubscribe…", "", false]
+    ].filter(Boolean);
+  }
+  const ROWBAR = ["archive", "move", "route", "task", "contact"];
+  function rowBar(t) {
+    const acts = rowActs(t).filter((a) => ROWBAR.includes(a[0]));
+    return '<span class="rowbar" role="group" aria-label="Thread actions">' + acts.map((a) => '<button type="button" class="ra" data-ra="' + a[0] + '" data-id="' + esc(t.id) + '" title="' + esc(a[1].replace("…", "") + (a[2] ? " (" + a[2] + ")" : "")) + '" aria-label="' + esc(a[1].replace("…", "")) + '"' + (a[3] ? " data-mut" : "") + '>' + raSvg(a[0]) + '</button>').join("") + '</span>';
+  }
   function renderList() {
     if (!state.threads.length) {
       list.innerHTML = state.mode === "waiting"
@@ -1357,10 +1442,10 @@ body.ro [data-mut] { opacity: 0.4; }
       return '<div class="thread' + (t.id === state.selectedId ? " sel" : "") + (unread ? " unread" : "") + (ac ? " acc" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-id="' + esc(t.id) + '" draggable="true" tabindex="0" role="button">'
         + '<span class="from">' + esc(who) + '</span>'
         + '<span class="when">' + esc(fmtDate(m.date)) + '</span>'
-        + '<span class="rowacts"><button class="mvbtn" data-move="' + esc(t.id) + '" type="button" title="Move to a folder, copy to another account, or unsubscribe">More</button><button class="totask" data-task="' + esc(t.id) + '" type="button" title="Create a task from this thread">Task</button></span>'
+        + rowBar(t)
         + '<span class="subj">' + esc(m.subject || "(no subject)") + (t.messageCount > 1 ? '<span class="count">' + esc(t.messageCount) + '</span>' : "") + '</span>'
         + '<span class="prev' + (pv === undefined && !snip ? " pending" : "") + '" data-prev="' + esc(t.id) + '">' + esc(pv || snip || (pv === undefined ? "Loading preview…" : "(no text)")) + '</span>'
-        + (tags ? '<span class="tri">' + tags + '</span>' : "")
+        + (tags || t.id === state.selectedId ? '<span class="tri">' + tags + '</span>' : "")
         + '</div>';
     };
     const sorted = state.mode !== "waiting" && featOn("triage") && state.threads.some((t) => state.triage[t.id]);
@@ -1590,7 +1675,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const t = state.thread; if (!t) return;
     const ms = t.messages || [];
     const last = ms[ms.length - 1] || {};
-    $("subject").textContent = last.subject || (ms[0] && ms[0].subject) || "(no subject)";
+    $("subject").textContent = last.subject || (ms[0] && ms[0].subject) || "(no subject)"; $("subject").title = $("subject").textContent;
     $("acts").hidden = false; document.body.classList.add("thread-open");
     $("openLink").href = t.viewUrl || "#";
     const anyUnread = ms.some((m) => (m.labelIds || []).includes("UNREAD"));
@@ -1607,13 +1692,14 @@ body.ro [data-mut] { opacity: 0.4; }
         + ((m.attachments && m.attachments.length) ? '<div class="att">' + m.attachments.map((a, ai) => '<button type="button" class="attbtn" data-attm="' + esc(m.id) + '" data-atti="' + ai + '" title="Open ' + esc(a.filename || "attachment") + '">' + esc(a.filename || a.mimeType || "attachment") + '</button>').join("") + '</div>' : "")
         + '</article>';
     }).join("");
-    compose.hidden = false;
+    compose.hidden = false; setCompose(ls.get("cm.composeOpen") === "1", false);
     $("body").value = ""; $("composeNote").textContent = ""; $("confirmBox").hidden = true; $("custom").value = "";
     $("nudgeBtn").hidden = !isOwn(last);
     renderVariants(true);
     state.loadedDraftId = null; state.attachments = []; renderAtt();
     $("htmlBtn").setAttribute("aria-checked", "false");
-    $("webChk").checked = false; showSide(true); showDraftBox(); loadContext(false);
+    $("webChk").checked = false; showSide(true); showDraftBox(); loadContext(false); updateIter();
+    if (featOn("drafts") && Date.now() - draftsAt > 15000) loadDraftsMap(true);
   }
   async function fetchThread(id) {
     return call(GMAIL, "get_thread", { threadId: id, messageFormat: "PLAIN_TEXT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
@@ -1715,7 +1801,7 @@ body.ro [data-mut] { opacity: 0.4; }
     if (!state.thread) return;
     if (state.ctl) state.ctl.abort();
     const ctl = new AbortController(); state.ctl = ctl;
-    const ta = $("body"); const keep = ta.value; ta.value = ""; ta.placeholder = "Thinking…";
+    openCompose(); const ta = $("body"); const keep = ta.value; pushHist(state.selectedId, keep); ta.value = ""; ta.placeholder = "Thinking…";
     $("stopBtn").hidden = false; note("Drafting with " + (state.model === "claude" ? "Claude" : state.model.replace(/^[^\/]+\//, "")) + "…");
     try {
       const tid = state.selectedId;
@@ -1723,11 +1809,11 @@ body.ro [data-mut] { opacity: 0.4; }
       if (ctl.signal.aborted) throw { code: "cancelled" };
       const text = await ask(voicePrompt(), "What the reply should do: " + instruction + ctx.text + "\n\nThe thread (newest message last):\n\n" + threadText(state.thread, 14000), { max_tokens: 4000, signal: ctl.signal });
       if (state.selectedId !== tid) return;
-      ta.value = text; state.aiDraft[tid] = text; note("Draft ready" + (ctx.notes.length ? " (" + ctx.notes.join(", ") + ")" : "") + ". Edit as you like.");
+      ta.value = text; state.aiDraft[tid] = text; $("custom").value = ""; note("Draft ready" + (ctx.notes.length ? " (" + ctx.notes.join(", ") + ")" : "") + ". Edit as you like.");
     } catch (e) {
       ta.value = keep;
       const c = mcpCopy(e, aiLabel()); note(c, c ? "err" : "");
-    } finally { ta.placeholder = "Your reply. Type here, or hit a button above for a first draft."; $("stopBtn").hidden = true; if (state.ctl === ctl) state.ctl = null; }
+    } finally { ta.placeholder = "Your reply. Type here, or pick Reply above for a first draft."; $("stopBtn").hidden = true; if (state.ctl === ctl) state.ctl = null; updateIter(); }
   }
 
   // ---------- Notion tasks ----------
@@ -1830,6 +1916,10 @@ body.ro [data-mut] { opacity: 0.4; }
       else openThread(id);
     } catch (e) { showBanner(mcpCopy(e, GMAIL), "err"); }
   }
+  // Fold the thread actions, and the reply box (to one line of reply buttons), to give the message room.
+  function setHeadFold(on, persist) { $("desk").classList.toggle("headfold", on); const b = $("headTog"); b.setAttribute("aria-expanded", String(!on)); b.title = on ? "Show the thread actions" : "Hide the thread actions"; if (persist) ls.set("cm.headFold", on ? "1" : "0"); }
+  function setCompose(open, persist) { compose.classList.toggle("folded", !open); const b = $("composeTog"); b.setAttribute("aria-expanded", String(open)); b.title = open ? "Fold the reply box" : "Open the reply box"; $("writeBtn").hidden = open; if (persist) ls.set("cm.composeOpen", open ? "1" : "0"); }
+  const openCompose = () => { if (compose.classList.contains("folded")) setCompose(true, false); };
   function clearDesk(word) { state.selectedId = null; state.thread = null; app.dataset.view = "list"; $("acts").hidden = true; document.body.classList.remove("thread-open"); compose.hidden = true; showSide(false); renderToday(word); }
 
   // ---------- drag and drop ----------
@@ -1951,7 +2041,7 @@ body.ro [data-mut] { opacity: 0.4; }
   $("acctCustom").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); askForward(); } });
   $("acctYes").addEventListener("click", doForward);
   $("acctNo").addEventListener("click", () => { $("acctConfirm").hidden = true; });
-  document.addEventListener("mousedown", (ev) => { if (!pop.hidden && !pop.contains(ev.target) && !ev.target.closest(".mvbtn, #moveBtn, #unsubBtn")) closePop(); });
+  document.addEventListener("mousedown", (ev) => { if (!pop.hidden && !pop.contains(ev.target) && !ev.target.closest("[data-ra], #rowMenu, #moveBtn, #unsubBtn")) closePop(); });
   document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !pop.hidden) closePop(); });
 
   // ---------- unsubscribe ----------
@@ -2223,7 +2313,7 @@ body.ro [data-mut] { opacity: 0.4; }
     note("Loaded \u201c" + v.label + "\u201d. Edit as you like. Nothing goes out until you press Send.");
   });
   async function threeOptions() {
-    if (!state.thread) return; const id = state.selectedId;
+    if (!state.thread) return; const id = state.selectedId; openCompose();
     const btn = $("variantsBtn"); btn.disabled = true; note("Writing three options…");
     try {
       const vs = await draftVariants(state.thread);
@@ -2723,7 +2813,7 @@ body.ro [data-mut] { opacity: 0.4; }
   }
 
   // ---------- skills picker ----------
-  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["o", "route to your systems"], ["b", "snooze or remind me"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last change"], ["[", "show or hide the thread list"], ["]", "show or hide context"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
+  const KEYS = [["j / k", "next / previous thread"], ["Enter", "open the selected thread"], ["e", "archive"], ["s", "star or unstar"], ["m", "move to folder"], ["t", "file as a task"], ["c", "add sender to contacts"], ["o", "route to your systems"], ["b", "snooze or remind me"], ["r", "jump to the reply box"], ["/", "search"], ["z", "undo the last change"], ["[", "show or hide the thread list"], ["]", "show or hide context"], ["Shift F10", "actions menu for the focused row (or right-click)"], ["\u2318K or Ctrl K", "command palette"], ["?", "this list"], ["Esc", "close"]];
   const keysHtml = () => '<div class="keys">' + KEYS.map((k) => '<span><span class="kbd">' + esc(k[0]) + '</span></span><span>' + esc(k[1]) + '</span>').join("") + '</div>';
   function openSkills(focusKeys) {
     const rows = FEATURES.map((f) => {
@@ -2846,7 +2936,7 @@ body.ro [data-mut] { opacity: 0.4; }
     const act = {
       j: () => moveSel(1), k: () => moveSel(-1), e: () => { if (state.selectedId && state.thread) $("archiveBtn").click(); }, s: () => { if (state.thread) $("starBtn").click(); },
       m: () => { if (state.selectedId && featOn("move")) openPop(state.selectedId, $("moveBtn"), "move"); }, t: () => { if (state.selectedId && featOn("tasks")) createTask(state.selectedId); },
-      c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) $("body").focus(); }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true),
+      c: () => { if (state.thread && featOn("contacts")) openContact(); }, o: () => { if (state.thread && featOn("route")) openRoute(); }, b: () => { if (state.selectedId && featOn("snooze")) openSnooze(); }, r: () => { if (!compose.hidden) { openCompose(); $("body").focus(); } }, "/": () => $("q").focus(), z: undoLast, "?": () => openSkills(true),
       "[": () => { if (!phoneMQ.matches) setRailOff(!state.railOff); }, "]": toggleContext
     }[ev.key];
     if (act) { ev.preventDefault(); act(); }
@@ -3314,7 +3404,7 @@ body.ro [data-mut] { opacity: 0.4; }
       steps = '<div class="sec"><div class="cap">Next steps</div>' + body + '</div>';
     }
     const head = wide ? '<div class="who"><span class="avatar" aria-hidden="true">' + esc(initials(who)) + '</span><div style="min-width:0;display:flex;flex-direction:column;gap:1px"><span class="nm">' + esc(who.name || who.email || "") + '</span>' + (who.org ? '<span class="sub">' + esc(who.org) + (who.domain ? " · " + esc(who.domain) : "") + '</span>' : "") + '<span class="sub">' + esc(who.email || "") + '</span></div></div>' : "";
-    el.innerHTML = wide ? head + sys + web + steps : '<div class="ctx' + (state.ctxFold ? " folded" : "") + '"><div class="ctxhead"><span class="lbl">Context · ' + esc(who.who || "") + '</span><button type="button" class="btn sm ghost" data-ctx="fold" aria-expanded="' + !state.ctxFold + '" title="' + (state.ctxFold ? "Show" : "Hide") + ' context (])">' + (state.ctxFold ? "Show" : "Hide") + '</button></div>' + sys + web + steps + '</div>';
+    el.innerHTML = wide ? head + sys + web + steps : '<div class="ctx' + (state.ctxFold ? " folded" : "") + '"><div class="ctxhead"><span class="lbl">Context · ' + esc(who.who || "") + '</span><button type="button" class="btn sm ghost" data-ctx="fold" aria-expanded="' + !state.ctxFold + '" title="' + (state.ctxFold ? "Show" : "Hide") + ' context (])">' + (state.ctxFold ? "Show" : "Hide") + '<svg class="chev" width="10" height="10" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5 6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>' + sys + web + steps + '</div>';
     const wc = $("webChk"); if (wc) { const ok = !!(state.web[id] && state.web[id].text && !state.web[id].loading && !/^Nothing relevant/i.test(state.web[id].text)); wc.disabled = !ok; if (!ok) wc.checked = false; }
   }
   document.addEventListener("click", (ev) => {
@@ -3586,7 +3676,7 @@ body.ro [data-mut] { opacity: 0.4; }
       '<p class="note">Reusable text. <code>{{firstName}}</code> becomes their first name and <code>{{myName}}</code> your sign-off. Saved in this browser.</p>'
       + '<div class="mlist">' + (sn.length ? sn.map((s, i) => '<div class="mitem"><span></span><span class="t">' + esc(s.name) + '</span><span class="x" style="grid-column:auto;margin:0"><button type="button" class="btn sm primary" data-sins="' + i + '">Insert</button><button type="button" class="btn sm ghost" data-sdel="' + i + '">Delete</button></span><span class="d" style="white-space:pre-wrap">' + esc(s.text.slice(0, 220)) + (s.text.length > 220 ? "…" : "") + '</span></div>').join("") : '<div class="mitem"><span></span><span class="d">No snippets yet.</span></div>') + '</div>'
       + '<h3>New snippet</h3><input type="text" id="snName" placeholder="Name, e.g. Sponsor prospectus" data-focus><textarea id="snText" style="min-height:90px" placeholder="Hi {{firstName}}, here is the prospectus…"></textarea><div class="mrow"><button type="button" class="btn" id="snAdd">Save snippet</button></div>');
-    $("modalBody").querySelectorAll("[data-sins]").forEach((b) => b.addEventListener("click", () => { const s = loadSnippets()[+b.dataset.sins]; closeModal(); if (s) insertAtCursor($("body"), fillSnippet(s.text)); }));
+    $("modalBody").querySelectorAll("[data-sins]").forEach((b) => b.addEventListener("click", () => { const s = loadSnippets()[+b.dataset.sins]; closeModal(); if (s) { openCompose(); insertAtCursor($("body"), fillSnippet(s.text)); } }));
     $("modalBody").querySelectorAll("[data-sdel]").forEach((b) => b.addEventListener("click", () => { const a = loadSnippets(); a.splice(+b.dataset.sdel, 1); saveSnippets(a); openSnippets(); }));
     $("snAdd").addEventListener("click", () => { const nm = $("snName").value.trim(), tx = $("snText").value; if (!nm || !tx.trim()) return; const a = loadSnippets(); a.push({ name: nm, text: tx }); saveSnippets(a); openSnippets(); });
   }
@@ -3708,7 +3798,7 @@ body.ro [data-mut] { opacity: 0.4; }
     }
     if (!full) { box.innerHTML = '<div class="banner ok draftready"><strong>A draft is waiting in Gmail.</strong> <span class="note">Couldn\'t load its text here.</span>' + (d.viewUrl ? '<span class="mrow"><a class="btn sm ghost" href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a></span>' : "") + '</div>'; return; }
     box.innerHTML = '<div class="banner ok draftready"><strong>A draft is waiting in Gmail.</strong> <span class="note">' + esc(draftText(full).slice(0, 140)) + '…</span><span class="mrow"><button type="button" class="btn sm primary" id="dLoad">Load it</button>' + (d.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "") + '</span></div>';
-    $("dLoad").addEventListener("click", () => { $("body").value = draftText(full); state.aiDraft[state.selectedId] = $("body").value; state.loadedDraftId = d.id; box.innerHTML = ""; note("Loaded the Gmail draft. Sending replaces it."); $("body").focus(); });
+    $("dLoad").addEventListener("click", () => { openCompose(); $("body").value = draftText(full); state.aiDraft[state.selectedId] = $("body").value; state.loadedDraftId = d.id; box.innerHTML = ""; note("Loaded the Gmail draft. Sending replaces it."); $("body").focus(); });
   }
   async function afterSend(threadId) {
     const msgs = [];
@@ -3726,13 +3816,73 @@ body.ro [data-mut] { opacity: 0.4; }
   $("askMode").addEventListener("click", () => { const on = $("askMode").getAttribute("aria-pressed") !== "true"; $("askMode").setAttribute("aria-pressed", String(on)); $("q").placeholder = on ? "Ask a question about your mail" : "Search mail"; $("q").focus(); });
   $("searchForm").addEventListener("submit", (ev) => { if ($("askMode").getAttribute("aria-pressed") === "true" && featOn("ask")) { ev.preventDefault(); ev.stopImmediatePropagation(); const qv = $("q").value.trim(); if (!qv) return; openAsk(); $("askQ").value = qv; runAsk(); } }, true);
   $("searchForm").addEventListener("submit", (ev) => { ev.preventDefault(); const q = $("q").value.trim(); if (!q) return; document.querySelectorAll("#chips .chip").forEach((x) => x.classList.remove("on")); state.query = q; state.mode = "normal"; $("waitWrap").hidden = true; state.triage = {}; loadThreads(false); });
-  $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} state.triage = {}; loadThreads(false); });
+  $("refreshBtn").addEventListener("click", async () => { try { await invalGmail("search_threads"); } catch {} state.triage = {}; draftsAt = 0; loadThreads(false); });
   $("moreBtn").addEventListener("click", () => loadThreads(true));
   list.addEventListener("click", (ev) => { if (ev.target.closest("[data-loadmore]")) loadThreads(true); });
   list.addEventListener("scroll", () => { if (state.hasMore && !state.loadingMore && list.scrollTop > 0 && list.scrollTop + list.clientHeight > list.scrollHeight - 240) loadThreads(true); }, { passive: true });
   $("triageBtn").addEventListener("click", triage);
-  list.addEventListener("click", (ev) => { const mv = ev.target.closest(".mvbtn"); if (mv) { ev.stopPropagation(); openPop(mv.dataset.move, mv, "move"); return; } const tb = ev.target.closest(".totask"); if (tb) { ev.stopPropagation(); createTask(tb.dataset.task); return; } const b = ev.target.closest(".thread"); if (b) openThread(b.dataset.id); });
-  list.addEventListener("keydown", (ev) => { if ((ev.key === "Enter" || ev.key === " ") && ev.target.classList.contains("thread")) { ev.preventDefault(); openThread(ev.target.dataset.id); } });
+  list.addEventListener("click", (ev) => { const ra = ev.target.closest("[data-ra]"); if (ra) { ev.stopPropagation(); rowAction(ra.dataset.id, ra.dataset.ra, ra); return; } const b = ev.target.closest(".thread"); if (b) openThread(b.dataset.id); });
+  list.addEventListener("keydown", (ev) => {
+    if (!ev.target.classList.contains("thread")) return;
+    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openThread(ev.target.dataset.id); }
+    else if (ev.key === "ContextMenu" || (ev.shiftKey && ev.key === "F10")) { ev.preventDefault(); const r = ev.target.getBoundingClientRect(); openRowMenu(ev.target.dataset.id, r.left + 24, r.top + 28, true); }
+  });
+  list.addEventListener("contextmenu", (ev) => { const row = ev.target.closest(".thread"); if (!row) return; ev.preventDefault(); openRowMenu(row.dataset.id, ev.clientX, ev.clientY, false); });
+  list.addEventListener("scroll", () => { if (openMenu && openMenu.menu === $("rowMenu")) closeMenus(); }, { passive: true });
+  const rowEl = (id) => list.querySelector('.thread[data-id="' + CSS.escape(id) + '"]');
+  // Actions from a row, for any thread in the list. Archive, star and read work in place; the rest open the thread first.
+  async function rowAction(id, act, anchor) {
+    const t = state.threads.find((x) => x.id === id); if (!t) return;
+    const open = id === state.selectedId && !!state.thread;
+    if (act === "open") { openThread(id); return; }
+    if (act === "move") { openPop(id, anchor && anchor.isConnected ? anchor : rowEl(id), "move"); return; }
+    if (act === "task") { createTask(id); return; }
+    const flip = { archive: [[], ["INBOX"], "Archiving", "archive"], star: [["STARRED"], [], "Starring", "star"], unstar: [[], ["STARRED"], "Unstarring", "unstar"], read: [[], ["UNREAD"], "Marking read", "mark read"], unread: [["UNREAD"], [], "Marking unread", "mark unread"] }[act];
+    if (flip) {
+      if (open && act !== "unread") { labelThread(flip[0], flip[1], flip[2]); return; }
+      const row = rowEl(id); if (row && act === "archive") row.classList.add("leaving");
+      try {
+        await threadOp(id, flip[0], flip[1]);
+        pushUndo(flip[3], [{ threadId: id, add: flip[0], remove: flip[1] }]);
+        if (act === "archive") recordAction(senderOf(id), "archive", null); else if (act === "star") recordAction(senderOf(id), "star", null);
+        try { await invalGmail(); } catch {}
+        if (act === "archive") { state.threads = state.threads.filter((x) => x.id !== id); if (state.selectedId === id) clearDesk("Archived"); $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate - 1, state.threads.length) : ""); }
+        else (t.messages || []).forEach((m) => { m.labelIds = (m.labelIds || []).filter((l) => !flip[1].includes(l)).concat(flip[0].filter((l) => !(m.labelIds || []).includes(l))); });
+        renderList();
+        toast({ archive: "Archived.", star: "Starred.", unstar: "Unstarred.", read: "Marked read.", unread: "Marked unread." }[act] + undoBtn(), "ok", 6000);
+      } catch (e) { if (row) row.classList.remove("leaving"); toast(esc(mcpCopy(e, GMAIL)), "err", 8000); }
+      return;
+    }
+    // Snooze, Route, Contact and Unsubscribe work on the open thread.
+    if (!open) await openThread(id);
+    if (state.selectedId !== id || !state.thread) return;
+    if (act === "snooze") openSnooze(); else if (act === "route") openRoute(); else if (act === "contact") openContact(); else if (act === "unsub") openPop(id, rowEl(id) || $("unsubBtn"), "unsub");
+  }
+  function openRowMenu(id, x, y, focusFirst) {
+    const t = state.threads.find((r) => r.id === id); const row = rowEl(id); if (!t || !row) return;
+    const menu = $("rowMenu"); closeMenus(); closePop();
+    const groups = [["open"], ["archive", "snooze", "move"], ["route", "task", "contact"], ["star", "unstar", "read", "unread", "unsub"]];
+    const acts = [["open", "Open", "↵", false]].concat(rowActs(t));
+    const item = (a) => '<button class="mi row" role="menuitem" type="button" data-rm="' + a[0] + '"' + (a[3] ? " data-mut" : "") + '>' + raSvg(a[0]) + '<span>' + esc(a[1]) + '</span>' + (a[2] ? '<span class="kbd">' + esc(a[2]) + '</span>' : "") + '</button>';
+    const url = t.viewUrl || (((t.messages || [])[0]) || {}).viewUrl || (GX ? gxView(id, ownerOf("t", id) || curAcct()) : "https://mail.google.com/mail/u/0/#all/" + encodeURIComponent(id));
+    menu.innerHTML = groups.map((g) => acts.filter((a) => g.includes(a[0])).map(item).join("")).filter(Boolean).join('<div class="msep"></div>')
+      + (url ? '<div class="msep"></div><a class="mi row" role="menuitem" href="' + esc(url) + '" target="_blank" rel="noopener">' + raSvg("gmail") + '<span>Open in Gmail</span></a>' : "");
+    menu.dataset.id = id; menu.hidden = false; row.setAttribute("aria-haspopup", "menu"); row.setAttribute("aria-expanded", "true");
+    openMenu = { menu: menu, btn: row };
+    if (window.innerWidth <= 860) { menu.style.top = menu.style.left = ""; }
+    else {
+      const w = menu.offsetWidth, h = menu.offsetHeight;
+      menu.style.left = Math.max(8, Math.min(x, window.innerWidth - w - 8)) + "px";
+      menu.style.top = Math.max(8, y + h <= window.innerHeight - 8 ? y : y - h) + "px";
+    }
+    if (focusFirst) { const f = menuItems(menu)[0]; if (f) f.focus(); }
+  }
+  $("rowMenu").addEventListener("click", (ev) => { const b = ev.target.closest("[data-rm]"); if (ev.target.closest("a.mi")) { closeMenus(); return; } if (!b) return; const id = $("rowMenu").dataset.id; closeMenus(); rowAction(id, b.dataset.rm, null); });
+  $("rowMenu").addEventListener("keydown", (ev) => {
+    const items = menuItems($("rowMenu")); if (!items.length) return; const i = items.indexOf(document.activeElement);
+    const go = (n) => { ev.preventDefault(); items[(n + items.length) % items.length].focus(); };
+    if (ev.key === "ArrowDown") go(i + 1); else if (ev.key === "ArrowUp") go(i < 0 ? -1 : i - 1); else if (ev.key === "Home") go(0); else if (ev.key === "End") go(-1); else if (ev.key === "Tab") closeMenus();
+  });
   reading.addEventListener("click", (ev) => { const h = ev.target.closest(".mh"); if (h) h.parentElement.classList.toggle("collapsed"); });
   $("backBtn").addEventListener("click", () => { app.dataset.view = "list"; });
   function setTab(k) { document.querySelectorAll("#tabbar [data-tab]").forEach((b) => { if (b.dataset.tab === k) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); }); }
@@ -3743,7 +3893,7 @@ body.ro [data-mut] { opacity: 0.4; }
     if (k === "today") { state.selectedId = null; state.thread = null; document.body.classList.remove("thread-open"); $("acts").hidden = true; compose.hidden = true; showSide(false); app.dataset.view = "thread"; renderToday(); return; }
     clickChip(k === "waiting" ? "waiting" : "inbox"); app.dataset.view = "list";
   });
-  $("replyJump").addEventListener("click", () => { compose.scrollIntoView({ block: "end", behavior: "smooth" }); setTimeout(() => $("body").focus(), 250); });
+  $("replyJump").addEventListener("click", () => { openCompose(); compose.scrollIntoView({ block: "end", behavior: "smooth" }); setTimeout(() => $("body").focus(), 250); });
   $("phoneBar").addEventListener("click", (ev) => { const px = ev.target.closest("[data-proxy]"); if (px) $(px.dataset.proxy).click(); });
   compose.addEventListener("focusin", (ev) => { if (ev.target.matches("textarea, input[type=text]")) document.body.classList.add("typing"); });
   compose.addEventListener("focusout", () => { setTimeout(() => { if (!compose.contains(document.activeElement)) document.body.classList.remove("typing"); }, 50); });
@@ -3752,8 +3902,51 @@ body.ro [data-mut] { opacity: 0.4; }
   $("starBtn").addEventListener("click", () => { const anyStar = ((state.thread && state.thread.messages) || []).some((m) => (m.labelIds || []).includes("STARRED")); labelThread(anyStar ? [] : ["STARRED"], anyStar ? ["STARRED"] : [], anyStar ? "Unstarring" : "Starring"); });
   $("readBtn").addEventListener("click", () => labelThread([], ["UNREAD"], "Marking read"));
   $("archiveBtn").addEventListener("click", () => labelThread([], ["INBOX"], "Archiving"));
-  document.querySelectorAll("#compose [data-intent]").forEach((b) => b.addEventListener("click", () => { if (b.dataset.intent === "call" && featOn("calendar")) $("calChk").checked = true; draftReply(INTENTS[b.dataset.intent]); }));
-  $("customBtn").addEventListener("click", () => { const v = $("custom").value.trim(); draftReply(v || "Write a sensible reply to the latest message."); });
+  setHeadFold(ls.get("cm.headFold") === "1", false);
+  $("headTog").addEventListener("click", () => setHeadFold(!$("desk").classList.contains("headfold"), true));
+  $("composeTog").addEventListener("click", () => { const open = compose.classList.contains("folded"); setCompose(open, true); if (open) $("body").focus(); });
+  $("writeBtn").addEventListener("click", () => { setCompose(true, false); $("body").focus(); });
+  // Iterate on the draft: with text in the box, an instruction revises that text instead of starting over.
+  // The last 10 versions of each thread's draft are kept for Undo.
+  state.hist = {};
+  function pushHist(tid, text) { if (!tid || !text || !text.trim()) return; const h = state.hist[tid] || (state.hist[tid] = []); if (h[h.length - 1] !== text) h.push(text); if (h.length > 10) h.shift(); }
+  function updateIter() {
+    const has = !!$("body").value.trim();
+    $("custom").placeholder = has ? "Tell it what to change: shorter, warmer, mention the deck…" : "Tell it what to say: 'yes, but only if we can do it in December'";
+    $("customBtn").textContent = has ? "Revise" : "Draft"; $("iterRow").hidden = !has && !((state.hist[state.selectedId] || []).length);
+    $("undoDraft").disabled = !((state.hist[state.selectedId] || []).length);
+  }
+  async function reviseReply(instruction) {
+    const ta = $("body"); const cur = ta.value.trim(); if (!state.thread) return; if (!cur) return draftReply(instruction);
+    if (state.ctl) state.ctl.abort(); const ctl = new AbortController(); state.ctl = ctl; const tid = state.selectedId;
+    openCompose(); pushHist(tid, ta.value); ta.readOnly = true; $("stopBtn").hidden = false; note("Revising with " + (state.model === "claude" ? "Claude" : state.model.replace(/^[^\/]+\//, "")) + "…");
+    try {
+      const text = await ask(voicePrompt(), "Revise this draft reply. Change only what the instruction asks; keep everything else, including names, dates, numbers and promises, unless the instruction says otherwise. Return only the new email body: no subject line, no commentary.\n\nInstruction: " + instruction + "\n\nCurrent draft:\n" + cur + "\n\nThe thread it answers (newest message last), for reference:\n\n" + threadText(state.thread, 8000), { max_tokens: 4000, signal: ctl.signal });
+      if (state.selectedId !== tid) return;
+      ta.value = text; state.aiDraft[tid] = text; $("custom").value = ""; note("Revised. Undo goes back a version.");
+    } catch (e) { const h = state.hist[tid] || []; if (h[h.length - 1] === ta.value) h.pop(); const c = mcpCopy(e, aiLabel()); note(c, c ? "err" : ""); }
+    finally { ta.readOnly = false; $("stopBtn").hidden = true; if (state.ctl === ctl) state.ctl = null; updateIter(); }
+  }
+  // Click anywhere on the inline context header to fold or unfold it.
+  reading.addEventListener("click", (ev) => { const h = ev.target.closest("#ctxBox .ctxhead"); if (h && !ev.target.closest("button")) { const b = h.querySelector('[data-ctx="fold"]'); if (b) b.click(); } });
+  $("iterRow").addEventListener("click", (ev) => { const b = ev.target.closest("[data-rev]"); if (b) reviseReply(b.dataset.rev); });
+  $("undoDraft").addEventListener("click", () => { const h = state.hist[state.selectedId] || []; const prev = h.pop(); if (prev === undefined) return; $("body").value = prev; state.aiDraft[state.selectedId] = prev; updateIter(); note("Back one version."); });
+  $("body").addEventListener("input", updateIter);
+  // Work on a reply in Claude chat: copy a pointer to this thread. Claude reads it, works on the reply with you,
+  // and saves it as a Gmail draft in the thread; the draft shows here (Load it), ready to edit and send.
+  $("chatCopyBtn").addEventListener("click", () => {
+    const t = state.thread; if (!t) return; const ms = t.messages || []; const last = ms[ms.length - 1] || {}; const A = GX ? curAcct() : null;
+    const txt = "Help me reply to this email, then save the reply as a Gmail draft in the same thread" + (A ? " (Gmail through Composio, account " + A.id + ")" : "") + ".\n"
+      + "Subject: " + (last.subject || "(no subject)") + "\nFrom: " + (last.sender || "") + "\nAccount: " + (curEmail() || "") + "\nThread id: " + (t.id || state.selectedId) + "\nIn Gmail: " + (t.viewUrl || "");
+    const done = () => toast("Copied. Paste it into Claude chat. When Claude saves the draft, it shows on this thread: Load it, then Send.", "ok", 8000);
+    try { navigator.clipboard.writeText(txt).then(done, () => openModal("Work on it in chat", '<p class="note">Copy this into Claude chat:</p><textarea class="copybox" readonly>' + esc(txt) + '</textarea>')); } catch { openModal("Work on it in chat", '<p class="note">Copy this into Claude chat:</p><textarea class="copybox" readonly>' + esc(txt) + '</textarea>'); }
+  });
+  document.querySelectorAll("#replyMenu [data-intent]").forEach((b) => b.addEventListener("click", () => { if (b.dataset.intent === "call" && featOn("calendar")) $("calChk").checked = true; draftReply(INTENTS[b.dataset.intent]); }));
+  $("customBtn").addEventListener("click", () => {
+    const v = $("custom").value.trim();
+    if ($("body").value.trim()) { if (v) reviseReply(v); else { openCompose(); note("Say what to change in the box next to Revise, or pick Shorter, Warmer, More direct or Polish."); $("custom").focus(); } }
+    else draftReply(v || "Write a sensible reply to the latest message.");
+  });
   $("custom").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); $("customBtn").click(); } });
   $("stopBtn").addEventListener("click", () => { if (state.ctl) state.ctl.abort(); });
   $("saveDraftBtn").addEventListener("click", saveDraft);
@@ -3802,6 +3995,7 @@ body.ro [data-mut] { opacity: 0.4; }
   }
   wireMenu($("toolsBtn"), $("toolMenu"));
   wireMenu($("threadMoreBtn"), $("threadMenu"));
+  wireMenu($("replyMenuBtn"), $("replyMenu"), "left");
   wireMenu($("setBtn"), $("setMenu"));
   wireMenu($("tabTools"), $("toolMenu"));
   wireMenu($("pbMore"), $("threadMenu"));

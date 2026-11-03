@@ -50,7 +50,7 @@ const voDur = VO ? Array.from({ length: 10 }, (_, k) => +execFileSync('ffprobe',
   await pg.click('#sideBody [data-ctx="route"]'); await caption('Review and apply: nothing runs until you do'); await hold(2600);
   await finishBeat(); await caption(''); await shot('route');
   await pg.click('#modalClose'); await hold(400);
-  await beat(6); await caption('Draft in your voice, using what your systems know'); await pg.click('[data-intent="yes"]'); await hold(2600);
+  await beat(6); await caption('Draft in your voice, using what your systems know'); await pg.click('#replyMenuBtn'); await pg.click('[data-intent="yes"]'); await hold(2600);
   await finishBeat(); await caption(''); await shot('draft');
   await beat(7); await caption('Pre-send check: catches the promise you forgot'); await pg.click('#sendBtn'); await hold(3000);
   await finishBeat(); await caption(''); await shot('presend');

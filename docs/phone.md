@@ -44,7 +44,7 @@ The phone layout applies at 860 px wide and below, so it also shows on a narrow 
 
 **More** holds Move or copy, File as a task, Add to contacts, Summarize, Star, Mark read, Unsubscribe, Formatted view and Open in Gmail. **Tools** opens the inbox tools. Both open as bottom sheets with a **Close** button at the bottom, and every item is tall enough to tap.
 
-**Replying.** Tap **Reply** to jump to the reply box. The reply buttons, *Draft with* switches, Save draft and Send work as they do on a computer. The action bar hides while you type, so it never covers the box, and comes back when you're done. Send always scrolls clear of the bar.
+**Replying.** Tap **Reply** to jump to the reply box. The **Reply** menu, *Draft with* switches, Save draft and Send work as they do on a computer. The action bar hides while you type, so it never covers the box, and comes back when you're done. Send always scrolls clear of the bar.
 
 ## Details
 

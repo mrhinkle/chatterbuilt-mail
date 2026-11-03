@@ -1,6 +1,6 @@
 # Replying
 
-Press a button or say what you want, and you get a reply in your voice that already knows what your systems know about the person. Before it goes, the **pre-send check** rereads it against the thread and your systems and flags what you missed.
+Pick a reply from the **Reply** menu or say what you want, and you get a reply in your voice that already knows what your systems know about the person. Before it goes, the **pre-send check** rereads it against the thread and your systems and flags what you missed.
 
 ![A draft in the reply box: "Yes to gold" with two times for a call](images/draft.webp)
 
@@ -8,15 +8,21 @@ Press a button or say what you want, and you get a reply in your voice that alre
 
 ## How to use it
 
-1. Open a thread. The reply box is under the messages (on a phone, tap **Reply** in the bottom bar).
-2. Press a button, or type what the reply should say and press **Draft**:
+1. Open a thread. The reply box sits under the messages as one line: the **Reply** menu, a box for what to say, and **Draft**. It opens up when you use it, so the message keeps the room while you read. The chevron at the right of that line opens or folds it by hand, and the app remembers which you prefer. On a phone, tap **Reply** in the bottom bar.
+
+   ![The Reply menu open over the folded reply box](images/reply-menu.webp)
+
+2. Pick from **Reply**, or type what the reply should say and press **Draft**:
    - **Say yes:** warm, and specific about what happens next.
    - **Decline:** kind, without over-explaining.
    - **Ask a question:** doesn't commit; asks the one or two things you'd need to know.
    - **Offer a call:** suggests a short call, with your open times.
    - **Follow up later:** acknowledges it and says roughly when you'll come back to it.
    - **Your own words:** "yes, but only if we can do it in December."
-3. Edit the draft. Your edits are how it learns ([self-improving.md](self-improving.md)).
+3. Work on it until it's right. With a draft in the box, the button says **Revise**: type what to change ("shorter", "mention the deck is coming today", "move the call to Thursday") and it rewrites the draft you have instead of starting over. **Shorter**, **Warmer**, **More direct** and **Polish** do the common ones in a click, and **↶ Undo** steps back through the last ten versions. Edit by hand at any point; your edits are how it learns ([self-improving.md](self-improving.md)).
+
+   ![Revise: an instruction typed next to the Revise button, with Shorter, Warmer, More direct, Polish and Undo below](images/revise.webp)
+
 4. Press **Send**. The pre-send check runs, then you confirm. Or press **Save draft** to put it in Gmail Drafts.
 
 Under the draft, a line says what went into it, for example: *matched how you write to Dana Ruiz, used Meetings, Pipeline, Memory*.
@@ -40,9 +46,9 @@ The switches under the instruction box decide what the draft uses:
 - It skips declined, cancelled and all-day events.
 - Only the free times go to the AI, never event names, people or locations.
 
-## 3 options
+## Three options
 
-**3 options** writes three versions side by side: **Best fit**, **Shorter** and **Polite no**. Click one to load it into the reply box. If the thread doesn't need a reply (a newsletter, a receipt, an FYI), it says so instead of inventing one.
+**Three options**, in the **Reply** menu, writes three versions side by side: **Best fit**, **Shorter** and **Polite no**. Click one to load it into the reply box. If the thread doesn't need a reply (a newsletter, a receipt, an FYI), it says so instead of inventing one.
 
 ![3 options: Best fit, Shorter and Polite no above the reply box](images/options.webp)
 
@@ -81,7 +87,8 @@ If nothing is wrong, it says so and asks you to confirm. If the check can't run,
 
 ## Everything else in the reply box
 
-- **Snippets:** reusable text you insert at the cursor, with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
+- **Work on it in chat:** in **More** above the thread, this copies a short pointer to the thread (subject, sender, account, thread id). Paste it into a Claude chat, work the reply out there, and ask Claude to save it as a Gmail draft in the thread. Back here, open the thread: the **draft waiting in Gmail** banner offers **Load it**, and **Send** sends it (and removes the draft). The page checks for new drafts each time you open a thread.
+- **Snippets:** reusable text you insert at the cursor (the foot of the reply box, or **Reply → Insert a snippet**), with `{{firstName}}` and `{{myName}}`. See [voice.md](voice.md#snippets).
 - **Your Gmail signature:** Gmail adds the signature you set in Gmail (Settings → Signature) to every reply, draft and forward, with its formatting, links and images. A line under the reply box says so. Each account uses its own signature. If your drafts already end with a signature block, turn **Gmail signature** off in Skills so you don't get two.
 - **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
 - **Reply all:** off by default. The pre-send check warns when reply-all looks risky.

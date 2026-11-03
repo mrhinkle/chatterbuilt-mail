@@ -75,6 +75,7 @@ It lists every action that's switched on: the views (Inbox, Unread, Waiting on r
 | `z` | Undo the last change |
 | `[` | Show or hide the thread list |
 | `]` | Show or hide context: the side panel on wide screens, the card at the top of the thread otherwise |
+| Shift+F10 or the menu key on a row | The row's action menu (same as right-click) |
 | Arrow keys on a pane grip | Resize that pane. Shift moves 64 px instead of 16; Home and End go to the limits |
 | `⌘K` / `Ctrl K` | Command palette |
 | `?` | Shortcuts and skills |

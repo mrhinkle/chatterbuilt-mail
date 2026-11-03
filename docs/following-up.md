@@ -23,11 +23,11 @@ The default number of days is `waitingDays` in your config (3 if you don't set i
 
 ![A nudge drafted for Jordan, in your voice, using what your systems know](images/nudge.webp)
 
-**How to use it.** Open a thread from Waiting and press **Nudge** in the reply buttons. It only appears when you had the last word. You get a short, friendly follow-up that restates the one thing you need and makes it easy to answer. It won't open with "just circling back."
+**How to use it.** Open a thread from Waiting and pick **Nudge** from the **Reply** menu. It only appears when you had the last word. You get a short, friendly follow-up that restates the one thing you need and makes it easy to answer. It won't open with "just circling back."
 
 Like any draft, it uses your voice, your tone with that person, and the context panel. Edit it, then **Send**. It goes to the people you wrote to, threaded under your last message.
 
-**3 options** on a thread where you had the last word gives you three follow-ups instead of three replies:
+**Three options** on a thread where you had the last word gives you three follow-ups instead of three replies:
 - **Friendly nudge**;
 - **Shorter**;
 - **Close the loop**, which offers to drop it gracefully if it's no longer a priority for them.

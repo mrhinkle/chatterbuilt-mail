@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.6.2 (2026-11-02)
+
+### New
+- **Act on a thread from the list.** Each row has a small strip of icons (Archive, Move, Route, Create task, Add contact): always on the open thread, on hover for the rest. Right-click a row, or press Shift+F10 or the menu key, for a menu with every action: Open, Archive, Snooze, Move, Route, Create task, Add contact, Star, Mark read or unread, Unsubscribe and Open in Gmail. Archive, star and read work in place without opening the thread.
+- **A Reply menu instead of a row of buttons.** Say yes, Decline, Ask a question, Offer a call, Follow up later, Nudge, Three options, Write it myself and Insert a snippet sit in one menu beside the instruction box.
+- **Revise the draft you have.** With a draft in the box, type what to change and press **Revise** (or use Shorter, Warmer, More direct, Polish), and it rewrites that draft instead of starting over. **Undo** steps back through the last ten versions.
+- **Work on it in chat.** **More → Work on it in chat** copies a pointer to the thread for a Claude chat. Claude saves the reply as a Gmail draft in the thread, and the page offers **Load it** the next time you open the thread (it now checks for new drafts each time).
+
+### Changed
+- **The reply box folds to one line** (Reply menu, instruction, Draft) until you use it, so the message and its context get the room. The chevron opens or folds it by hand, and the app remembers.
+- **A compact thread header.** The subject takes at most two lines, the thread buttons become icons on one line when the reading pane is narrow, and a chevron hides them. Clicking the context card's header folds it.
+- The hover buttons that sat over the row's date are gone; the new strip sits at the bottom of the row.
+
 ## 0.6.1 (2026-11-02)
 
 ### Fixed

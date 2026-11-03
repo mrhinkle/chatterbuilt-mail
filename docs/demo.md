@@ -48,8 +48,12 @@ Each section links to its guide.
 
 | | |
 |---|---|
-| ![Draft](images/draft.webp) | ![3 options](images/options.webp) |
-| A draft that used your tone with this person and the brief | 3 options: Best fit, Shorter, Polite no |
+| ![Draft](images/draft.webp) | ![Three options](images/options.webp) |
+| A draft that used your tone with this person and the brief | Three options: Best fit, Shorter, Polite no |
+| ![Reply menu](images/reply-menu.webp) | ![Revise](images/revise.webp) |
+| The Reply menu over the folded reply box | Revising the draft in the box, with Undo |
+| ![Row menu](images/row-menu.webp) | |
+| Right-click a row for every thread action | |
 | ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
 | Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
 | ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |

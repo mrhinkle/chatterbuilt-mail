@@ -19,7 +19,12 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 
 - **Search.** Type any Gmail query and press Enter: `from:dana newer_than:7d`, `subject:invoice has:attachment`.
 - **Rows** fill in their preview, date and unread dot as each thread loads. Tags show **draft in Gmail** when a draft is waiting, and after Triage, **reply**, **read** or **skip** with a short reason.
-- **Row buttons.** Hover a row for **More** (move, copy or unsubscribe without opening it) and **Task**. You can also drag a row onto **Tasks** in the top bar.
+- **Row buttons.** Each row has a small strip of icons: **Archive**, **Move**, **Route**, **Create task** and **Add contact**. It always shows on the open thread and appears on hover for the others, so you can file a thread without opening it. Archive and Move work in place; Route and Add contact open the thread first. You can also drag a row onto **Tasks** in the top bar.
+- **Right-click a row** (or focus it and press Shift+F10 or the menu key) for every action in one menu: Open, Archive, Snooze, Move, Route, Create task, Add contact, Star or Unstar, Mark read or unread, Unsubscribe, and Open in Gmail.
+
+  ![Right-click on a row: the menu of thread actions](images/row-menu.webp)
+
+- **The thread header.** The subject takes at most two lines. On a narrow reading pane the thread buttons turn into icons on one line (hover for the name), and the chevron at the right of the subject hides them altogether. The context card's header folds it with a click.
 - **More mail.** The list shows 25 at a time. Scroll to the end, or press **Load older mail**, for the next batch. The footer shows how many are loaded out of Gmail's estimate.
 
 ## Triage
