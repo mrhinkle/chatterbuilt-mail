@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.4 (2026-11-03)
+
+### Fixed
+- **Long threads open faster in the formatted view.** Only the messages on show are cleaned and rendered; an older, collapsed message is formatted when you open it. Cleaning every message's HTML up front was the slow part on threads with long quoted history.
+- **Screen readers hear "Updates available".** A status line, read out once when the news changes, says how many new threads arrived and that Update is in the header.
+
 ## 0.7.3 (2026-11-03)
 
 ### Added

@@ -28,7 +28,7 @@ The thread list is your Gmail, with previews, unread dots and tags for drafts an
 
 - **The thread header.** The subject takes at most two lines. On a narrow reading pane the thread buttons turn into icons on one line (hover for the name), and the chevron at the right of the subject hides them altogether. The context card's header folds it with a click.
 - **More mail.** The list shows 25 at a time. Scroll to the end, or press **Load older mail**, for the next batch. The footer shows how many are loaded out of Gmail's estimate.
-- **It updates, it doesn't reload.** **Refresh**, and the refresh after you archive, snooze, move or undo, fetches the newest page and merges it into the list on screen. New mail slides in at the top with a moment of highlight, threads that left the view drop out, and your scroll position, open thread and selection stay where they were. The list never changes on its own, though: every few minutes, and when you come back to the tab, it checks Gmail quietly, and if there's new mail the header shows **Updates available** (or **3 new · Update**). Click it, or **Refresh**, when you're ready.
+- **It updates, it doesn't reload.** **Refresh**, and the refresh after you archive, snooze, move or undo, fetches the newest page and merges it into the list on screen. New mail slides in at the top with a moment of highlight, threads that left the view drop out, and your scroll position, open thread and selection stay where they were. The list never changes on its own, though: every few minutes, and when you come back to the tab, it checks Gmail quietly, and if there's new mail the header shows **Updates available** (or **3 new · Update**). Click it, or **Refresh**, when you're ready. Screen readers hear it too, once each time it changes.
 - **Views come back at once.** Inbox, Unread, Primary, each account and each search keep their last list, so switching shows it straight away and refreshes behind it. The latest list is also kept for this browser session, so reopening the page shows your list before Gmail answers. If a refresh fails, the list stays as it was and a note says so.
 
 ## Triage
@@ -116,6 +116,7 @@ Messages open formatted: their own layout, colors, fonts, links, headings, lists
 - Scripts, style sheets, forms, SVG and `javascript:` links are removed before anything shows. Only safe inline styles are kept: colors, fonts, spacing, borders and gradients, never one that could load something from elsewhere.
 - Pictures can't load inside the artifact, so each shows as a box of its real size with its description. Tracking pixels (images with no size) show nothing.
 - Links open in a new tab, and quoted history folds under **Earlier messages**.
+- On a long thread, the older messages folded to one line are formatted when you open them, so the thread opens quickly.
 - A message sent as plain text stays plain text.
 
 ## What it touches

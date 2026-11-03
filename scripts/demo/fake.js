@@ -161,9 +161,9 @@ module.exports = function fake() {
         if (tool === 'get_thread') {
           const t = JSON.parse(JSON.stringify(T[input.threadId]));
           // Tests: window.__mailHtml[threadId] replaces the last message's HTML; window.__extraMsg[threadId] adds a
-          // message to the end (a reply that just arrived), copying the last one with the fields given.
+          // message (or a list of them) to the end (a reply that just arrived), copying the last one with the fields given.
           if (window.__mailHtml && window.__mailHtml[input.threadId]) t.messages[t.messages.length - 1].htmlBody = window.__mailHtml[input.threadId];
-          if (window.__extraMsg && window.__extraMsg[input.threadId]) t.messages.push(Object.assign({}, t.messages[t.messages.length - 1], { date: new Date().toISOString() }, window.__extraMsg[input.threadId]));
+          if (window.__extraMsg && window.__extraMsg[input.threadId]) [].concat(window.__extraMsg[input.threadId]).forEach((x) => t.messages.push(Object.assign({}, t.messages[t.messages.length - 1], { date: new Date().toISOString() }, x)));
           if (input.messageFormat !== 'FULL_CONTENT') t.messages.forEach((m) => { delete m.htmlBody; });
           return P(t);
         }
