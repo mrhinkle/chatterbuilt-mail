@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.7.3 (2026-11-03)
+
+### Added
+- **Delete a draft.** The draft editor in the Drafts tab has **Delete**. It asks first, naming the draft and saying it's permanent (Gmail keeps no copy of a deleted draft), then deletes it with one call and opens the next draft. If Gmail doesn't answer, it says the draft may already be gone and to check before deleting again: a failed delete is never retried. Read-only blocks it. Composio uses `GMAIL_DELETE_DRAFT` on the account that holds the draft.
+
+### Fixed
+- **The bar with Send is back under a folded reply box.** 0.7.1 hid the bar when the reply box was folded, and the box remembers being folded, so on most threads the bar with Snippets, Reply all, Remind me, Save draft and Send was gone. It now shows whenever a thread is open. Using it while the box is folded opens the box and scrolls to its note or the send confirmation.
+
+From a code review of 0.7.1 to 0.7.3:
+- **Sending or deleting a draft holds the editor until Gmail answers.** The other draft buttons wait, and another draft can't open, so a slow answer can't land on the draft you moved to (and take your unsaved edits with it).
+- **A held or doubled Enter can't answer Send or Delete.** Delete's question puts the keyboard on Cancel, and both ignore key repeats and a key press in the first half second.
+- **Formatted mail can't load anything from elsewhere.** Styles that could fetch an image through CSS escapes, comments or `image-set()` are removed, and so are SVG and MathML with everything inside them (their text used to show). Quoted history folds once instead of once per level.
+- **New messages show formatted.** A message that arrived after you first opened a thread, your own reply included, showed as plain text in a formatted thread. Switching to plain text keeps links clickable.
+- **Through Composio, draft writes go to the draft's own account,** and switching accounts saves an open draft's edits and closes it.
+- **Your own reply updates the list right away,** instead of turning on Updates available later.
+- **Today's drafts card** no longer waits for ever when the inbox fails to load, and no longer shows the last account's drafts after you switch.
+- Deleting a draft Gmail says is already gone counts as deleted. "Gmail can't find this" shows only for Gmail errors, not for other connectors or a missing account. The Delete button is red (it showed grey). Notes in the draft editor and toasts are announced to screen readers.
+
 ## 0.7.2 (2026-11-03)
 
 ### Changed

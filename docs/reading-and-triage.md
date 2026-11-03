@@ -113,7 +113,7 @@ Messages open formatted: their own layout, colors, fonts, links, headings, lists
 ![A newsletter in Formatted view, with headings, a link and a table](images/formatted.webp)
 
 - Each message renders in its own sealed-off box, so its styles and the page's never mix.
-- Scripts, style sheets, forms and `javascript:` links are removed before anything shows. Only safe inline styles are kept.
+- Scripts, style sheets, forms, SVG and `javascript:` links are removed before anything shows. Only safe inline styles are kept: colors, fonts, spacing, borders and gradients, never one that could load something from elsewhere.
 - Pictures can't load inside the artifact, so each shows as a box of its real size with its description. Tracking pixels (images with no size) show nothing.
 - Links open in a new tab, and quoted history folds under **Earlier messages**.
 - A message sent as plain text stays plain text.

@@ -108,7 +108,7 @@ body.dragging .taskdrop { border-color: var(--accent); }
 .main.has-side { grid-template-columns: var(--rail-w, minmax(280px, 350px)) minmax(0, 1fr) var(--side-w, minmax(260px, 320px)); }
 .side { min-width: 0; min-height: 0; display: flex; flex-direction: column; border-radius: var(--radius-lg); overflow: hidden; }
 .sidebody { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 18px; }
-@media (max-width: 1179px) { .main.has-side { grid-template-columns: var(--rail-w, minmax(300px, 400px)) minmax(0, 1fr); } .side { display: none !important; } #sideTog { display: none !important; } }
+@media (max-width: 1179px) { .main.has-side { grid-template-columns: var(--rail-w, minmax(300px, 400px)) minmax(0, 1fr); } .side { display: none !important; } }
 .side { position: relative; }
 .listtog { flex: none; }
 .listtog[aria-expanded="false"] { color: var(--accent); border-color: rgba(37, 99, 235, 0.35); }
@@ -139,7 +139,6 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .side.min > .sidemin { display: flex; flex: 1; flex-direction: column; align-items: center; gap: 10px; padding: 14px 0; border: 0; background: none; color: var(--violet); font: inherit; cursor: pointer; }
 .side.min > .sidemin:hover { background: var(--hover); }
 .sidemin .vt { writing-mode: vertical-rl; font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
-#sideTog { display: none !important; }
 .sidecap .btn { gap: 2px; }
 .who { display: flex; gap: 12px; align-items: center; min-width: 0; }
 .avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; font-weight: 700; font-size: 14px; flex: none; }
@@ -171,6 +170,9 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 /* Drafts on Today: who it's to and the subject, each on its own line and wrapped, never cut off. */
 .today .trow.wrap { flex-direction: column; align-items: flex-start; gap: 1px; }
 .today .trow.wrap .w, .today .trow.wrap .s { max-width: 100%; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
+.dangerbtn, .btn.ghost.dangerbtn { color: #b42318; }
+.dangerbtn:hover, .btn.ghost.dangerbtn:hover { background: rgba(180, 35, 24, 0.07); color: #912018; }
+.btn.primary.dangerbtn { background: #b42318; border-color: #b42318; color: #ffffff; }
 .updbtn { color: var(--accent); border-color: rgba(37, 99, 235, 0.35); background: rgba(37, 99, 235, 0.07); font-weight: 600; }
 .updbtn .ic { color: var(--accent); }
 .today .trow .w { font-weight: 600; flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -408,12 +410,15 @@ body:not(.thread-open) .headtog { display: none; }
 .compose .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
 /* The bar with Send is the reading pane's own child, right after the reply box, so it can stay pinned to the bottom of
    the pane while the thread and an open reply scroll as one: a sticky bar inside the reply box couldn't leave the box,
-   and on a long thread the box starts below the fold. Folded or hidden reply box, no bar. */
+   and on a long thread the box starts below the fold. A folded reply box keeps its bar (a click on it opens the box,
+   where the note and the confirm show); only a hidden one, with no thread open, has none. */
 .cfoot { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; padding: 4px 14px 14px; background: rgba(255, 255, 255, 0.38); }
 .cfoot .spacer { flex: 1 1 auto; }
 .cfoot .sendgrp { display: flex; gap: 6px; align-items: center; margin-left: auto; }
 .compose:not(.folded) { padding-bottom: 6px; }
-.compose[hidden] + .cfoot, .compose.folded + .cfoot { display: none; }
+.compose[hidden] + .cfoot { display: none; }
+.compose.folded + .cfoot { padding-top: 0; }
+#confirmBox, #composeNote { scroll-margin-bottom: 72px; }
 @media (min-width: 861px) {
   .desk:has(.compose:not([hidden]):not(.folded)) > .cfoot { position: sticky; bottom: 0; z-index: 3; padding-top: 9px; padding-bottom: 10px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border-top: 1px solid var(--line); }
 }
@@ -516,13 +521,6 @@ body:not(.thread-open) .headtog { display: none; }
 .att1 { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; padding: 2px 4px 2px 9px; border: 1px solid var(--line); border-radius: 999px; background: rgba(255, 255, 255, 0.8); }
 .att1 button { border: 0; background: transparent; font-size: 14px; line-height: 1; color: var(--muted); padding: 0 4px; }
 .msg .body.html { white-space: normal; max-width: none; }
-.htmlbody { overflow-x: auto; }
-.htmlbody table { border-collapse: collapse; max-width: 100%; }
-.htmlbody td, .htmlbody th { padding: 2px 6px; vertical-align: top; }
-.htmlbody p { margin: 0 0 10px; }
-.htmlbody blockquote { margin: 6px 0; padding-left: 10px; border-left: 2px solid var(--line-2); color: var(--muted); }
-.htmlbody .imgalt { color: var(--faint); font-size: 12px; }
-.htmlbody details { margin-top: 8px; }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .field { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .field > span { font-size: 11.5px; font-weight: 600; color: var(--muted); }
@@ -645,9 +643,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   .phonebar .btn { flex: 1 1 0; flex-direction: column; gap: 2px; min-height: 50px; padding: 4px 2px; font-size: 11.5px; border-color: transparent; background: transparent; }
   .phonebar .btn.primary { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: var(--accent-ink); }
   .phonebar .btn .ic { color: inherit; }
-  body.thread-open .compose { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
-  body.thread-open .compose:not(.folded) { padding-bottom: 6px; }
-  .cfoot { padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px)); }
+  body.thread-open .compose { padding-bottom: 6px; }
   body.thread-open .cfoot { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
   body.thread-open .reading { padding-bottom: 12px; }
   .today { padding: 16px; }
@@ -753,7 +749,6 @@ body.drafts-mode #triageBtn { visibility: hidden; }
             <button class="btn sm" id="sumBtn" type="button" aria-label="Summarize" hidden title="The gist and the asks"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M5 12h14M5 17h9"/></svg><span class="tl">Summarize</span></button>
           </div>
           <div class="tgroup end">
-            <button class="btn sm" id="sideTog" type="button" aria-label="Context" aria-controls="side" title="Show the context panel beside the thread (])" hidden><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2.5"/><path d="M14.5 4.5v15"/></svg><span class="tl">Context</span></button>
             <button class="btn sm mbtn" id="threadMoreBtn" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="threadMenu" aria-label="More actions"><svg class="ic" viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="currentColor" stroke="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="18.5" cy="12" r="1.6"/></svg><span class="tl">More</span></button>
           </div>
         </div>
@@ -1011,7 +1006,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const setStatus = (text, cls) => { const s = $("status"); s.className = "status " + (cls || ""); $("statusText").textContent = text; };
   const ls = { get(k) { try { return localStorage.getItem(k); } catch { return null; } }, set(k, v) { try { localStorage.setItem(k, v); } catch {} }, del(k) { try { localStorage.removeItem(k); } catch {} } };
   let toastTimer = null;
-  function toast(html, cls, ms) { let t = document.querySelector(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; document.body.append(t); } t.className = "toast " + (cls || ""); t.innerHTML = html; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), ms || 6000); }
+  function toast(html, cls, ms) { let t = document.querySelector(".toast"); if (!t) { t = document.createElement("div"); t.className = "toast"; t.setAttribute("role", "status"); t.setAttribute("aria-live", "polite"); document.body.append(t); } t.className = "toast " + (cls || ""); t.innerHTML = html; clearTimeout(toastTimer); toastTimer = setTimeout(() => t.remove(), ms || 6000); }
 
   // ---------- features (Skills picker) ----------
   const FEATURES = [
@@ -1180,10 +1175,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   });
 
   // Gmail's "not found" (a 404 inside a tool error): the thread or message was deleted or moved since the list loaded.
-  const isNotFound = (e) => /\b404\b|not ?found|notFound|Requested entity was not found/i.test(String((e && (e.message || e.detail)) || e || ""));
+  // Gmail's own "isn't there" answers (a 404, "Requested entity was not found", notFound), not a missing account or
+  // connection, which also say "not found" but mean something else.
+  const isNotFound = (e) => { const t = String((e && (e.message || e.detail)) || e || ""); return /\b404\b|not ?found|notFound|Requested entity was not found/i.test(t) && !/account|connection|toolkit|no such tool/i.test(t); };
   function mcpCopy(e, server) {
     const code = e && e.code; const s = server || (e && e.server) || "the connector";
-    if (isNotFound(e) && (!code || code === "tool_error" || code === "upstream_error")) return "Gmail can't find this any more. It was probably deleted or moved since the list loaded. Refresh the list to bring it up to date.";
+    if (s === GMAIL && isNotFound(e) && (!code || code === "tool_error" || code === "upstream_error")) return "Gmail can't find this any more. It was probably deleted or moved since the list loaded. Refresh the list to bring it up to date.";
     switch (code) {
       case "needs_reauth": return s + " needs to be reconnected. Open claude.ai Settings → Connectors and reconnect it.";
       case "server_not_connected": return s + " isn't connected for this account. Add it in claude.ai Settings → Connectors.";
@@ -1446,7 +1443,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         return { labelId: "gxname:" + input.displayName, name: input.displayName };
       }
     }
-    if (/^(list_send_as|send_message|create_draft)$/.test(tool) && input.acct && GX.accounts.some((a) => a.id === input.acct)) return gxOne(tool, input, opts, GX.accounts.find((a) => a.id === input.acct));
+    if (/^(list_send_as|send_message|create_draft|update_draft|delete_draft)$/.test(tool) && input.acct && GX.accounts.some((a) => a.id === input.acct)) return gxOne(tool, input, opts, GX.accounts.find((a) => a.id === input.acct));
     if (tool === "list_send_as") return gxOne(tool, input, opts, gxAcctFor(input));
     if (tool === "get_thread" && isAll() && GX.accounts.length > 1) {
       // Reading a thread is safe to ask each account in turn: if the one we expected says it isn't there, try the rest.
@@ -1454,9 +1451,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       try { return await gxOne(tool, input, opts, first); }
       catch (e) {
         if (!isNotFound(e)) throw e;
-        for (const A of GX.accounts) {
+        for (const A of allAccts()) {
           if (A.id === first.id) continue;
-          try { const r = await gxOne(tool, input, opts, A); gxOwner["t:" + input.threadId] = A.id; return r; } catch (e2) { if (!isNotFound(e2)) throw e2; }
+          try { const r = await gxOne(tool, input, opts, A); gxOwner["t:" + input.threadId] = A.id; return r; } catch { /* not there either; say what the first account said */ }
         }
         throw e;
       }
@@ -1817,6 +1814,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       list.innerHTML = '<div class="empty"><h2>Couldn\'t load threads</h2><p>' + esc(mcpCopy(e, GMAIL)) + '</p><button type="button" class="btn sm primary" data-retrylist="1">Try again</button></div>';
       $("countText").textContent = "error";
       setStatus(e && e.code ? e.code : "error", "err");
+      // Drafts load after the list does, so with no list Today would wait on them for ever: ask for them now.
+      if (!state.draftsAll && !state.draftsBusy) loadDraftsMap(true);
     } finally { if (append) { state.loadingMore = false; if (token === state.loadToken) renderList(); } if (soft && token === state.loadToken) $("refreshBtn").classList.remove("busy"); }
   }
   // ---------- a list that updates instead of reloading ----------
@@ -1849,7 +1848,6 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       return { threads: v.threads, estimate: v.estimate, hasMore: v.hasMore, nextToken: null };
     } catch { return null; }
   }
-  // Quietly pull changes every few minutes while the page is in view, and when you come back to it.
   // Every few minutes, and when you come back to the page, the list checks Gmail quietly. It never changes the list on
   // its own: if there's new mail it shows "Updates available" in the header, and the list updates when you click it
   // (or Refresh). Loading the page, switching views and your own actions still update the list right away.
@@ -1864,6 +1862,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     checking = true; lastSoft = Date.now(); const key = viewKey(), tok = state.loadToken;
     try {
       const p = await call(GMAIL, "search_threads", { query: state.query, pageSize: 25, view: "THREAD_VIEW_SUMMARY" }, { cache: false });
+      if (p && p.nextPageToken && gxPages[p.nextPageToken]) delete gxPages[p.nextPageToken]; // this check never pages on
       if (state.shownKey !== key || tok !== state.loadToken) return;
       const have = new Map(state.threads.map((t) => [t.id, t])); let n = 0, changed = 0;
       ((p && p.threads) || []).forEach((t) => { const h = have.get(t.id); if (!h) n++; else if (rowSig(h) !== rowSig(t)) changed++; });
@@ -2397,8 +2396,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       recordDraftOutcome(state.selectedId, body, to[0]); delete state.variants[state.selectedId];
       const after = await afterSend(state.selectedId);
       const sentMsg = "Sent" + (after.length ? "; " + after.join(", ") : "") + "."; note(sentMsg, "ok"); toast(esc(sentMsg), after.some((x) => /^couldn't|didn't/.test(x)) ? "err" : "ok", after.length ? 9000 : 4000); $("body").value = ""; resetRcpts();
-      try { await invalGmail("get_thread"); } catch {}
-      openThread(state.selectedId);
+      try { await invalGmail(); } catch {}
+      openThread(state.selectedId); loadThreads(false); // your own reply updates the list now, like archive and move
     } catch (e) {
       const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
       note(mcpCopy(e, GMAIL) + (amb ? " Check your Sent folder before sending again." : ""), "err");
@@ -2629,7 +2628,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   async function formattedUnsubLinks(threadId, msgId) {
     try {
-      const full = state.full[threadId] || (state.full[threadId] = await call(GMAIL, "get_thread", { threadId: threadId, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
+      const full = await fullThread(threadId, state.selectedId === threadId && state.thread ? state.thread.messages : null);
       const fm = ((full && full.messages) || []).find((m) => m.id === msgId) || {};
       return unsubLinksFromHtml(fm.htmlBody);
     } catch { return []; }
@@ -3353,14 +3352,16 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // Thread ids, labels and drafts belong to the mailboxes on screen, so a switch drops everything from the last view.
   function resetMailbox() {
     OWN = ((homeAcct() && homeAcct().email) || CONFIG.ownEmail || "").toLowerCase(); MARK = markNow();
-    state.labels = null; state.preview = {}; state.full = {}; state.draftMap = {}; draftsAt = 0; state.triage = {}; state.age = {}; state.variants = {}; state.aiDraft = {};
+    state.labels = null; state.preview = {}; state.full = {}; state.draftMap = {}; draftsAt = 0; state.draftsAll = null; state.draftsCapped = false; state.draftsErr = false; state.draftsBusy = false; state.draftsGen++; state.triage = {}; state.age = {}; state.variants = {}; state.aiDraft = {};
     state.queue = []; state.undo = []; state.ctx = {}; state.loadedDraftId = null; Object.keys(gxMsg).forEach((k) => delete gxMsg[k]);
     Object.keys(gxPages).forEach((k) => delete gxPages[k]); gxLabelCache = {};
     updateReviewBadge(); clearDesk();
   }
   const acctName = (a) => (a ? a.label || a.email || "that account" : "");
-  function setAccount(i) {
+  async function setAccount(i) {
     if (!GX || i === acctIdx || (i >= 0 && !GX.accounts[i]) || (i < 0 && !MULTI)) return;
+    // A draft open in the Drafts tab belongs to the account being left: save your edits to it, then close it.
+    if (state.dSel) { if (state.dDirty && !state.readOnly && !state.dBusy) await saveDraftEdit(true); state.dSel = null; state.dCur = null; state.dDirty = false; }
     acctIdx = i < 0 ? -1 : i; ls.set("cm.acct", i < 0 ? "all" : GX.accounts[i].id);
     const sel = $("acctSel"); if (sel) sel.value = String(acctIdx);
     resetMailbox(); renderAcctChips(); loadThreads(false);
@@ -3877,8 +3878,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   state.web = {}; state.steps = {};
   const wideMQ = window.matchMedia("(min-width: 1180px)");
   const panelOn = () => featOn("context") || featOn("more") || featOn("route");
-  // The context panel sits beside the thread on wide screens. The Panel button hides it (context then
-  // shows at the top of the thread) and brings it back; the choice is remembered in this browser.
+  // The context panel sits beside the thread on wide screens. Its header (or Hide, or ]) closes it to a slim strip at
+  // the edge, and the strip opens it again; the choice is remembered in this browser.
   state.sideOff = ls.get("cm.sideOff") === "1";
   const sidePanel = () => wideMQ.matches && !state.sideOff;
   function showSide(on) {
@@ -3887,19 +3888,17 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     // Closed, the panel stays as a slim strip that opens it again.
     const side = $("side"); side.hidden = !show; side.classList.toggle("min", state.sideOff);
     const main = document.querySelector(".main"); main.classList.toggle("has-side", show && wideMQ.matches); main.classList.toggle("side-min", show && state.sideOff);
-    $("sideOpen").setAttribute("aria-expanded", String(!state.sideOff)); $("sideTog").hidden = true;
+    $("sideOpen").setAttribute("aria-expanded", String(!state.sideOff));
   }
-  // Hidden on purpose on a wide screen means hidden: no copy of the context at the top of the thread. The Context button
-  // in the thread's toolbar (or ]) brings the panel back. Narrower screens have no panel, so they keep the card in the thread,
-  // and so does the Drafts editor, which has no thread toolbar to bring the panel back from.
-  const ctxHidden = () => wideMQ.matches && state.sideOff && !inDraftCtx();
+  // Closed on purpose on a wide screen means closed: no copy of the context at the top of the thread or the draft. The
+  // strip at the edge (or ]) brings the panel back. Narrower screens have no panel, so they keep the card in the page.
+  const ctxHidden = () => wideMQ.matches && state.sideOff;
   function ctxTarget() { return sidePanel() ? $("sideBody") : ctxHidden() ? null : $("ctxBox"); }
   function setSideOff(off) {
     state.sideOff = off; ls.set("cm.sideOff", off ? "1" : "0");
     showSide(true); if (state.thread || inDraftCtx()) renderContext();
     const f = off ? $("sideOpen") : $("sideHide"); if (f && f.getClientRects().length) f.focus({ preventScroll: true });
   }
-  $("sideTog").addEventListener("click", () => setSideOff(false));
   $("sideOpen").addEventListener("click", () => setSideOff(false));
   $("sideHide").addEventListener("click", (ev) => { ev.stopPropagation(); setSideOff(true); });
   document.querySelector("#side .sidecap").addEventListener("click", (ev) => { if (!ev.target.closest("button, a, input, select")) setSideOff(true); });
@@ -4433,10 +4432,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 
   // ---------- formatted (HTML) view, sanitized ----------
   const OK_TAGS = new Set(["A", "B", "STRONG", "I", "EM", "U", "P", "BR", "DIV", "SPAN", "UL", "OL", "LI", "TABLE", "THEAD", "TBODY", "TFOOT", "TR", "TD", "TH", "BLOCKQUOTE", "H1", "H2", "H3", "H4", "H5", "H6", "HR", "PRE", "CODE", "SMALL", "SUP", "SUB", "FONT", "CENTER"]);
+  const HTML_NS = "http://www.w3.org/1999/xhtml";
   const DROP_TAGS = /^(SCRIPT|STYLE|HEAD|TITLE|META|LINK|IFRAME|FRAME|OBJECT|EMBED|FORM|INPUT|BUTTON|SELECT|TEXTAREA|SVG|MATH|NOSCRIPT|TEMPLATE|BASE|AUDIO|VIDEO|CANVAS)$/;
   function sanitizeHtml(html) {
     const doc = new DOMParser().parseFromString(String(html || ""), "text/html");
-    const out = document.createElement("div"); out.className = "htmlbody";
+    const out = document.createElement("div");
     (function walk(src, dst) {
       src.childNodes.forEach((n) => {
         if (n.nodeType === 3) { dst.append(document.createTextNode(n.nodeValue)); return; }
@@ -4462,14 +4462,24 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // choice is remembered. The thread shows as text first and the formatted version replaces it when it arrives.
   state.formatted = ls.get("cm.formatted") !== "0";
   const fmtOn = () => state.formatted && featOn("html");
+  // The thread with every message's HTML. The copy kept here is used only while it has every message on screen (a reply
+  // you just sent, or new mail, means fetching again), and only the last 20 threads are kept.
+  async function fullThread(id, onScreen) {
+    const have = state.full[id]; const ids = new Set(((have && have.messages) || []).map((m) => m.id));
+    if (have && (onScreen || []).every((m) => ids.has(m.id))) return have;
+    const full = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } });
+    delete state.full[id]; state.full[id] = full; const keys = Object.keys(state.full); if (keys.length > 20) delete state.full[keys[0]];
+    return full;
+  }
   async function loadFormatted(id, quiet) {
-    const btn = $("htmlBtn"); if (!quiet) { btn.disabled = true; toast('<span class="spin"></span>Loading the formatted view…', "", 15000); }
+    const btn = $("htmlBtn"); const hideToast = () => { const tt = document.querySelector(".toast"); if (tt) tt.remove(); };
+    if (!quiet) { btn.disabled = true; toast('<span class="spin"></span>Loading the formatted view…', "", 15000); }
     try {
-      const full = state.full[id] || (state.full[id] = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
-      if (state.selectedId !== id || !fmtOn() || !state.thread) return;
-      renderThreadBodies(full); if (!quiet) { const tt = document.querySelector(".toast"); if (tt) tt.remove(); }
+      const full = await fullThread(id, state.thread && state.thread.messages);
+      if (state.selectedId !== id || !fmtOn() || !state.thread) { if (!quiet) hideToast(); return; }
+      renderThreadBodies(full); if (!quiet) hideToast();
     } catch (e) { if (!quiet) toast(esc(mcpCopy(e, GMAIL)), "err", 6000); }
-    finally { btn.disabled = false; }
+    finally { if (!quiet) btn.disabled = false; }
   }
   async function toggleFormatted() {
     const btn = $("htmlBtn"); const id = state.selectedId; if (!id || !state.thread) return;
@@ -4487,29 +4497,37 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         const pm = ((state.thread && state.thread.messages) || []).find((x) => x.id === art.dataset.mid) || {};
         const parts = splitQuoted(String(pm.plaintextBody || pm.snippet || "").replace(/\r/g, ""));
         body.classList.remove("html");
-        body.innerHTML = esc(parts.main) + (parts.quoted ? '<details><summary class="note">Earlier messages</summary><div class="quoted">' + esc(parts.quoted) + '</div></details>' : "");
+        body.innerHTML = linkify(parts.main) + (parts.quoted ? '<details><summary class="note">Earlier messages</summary><div class="quoted">' + linkify(parts.quoted) + '</div></details>' : "");
       }
     });
   }
 
   // ---------- drafts already waiting in Gmail (the morning run's, or your own) ----------
-  state.draftMap = {}; let draftsAt = 0;
+  // state.draftsGen moves on when the mailbox changes (another account), so an answer for the old one is dropped.
+  state.draftMap = {}; state.draftsGen = 0; state.draftsBusy = false; let draftsAt = 0;
   async function loadDraftsMap(force) {
     if (!featOn("drafts")) return;
     if (!force && Date.now() - draftsAt < 60000) return;
+    const gen = state.draftsGen; state.draftsBusy = true;
     try {
       const p = await call(GMAIL, "list_drafts", { pageSize: 50, view: "DRAFT_VIEW_METADATA_ONLY" }, { cache: false });
+      if (gen !== state.draftsGen) return;
       const map = {}; ((p && p.drafts) || []).forEach((d) => { if (d && d.threadId && !map[d.threadId]) map[d.threadId] = d; });
       state.draftMap = map; draftsAt = Date.now();
-      // Every draft, for the Today card (the Drafts tab keeps its own list). Keep names already looked up.
+      // Every draft, for the Today card (the Drafts tab keeps its own list). Keep names already looked up, unless the
+      // draft has changed since (Gmail gives it a new message and date on every save).
       const prev = new Map((state.draftsAll || []).map((d) => [d.id, d]));
-      state.draftsAll = ((p && p.drafts) || []).filter((d) => d && d.id).map((d) => Object.assign(d, prev.has(d.id) && prev.get(d.id)._meta ? { _meta: prev.get(d.id)._meta } : {})).sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
-      state.draftsCapped = ((p && p.drafts) || []).length >= 50;
+      const same = (a, b) => a && a._meta && a.date === b.date && (a.messageId || "") === (b.messageId || "");
+      state.draftsAll = ((p && p.drafts) || []).filter((d) => d && d.id).map((d) => Object.assign(d, same(prev.get(d.id), d) ? { _meta: prev.get(d.id)._meta } : {})).sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
+      // Each account's list stops at 50, so "+" means one of them may have more.
+      const per = {}; state.draftsAll.forEach((d) => { per[d.acct || ""] = (per[d.acct || ""] || 0) + 1; });
+      state.draftsCapped = Object.values(per).some((n) => n >= 50);
       state.draftsErr = false; renderTodaySoon(); todayDraftNames();
       const ids = new Set(state.threads.map((t) => t.id));
       if (Object.keys(map).some((k) => ids.has(k))) renderList();
       showDraftBox();
-    } catch (e) { if (!state.draftsAll) { state.draftsErr = true; renderTodaySoon(); } /* drafts are a convenience */ }
+    } catch (e) { if (gen === state.draftsGen && !state.draftsAll) { state.draftsErr = true; renderTodaySoon(); } /* drafts are a convenience */ }
+    finally { if (gen === state.draftsGen) state.draftsBusy = false; }
   }
   const htmlToText = (h) => { const el = sanitizeHtml(h); el.querySelectorAll("br").forEach((b) => b.replaceWith("\n")); el.querySelectorAll("p,div,li,tr").forEach((b) => b.append("\n")); return el.textContent.replace(/\n{3,}/g, "\n\n").trim(); };
   function draftText(d) {
@@ -4545,7 +4563,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   async function afterSend(threadId) {
     const msgs = [];
     try { msgs.push(...await runThen(threadId, state.thread)); } catch { msgs.push("the follow-ups didn't run"); }
-    if (state.loadedDraftId) { try { await call(GMAIL, "delete_draft", { draftId: state.loadedDraftId }, { cache: false }); delete state.draftMap[threadId]; msgs.push("removed the old Gmail draft"); } catch (e) { msgs.push("the old Gmail draft is still there"); } state.loadedDraftId = null; }
+    if (state.loadedDraftId) { const ld = (state.draftMap[threadId] && state.draftMap[threadId].id === state.loadedDraftId && state.draftMap[threadId]) || { id: state.loadedDraftId, threadId: threadId }; try { await call(GMAIL, "delete_draft", Object.assign({ draftId: state.loadedDraftId }, draftAcct(ld)), { cache: false }); dropDraftLocally(ld); msgs.push("removed the old Gmail draft"); } catch (e) { msgs.push("the old Gmail draft is still there"); } state.loadedDraftId = null; }
     if (featOn("snooze") && $("remindChk").checked) { try { await remindThread(threadId, ymd(Date.now() + (+$("remindDays").value || 3) * 864e5)); msgs.push("reminder set"); } catch (e) { msgs.push("couldn't set the reminder"); } $("remindChk").checked = false; }
     state.attachments = []; renderAtt();
     return msgs;
@@ -4579,7 +4597,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       renderDrafts(); if (!state.dSel) renderDraftsHome(); loadDraftMetas(token);
       // A draft picked on Today opens straight away.
       const want = state.pendingDraft; state.pendingDraft = null; if (want && state.drafts.some((d) => d.id === want)) openDraft(want);
-    } catch (e) { if (token === state.loadToken) list.innerHTML = '<div class="empty"><h2>Couldn\'t load your drafts</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; }
+    } catch (e) { state.pendingDraft = null; if (token === state.loadToken) list.innerHTML = '<div class="empty"><h2>Couldn\'t load your drafts</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; }
   }
   // ---------- your signature ----------
   // The HTML signature you set in Gmail, to preview on a reply and insert into a draft. Through Composio it's read from
@@ -4616,8 +4634,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const SIG_TAGS = /^(TABLE|THEAD|TBODY|TFOOT|TR|TD|TH|DIV|SPAN|P|BR|A|B|STRONG|I|EM|U|IMG|FONT|HR|SMALL|SUP|SUB|CENTER|UL|OL|LI|H1|H2|H3|H4|H5|H6)$/;
   const SIG_ATTRS = ["width", "height", "align", "valign", "bgcolor", "cellpadding", "cellspacing", "border", "colspan", "rowspan", "color", "face", "size", "dir"];
   const SIG_CSS = /^(color|background|background-color|font|font-family|font-size|font-weight|font-style|line-height|letter-spacing|text-align|text-decoration|text-transform|vertical-align|white-space|padding(-(top|right|bottom|left))?|margin(-(top|right|bottom|left))?|border(-(top|right|bottom|left|width|style|color|collapse|spacing|radius))?(-(width|style|color))?|width|height|max-width|min-width|max-height|display|direction)$/;
+  // A style value is kept only if it can't fetch anything or reach outside the box. Backslashes (CSS escapes such as
+  // "\75 rl(") and comments are refused outright, and the only functions allowed are colors, calc and gradients, so
+  // url(), image-set(), element(), cross-fade() and the like never get through, however they're spelled.
+  const CSS_FN_OK = /^(rgba?|hsla?|calc|linear-gradient|radial-gradient)$/i;
+  const cssValOk = (v) => !/[\\<>]|\/\*|@import|javascript:|expression/i.test(v) && [...v.matchAll(/([a-z-]*)\s*\(/gi)].every((m) => CSS_FN_OK.test(m[1]));
   function sigStyle(v) {
-    return String(v || "").split(";").map((d) => { const i = d.indexOf(":"); if (i < 1) return ""; const p = d.slice(0, i).trim().toLowerCase(), val = d.slice(i + 1).trim(); return SIG_CSS.test(p) && val && !/url\(|expression|javascript:|@import|[<>]/i.test(val) && !(p === "display" && !/^(block|inline|inline-block|table|table-cell|table-row|none)$/i.test(val)) ? p + ":" + val : ""; }).filter(Boolean).join(";");
+    return String(v || "").split(";").map((d) => { const i = d.indexOf(":"); if (i < 1) return ""; const p = d.slice(0, i).trim().toLowerCase(), val = d.slice(i + 1).trim(); return SIG_CSS.test(p) && val && cssValOk(val) && !(p === "display" && !/^(block|inline|inline-block|table|table-cell|table-row|none)$/i.test(val)) ? p + ":" + val : ""; }).filter(Boolean).join(";");
   }
   // A whole message uses the same cleaner with mail: true: a few more tags, quoted text folded under "Earlier messages",
   // and no box for an image with no size (often a tracking pixel), just its alt text if it has one.
@@ -4625,14 +4648,17 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const QUOTE_CLS = /gmail_quote|reference-message|divRplyFwdMsg|moz-cite-prefix|yahoo_quoted/i;
   function sigClean(html, mail) {
     const doc = new DOMParser().parseFromString(String(html || ""), "text/html"); const out = document.createElement("div");
-    (function walk(src, dst) {
+    // Only HTML elements count: SVG and MathML keep lower-case tag names, so they're dropped by namespace, with
+    // everything inside them. Quoted history folds once; quotes inside a quote just carry on inside the same fold.
+    (function walk(src, dst, inQuote) {
       src.childNodes.forEach((n) => {
         if (n.nodeType === 3) { dst.append(document.createTextNode(n.nodeValue)); return; }
-        if (n.nodeType !== 1 || DROP_TAGS.test(n.tagName)) return;
+        if (n.nodeType !== 1 || n.namespaceURI !== HTML_NS || DROP_TAGS.test(n.tagName)) return;
         if (mail && QUOTE_CLS.test((n.getAttribute("class") || "") + " " + (n.getAttribute("id") || ""))) {
-          const d = document.createElement("details"); const sm = document.createElement("summary"); sm.textContent = "Earlier messages"; d.append(sm); walk(n, d); dst.append(d); return;
+          if (inQuote) { walk(n, dst, true); return; }
+          const d = document.createElement("details"); const sm = document.createElement("summary"); sm.textContent = "Earlier messages"; d.append(sm); walk(n, d, true); dst.append(d); return;
         }
-        if (!SIG_TAGS.test(n.tagName) && !(mail && MAIL_TAGS.test(n.tagName))) { walk(n, dst); return; }
+        if (!SIG_TAGS.test(n.tagName) && !(mail && MAIL_TAGS.test(n.tagName))) { walk(n, dst, inQuote); return; }
         const st = sigStyle(n.getAttribute("style")), px = (k) => { const m = st.match(new RegExp("(?:^|;)" + k + ":\\s*(\\d+)")); return m ? +m[1] : 0; };
         if (n.tagName === "IMG") {
           const w0 = parseInt(n.getAttribute("width"), 10) || px("width"), h0 = parseInt(n.getAttribute("height"), 10) || px("height");
@@ -4646,9 +4672,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         SIG_ATTRS.forEach((a) => { const v = n.getAttribute(a); if (v != null && /^[#\w%. ,-]{0,40}$/.test(v)) el.setAttribute(a, v); });
         if (st) el.setAttribute("style", st);
         if (n.tagName === "A") { const href = n.getAttribute("href") || ""; if (/^(https?:|mailto:|tel:)/i.test(href)) { el.setAttribute("href", href); el.setAttribute("target", "_blank"); el.setAttribute("rel", "noopener noreferrer"); } }
-        walk(n, el); dst.append(el);
+        walk(n, el, inQuote); dst.append(el);
       });
-    })(doc.body, out);
+    })(doc.body, out, false);
     return out;
   }
   function mountSig(host, html) {
@@ -4752,13 +4778,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + (left.length ? '<p><button type="button" class="btn primary" id="dStart">Start with the first one</button></p>' : "") + '</div>';
     const b = $("dStart"); if (b) b.addEventListener("click", () => openDraft(left[0].id));
   }
-  // The list call carries no subjects, so each row's subject and first line are fetched on their own, three at a time.
   // Today names its first drafts: who each is to and its subject (a read per draft, a few at a time).
   async function todayDraftNames() {
     const todo = (state.draftsAll || []).slice(0, 6).filter((d) => !d._meta); let i = 0;
     async function w() { while (i < todo.length) { const d = todo[i++]; try { await draftMeta(d); } catch { d._meta = d._meta || { subject: "", snippet: "", to: d.toRecipients || [] }; } } }
     if (todo.length) { await Promise.all([w(), w(), w()]); renderTodaySoon(); }
   }
+  // The list call carries no subjects, so each row's subject and first line are fetched on their own, three at a time.
   async function loadDraftMetas(token) {
     const todo = state.drafts.filter((d) => !d._meta); let i = 0;
     async function w() { while (i < todo.length && token === state.loadToken) { const d = todo[i++]; try { await draftMeta(d); } catch { d._meta = d._meta || { subject: "", snippet: "", to: d.toRecipients || [] }; } renderDrafts(); } }
@@ -4843,6 +4869,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   const addrList = (v) => String(v || "").split(/[,;\n]+/).map((x) => emailOf(x.trim()).toLowerCase()).filter((x) => EMAIL_RE.test(x));
   async function openDraft(id) {
+    // While a draft is being sent or deleted, the editor stays on it, so the answer can't land on another draft.
+    if (state.dBusy) { toast("One moment: still " + state.dBusy + " that draft.", "", 2500); return; }
     const d = state.drafts.find((x) => x.id === id); if (!d) return;
     if (state.dDirty && state.dSel && state.dSel !== id && !state.readOnly) { const ok = await saveDraftEdit(true); if (!ok) return; }
     state.dSel = id; state.dCur = null; state.dDirty = false; state.selectedId = null; state.thread = null; renderDrafts();
@@ -4889,9 +4917,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
       + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm primary" id="dAutoCheck">Check it for me</button></div><p class="note dhow">Claude reads the draft against the message it answers, what your systems know about this person and your writing rules. It ticks what passes and says what to fix. It never changes the draft.</p>'
       + '<div id="dChecks">' + dChecksHtml(d.id) + '</div></div>'
-      + '<div class="mrow dfoot"><span class="note dnote" id="dNote"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
+      + '<div class="mrow dfoot"><span class="note dnote" id="dNote" aria-live="polite"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
       + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
-      + '<button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
+      + '<button type="button" class="btn sm ghost dangerbtn" id="dDelete" data-mut title="Delete this draft from Gmail">Delete</button><button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
     const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML; renderDraftSig();
     const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; };
     ed.addEventListener("input", dirty); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
@@ -4923,8 +4951,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("dDone").addEventListener("click", () => { setDChecked(d.id, true); renderDrafts(); dMove(1, true); });
     $("dSave").addEventListener("click", () => saveDraftEdit(false));
     $("dSend").addEventListener("click", askSendDraft);
+    $("dDelete").addEventListener("click", askDeleteDraft);
     $("dConfirmNo").addEventListener("click", () => { $("dConfirm").hidden = true; });
-    $("dConfirmGo").addEventListener("click", sendDraftEdit);
+    // A held or doubled Enter must not answer the question it just opened: key repeats are ignored, and so is a
+    // keyboard press in the first half second.
+    $("dConfirmGo").addEventListener("keydown", (ev) => { if (ev.repeat) ev.preventDefault(); });
+    $("dConfirmGo").addEventListener("click", (ev) => { if (ev.detail === 0 && performance.now() - (state.dConfirmAt || 0) < 500) return; if (state.dConfirmAct === "delete") deleteDraftEdit(); else sendDraftEdit(); });
   }
   function dChecksHtml(id) {
     const ticks = state.dTicks[id] || {};
@@ -4939,6 +4971,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // The people in a draft field, including anything still typed in its box.
   function dAddrs(k) { const i = $(k + "In"); if (i && i.value.trim() && addRcpt(k, i.value)) i.value = ""; return state.rcpt[k].map((r) => r.email); }
   const toRc = (l) => (l || []).map((a) => { const e = emailOf(a).toLowerCase(); const n = nameOf(a); return { email: e, name: n && !n.includes("@") ? n : "" }; }).filter((r) => EMAIL_RE.test(r.email));
+  // Through Composio a draft write goes to the account the draft is in, not whichever account is on screen.
+  const draftAcct = (d) => (GX && d && d.acct ? { acct: d.acct } : {});
   function dNote(text, cls) { const n = $("dNote"); if (n) { n.className = "note dnote " + (cls || ""); n.textContent = text; } }
   async function saveDraftEdit(quiet) {
     const c = state.dCur; if (!c) return false; const { d, full } = c;
@@ -4949,8 +4983,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("dSave").disabled = true; dNote("Saving…");
     try {
       // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
-      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id, to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false });
-      state.dDirty = false; d._meta = null; full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
+      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id }, draftAcct(d), { to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false });
+      state.dDirty = false; d._meta = null; (state.draftsAll || []).forEach((x) => { if (x.id === d.id) x._meta = null; }); full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
       // Composio's GMAIL_UPDATE_DRAFT rewrites the message without its In-Reply-To and References headers. Gmail still files
       // it in your thread, but their mail app may show it as a new conversation.
       if (GX && full.inReplyTo) { c.lostThread = true; full.inReplyTo = ""; }
@@ -4966,22 +5000,80 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const to = dAddrs("dto"); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
     const cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
     $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
-    $("dConfirm").hidden = false; $("dConfirmGo").focus();
+    state.dConfirmAct = "send"; $("dConfirmGo").textContent = "Yes, send it"; $("dConfirmGo").classList.remove("dangerbtn");
+    $("dConfirm").hidden = false; state.dConfirmAt = performance.now(); $("dConfirmGo").focus();
+  }
+  // Deleting a draft is for good: Gmail doesn't keep deleted drafts in Trash. So it asks first, in the page.
+  function askDeleteDraft() {
+    if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
+    const c = state.dCur; if (!c) return; const m = c.d._meta || {}; const subj = (c.full && c.full.subject) || m.subject || "";
+    $("dConfirmText").textContent = "Delete this draft" + (subj ? " (“" + subj + "”)" : "") + " from Gmail? It's gone for good: Gmail doesn't keep deleted drafts." + (state.dDirty ? " Your unsaved changes go with it." : "");
+    state.dConfirmAct = "delete"; $("dConfirmGo").textContent = "Yes, delete it"; $("dConfirmGo").classList.add("dangerbtn");
+    // Focus goes to Cancel, the safe answer, since this can't be undone.
+    $("dConfirm").hidden = false; state.dConfirmAt = performance.now(); $("dConfirmNo").focus();
+  }
+  // A draft that's gone (sent or deleted) leaves every list that shows it: the Drafts tab, Today, the thread's tag.
+  // Returns where it was in the Drafts tab, so the next one can open in its place.
+  function dropDraftLocally(d) {
+    setDChecked(d.id, false); delete state.dTicks[d.id];
+    const i = state.drafts.findIndex((x) => x.id === d.id); if (i >= 0) state.drafts.splice(i, 1);
+    if (state.draftsAll) state.draftsAll = state.draftsAll.filter((x) => x.id !== d.id);
+    const tid = d.threadId || Object.keys(state.draftMap || {}).find((k) => state.draftMap[k].id === d.id);
+    if (tid && state.draftMap[tid] && state.draftMap[tid].id === d.id) delete state.draftMap[tid];
+    draftsAt = 0; if (state.mode === "drafts") $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
+    renderTodaySoon(); return i;
+  }
+  // Send and Delete own the editor until Gmail answers: the other draft buttons are off, and no other draft can open.
+  const D_BTNS = ["dDelete", "dSend", "dSave", "dDone", "dPrev", "dNext"];
+  function dLock(verb) { state.dBusy = verb; D_BTNS.forEach((k) => { if ($(k)) $(k).disabled = true; }); }
+  function dUnlock(c) { state.dBusy = false; D_BTNS.forEach((k) => { if ($(k)) $(k).disabled = k === "dSave" ? !!(c && c.hasAtt) : false; }); }
+  // After a draft is sent or deleted: open the one that took its place, or say there are none left. Focus goes to the
+  // editor, so the keyboard isn't left on a button that's gone.
+  function dAfterGone(i, done) {
+    state.dCur = null; state.dSel = null;
+    const next = state.drafts[Math.min(Math.max(i, 0), state.drafts.length - 1)];
+    if (next) openDraft(next.id).then(() => { const ed = $("dEditor"); if (ed && state.dSel === next.id) ed.focus({ preventScroll: true }); });
+    else { renderDrafts(); clearDesk(done); const chip = document.querySelector('.chip[data-key="drafts"]'); if (chip) chip.focus({ preventScroll: true }); }
+  }
+  async function deleteDraftEdit() {
+    const c = state.dCur; if (!c || state.dBusy) return; const { d } = c; $("dConfirm").hidden = true;
+    // You said yes knowing unsaved changes go too, so nothing saves them on the way out (leaving the tab, say).
+    const wasDirty = state.dDirty; state.dDirty = false; dLock("deleting"); dNote("Deleting…");
+    try {
+      try { await call(GMAIL, "delete_draft", Object.assign({ draftId: d.id }, draftAcct(d)), { cache: false }); }
+      catch (e) {
+        // Already gone (a first try that did go through, or deleted in Gmail meanwhile) is what you asked for.
+        if (!isNotFound(e)) {
+          // A write is never retried: if Gmail didn't answer, it may already be gone.
+          const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error");
+          dNote(amb ? "Gmail didn't answer, so this draft may already be gone. Refresh the list or check Gmail Drafts before you delete it again." : mcpCopy(e, GMAIL), "err");
+          state.dDirty = wasDirty; return;
+        }
+      }
+      const i = dropDraftLocally(d);
+      try { await invalGmail(); } catch {}
+      toast("Draft deleted.", "ok", 4000);
+      state.dBusy = false;
+      // You may have left the Drafts tab while it ran; then the list is all that changes.
+      if (state.mode !== "drafts" || state.dSel !== d.id) { renderDrafts(); return; }
+      dAfterGone(i, "No drafts left");
+    } finally { if (state.dBusy) dUnlock(c); else state.dBusy = false; }
   }
   async function sendDraftEdit() {
-    const c = state.dCur; if (!c) return; const { d } = c; $("dConfirm").hidden = true;
+    const c = state.dCur; if (!c || state.dBusy) return; const { d } = c; $("dConfirm").hidden = true;
     if (state.dDirty && !(await saveDraftEdit(true))) return;
-    $("dSend").disabled = true; dNote("Sending…");
+    if (state.dCur !== c) return;
+    dLock("sending"); dNote("Sending…");
     try {
-      await call(GMAIL, "send_message", { draftId: d.id }, { cache: false });
-      setDChecked(d.id, false); delete state.dTicks[d.id];
-      const i = state.drafts.findIndex((x) => x.id === d.id); state.drafts.splice(i, 1); state.dDirty = false; state.dCur = null;
-      try { await invalGmail(); } catch {} draftsAt = 0;
+      try { await call(GMAIL, "send_message", Object.assign({ draftId: d.id }, draftAcct(d)), { cache: false }); }
+      catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check your Sent folder before sending again." : ""), "err"); return; }
+      state.dDirty = false; const i = dropDraftLocally(d);
+      try { await invalGmail(); } catch {}
       toast("Sent.", "ok", 4000);
-      $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
-      const next = state.drafts[Math.min(i, state.drafts.length - 1)];
-      if (next) { state.dSel = null; openDraft(next.id); } else { state.dSel = null; renderDrafts(); clearDesk("Every draft is sent or checked"); }
-    } catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check your Sent folder before sending again." : ""), "err"); if ($("dSend")) $("dSend").disabled = false; }
+      state.dBusy = false;
+      if (state.mode !== "drafts" || state.dSel !== d.id) { renderDrafts(); return; }
+      dAfterGone(i, "Every draft is sent or checked");
+    } finally { if (state.dBusy) dUnlock(c); else state.dBusy = false; }
   }
   async function reviseDraft(instr) {
     const c = state.dCur; if (!c || c.hasAtt) return; const ed = $("dEditor"); const cur = htmlToText(ed.innerHTML); if (!cur.trim()) return;
@@ -5174,6 +5266,14 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("archiveBtn").addEventListener("click", () => labelThread([], ["INBOX"], "Archiving"));
   setHeadFold(ls.get("cm.headFold") === "1", false);
   $("headTog").addEventListener("click", () => setHeadFold(!$("desk").classList.contains("headfold"), true));
+  // The bar with Send stays under a folded reply box. Using it opens the box first (this runs before the button's own
+  // handler), then, once that handler has shown its note or the send confirmation, scrolls that into view: opening the
+  // box makes the whole pane the scroller, starting at the top of the thread.
+  $("composeFoot").addEventListener("click", () => {
+    if (!compose.classList.contains("folded")) return;
+    openCompose();
+    requestAnimationFrame(() => { const t = !$("confirmBox").hidden ? $("confirmBox") : $("composeNote"); if (t) t.scrollIntoView({ block: "nearest" }); });
+  }, true);
   $("composeTog").addEventListener("click", () => { const open = compose.classList.contains("folded"); setCompose(open, true); if (open) $("body").focus(); });
   $("writeBtn").addEventListener("click", () => { setCompose(true, false); $("body").focus(); });
   // Iterate on the draft: with text in the box, an instruction revises that text instead of starting over.

@@ -81,7 +81,7 @@ That's the loop: your meeting notes caught a promise, the brief put it in front 
 
      ![The panel closed to a slim Context strip beside the thread](images/panel-hidden.webp)
 
-   - On narrower screens and phones, where the brief sits at the top of the thread, **Hide** folds it to one line and **Show** opens it again. `]` does the same. The Drafts tab keeps the brief at the top of the draft when the panel is hidden, since it has no toolbar to bring the panel back. Both choices are remembered.
+   - On narrower screens and phones, where the brief sits at the top of the thread, **Hide** folds it to one line and **Show** opens it again. `]` does the same. On a wide screen the Drafts tab works the same as a thread: closed means the strip, with no copy of the brief over the draft. Both choices are remembered.
    - Too narrow or too wide? Drag the grip on the panel's left edge. Double-click it to reset.
    - While a thread loads, the panel says so. If there's no one on the thread but you, it says that instead of staying blank.
 

@@ -118,7 +118,8 @@ module.exports = function fake() {
     if (slug === 'GMAIL_FETCH_MESSAGE_BY_MESSAGE_ID') return { messageId: a.message_id, payload: { mimeType: 'multipart/alternative', headers: [{ name: 'Subject', value: 'x' }].concat(a.message_id === 'mt5' ? [{ name: 'List-Unsubscribe', value: '<https://weeklybyte.example/u?x=demo>, <mailto:leave@weeklybyte.example?subject=unsubscribe>' }] : []) } };
     if (slug === 'GMAIL_LIST_LABELS') return { labels: [{ id: 'INBOX', name: 'INBOX', type: 'system' }].concat((personal ? ['Family', 'Bikes'] : ['Finance', 'Sponsors', 'Meetup', 'Newsletters']).map((n, i) => ({ id: 'L' + (i + 1), name: n, type: 'user' }))) };
     if (slug === 'GMAIL_LIST_SEND_AS') return { sendAs: personal ? [{ sendAsEmail: 'alex.rivera@mail.example', isPrimary: true, isDefault: true, signature: '' }] : [{ sendAsEmail: 'alex@riveralabs.example', isPrimary: true, isDefault: true, signature: window.__noSig ? '' : SIG }, { sendAsEmail: 'events@riveralabs.example', signature: '' }] };
-    if (slug === 'GMAIL_LIST_DRAFTS') return { drafts: personal ? [] : [{ id: 'd1', message: { id: 'md1', threadId: 't2' } }] };
+    if (slug === 'GMAIL_LIST_DRAFTS') return { drafts: personal ? [] : [{ id: 'd1', message: { id: 'md1', threadId: 't2' } }].filter((d) => !(window.__deletedDrafts || []).includes(d.id)) };
+    if (slug === 'GMAIL_DELETE_DRAFT') { (window.__deletedDrafts = window.__deletedDrafts || []).push(a.draft_id); return {}; }
     // window.__htmlOnlyDraft: a draft saved as HTML only, the way Gmail returns many through Composio: one text/html
     // payload, and the same HTML (entities and all) in messageText.
     if (slug === 'GMAIL_GET_DRAFT' && window.__htmlOnlyDraft) {
@@ -159,16 +160,26 @@ module.exports = function fake() {
         if (tool === 'search_threads') { if (window.__failSearch) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); return P(search(input.query || '')); }
         if (tool === 'get_thread') {
           const t = JSON.parse(JSON.stringify(T[input.threadId]));
+          // Tests: window.__mailHtml[threadId] replaces the last message's HTML; window.__extraMsg[threadId] adds a
+          // message to the end (a reply that just arrived), copying the last one with the fields given.
+          if (window.__mailHtml && window.__mailHtml[input.threadId]) t.messages[t.messages.length - 1].htmlBody = window.__mailHtml[input.threadId];
+          if (window.__extraMsg && window.__extraMsg[input.threadId]) t.messages.push(Object.assign({}, t.messages[t.messages.length - 1], { date: new Date().toISOString() }, window.__extraMsg[input.threadId]));
           if (input.messageFormat !== 'FULL_CONTENT') t.messages.forEach((m) => { delete m.htmlBody; });
           return P(t);
         }
         if (tool === 'get_message') return P({ id: input.messageId, raw: input.messageId === 'mt5' ? unsubRaw : input.messageId === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') });
         if (tool === 'list_drafts') {
-          if ((input || {}).view === 'DRAFT_VIEW_METADATA_ONLY' && window.__draftsTab !== false) return P({ drafts: Object.values(DRAFT_FULL).filter((d) => !window.__sentDrafts || !window.__sentDrafts.includes(d.id)).map((d) => ({ id: d.id, threadId: d.threadId, toRecipients: d.toRecipients, ccRecipients: d.ccRecipients, date: d.date, viewUrl: d.viewUrl })) });
-          return P(DRAFTS);
+          const gone = (id) => (window.__sentDrafts || []).includes(id) || (window.__deletedDrafts || []).includes(id);
+          if ((input || {}).view === 'DRAFT_VIEW_METADATA_ONLY' && window.__draftsTab !== false) return P({ drafts: Object.values(DRAFT_FULL).filter((d) => !gone(d.id)).map((d) => ({ id: d.id, threadId: d.threadId, toRecipients: d.toRecipients, ccRecipients: d.ccRecipients, date: d.date, viewUrl: d.viewUrl })) });
+          return P({ drafts: DRAFTS.drafts.filter((d) => !gone(d.id)) });
         }
         if (tool === 'get_draft') { const d = DRAFT_FULL[(input || {}).draftId]; if (!d) return P({}); if ((input || {}).messageFormat === 'MINIMAL') { const m = Object.assign({}, d); delete m.plaintextBody; delete m.htmlBody; return P(m); } return P(d); }
         if (tool === 'update_draft') { const d = DRAFT_FULL[(input || {}).draftId]; if (d) { if (input.htmlBody) d.htmlBody = input.htmlBody; if (input.body) d.plaintextBody = input.body; if (input.subject) d.subject = input.subject; if (input.to) d.toRecipients = input.to; } return P({ id: input.draftId }); }
+        if (tool === 'delete_draft') {
+          // Tests: window.__slowDelete waits that many ms; window.__delete404 answers like Gmail for a draft that's already gone.
+          if (window.__slowDelete) await new Promise((r) => setTimeout(r, window.__slowDelete));
+          if (window.__delete404) throw Object.assign(new Error('Requested entity was not found.'), { code: 'tool_error' });
+          if (window.__failDelete) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); (window.__deletedDrafts = window.__deletedDrafts || []).push((input || {}).draftId); return P({}); }
         if (tool === 'send_message' && (input || {}).draftId) { (window.__sentDrafts = window.__sentDrafts || []).push(input.draftId); return P({ id: 'sent-' + input.draftId, threadId: (DRAFT_FULL[input.draftId] || {}).threadId || 'new', labelIds: ['SENT'] }); }
         if (tool === 'list_labels') return P({ labels: [{ labelId: 'L1', name: 'Finance', labelType: 'USER' }, { labelId: 'L2', name: 'Sponsors', labelType: 'USER' }, { labelId: 'L3', name: 'Meetup', labelType: 'USER' }, { labelId: 'L4', name: 'Newsletters', labelType: 'USER' }] });
         return P({ id: 'ok' });
@@ -181,7 +192,7 @@ module.exports = function fake() {
         if (tool === 'COMPOSIO_REMOTE_BASH_TOOL') return P(await bashTool(String((input || {}).command || '')));
         const it = (input.tools || [])[0] || {}; const slug = it.tool_slug;
         if (/^GMAIL_/.test(slug)) {
-          if (window.__failSearch && /^GMAIL_(FETCH_EMAILS|LIST_THREADS)$/.test(slug)) return P({ successful: false, data: { results: [{ response: { successful: false, data: {}, error: 'Gmail is not answering' }, tool_slug: slug }] } });
+          if ((window.__failSearch && /^GMAIL_(FETCH_EMAILS|LIST_THREADS)$/.test(slug)) || (window.__failDelete && slug === 'GMAIL_DELETE_DRAFT')) return P({ successful: false, data: { results: [{ response: { successful: false, data: {}, error: 'Gmail is not answering' }, tool_slug: slug }] } });
           const r = gmailBridge(slug, it.arguments || {}, it.account);
           if (r && r.__404) return P({ successful: false, data: { results: [{ response: { successful: false, data: { http_error: '404 Client Error: Not Found for url: https://gmail.googleapis.com/gmail/v1/users/me/threads/' + r.__404, message: '{\n  "error": {\n    "code": 404,\n    "message": "Requested entity was not found.",\n    "status": "NOT_FOUND"\n  }\n}' }, error: '404 Client Error: Not Found' }, tool_slug: slug }] } });
           return P(await offload(env(r)));

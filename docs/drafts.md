@@ -15,7 +15,8 @@ The **Drafts** tab is for going through your Gmail drafts one at a time: the one
 4. **Revise** it if you like: Shorter, Warmer, More direct, Polish, or say what to change. It keeps every fact, name, date and link. **Undo** puts the old version back. A revision resets formatting.
 5. Look at **Before you send**. **Check it for me** has usually already run (see below): what passes is ticked, and anything that doesn't has a short note saying what to fix.
 6. **Save** writes your changes to the Gmail draft. **Send** asks once, naming everyone on it and how many checklist items aren't ticked, then sends the draft and opens the next one.
-7. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list.
+7. **Delete** removes the draft from Gmail. It asks first, naming the draft, because Gmail doesn't keep deleted drafts: there's no Undo. The keyboard starts on Cancel. Then the next draft opens. While a draft is sending or deleting, the other buttons wait for Gmail's answer.
+8. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list.
 
 ## Check it for me
 
@@ -73,8 +74,9 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 | Insert signature | your signature from Gmail (`GMAIL_LIST_SEND_AS` through Composio; your newest signed sent message with the Gmail connector) | nothing until you Save | nothing |
 | Save | | the Gmail draft (`update_draft`) | |
 | Send | | sends the draft (`send_message` with the draft) | |
+| Delete | | deletes the draft, after you confirm (`delete_draft`); never retried | |
 
-Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT` and `GMAIL_SEND_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
+Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT`, `GMAIL_SEND_DRAFT` and `GMAIL_DELETE_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
 
 ## Related
 
