@@ -404,9 +404,9 @@ body:not(.thread-open) .headtog { display: none; }
 .compose .chead .chto { flex: 1 1 auto; min-width: 0; font-size: 12.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .compose .chead .chev { flex: none; transition: transform 0.15s; }
 /* With the reply box open, the thread and the reply are one page with one scrollbar, not a frame inside a frame. */
-.desk:has(.compose:not([hidden]):not(.folded)) { overflow-y: auto; }
-.desk:has(.compose:not([hidden]):not(.folded)) > .deskhead { position: sticky; top: 0; z-index: 4; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
-.desk:has(.compose:not([hidden]):not(.folded)) .reading { flex: none; overflow: visible; }
+body.reply-open .desk { overflow-y: auto; }
+body.reply-open .desk > .deskhead { position: sticky; top: 0; z-index: 4; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); }
+body.reply-open .desk .reading { flex: none; overflow: visible; }
 .compose.folded > :not(.first):not(.chead) { display: none !important; }
 .compose.folded { padding-block: 8px; }
 .compose .row.iter { gap: 4px; }
@@ -423,9 +423,9 @@ body:not(.thread-open) .headtog { display: none; }
 .compose[hidden] + .cfoot { display: none; }
 .compose.folded + .cfoot { padding-top: 0; }
 #confirmBox, #composeNote { scroll-margin-bottom: 72px; }
-@media (min-width: 861px) {
-  .desk:has(.compose:not([hidden]):not(.folded)) > .cfoot { position: sticky; bottom: 0; z-index: 3; padding-top: 9px; padding-bottom: 10px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border-top: 1px solid var(--line); }
-}
+/* Pinned at every width, the Claude app's side pane and a phone included: with the reply box open, the bar with Send
+   sits at the bottom of the screen, never at the end of a long thread. */
+body.reply-open .desk > .cfoot { position: sticky; bottom: 0; z-index: 3; padding-top: 9px; padding-bottom: 10px; background: rgba(255, 255, 255, 0.94); -webkit-backdrop-filter: var(--blur); backdrop-filter: var(--blur); border-top: 1px solid var(--line); }
 .tog { position: relative; display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px 4px 8px; border: 1px solid var(--line); border-radius: 999px; font-size: 12px; font-weight: 550; color: var(--muted); background: rgba(255, 255, 255, 0.6); cursor: pointer; user-select: none; }
 .tog input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
 .tog::before { content: ""; width: 13px; height: 13px; border-radius: 4px; border: 1.5px solid var(--line-2); background: #ffffff; flex: none; }
@@ -568,6 +568,8 @@ body:not(.thread-open) .headtog { display: none; }
 .dflags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; } .dflag { font-size: 10.5px; font-weight: 650; padding: 1px 6px; border-radius: 5px; background: var(--warm-soft); color: var(--warm); }
 .dplan { display: flex; gap: 4px; margin-top: 6px; } .dpb { font: inherit; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); cursor: pointer; }
 .dpb:disabled { opacity: 0.4; cursor: not-allowed; } .dpb:not(:disabled):hover { background: var(--hover); }
+.thread.sel .dpb { color: #ffffff; border-color: rgba(255, 255, 255, 0.6); } .thread.sel .dpb:not(:disabled):hover { background: rgba(255, 255, 255, 0.16); }
+.thread.sel .dflag { background: rgba(255, 255, 255, 0.92); }
 .dpb.send[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; } .dpb.delete[aria-pressed="true"] { background: #b42318; border-color: #b42318; color: #fff; } .dpb.skip[aria-pressed="true"] { background: var(--muted); border-color: var(--muted); color: #fff; }
 .dplanbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px 8px; font-size: 12.5px; } .dplanbar .dplansum { flex: 1 1 auto; } .dplanbar b.ok { color: var(--ok); } .dplanbar b.bad { color: #b42318; }
 .dapplyask { margin: 0 10px 8px; font-size: 12.5px; }
@@ -673,13 +675,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   .deskhead .acts { display: none !important; }
   body.thread-open .app[data-view="thread"] ~ .phonebar { display: flex; }
   .phonebar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; gap: 6px; padding: 8px max(10px, env(safe-area-inset-right, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px)); background: rgba(255, 255, 255, 0.95); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px); border-top: 1px solid var(--line); }
-  body.typing .phonebar { display: none !important; }
   .phonebar .btn { flex: 1 1 0; flex-direction: column; gap: 2px; min-height: 50px; padding: 4px 2px; font-size: 11.5px; border-color: transparent; background: transparent; }
   .phonebar .btn.primary { background: linear-gradient(180deg, var(--accent-2), var(--accent)); color: var(--accent-ink); }
   .phonebar .btn .ic { color: inherit; }
   body.thread-open .compose { padding-bottom: 6px; }
   body.thread-open .cfoot { padding-bottom: calc(84px + env(safe-area-inset-bottom, 0px)); }
+  /* Narrow, with the reply box open: the bar with Send rides just above the thread's action bar (Archive … More), so
+     both stay on screen however long the thread or the reply. The margin lets the end of the page scroll clear of both. */
+  body.thread-open.reply-open .desk > .cfoot { bottom: calc(67px + env(safe-area-inset-bottom, 0px)); padding-bottom: 10px; margin-bottom: calc(67px + env(safe-area-inset-bottom, 0px)); }
   body.thread-open .reading { padding-bottom: 12px; }
+  @media (pointer: coarse) {
+    body.typing .phonebar { display: none !important; }
+    body.typing.thread-open.reply-open .desk > .cfoot { bottom: 0; margin-bottom: 0; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  }
   .today { padding: 16px; }
   .toast { bottom: auto; top: calc(10px + env(safe-area-inset-top, 0px)); }
   .phone-only { display: revert !important; }
@@ -5696,8 +5704,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     clickChip(k === "waiting" ? "waiting" : "inbox"); app.dataset.view = "list";
   });
   $("replyJump").addEventListener("click", () => { openCompose(); compose.scrollIntoView({ block: "end", behavior: "smooth" }); setTimeout(() => $("body").focus(), 250); });
+  // body.reply-open says the reply box is showing and unfolded. The layout keys off this class rather than a CSS :has()
+  // test on the box, because Chromium (and so the Claude app) can leave a :has() rule applied after the box folds,
+  // which kept the phone's thread-actions bar hidden on the first thread you opened.
+  const syncReplyOpen = () => document.body.classList.toggle("reply-open", !compose.hidden && !compose.classList.contains("folded"));
+  new MutationObserver(syncReplyOpen).observe(compose, { attributes: true, attributeFilter: ["class", "hidden"] }); syncReplyOpen();
   $("phoneBar").addEventListener("click", (ev) => { const px = ev.target.closest("[data-proxy]"); if (px) $(px.dataset.proxy).click(); });
-  compose.addEventListener("focusin", (ev) => { if (ev.target.matches("textarea, input[type=text]")) document.body.classList.add("typing"); });
+  // "typing" hides the phone's thread-actions bar while a text field has focus, on a touch screen only (see the CSS). Focus moving to a button in the reply box
+  // (folding it, say) ends it, so the bar comes back instead of staying hidden until focus leaves the box.
+  compose.addEventListener("focusin", (ev) => { document.body.classList.toggle("typing", ev.target.matches("textarea, input[type=text]")); });
   compose.addEventListener("focusout", () => { setTimeout(() => { if (!compose.contains(document.activeElement)) document.body.classList.remove("typing"); }, 50); });
   $("sumBtn").addEventListener("click", summarize);
   $("taskBtn").addEventListener("click", () => createTask(state.selectedId));
@@ -5714,7 +5729,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     openCompose();
     requestAnimationFrame(() => { const t = !$("confirmBox").hidden ? $("confirmBox") : $("composeNote"); if (t) t.scrollIntoView({ block: "nearest" }); });
   }, true);
-  $("composeTog").addEventListener("click", () => { const open = compose.classList.contains("folded"); setCompose(open, true); if (open) $("body").focus(); });
+  $("composeTog").addEventListener("click", () => { const open = compose.classList.contains("folded"); setCompose(open, true); if (open) $("body").focus(); else document.body.classList.remove("typing"); });
   $("writeBtn").addEventListener("click", () => { setCompose(true, false); $("body").focus(); });
   // Iterate on the draft: with text in the box, an instruction revises that text instead of starting over.
   // The last 10 versions of each thread's draft are kept for Undo.

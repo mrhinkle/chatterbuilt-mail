@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.7.10 (2026-11-04)
+
+### Fixed
+- **The bottom bars stay put.** With the reply box open, the bar with **Save draft** and **Send** is pinned to the bottom at every width. It used to pin only on a wide screen, so in the Claude app's side pane or on a phone it sat at the end of a long thread, off the screen. On a narrow screen it rides just above the thread's action bar (Archive, Snooze, Route, Reply, More), and both stay on screen.
+- **The action bar no longer disappears while you type.** In a narrow window on a computer, such as the Claude app's side pane, it used to hide whenever the reply box had focus, and sometimes stayed hidden after. Now it hides only on a touch screen, while the keyboard is up.
+- **Send, Skip and Delete stay readable on the selected draft row.** They were dark on the selected row's blue.
+
 ## 0.7.9 (2026-11-04)
 
 ### Added

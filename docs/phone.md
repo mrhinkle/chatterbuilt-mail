@@ -36,6 +36,8 @@ The phone layout applies at 860 px wide and below, so it also shows on a narrow 
 | **Reply** | Jump to the reply box and start typing |
 | **More** | Everything else, in a sheet |
 
+The action bar stays on screen the whole time you're in a thread. With the reply box open, the bar with **Save draft** and **Send** sits just above it, however long the thread or your reply. While the keyboard is up, the action bar steps aside and Send sits on top of the keyboard.
+
 <p>
 <img src="images/phone-more.webp" alt="The More sheet: Move or copy, File as a task, Add to contacts, Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail, Close" width="260">
 <img src="images/phone-tools.webp" alt="The Tools sheet: Review, Pre-draft, Rules, Sweep, Ask, Close" width="260">
