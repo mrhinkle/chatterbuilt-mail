@@ -1080,7 +1080,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own. Show previews it under the reply box, where you can leave it off one message, and Insert signature adds it to a draft in the Drafts tab.", how: "On by default. Turn it off if your drafts already end with a signature." },
     { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
     { key: "html", name: "Formatted view", desc: "Shows messages as they were written: their own layout, colors and links, with scripts and tracking images removed. Pictures show as boxes of their size.", how: "On by default. More, Formatted view, above the thread, switches to plain text and back." },
-    { key: "cache", name: "Open mail at once", desc: "Keeps a copy of the threads you open, and of the next few in the list, in this browser, so they open without waiting on Gmail. A copy is only used while it matches the list, so a new message is never hidden behind an old copy. The next thread's context brief is ready before you get to it, and the list opens where you left it.", how: "Settings, Speed: how far ahead to load, what's kept, and Clear." },
+    { key: "cache", name: "Open mail at once", desc: "Keeps a copy of the threads and drafts you open, and of the next few in the list, in this browser, so they open without waiting on Gmail. A copy is only used while it matches the list, so a new message or a newer version of a draft is never hidden behind an old copy. The next one's context brief (and in Drafts, its checklist) is ready before you get to it, and the list opens where you left it.", how: "Settings, Speed: how far ahead to load, what's kept, and Clear." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
   let featState = {}; try { featState = JSON.parse(ls.get("cm.features") || "{}") || {}; } catch { featState = {}; }
@@ -1224,9 +1224,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + rows.map((r) => '<tr><td>' + esc(r.l) + (r.bad ? ' <span class="note err">' + r.bad + ' failed</span>' : "") + '</td><td>' + r.n + '</td><td>' + fmtMs(r.mid) + '</td><td>' + fmtMs(r.p90) + '</td><td>' + fmtMs(r.max) + '</td></tr>').join("") + '</tbody></table></div>' : '<p class="note">Nothing yet.</p>';
     const ks = tcStats(), mb = (ks.bytes / 1e6).toFixed(ks.bytes < 1e7 ? 1 : 0);
     const kept = '<h3 class="speedh">Open mail at once</h3>' + (!cacheOn() ? '<p class="note">Off. Turn on <em>Open mail at once</em> in Settings → Skills to keep copies of threads in this browser so they open without waiting on Gmail.</p>'
-      : '<p class="note">' + (ks.n ? ks.n + " thread" + (ks.n === 1 ? "" : "s") + " kept in this browser (" + mb + " MB)" : "Nothing kept yet") + '. Copies stay in this browser and are only shown while they match your list; any change you make to a thread drops its copy.</p>'
+      : '<p class="note">' + (ks.n ? ks.n + " thread" + (ks.n === 1 ? "" : "s") + " kept in this browser (" + mb + " MB)" : "Nothing kept yet") + '. Threads and drafts. Copies stay in this browser and are only shown while they match your list; any change you make to a thread or draft drops its copy.</p>'
       + '<div class="mrow"><label class="note" for="aheadSel">Load ahead</label><select id="aheadSel">' + [0, 3, 5, 10].map((v) => '<option value="' + v + '"' + (v === aheadN() ? " selected" : "") + '>' + (v ? "next " + v + " threads" : "off") + '</option>').join("") + '</select>'
-      + '<label class="tog"><input type="checkbox" id="ctxAheadChk"' + (ls.get("cm.ctxAhead") === "0" ? "" : " checked") + '>Next brief too</label>'
+      + '<label class="tog" title="While you work on one thread, the next one\'s context brief is built. In Drafts, the next draft\'s brief and check too. Each is an AI call made a step early."><input type="checkbox" id="ctxAheadChk"' + (ls.get("cm.ctxAhead") === "0" ? "" : " checked") + '>Get the next one ready</label>'
       + '<button type="button" class="btn sm ghost" id="tcClearBtn">Clear kept mail</button><span class="note" id="tcNote"></span></div>');
     openModal("Speed", '<p class="note">How long things take in this browser' + (state.speed.length ? ", from the last " + state.speed.length + " timings since " + esc(new Date(state.speed[0].at).toLocaleString()) : "") + '. <em>Typical</em> is the middle time, <em>slow</em> is 1 in 10. Timings keep only names and times, never any mail.</p>'
       + kept + '<h3 class="speedh">What you wait for</h3>' + table(st.filter((r) => r.k === "action"), "Action")
@@ -2256,6 +2256,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function tcDropFor(input) {
     const i = input || {}; const tids = [i.threadId, i.thread_id, state.selectedId].filter(Boolean);
     tids.forEach((id) => tcDrop(tcKey(id)));
+    const did = i.draftId || i.draft_id; if (did) { const d = (state.drafts || []).find((x) => x.id === did); if (d) tcDrop(dcKey(d)); }
     const mids = [i.messageId, i.message_id].concat(i.messageIds || [], i.message_ids || []).filter(Boolean);
     if (mids.length) tcMem.forEach((e, k) => { if ((e.ids || []).some((x) => mids.includes(x))) tcDrop(k); });
   }
@@ -2333,16 +2334,99 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (await ctxKept(id, t)) return;
     ctxBuild(t, id, who, CONFIG.context).catch(() => {});
   }
-  // Context briefs are kept too, for 12 hours, as long as the thread has no newer message than when it was built.
+  // Context briefs are kept too, for 12 hours: a thread's as long as it has no newer message than when it was built, a
+  // draft's as long as the draft hasn't changed.
+  const ctxStore = (id) => {
+    if (!String(id).startsWith("draft:")) return { k: tcKey(id) };
+    const d = (state.drafts || []).find((x) => "draft:" + x.id === id); return d && dSigOf(d) ? { k: "dctx:" + dcKey(d), sig: dSigOf(d) } : null;
+  };
   async function ctxKept(id, t) {
-    if (!cacheOn() || !id || String(id).startsWith("draft:")) return false;
-    const e = await idb.get("ctx", tcKey(id), 500);
-    if (!e || !e.c || Date.now() - e.at > 12 * 3600000 || e.last !== lastId(t)) return false;
+    if (!cacheOn() || !id) return false; const st = ctxStore(id); if (!st) return false;
+    const e = await idb.get("ctx", st.k, 500);
+    if (!e || !e.c || Date.now() - e.at > 12 * 3600000 || e.last !== (st.sig || lastId(t))) return false;
     state.ctx[id] = Object.assign({}, e.c, { at: e.at }); return true;
   }
   function ctxKeep(id, t, c) {
-    if (!cacheOn() || !id || String(id).startsWith("draft:") || !c || !c.text || /^Couldn't summarize/.test(c.text)) return;
-    idb.put("ctx", tcKey(id), { at: c.at || Date.now(), last: lastId(t), c: c });
+    if (!cacheOn() || !id || !c || !c.text || /^Couldn't summarize/.test(c.text)) return; const st = ctxStore(id); if (!st) return;
+    idb.put("ctx", st.k, { at: c.at || Date.now(), last: st.sig || lastId(t), c: c });
+  }
+  // Drafts are kept the same way, by draft id, and a copy is used only while it's the version the list shows: Gmail gives
+  // a draft a new message id each time it's saved (where the list has no id, its date stands in).
+  const dcKey = (d) => (GX ? (d.acct || gxOwner["d:" + d.id] || (curAcct() || {}).id || "gx") : "g") + ":d:" + d.id;
+  const dSigOf = (d) => String((d && (d.messageId || (d.message && d.message.id) || d.date)) || "");
+  async function dcGet(d) {
+    if (!cacheOn() || !d) return null;
+    const k = dcKey(d); let e = tcMem.get(k);
+    if (!e && tcIdx[k]) { e = await idb.get("threads", k, 500); if (e && e.m) tcMemSet(k, e); else { e = null; delete tcIdx[k]; tcSaveIdx(); } }
+    if (!e || !e.m || Date.now() - e.at > TC_DAYS * 864e5) return null;
+    const sig = dSigOf(d); if (sig ? e.sig !== sig : Date.now() - e.at > 120000) return null;
+    if (tcIdx[k]) { tcIdx[k][2] = Date.now(); tcSaveIdx(); }
+    return e;
+  }
+  function dcPut(d, m, started) {
+    if (!cacheOn() || !d || !m || !(m.plaintextBody || m.htmlBody)) return;
+    const k = dcKey(d); if (tcDropped[k] && started && started <= tcDropped[k]) return;
+    let bytes = 0; try { bytes = JSON.stringify(m).length; } catch { return; }
+    if (bytes > 4e6) return;
+    const e = { at: Date.now(), sig: dSigOf(d), m: clone(m) };
+    tcMemSet(k, e); tcIdx[k] = [e.at, bytes, Date.now()]; idb.put("threads", k, e); tcTrim(); tcSaveIdx();
+  }
+  // The thread a draft answers: a kept copy that already holds the draft (so it's at least as new) and is under half an
+  // hour old, or a fresh fetch.
+  async function draftThread(d) {
+    const rl = String(d.messageId || (d.message && d.message.id) || "");
+    const e = rl ? await tcEntry(d.threadId, false, rl) : null;
+    if (e && Date.now() - e.at < 30 * 60000) return clone(e.t);
+    return fetchThread(d.threadId);
+  }
+  // The checklist results of "Check it for me" are kept per version of a draft for a week.
+  async function dTicksKept(d) {
+    if (!cacheOn() || !d || !dSigOf(d)) return false;
+    const e = await idb.get("ctx", "chk:" + dcKey(d), 500);
+    if (!e || !e.ticks || e.sig !== dSigOf(d) || Date.now() - e.at > 7 * 864e5) return false;
+    if (!(state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length)) state.dTicks[d.id] = clone(e.ticks);
+    return true;
+  }
+  function dTicksKeep(d) { const t = d && state.dTicks[d.id]; if (cacheOn() && dSigOf(d) && t && Object.keys(t).length) idb.put("ctx", "chk:" + dcKey(d), { at: Date.now(), sig: dSigOf(d), ticks: clone(t) }); }
+  // Load ahead in the Drafts tab: the next few drafts and their threads, two at a time; then the very next draft gets
+  // its brief and its check, so it opens ready. With copies off, only the next draft loads, in memory, as before.
+  let dWarmRun = 0; const dCheckRuns = {};
+  async function draftsWarm(ds, prep) {
+    ds = ds.filter(Boolean);
+    if (!cacheOn()) { if (ds[0]) draftAhead(ds[0]); return; }
+    const run = ++dWarmRun, todo = ds.slice();
+    const worker = async () => {
+      while (todo.length && run === dWarmRun && !document.hidden && state.mode === "drafts") {
+        const d = todo.shift();
+        if (await dcGet(d)) { if (d.threadId) { try { await draftThread(d); } catch {} } continue; }
+        draftAhead(d); const a = d._ahead;
+        if (a) { try { await a.whole; } catch {} try { await a.thr; } catch {} }
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    if (prep && run === dWarmRun) draftPrep(prep);
+  }
+  const draftCtxT = (d, full, thr) => thr || { id: "draft:" + d.id, _id: "draft:" + d.id, messages: [{ id: "draft-" + d.id, sender: CONFIG.ownEmail || OWN, toRecipients: full.toRecipients || d.toRecipients || [], subject: full.subject || "", plaintextBody: draftText(full), labelIds: [] }] };
+  async function draftPrep(d) {
+    if (!d || !cacheOn() || ls.get("cm.ctxAhead") === "0" || state.dSel === d.id || state.mode !== "drafts") return;
+    const e = await dcGet(d); if (!e) return; const full = clone(e.m);
+    let thr = null;
+    if (d.threadId) { const rl = String(d.messageId || (d.message && d.message.id) || ""); const te = rl ? await tcEntry(d.threadId, false, rl) : await tcEntry(d.threadId, false); thr = te ? clone(te.t) : null; }
+    const theirs = thr ? ((thr.messages || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null) : null;
+    const cid = "draft:" + d.id;
+    if (featOn("context") && panelOn() && (CONFIG.context || []).length && !state.ctx[cid]) {
+      const t = draftCtxT(d, full, thr); const who = personOf(t);
+      if (who && !(await ctxKept(cid, t))) { try { await ctxBuild(t, cid, who, CONFIG.context); } catch {} }
+    }
+    if (!featOn("precheck") || state.dSel === d.id || dCheckRuns[d.id] || (state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length) || await dTicksKept(d)) return;
+    const list = (l) => (l || []).join(", ");
+    const run = draftCheckAsk({ to: list(full.toRecipients || d.toRecipients), cc: list(full.ccRecipients || d.ccRecipients), bcc: list(full.bccRecipients || d.bccRecipients), subject: full.subject || "", text: splitQuoted(draftText(full)).main, ctx: state.ctx[cid], theirs: theirs });
+    dCheckRuns[d.id] = run;
+    try {
+      const o = await run;
+      if (!(state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length)) { const t = state.dTicks[d.id] = {}; DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; t[k] = { on: r.ok === true, note: String(r.note || "") }; }); dTicksKeep(d); }
+    } catch { /* it runs again when the draft opens */ }
+    finally { delete dCheckRuns[d.id]; }
   }
   async function openThread(id) {
     const t0 = performance.now();
@@ -5301,6 +5385,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const when = (d) => Date.parse((d._meta && d._meta.date) || d.date) || 0;
     const sorted = state.drafts.slice().sort((a, b) => when(b) - when(a));
     if (sorted.some((d, i) => d !== state.drafts[i])) { state.drafts = sorted; renderDrafts(); }
+    if (!state.dSel && state.mode === "drafts" && cacheOn() && aheadN()) draftsWarm(state.drafts.slice(0, aheadN()), state.drafts[0]);
   }
   async function draftMeta(d) {
     if (d._meta) return d._meta;
@@ -5316,14 +5401,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function draftAhead(d) {
     if (!d || (d._ahead && Date.now() - d._ahead.at < DRAFT_AHEAD_MS)) return;
     const a = { at: Date.now() }; d._ahead = a;
-    a.whole = draftWhole(d, true); a.thr = d.threadId ? fetchThread(d.threadId) : Promise.resolve(null);
+    a.whole = draftWhole(d, true); a.thr = d.threadId ? draftThread(d) : Promise.resolve(null);
     a.whole.catch(() => { if (d._ahead === a) d._ahead = null; }); a.thr.catch(() => {});
   }
   function takeAhead(d) { const a = d._ahead; d._ahead = null; return a && Date.now() - a.at < DRAFT_AHEAD_MS ? a : null; }
   async function draftWhole(d, ahead) {
-    if (!ahead) { const a = takeAhead(d); if (a) { try { const m = await a.whole; if (m) return m; } catch {} } }
-    try { const m = await call(GMAIL, "get_draft", { draftId: d.id }, { cache: false }); if (m && (m.plaintextBody || m.htmlBody)) return m; } catch (e) { if (GX) throw e; }
-    d._full = undefined; return draftFull(d);
+    d._kept = false;
+    if (!ahead) {
+      const a = takeAhead(d); if (a) { try { const m = await a.whole; if (m) return m; } catch {} }
+      const e = await dcGet(d); if (e) { d._kept = true; return clone(e.m); }
+    }
+    const started = Date.now();
+    try { const m = await call(GMAIL, "get_draft", { draftId: d.id }, { cache: false }); if (m && (m.plaintextBody || m.htmlBody)) { dcPut(d, m, started); return m; } } catch (e) { if (GX) throw e; }
+    d._full = undefined; const m = await draftFull(d); dcPut(d, m, started); return m;
   }
   function renderDrafts() {
     if (state.mode !== "drafts") return;
@@ -5430,7 +5520,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("subject").textContent = "Draft"; reading.innerHTML = '<div class="empty"><span class="spin"></span>Getting the draft…</div>';
     // The draft and the thread it answers are fetched at the same time (or come from the copy loaded ahead).
     const ahead = d._ahead && Date.now() - d._ahead.at < DRAFT_AHEAD_MS ? d._ahead : null;
-    const thrP = d.threadId ? (ahead ? ahead.thr : fetchThread(d.threadId)) : Promise.resolve(null); thrP.catch(() => {});
+    const thrP = d.threadId ? (ahead ? ahead.thr : draftThread(d)) : Promise.resolve(null); thrP.catch(() => {});
     let full; try { full = await draftWhole(d); } catch (e) { if (state.dSel === id) reading.innerHTML = '<div class="empty"><h2>Couldn\'t open this draft</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; return; }
     if (state.dSel !== id) return;
     if (!full) { reading.innerHTML = '<div class="empty"><h2>Couldn\'t read this draft here</h2>' + (d.viewUrl ? '<p><a href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open it in Gmail</a></p>' : "") + '</div>'; return; }
@@ -5439,8 +5529,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.dSel !== id) return;
     state.dCur = { d: d, full: full, theirs: theirs, thread: thr, files: [] }; { const c0 = state.dCur; c0.filesP = loadDraftFiles(c0); c0.filesP.then(() => { c0.filesSettled = true; }, () => { c0.filesSettled = true; }); }
     state.rcpt.dto = toRc(full.toRecipients || d.toRecipients); state.rcpt.dcc = toRc(full.ccRecipients || d.ccRecipients); state.rcpt.dbcc = toRc(full.bccRecipients || d.bccRecipients);
-    renderDraftEditor(); speedNote("Open a draft", performance.now() - t0, true, "action");
-    { const i = state.drafts.findIndex((x) => x.id === id); draftAhead(state.drafts[i + 1]); }
+    renderDraftEditor(); speedNote(d._kept ? "Open a draft (kept copy)" : "Open a draft", performance.now() - t0, true, "action");
+    { const i = state.drafts.findIndex((x) => x.id === id); draftsWarm(state.drafts.slice(i + 1, i + 1 + Math.max(1, aheadN())), state.drafts[i + 1]); }
     // Check it for me runs on its own the first time a draft opens; your own ticks are never overwritten.
     if (featOn("context") || featOn("more")) {
       // A reply uses its thread; a new email gets a stand-in thread so the panel looks up the person it's to.
@@ -5449,7 +5539,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
     // The check waits for the context brief, so it can catch a draft that forgets what your systems know.
     const unticked = () => !Object.keys(state.dTicks[id] || {}).length;
-    if (featOn("precheck") && unticked()) Promise.resolve(ctxP).catch(() => {}).then(() => { if (state.dSel === id && unticked()) checkDraft(true); });
+    if (featOn("precheck") && unticked()) (async () => {
+      if (dCheckRuns[id]) { try { await dCheckRuns[id]; } catch {} } else await dTicksKept(d);
+      if (state.dSel !== id) return;
+      if (!unticked()) { showDChecks(id); return; }
+      try { await ctxP; } catch {}
+      if (state.dSel === id && unticked()) checkDraft(true);
+    })();
   }
   // The draft editor's toolbar: [command, label, shows whether it's on]; null is a divider.
   const RT_TOOLS = [["undo", "Undo (Ctrl Z)", false], ["redo", "Redo (Ctrl Shift Z)", false], null, ["bold", "Bold (Ctrl B)", true], ["italic", "Italic (Ctrl I)", true], ["underline", "Underline (Ctrl U)", true], ["strikeThrough", "Strikethrough", true], null, ["link", "Add a link", false], ["insertUnorderedList", "Bulleted list", true], ["insertOrderedList", "Numbered list", true], null, ["removeFormat", "Clear formatting", false]];
@@ -5719,28 +5815,43 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); } finally { ed.removeAttribute("aria-busy"); const g = $("dReviseGo"); if (g) g.disabled = false; }
   }
   // The AI goes through the same checklist and ticks what passes, with a short note on anything that doesn't.
-  async function checkDraft(auto) {
-    const c = state.dCur; if (!c) return; const id = c.d.id; const b = $("dAutoCheck"); b.disabled = true; b.textContent = "Checking…";
-    const ppl = (k) => state.rcpt[k].map((r) => (r.name ? r.name + " <" + r.email + ">" : r.email)).join(", ");
-    try {
-      const text = await ask(MARK + " You review an email draft before " + OWNER + " sends it. Reply with JSON only.",
+  // The checklist question for a draft, given its parts (p: to, cc, bcc, subject, text, ctx, theirs), so the next draft
+  // can be checked ahead from its kept copy as well as the open one from the editor.
+  async function draftCheckAsk(p) {
+    const text = await ask(MARK + " You review an email draft before " + OWNER + " sends it. Reply with JSON only.",
         "Go through this checklist for the draft below. Mark an item ok: false only for a concrete problem " + OWNER + " would want to fix before sending: a question left unanswered, a wrong name, date or number, a promise they likely didn't mean, a missing or wrong recipient, a tone that would land badly with this person, a typo or a missing attachment or link. Something you can't verify from what's here is not a failure: keep ok true and, if it matters, say so in the note. Don't fail an item over wording or tone " + OWNER + " plainly chose. Before failing an item, ask whether " + OWNER + " would change the draft because of it; if not, it passes. The signature is kept as it is and isn't shown; don't judge it. note: at most 15 words; when it fails, say what to fix.\n"
         + DRAFT_CHECKS.map(([k, l]) => "- " + k + ": " + l).join("\n")
         + "\nReply with {" + DRAFT_CHECKS.map(([k]) => "\"" + k + "\": {\"ok\": boolean, \"note\": string}").join(", ") + "}.\n\n"
         + (CONFIG.rules ? OWNER + "'s writing rules: " + CONFIG.rules + "\n\n" : "")
-        + "TO: " + ppl("dto") + (state.rcpt.dcc.length ? "\nCC: " + ppl("dcc") : "") + (state.rcpt.dbcc.length ? "\nBCC: " + ppl("dbcc") : "") + "\nSUBJECT: " + $("dSubj").value
-        + "\n\nDRAFT:\n" + htmlToText($("dEditor").innerHTML)
-        + (state.ctx[ctxKey()] && state.ctx[ctxKey()].text && !/^Nothing relevant/i.test(state.ctx[ctxKey()].text) ? "\n\nWHAT " + OWNER.toUpperCase() + "'S OTHER SYSTEMS SAY ABOUT THIS PERSON (flag a draft that contradicts it or forgets a commitment in it):\n" + state.ctx[ctxKey()].text : "")
-        + (c.theirs ? "\n\nTHE MESSAGE IT ANSWERS (from " + c.theirs.sender + "):\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 8000) : "\n\n(It's a new email, not a reply.)"),
+        + "TO: " + p.to + (p.cc ? "\nCC: " + p.cc : "") + (p.bcc ? "\nBCC: " + p.bcc : "") + "\nSUBJECT: " + p.subject
+        + "\n\nDRAFT:\n" + p.text
+        + (p.ctx && p.ctx.text && !/^Nothing relevant/i.test(p.ctx.text) ? "\n\nWHAT " + OWNER.toUpperCase() + "'S OTHER SYSTEMS SAY ABOUT THIS PERSON (flag a draft that contradicts it or forgets a commitment in it):\n" + p.ctx.text : "")
+        + (p.theirs ? "\n\nTHE MESSAGE IT ANSWERS (from " + p.theirs.sender + "):\n" + splitQuoted(String(p.theirs.plaintextBody || "")).main.slice(0, 8000) : "\n\n(It's a new email, not a reply.)"),
         { max_tokens: 2000 });
+    const o = parseJsonObject(text); if (!o) throw { code: "tool_error", message: "the check didn't come back in the expected shape" };
+    return o;
+  }
+  // A check that ran ahead, or was kept from before, shown when its draft opens.
+  function showDChecks(id) {
+    const c = state.dCur; if (!c || c.d.id !== id || !$("dChecks")) return;
+    $("dChecks").innerHTML = dChecksHtml(id); wireDChecks(c.d);
+    const t = state.dTicks[id] || {}; const bad = DRAFT_CHECKS.filter(([k]) => !(t[k] && t[k].on)).length;
+    dNote(bad ? bad + " thing" + (bad === 1 ? "" : "s") + " to look at, marked in the checklist." : "Everything on the checklist passes.", bad ? "" : "ok");
+    if (!bad && !dChecked()[id]) { setDChecked(id, true); renderDrafts(); }
+  }
+  async function checkDraft(auto) {
+    const c = state.dCur; if (!c) return; const id = c.d.id; const b = $("dAutoCheck"); b.disabled = true; b.textContent = "Checking…";
+    const ppl = (k) => state.rcpt[k].map((r) => (r.name ? r.name + " <" + r.email + ">" : r.email)).join(", ");
+    try {
+      const o = await draftCheckAsk({ to: ppl("dto"), cc: ppl("dcc"), bcc: ppl("dbcc"), subject: $("dSubj").value, text: htmlToText($("dEditor").innerHTML), ctx: state.ctx[ctxKey()], theirs: c.theirs });
       if (!state.dCur || state.dCur.d.id !== id) return;
-      const o = parseJsonObject(text); if (!o) throw { code: "tool_error", message: "the check didn't come back in the expected shape" };
       const t = state.dTicks[id] || (state.dTicks[id] = {});
       DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; if (auto && t[k] && t[k].on) return; t[k] = { on: r.ok === true, note: String(r.note || "") }; });
       $("dChecks").innerHTML = dChecksHtml(id); wireDChecks(c.d);
       const bad = DRAFT_CHECKS.filter(([k]) => !t[k].on).length;
       dNote(bad ? bad + " thing" + (bad === 1 ? "" : "s") + " to look at, marked in the checklist." : "Everything on the checklist passes.", bad ? "" : "ok");
       if (!bad && !dChecked()[id]) { setDChecked(id, true); renderDrafts(); }
+      dTicksKeep(c.d);
     } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); }
     finally { const x = $("dAutoCheck"); if (x) { x.disabled = false; x.textContent = "Check it for me"; } }
   }

@@ -16,7 +16,7 @@ The **Drafts** tab is for going through your Gmail drafts one at a time: the one
 5. Look at **Before you send**. **Check it for me** has usually already run (see below): what passes is ticked, and anything that doesn't has a short note saying what to fix.
 6. **Save** writes your changes to the Gmail draft. **Send** asks once, naming everyone on it and how many checklist items aren't ticked, then sends the draft and opens the next one.
 7. **Delete** removes the draft from Gmail. It asks first, naming the draft, because Gmail doesn't keep deleted drafts: there's no Undo. The keyboard starts on Cancel. Then the next draft opens. While a draft is sending or deleting, the other buttons wait for Gmail's answer.
-8. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list. While you're on one draft, the next one loads in the background, so Next opens at once.
+8. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list. While you're on one draft, the next few load in the background (and the threads they answer), and the very next one gets its context brief and its checklist, so Next opens with all three ready. With **Open mail at once** on (the default), drafts are kept in this browser: a copy is used only while it's the version Gmail has (each save gives a draft a new version), the checklist results are kept per version, and both survive a reload. **Settings → Speed** sets how far ahead (**Load ahead**) and whether the next one is prepared (**Get the next one ready**); with copies off, only the next draft loads, as before.
 
 ## Batch review
 
