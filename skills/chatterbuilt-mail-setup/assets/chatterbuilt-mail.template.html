@@ -5013,6 +5013,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const todo = state.drafts.filter((d) => !d._meta); let i = 0;
     async function w() { while (i < todo.length && token === state.loadToken) { const d = todo[i++]; try { await draftMeta(d); } catch { d._meta = d._meta || { subject: "", snippet: "", to: d.toRecipients || [] }; } renderDrafts(); } }
     await Promise.all([w(), w(), w()]);
+    if (token !== state.loadToken || !todo.length) return;
+    // Through Composio the list comes without dates (each draft's details bring its own), and with several accounts it
+    // comes account by account, so once the details are in, the list goes into date order, newest first.
+    const when = (d) => Date.parse((d._meta && d._meta.date) || d.date) || 0;
+    const sorted = state.drafts.slice().sort((a, b) => when(b) - when(a));
+    if (sorted.some((d, i) => d !== state.drafts[i])) { state.drafts = sorted; renderDrafts(); }
   }
   async function draftMeta(d) {
     if (d._meta) return d._meta;

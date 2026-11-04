@@ -6,6 +6,9 @@
 - **Attachments on drafts.** A draft with files opens editable (it used to be read-only here): its files sit under the sheet, each with an ×, and the paperclip in the toolbar adds more, up to 18 MB a save. Gmail drops a draft's attachments unless every save sends them all again, so Save sends the ones you kept and the ones you added; if the draft's files can't be read, Save stays off rather than lose them. Pictures inside the email, such as a signature's logo, stay in place. Through Composio, Save copies each file from the draft into Composio's store and uploads new ones through its workbench, so nothing passes through the browser; Composio can't carry a picture inside the text, so the editor says so first and **Save without them** goes ahead with it taken out. The page now declares `COMPOSIO_REMOTE_WORKBENCH` when Gmail goes through Composio.
 - **Tell Claude what to change.** The one-line Revise field is now a prompt box under the editor: type what to change in your own words and press Enter (Shift+Enter for a new line), or use the Quick chips. The rewrite keeps links, bold and lists instead of resetting the formatting, and a plain-text answer is laid out as paragraphs. Select a passage first and only that passage is rewritten, with the rest sent along for context; a **Selected text only** chip shows while that's on. Undo steps back through every revision, not just the last.
 
+### Fixed
+- **Drafts in All inboxes are in date order.** Through Composio the list of drafts comes without dates, one account after another, so a draft saved this morning in the second account sat under yesterday's drafts from the first. Once each draft's details are in, the list is put in order, newest first.
+
 ## 0.7.7 (2026-11-04)
 
 ### Added
