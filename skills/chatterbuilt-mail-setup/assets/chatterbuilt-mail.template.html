@@ -1296,6 +1296,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.speed.length > SPEED_KEEP) state.speed.splice(0, state.speed.length - SPEED_KEEP);
     clearTimeout(speedSave); speedSave = setTimeout(() => ls.set("cm.speed", JSON.stringify(state.speed)), 1500);
   }
+  // Timings still waiting to be saved are saved when the page goes away (a reload within the 1.5 seconds lost them).
+  window.addEventListener("pagehide", () => { if (speedSave) { clearTimeout(speedSave); speedSave = 0; ls.set("cm.speed", JSON.stringify(state.speed)); } });
   const speedLabel = (server, tool, input) => server === GMAIL ? "Gmail: " + tool
     : tool === "COMPOSIO_MULTI_EXECUTE_TOOL" ? server + ": " + ((((input || {}).tools || [])[0] || {}).tool_slug || tool)
     : tool === "COMPOSIO_REMOTE_BASH_TOOL" ? server + ": one piece of a large reply" : server + ": " + tool;
