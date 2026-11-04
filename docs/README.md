@@ -55,4 +55,4 @@ Each guide has screenshots (made-up data) and says what the feature reads, write
 | `chatterbuilt-mail-feedback` | Report a bug or share an idea as a GitHub issue, scrubbed of anything private; check on issues you've filed |
 | `contact-cleanup` | Complete the address book you already have: how you met, first contact, background and missing job details, from your mail and an enrichment app. Works without the app; changes nothing until you approve. |
 
-Want to contribute or add another email platform? See [CONTRIBUTING.md](../CONTRIBUTING.md).
+Want to contribute or add another email platform? See [CONTRIBUTING.md](../CONTRIBUTING.md). The plan for IMAP and a faster Gmail path, a connector each person deploys for themselves, is in [connector-design.md](connector-design.md).
