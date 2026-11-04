@@ -197,7 +197,7 @@ Guide: [tasks-and-contacts.md](tasks-and-contacts.md).
 - The task gets the subject, sender, a link back to Gmail, and the message quoted.
 - It works with any task app that has a claude.ai connector. See [connectors.md](connectors.md).
 
-**Drafts.** The **Drafts** tab lists every Gmail draft as a checklist (tick each as you review it; **Hide checked**). Open one to edit it in a rich-text editor under the message it answers, attach files, tell Claude what to change (in your words, or Shorter, Warmer, More direct, Polish; a selected passage on its own), run the **Before you send** checklist yourself or with **Check it for me**, then **Save**, **Send** (it asks once), **Delete** (it asks too; Gmail keeps no copy) or **Mark checked · next**. Guide: [drafts.md](drafts.md).
+**Drafts.** The **Drafts** tab lists every Gmail draft as a checklist (tick each as you review it; **Hide checked**). From the list, mark each draft **Send**, **Skip** or **Delete** (rows flag *No recipient*, *Empty*, *[TK] to fill in* and *Duplicate*) and **Apply plan** sends and deletes them one at a time after one confirmation. Open one to edit it in a rich-text editor under the message it answers, attach files, tell Claude what to change (in your words, or Shorter, Warmer, More direct, Polish; a selected passage on its own), run the **Before you send** checklist yourself or with **Check it for me**, then **Save**, **Send** (it asks once), **Delete** (it asks too; Gmail keeps no copy) or **Mark checked · next**. Guide: [drafts.md](drafts.md).
 
 **Select several.** Tick a row's box (on hover), Cmd/Ctrl-click, press `x`, or Shift-click a range; the bar over the list archives, moves, marks read or stars them all, with one Undo.
 

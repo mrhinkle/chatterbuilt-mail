@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.9 (2026-11-04)
+
+### Added
+- **Batch review in the Drafts tab.** Every row has Send, Skip and Delete. Mark the pile from the list, then **Apply plan** asks once (who the sends go to, which drafts go) and sends the marked drafts one at a time, in list order, with the deletes after the sends. Each leaves the list as it goes. If one fails the run stops there and says what went through before it; a write is never retried. The plan is kept in this browser, Skip is the checkbox, and Clear plan unmarks everything.
+- **Flags on draft rows.** *No recipient*, *Empty* (nothing written, or only a signature), *[TK] to fill in* and *Duplicate* (same people, same subject as another draft). A draft that can't be sent as it is has Send switched off, with the reason.
+
 ## 0.7.8 (2026-11-04)
 
 ### Added

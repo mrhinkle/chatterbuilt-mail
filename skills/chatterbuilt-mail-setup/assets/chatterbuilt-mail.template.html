@@ -564,6 +564,13 @@ body:not(.thread-open) .headtog { display: none; }
 .draftrow .dchk { position: absolute; left: 6px; top: 8px; width: 24px; height: 24px; display: grid; place-items: center; cursor: pointer; }
 .draftrow .dchk input { width: 15px; height: 15px; margin: 0; cursor: pointer; }
 .draftrow.done .subj, .draftrow.done .from { opacity: 0.55; } .draftrow.done .subj { text-decoration: line-through; }
+.draftrow.plan-send { box-shadow: inset 3px 0 0 var(--ok); } .draftrow.plan-delete { box-shadow: inset 3px 0 0 #b42318; }
+.dflags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; } .dflag { font-size: 10.5px; font-weight: 650; padding: 1px 6px; border-radius: 5px; background: var(--warm-soft); color: var(--warm); }
+.dplan { display: flex; gap: 4px; margin-top: 6px; } .dpb { font: inherit; font-size: 11px; font-weight: 600; padding: 2px 9px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--muted); cursor: pointer; }
+.dpb:disabled { opacity: 0.4; cursor: not-allowed; } .dpb:not(:disabled):hover { background: var(--hover); }
+.dpb.send[aria-pressed="true"] { background: var(--ok); border-color: var(--ok); color: #fff; } .dpb.delete[aria-pressed="true"] { background: #b42318; border-color: #b42318; color: #fff; } .dpb.skip[aria-pressed="true"] { background: var(--muted); border-color: var(--muted); color: #fff; }
+.dplanbar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 6px 10px 8px; font-size: 12.5px; } .dplanbar .dplansum { flex: 1 1 auto; } .dplanbar b.ok { color: var(--ok); } .dplanbar b.bad { color: #b42318; }
+.dapplyask { margin: 0 10px 8px; font-size: 12.5px; }
 body.drafts-mode #triageBtn { visibility: hidden; }
 @media (max-width: 860px) { body.drafts-mode .phonebar { display: none !important; } }
 .dedit { padding: 16px 20px 28px; display: flex; flex-direction: column; gap: 12px; max-width: 860px; }
@@ -4720,6 +4727,75 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   state.drafts = []; state.dSel = null; state.dCur = null; state.dDirty = false; state.dTicks = {};
   const dChecked = () => lsJson("cm.draftsChecked", {});
   function setDChecked(id, on) { const o = dChecked(); if (on) o[id] = Date.now(); else delete o[id]; ls.set("cm.draftsChecked", JSON.stringify(o)); }
+  // ---------- Drafts: batch review ----------
+  // Each row takes a plan: Send, Skip (the checkbox: looked at, stays in Gmail) or Delete. The plan lives in this
+  // browser until Apply plan, which sends and deletes the marked drafts one at a time after one confirmation. A write
+  // is never retried: if one fails, the run stops there and says what went through before it.
+  const dPlan = () => lsJson("cm.draftPlan", {});
+  function setDPlan(id, v) { const o = dPlan(); if (v) o[id] = v; else delete o[id]; ls.set("cm.draftPlan", JSON.stringify(o)); }
+  const dRcpts = (d) => (d._meta && d._meta.to) || d.toRecipients || [];
+  const draftKey = (d) => { const m = d._meta || {}; const to = dRcpts(d).map((r) => emailOf(String(r)).toLowerCase()).filter(Boolean).sort().join(","); const sj = String(m.subject || "").trim().toLowerCase(); return to || sj ? to + "|" + sj : ""; };
+  const dEmptyText = (t) => !String(t || "").trim() || /^\s*(\[Website\]|\[image|Website\s+LinkedIn|\[LinkedIn\])/i.test(String(t));
+  // What's wrong with a draft, from its list details: shown on the row, and a draft that can't go stays off Send.
+  function draftFlags(d) {
+    const m = d._meta; if (!m) return [];
+    const f = []; const sn = String(m.snippet || "");
+    if (!dRcpts(d).length) f.push(["norcpt", "No recipient"]);
+    if (dEmptyText(m.text || sn)) f.push(["empty", "Empty"]);
+    if (/\[TK\b|\bTK:/.test(m.text || sn)) f.push(["tk", "[TK] to fill in"]);
+    const key = draftKey(d); if (key && state.drafts.some((o) => o !== d && o._meta && draftKey(o) === key)) f.push(["dup", "Duplicate"]);
+    return f;
+  }
+  const dCanSend = (d) => !!d._meta && !draftFlags(d).some((f) => f[0] === "norcpt" || f[0] === "empty");
+  function dPlanCounts() { const pl = dPlan(); const ids = new Set(state.drafts.map((d) => d.id)); let send = 0, del = 0; Object.keys(pl).forEach((k) => { if (!ids.has(k)) return; if (pl[k] === "send") send++; else if (pl[k] === "delete") del++; }); return { send: send, del: del }; }
+  function dPlanClick(b) {
+    const id = b.dataset.id, v = b.dataset.dplan; const d = state.drafts.find((x) => x.id === id); if (!d || state.dApplying) return;
+    if (v === "skip") { setDChecked(id, !dChecked()[id]); setDPlan(id, null); }
+    else { if (v === "send" && !dCanSend(d)) return; setDPlan(id, dPlan()[id] === v ? null : v); if (dPlan()[id]) setDChecked(id, false); }
+    state.dApplyAsk = false; renderDrafts();
+  }
+  function dPlanSummary() {
+    const pl = dPlan(); const sends = state.drafts.filter((d) => pl[d.id] === "send"), dels = state.drafts.filter((d) => pl[d.id] === "delete");
+    const who = sends.map((d) => dRcpts(d).map(nameOf).join(", ") || "(no recipient)"); const what = dels.map((d) => (d._meta && d._meta.subject) || "(no subject)");
+    const cut = (a) => a.length > 4 ? a.slice(0, 4).join("; ") + " and " + (a.length - 4) + " more" : a.join("; ");
+    return { sends: sends, dels: dels, text: (sends.length ? "Send " + sends.length + " draft" + (sends.length === 1 ? "" : "s") + " (to " + cut(who) + ")" : "") + (sends.length && dels.length ? " and " : "") + (dels.length ? "delete " + dels.length + " (" + cut(what) + ")" : "") + "?" + (dels.length ? " Gmail keeps no copy of a deleted draft." : ""), btn: (sends.length ? "Yes, send " + sends.length : "Yes") + (dels.length ? (sends.length ? " and delete " : ", delete ") + dels.length : "") };
+  }
+  async function applyDraftPlan() {
+    if (state.readOnly) { toast(esc(mcpCopy({ code: "read_only" })), "err", 5000); return; }
+    if (state.dBusy || state.dApplying) return;
+    const p = dPlanSummary(); if (!p.sends.length && !p.dels.length) return;
+    // Unsaved edits on the open draft go first, as Send does; if they can't be saved, nothing happens.
+    if (state.dCur && state.dDirty && (p.sends.some((d) => d.id === state.dSel) || p.dels.some((d) => d.id === state.dSel))) { if (p.sends.some((d) => d.id === state.dSel)) { if (!(await saveDraftEdit(true))) return; } else state.dDirty = false; }
+    state.dApplying = true; state.dApplyAsk = false; renderDrafts();
+    const did = { sent: [], deleted: [] }; let err = null, at = null, verb = "";
+    try {
+      // Sends first: a draft that can't be sent is still there to look at. Deletes after, so a failure never costs a draft you meant to send.
+      for (const d of p.sends) {
+        toast('<span class="spin"></span>Sending ' + (did.sent.length + 1) + " of " + p.sends.length + "…", "", 60000);
+        try { await call(GMAIL, "send_message", Object.assign({ draftId: d.id }, draftAcct(d)), { cache: false }); }
+        catch (e) { err = e; at = d; verb = "send"; break; }
+        did.sent.push(d); setDPlan(d.id, null); dGoneInBatch(d);
+      }
+      if (!err) for (const d of p.dels) {
+        toast('<span class="spin"></span>Deleting ' + (did.deleted.length + 1) + " of " + p.dels.length + "…", "", 60000);
+        try { await call(GMAIL, "delete_draft", Object.assign({ draftId: d.id }, draftAcct(d)), { cache: false }); }
+        catch (e) { if (!isNotFound(e)) { err = e; at = d; verb = "delete"; break; } }
+        did.deleted.push(d); setDPlan(d.id, null); dGoneInBatch(d);
+      }
+    } finally { state.dApplying = false; }
+    try { await invalGmail(); } catch {}
+    renderDrafts(); if (state.mode === "drafts" && !state.dSel) renderDraftsHome();
+    const n = (k, w) => k.length ? k.length + " " + w : ""; const before = [n(did.sent, "sent"), n(did.deleted, "deleted")].filter(Boolean).join(", ");
+    if (err) {
+      const amb = err && (err.code === "server_unavailable" || err.code === "upstream_error"); const subj = (at._meta && at._meta.subject) || "(no subject)";
+      toast(esc("Stopped at \u201c" + subj + "\u201d: " + (mcpCopy(err, GMAIL) || "it didn't go through.") + (amb ? (verb === "send" ? " Check your Sent folder before sending it again." : " Check Gmail Drafts before deleting it again.") : "") + (before ? " Before that: " + before + "." : "")), "err", 12000);
+    } else toast(esc("Done: " + (before || "nothing to do") + "."), "ok", 6000);
+  }
+  // A draft sent or deleted by the batch: if it was open, the desk clears; either way it leaves the list and the plan.
+  function dGoneInBatch(d) {
+    if (state.dSel === d.id) { state.dCur = null; state.dSel = null; state.dDirty = false; clearDesk(dPlan()[d.id] === "delete" ? "Deleted" : "Sent"); }
+    dropDraftLocally(d);
+  }
   async function loadDraftsList(token) {
     list.innerHTML = '<div class="empty"><span class="spin"></span>Loading drafts…</div>'; $("moreBtn").hidden = true; $("countText").textContent = "loading";
     state.threads = []; state.hasMore = false;
@@ -4729,6 +4805,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       state.drafts = ((p && p.drafts) || []).filter((d) => d && d.id).sort((a, b) => (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0));
       const ids = new Set(state.drafts.map((d) => d.id)); const ck = dChecked(); let gone = false;
       Object.keys(ck).forEach((k) => { if (!ids.has(k)) { delete ck[k]; gone = true; } }); if (gone) ls.set("cm.draftsChecked", JSON.stringify(ck));
+      const pl = dPlan(); let pg = false; Object.keys(pl).forEach((k) => { if (!ids.has(k)) { delete pl[k]; pg = true; } }); if (pg) ls.set("cm.draftPlan", JSON.stringify(pl));
       $("countText").textContent = state.drafts.length + " draft" + (state.drafts.length === 1 ? "" : "s");
       renderDrafts(); if (!state.dSel) renderDraftsHome(); loadDraftMetas(token);
       // A draft picked on Today opens straight away.
@@ -5025,7 +5102,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     let m = d.subject !== undefined || d.plaintextBody ? d : null;
     if (!m) { try { m = await call(GMAIL, "get_draft", { draftId: d.id, messageFormat: "MINIMAL" }, { cache: { staleTime: 60000, gcTime: 300000 } }); } catch (e) { if (GX) throw e; m = await draftFull(d); } }
     m = m || {};
-    d._meta = { subject: m.subject || "", snippet: decodeEnt(String(m.snippet || draftText(m) || "")).replace(/\s+/g, " ").slice(0, 160), to: m.toRecipients || d.toRecipients || [], date: m.date || d.date };
+    d._meta = { subject: m.subject || "", snippet: decodeEnt(String(m.snippet || draftText(m) || "")).replace(/\s+/g, " ").slice(0, 160), text: draftText(m).slice(0, 4000), to: m.toRecipients || d.toRecipients || [], date: m.date || d.date };
     return d._meta;
   }
   // Going through drafts one at a time: while you're on one, the next one (and the thread it answers) loads quietly,
@@ -5047,21 +5124,30 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.mode !== "drafts") return;
     const ds = state.drafts; const ck = dChecked(); const hide = ls.get("cm.draftsHideChecked") === "1";
     if (!ds.length) { list.innerHTML = '<div class="empty"><h2>No drafts</h2><p>Nothing is waiting in Gmail drafts. The morning run and <em>Work on it in chat</em> leave drafts here.</p></div>'; return; }
-    const done = ds.filter((d) => ck[d.id]).length;
+    const done = ds.filter((d) => ck[d.id]).length; const pl = dPlan(); const busy = !!state.dApplying;
     const row = (d) => {
       const m = d._meta || {}; const to = (m.to || d.toRecipients || []).map(nameOf).join(", ") || "(no recipient)"; const on = !!ck[d.id];
       const A = isAll() ? acctById(d.acct || ownerOf("d", d.id)) : null; const ac = A ? acctColor(A) : "";
-      return '<div class="thread draftrow' + (d.id === state.dSel ? " sel" : "") + (on ? " done" : "") + (ac ? " acc" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-did="' + esc(d.id) + '" tabindex="0" role="button">'
+      const flags = draftFlags(d); const plan = pl[d.id] || ""; const can = dCanSend(d);
+      const pb = (k, label, pressed, off, title) => '<button type="button" class="dpb ' + k + '" data-dplan="' + k + '" data-id="' + esc(d.id) + '" aria-pressed="' + (pressed ? "true" : "false") + '"' + (off ? ' disabled' : "") + (title ? ' title="' + esc(title) + '"' : "") + '>' + label + '</button>';
+      return '<div class="thread draftrow' + (d.id === state.dSel ? " sel" : "") + (on ? " done" : "") + (plan ? " plan-" + plan : "") + (ac ? " acc" : "") + '"' + (ac ? ' style="--acc:' + ac + '"' : "") + ' data-did="' + esc(d.id) + '" tabindex="0" role="button">'
         + '<label class="dchk" title="' + (on ? "Checked" : "Not checked yet") + '"><input type="checkbox" data-dchk="' + esc(d.id) + '"' + (on ? " checked" : "") + ' aria-label="Checked: draft to ' + esc(to) + '"></label>'
         + '<span class="from">To ' + esc(to) + '</span><span class="when">' + esc(fmtDate(m.date || d.date)) + '</span>'
         + '<span class="subj">' + esc(m.subject || (d._meta ? "(no subject)" : "…")) + '</span>'
         + '<span class="prev' + (d._meta ? "" : " pending") + '">' + esc(d._meta ? (m.snippet || "(empty)") : "Loading…") + '</span>'
+        + (flags.length ? '<span class="dflags">' + flags.map((f) => '<span class="dflag ' + f[0] + '">' + esc(f[1]) + '</span>').join("") + '</span>' : "")
+        + (d._meta ? '<span class="dplan" role="group" aria-label="Plan for this draft">' + pb("send", "Send", plan === "send", busy || !can, can ? "" : "This draft can't be sent as it is: " + flags.filter((f) => f[0] === "norcpt" || f[0] === "empty").map((f) => f[1].toLowerCase()).join(", ")) + pb("skip", "Skip", on && !plan, busy, "Looked at it; it stays in Gmail") + pb("delete", "Delete", plan === "delete", busy, "") + '</span>' : "")
         + (A ? '<span class="tri"><span class="pill acct"' + (ac ? ' style="--acc:' + ac + '"' : "") + '>' + esc(A.label || A.email) + '</span></span>' : "")
         + '</div>';
     };
+    const pc = dPlanCounts(); const p = pc.send || pc.del ? dPlanSummary() : null;
+    const planbar = p ? '<div class="dplanbar"><span class="dplansum">Plan: ' + (pc.send ? '<b class="ok">Send ' + pc.send + '</b>' : "") + (pc.send && pc.del ? " · " : "") + (pc.del ? '<b class="bad">Delete ' + pc.del + '</b>' : "") + '</span>'
+        + (busy ? '<span class="note"><span class="spin"></span>Working…</span>' : '<button type="button" class="btn sm primary" data-dapply data-mut>Apply plan</button><button type="button" class="btn sm ghost" data-dclear>Clear plan</button>') + '</div>'
+        + (state.dApplyAsk && !busy ? '<div class="confirmbox dapplyask" role="group" aria-label="Confirm the plan"><span>' + esc(p.text) + '</span><button type="button" class="btn sm primary" data-dapplygo data-mut>' + esc(p.btn) + '</button><button type="button" class="btn sm ghost" data-dapplyno>Cancel</button></div>' : "") : "";
     list.innerHTML = '<div class="lsec"><span role="heading" aria-level="3">Drafts</span><span class="lsx"><span class="dprog">' + done + ' of ' + ds.length + ' checked</span><button type="button" class="lsb" data-dhide>' + (hide ? "Show checked" : "Hide checked") + '</button></span></div>'
-      + '<div class="dbar" aria-hidden="true"><span style="width:' + Math.round(done / ds.length * 100) + '%"></span></div>'
+      + '<div class="dbar" aria-hidden="true"><span style="width:' + Math.round(done / ds.length * 100) + '%"></span></div>' + planbar
       + ds.filter((d) => !(hide && ck[d.id] && d.id !== state.dSel)).map(row).join("");
+    if (state.dApplyAsk && !busy) { const go = list.querySelector("[data-dapplygo]"); if (go && state.dApplyFocus) { state.dApplyFocus = false; const no = list.querySelector("[data-dapplyno]"); (no || go).focus({ preventScroll: true }); } }
   }
   function dMove(delta, unchecked) {
     const ck = dChecked(); const ds = state.drafts.filter((d) => !unchecked || !ck[d.id] || d.id === state.dSel); if (!ds.length) return;
@@ -5472,8 +5558,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   list.addEventListener("click", (ev) => {
     const bk = ev.target.closest("[data-bulk]"); if (bk) { ev.stopPropagation(); bulkClick(bk); return; }
     if (ev.target.closest("[data-dhide]")) { ls.set("cm.draftsHideChecked", ls.get("cm.draftsHideChecked") === "1" ? "0" : "1"); renderDrafts(); return; }
-    const dk = ev.target.closest("[data-dchk]"); if (dk) { ev.stopPropagation(); setDChecked(dk.dataset.dchk, dk.checked); renderDrafts(); return; }
+    const dk = ev.target.closest("[data-dchk]"); if (dk) { ev.stopPropagation(); setDChecked(dk.dataset.dchk, dk.checked); if (dk.checked) setDPlan(dk.dataset.dchk, null); renderDrafts(); return; }
     if (ev.target.closest(".dchk")) { ev.stopPropagation(); return; }
+    const dp = ev.target.closest("[data-dplan]"); if (dp) { ev.stopPropagation(); if (!dp.disabled) dPlanClick(dp); return; }
+    if (ev.target.closest("[data-dapply]")) { ev.stopPropagation(); if (state.readOnly) { toast(esc(mcpCopy({ code: "read_only" })), "err", 5000); return; } state.dApplyAsk = true; state.dApplyAt = performance.now(); state.dApplyFocus = true; renderDrafts(); return; }
+    if (ev.target.closest("[data-dclear]")) { ev.stopPropagation(); ls.set("cm.draftPlan", "{}"); state.dApplyAsk = false; renderDrafts(); return; }
+    if (ev.target.closest("[data-dapplyno]")) { ev.stopPropagation(); state.dApplyAsk = false; renderDrafts(); return; }
+    // The same keyboard guard as the editor's confirm: a held or doubled Enter must not answer the question it opened.
+    if (ev.target.closest("[data-dapplygo]")) { ev.stopPropagation(); if (ev.detail === 0 && performance.now() - (state.dApplyAt || 0) < 500) return; applyDraftPlan(); return; }
+    if (ev.target.closest(".dplan, .dplanbar, .dapplyask")) { ev.stopPropagation(); return; }
     const dr = ev.target.closest("[data-did]"); if (dr) { openDraft(dr.dataset.did); return; }
     const nx = ev.target.closest("[data-nx]"); if (nx) { ev.stopPropagation(); if (nx.dataset.nx === "go") runNext(nx.dataset.id, nx); else dismissNext(nx.dataset.id); return; }
     const sb = ev.target.closest("[data-sb]"); if (sb) { ev.stopPropagation(); selAction(sb.dataset.sb, sb); return; }

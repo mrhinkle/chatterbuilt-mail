@@ -18,6 +18,18 @@ The **Drafts** tab is for going through your Gmail drafts one at a time: the one
 7. **Delete** removes the draft from Gmail. It asks first, naming the draft, because Gmail doesn't keep deleted drafts: there's no Undo. The keyboard starts on Cancel. Then the next draft opens. While a draft is sending or deleting, the other buttons wait for Gmail's answer.
 8. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list. While you're on one draft, the next one loads in the background, so Next opens at once.
 
+## Batch review
+
+For a pile of drafts, decide from the list and let the page do the sending. Every row has **Send**, **Skip** and **Delete**, and the list says what's wrong with a draft before you open it.
+
+![Batch review: Send, Skip and Delete on each row, flags such as Duplicate and No recipient, the plan bar and its confirmation](images/drafts-batch.webp)
+
+- **Flags on the rows.** *No recipient*, *Empty* (nothing written, or only a signature), *[TK] to fill in* (placeholder text left in the draft) and *Duplicate* (another draft to the same people with the same subject). A draft with no recipient or nothing written can't be sent as it is, so its Send is off and says why; Delete still works, and so does opening it to fix it.
+- **The plan.** Press **Send** or **Delete** on a row to mark it; press again to unmark. **Skip** is the checkbox: you looked at it and it stays in Gmail. The bar above the list counts the plan (*Send 3 · Delete 2*), and the plan is kept in this browser, so you can close the tab and come back to it. Opening a draft and sending or deleting it from the editor still works as before.
+- **Apply plan** asks once, naming who the sends go to and which drafts are deleted, and reminds you that Gmail keeps no copy of a deleted draft. Then it sends the marked drafts one at a time, in list order, and deletes after the sends, so a failure never costs a draft you meant to send. Each one leaves the list as it goes; a draft open in the editor closes if the batch sends or deletes it.
+- **If one fails, the run stops there.** A write is never retried: the message says which draft it stopped at, what went through before it, and, when Gmail didn't answer, to check Sent (or Gmail Drafts) before trying that one again. The failed draft and the rest of the plan stay marked for the next Apply.
+- **Clear plan** unmarks everything. Read-only mode blocks Apply plan.
+
 ![The prompt box under the draft: an instruction typed in your words, Selected text only, the Quick chips, and the draft's file with its ×](images/drafts-prompt.webp)
 
 ## Check it for me
@@ -89,6 +101,7 @@ The reply box on an open thread attaches files the same way through the Gmail co
 | Save | | the Gmail draft (`update_draft`), with its files; through Composio, `GMAIL_GET_ATTACHMENT` copies each file the draft had and a new file goes up through `COMPOSIO_REMOTE_WORKBENCH` | |
 | Send | | sends the draft (`send_message` with the draft) | |
 | Delete | | deletes the draft, after you confirm (`delete_draft`); never retried | |
+| Apply plan | | sends each marked draft (`send_message` with the draft), then deletes each marked draft (`delete_draft`), one at a time after one confirmation; never retried | |
 
 Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT`, `GMAIL_SEND_DRAFT` and `GMAIL_DELETE_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
 

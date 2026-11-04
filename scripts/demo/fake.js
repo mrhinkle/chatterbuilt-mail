@@ -53,6 +53,15 @@ module.exports = function fake() {
     d2: { id: 'd2', subject: 'Keynote at the spring summit?', toRecipients: ['Riley Chen <riley@keynote.example>'], date: iso(now - 2 * H), snippet: 'Riley, your talk on AI agents at the March meetup was the one people kept quoting', plaintextBody: 'Riley,\n\nYour talk on AI agents at the March meetup was the one people kept quoting. Would you keynote the spring summit in April?\n\nAlex', htmlBody: '<p>Riley,</p><p>Your talk on AI agents at the March meetup was the one people kept quoting. Would you keynote the spring summit in <b>April</b>?</p><p>Alex</p>', viewUrl: 'https://mail.google.com/d2' },
     d3: { id: 'd3', threadId: 's2', subject: 'Re: Intro', toRecipients: ['Jo Park <jo@example.org>'], ccRecipients: ['Pat Kim <pat@example.org>'], date: iso(now - 3 * H), snippet: 'Jo, following up on Thursday. Does 2pm still work?', plaintextBody: 'Jo,\n\nFollowing up on Thursday. Does 2pm still work?\n\nAlex', viewUrl: 'https://mail.google.com/d3' }
   };
+  // Tests: window.__batchDrafts adds four more drafts for the Drafts tab's batch review: one with no recipient, one
+  // empty, one a duplicate of d2, one with a [TK] placeholder. window.__failSend makes sending that draft id fail.
+  const BATCH_EXTRA = {
+    d4: { id: 'd4', subject: 'Keystone intro', toRecipients: [], date: iso(now - 4 * H), snippet: 'Hi, I run All Things AI and wanted an introduction.', plaintextBody: 'Hi,\n\nI run All Things AI and wanted an introduction.\n\nAlex', viewUrl: 'https://mail.google.com/d4' },
+    d5: { id: 'd5', threadId: 't3', subject: 'Re: Thanks', toRecipients: ['Sam Lee <sam@example.org>'], date: iso(now - 5 * H), snippet: '', plaintextBody: '', viewUrl: 'https://mail.google.com/d5' },
+    d6: { id: 'd6', subject: 'Keynote at the spring summit?', toRecipients: ['Riley Chen <riley@keynote.example>'], date: iso(now - 6 * H), snippet: 'Riley, quick one: would April work for a keynote?', plaintextBody: 'Riley, quick one: would April work for a keynote?\n\nAlex', viewUrl: 'https://mail.google.com/d6' },
+    d7: { id: 'd7', threadId: 't1', subject: 'Re: Gold package', toRecipients: ['Dana Ruiz <dana@acme.example>'], date: iso(now - 7 * H), snippet: 'Dana, yes to gold. The deck is [TK: link] and the invoice follows.', plaintextBody: 'Dana, yes to gold. The deck is [TK: link] and the invoice follows.\n\nAlex', viewUrl: 'https://mail.google.com/d7' }
+  };
+  const batchMerge = () => { if (window.__batchDrafts && !DRAFT_FULL.d4) Object.assign(DRAFT_FULL, BATCH_EXTRA); };
   const env = (data) => ({ successful: true, data: { results: [{ response: { successful: true, data }, tool_slug: 'X' }] } });
   // Context sources answer by who is being looked up: Dana (a sponsor), Cloudway (a vendor invoice), Jordan (waiting on a reply).
   // Everyone else (newsletters, receipts) gets nothing, so their brief says "Nothing relevant".
@@ -203,7 +212,7 @@ module.exports = function fake() {
         }
         if (tool === 'get_message') return P({ id: input.messageId, raw: input.messageId === 'mt5' ? unsubRaw : input.messageId === 'mt8' ? cwRaw : b64('Subject: x\r\n\r\nbody') });
         if (tool === 'list_drafts') {
-          const gone = (id) => (window.__sentDrafts || []).includes(id) || (window.__deletedDrafts || []).includes(id);
+          batchMerge(); const gone = (id) => (window.__sentDrafts || []).includes(id) || (window.__deletedDrafts || []).includes(id);
           if ((input || {}).view === 'DRAFT_VIEW_METADATA_ONLY' && window.__draftsTab !== false) return P({ drafts: Object.values(DRAFT_FULL).filter((d) => !gone(d.id)).map((d) => ({ id: d.id, threadId: d.threadId, toRecipients: d.toRecipients, ccRecipients: d.ccRecipients, date: d.date, viewUrl: d.viewUrl })) });
           return P({ drafts: DRAFTS.drafts.filter((d) => !gone(d.id)) });
         }
@@ -221,7 +230,7 @@ module.exports = function fake() {
           if (window.__slowDelete) await new Promise((r) => setTimeout(r, window.__slowDelete));
           if (window.__delete404) throw Object.assign(new Error('Requested entity was not found.'), { code: 'tool_error' });
           if (window.__failDelete) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); (window.__deletedDrafts = window.__deletedDrafts || []).push((input || {}).draftId); return P({}); }
-        if (tool === 'send_message' && (input || {}).draftId) { (window.__sentDrafts = window.__sentDrafts || []).push(input.draftId); return P({ id: 'sent-' + input.draftId, threadId: (DRAFT_FULL[input.draftId] || {}).threadId || 'new', labelIds: ['SENT'] }); }
+        if (tool === 'send_message' && (input || {}).draftId) { if (window.__failSend === input.draftId) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); (window.__sentDrafts = window.__sentDrafts || []).push(input.draftId); return P({ id: 'sent-' + input.draftId, threadId: (DRAFT_FULL[input.draftId] || {}).threadId || 'new', labelIds: ['SENT'] }); }
         if (tool === 'list_labels') return P({ labels: [{ labelId: 'L1', name: 'Finance', labelType: 'USER' }, { labelId: 'L2', name: 'Sponsors', labelType: 'USER' }, { labelId: 'L3', name: 'Meetup', labelType: 'USER' }, { labelId: 'L4', name: 'Newsletters', labelType: 'USER' }] });
         return P({ id: 'ok' });
       }
