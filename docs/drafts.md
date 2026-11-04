@@ -11,12 +11,14 @@ The **Drafts** tab is for going through your Gmail drafts one at a time: the one
 1. Press **Drafts** in the tabs over the list. Every Gmail draft shows with who it's to, the subject and its first line, newest first. In All inboxes, each row carries its account. With none open, the desk says how many are left to review, and **Start with the first one** opens it.
 2. Open one. The message it answers sits on top (fold it away if you don't need it), then To, Cc, Bcc and Subject, then the draft in a what-you-see-is-what-you-get editor: one white sheet laid out like the email, with your text (in its own fonts and colors), your signature under it and the earlier messages folded at the bottom. The toolbar has undo and redo, bold, italic, underline, strikethrough, link, bulleted and numbered lists, and clear formatting; the buttons light up for what's on where the cursor is. An empty draft says *Write your message…* where you type. The **context panel** on the right shows what your systems know about the person it's to, the same brief you get beside a thread.
    - **To, Cc and Bcc** are address fields: start typing a name and pick from the people in your threads and, once one is connected, your address book (Google Contacts, for example). Enter, Tab or a comma adds someone; × removes them.
-3. Edit it. The toolbar has **bold**, *italic*, underline, links and bulleted or numbered lists; Ctrl or ⌘ B, I and U work too. Pasted text comes in plain, so you don't drag in someone else's fonts.
-4. **Revise** it if you like: Shorter, Warmer, More direct, Polish, or say what to change. It keeps every fact, name, date and link. **Undo** puts the old version back. A revision resets formatting.
+3. Edit it. The toolbar has **bold**, *italic*, underline, links and bulleted or numbered lists; Ctrl or ⌘ B, I and U work too. Pasted text comes in plain, so you don't drag in someone else's fonts. The **paperclip** attaches files; the draft's files sit under the sheet, each with an × (see [Attachments](#attachments)).
+4. **Tell Claude what to change.** The prompt box under the editor takes your instruction in your own words: *cut the second paragraph*, *add that I'll be in Pittsburgh on the 17th*, *less formal*. Enter sends it (Shift+Enter for a new line); the **Quick** chips (Shorter, Warmer, More direct, Polish) are one-word versions. The draft is rewritten in place and keeps its links, bold and lists; every fact, name, date and commitment stays. Select a passage first and only that passage is rewritten (a **Selected text only** chip says so; × goes back to the whole draft). **Undo** steps back one revision at a time. Nothing is saved until you press Save.
 5. Look at **Before you send**. **Check it for me** has usually already run (see below): what passes is ticked, and anything that doesn't has a short note saying what to fix.
 6. **Save** writes your changes to the Gmail draft. **Send** asks once, naming everyone on it and how many checklist items aren't ticked, then sends the draft and opens the next one.
 7. **Delete** removes the draft from Gmail. It asks first, naming the draft, because Gmail doesn't keep deleted drafts: there's no Undo. The keyboard starts on Cancel. Then the next draft opens. While a draft is sending or deleting, the other buttons wait for Gmail's answer.
 8. **Mark checked · next** moves on without sending. **← Previous** and **Next →** (or `j` and `k`) step through the list. While you're on one draft, the next one loads in the background, so Next opens at once.
+
+![The prompt box under the draft: an instruction typed in your words, Selected text only, the Quick chips, and the draft's file with its ×](images/drafts-prompt.webp)
 
 ## Check it for me
 
@@ -51,7 +53,7 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 ## Good to know
 
 - **Unsaved edits** are saved to the draft when you open another one or leave the tab. With read-only on, nothing is saved or sent.
-- **Attachments:** a draft with attachments opens read-only here, because saving from the page would drop them. Edit and send it in Gmail (**Open in Gmail ↗**).
+- **Attachments:** see below.
 - **Emptying Cc or Bcc:** Gmail keeps a field's old value when it's saved empty, so to take everyone off Cc, do it in Gmail.
 - **The quoted earlier messages** in a reply draft stay attached. They fold under **Earlier messages** at the bottom of the sheet; open it to read them.
 - **Signature:** the signature in the draft stays exactly as it is, tables, images and links included. It shows in the sheet right under your text, as it will in the email, and stays out of edits, revisions and the check; **Remove signature** (top right of it) takes it off. It goes back on when you save, and saving from here doesn't add a second one.
@@ -62,18 +64,29 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 
 - **Replies saved through Composio lose their threading headers.** Composio's draft update rewrites the message without `In-Reply-To` and `References`. Gmail still keeps the draft in your thread, but the other person's mail app may show it as a new conversation. On a reply draft the editor says so before you save. If threading matters, make your edits in Gmail; sending an unsaved draft from here is fine. The Gmail connector doesn't have this problem.
 
+## Attachments
+
+A draft's files show under the sheet when it opens, each with an ×, and the **paperclip** in the toolbar adds more (up to 18 MB in all per save). Pictures inside the email, such as the logo in a signature, stay where they are and aren't listed. **Save** keeps the files you left and adds the ones you attached; **Send** sends the draft as saved.
+
+How it works, since Gmail makes this harder than it sounds: Gmail drops a draft's attachments unless every save sends them all again. So when a draft with files opens, the page reads them, and Save sends them back along with anything new. If the files can't be read, the sheet says so and Save stays off rather than save a draft without them; Send and Open in Gmail still work.
+
+Through Composio, the page doesn't download the files: on Save it copies each one straight from the draft into Composio's store and attaches it from there, and a new file is uploaded through Composio's workbench. One limit: Composio can't carry a picture that sits inside the email's text (a signature's logo, say). If the draft has one, Save first says so, and **Save without them** goes ahead with the picture taken out; the files at the bottom are kept either way.
+
+The reply box on an open thread attaches files the same way through the Gmail connector. Through Composio that isn't available yet.
+
 ## What it touches
 
 | Step | Reads | Writes | Sent to the AI |
 |---|---|---|---|
 | The list | Gmail drafts (`list_drafts`, then `get_draft` for each subject) | nothing | nothing |
 | Opening a draft | the draft (`get_draft`) and the thread it answers (`get_thread`) | nothing | nothing |
-| Revise | | nothing until you Save | the draft and the message it answers |
+| Tell Claude what to change / Quick | | nothing until you Save | the draft as HTML (or the selected passage, with the rest for context), your instruction and the message it answers |
 | Check it for me | | nothing | the draft, its recipients and subject, the message it answers, the context brief, your writing rules |
 | Context panel | your context sources, for the person the draft is to | nothing | what those sources return, to write the brief |
 | To, Cc and Bcc suggestions | the threads you've loaded; your address book's search, when one is connected | nothing | nothing |
 | Insert signature | your signature from Gmail (`GMAIL_LIST_SEND_AS` through Composio; your newest signed sent message with the Gmail connector) | nothing until you Save | nothing |
-| Save | | the Gmail draft (`update_draft`) | |
+| Opening a draft with attachments | the draft's raw message (`get_draft` as RAW), for the files it holds; through Composio, only their list | nothing | nothing |
+| Save | | the Gmail draft (`update_draft`), with its files; through Composio, `GMAIL_GET_ATTACHMENT` copies each file the draft had and a new file goes up through `COMPOSIO_REMOTE_WORKBENCH` | |
 | Send | | sends the draft (`send_message` with the draft) | |
 | Delete | | deletes the draft, after you confirm (`delete_draft`); never retried | |
 

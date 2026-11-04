@@ -43,7 +43,8 @@ gmail: {
 - **What's missing.** Attaching files to a reply doesn't go through Composio yet, so **Attach** is hidden. Attach from Gmail for now.
 - **Speed.** Each call takes one extra hop through Composio. The list uses one metadata-only search per page per account, 25 messages at a time, so it stays quick; All inboxes asks every account at once. Waiting checks each sent thread in full, so it takes a little longer than with the native connector.
 - **Large replies.** Composio sends back only a preview when a reply runs past about 8K tokens, and saves the full reply to a file in its sandbox. Long threads, big drafts and attachments do that. The page then reads the file with `COMPOSIO_REMOTE_BASH_TOOL`: one fixed `jq` command keeps the fields it needs (long bodies trimmed) and writes them next to Composio's file, and it reads that back in 30,000-character pieces. It never runs anything else there.
-- **Permissions.** The page holds `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, including sending from every Gmail account there, and `COMPOSIO_REMOTE_BASH_TOOL`, which runs commands in your Composio sandbox. The page only calls the Gmail tools listed in [CONTRIBUTING.md](../CONTRIBUTING.md#add-another-email-platform) and the read commands above, read-only mode blocks every change, and writes are never retried.
+- **Attachments on drafts.** Composio holds each file in its own store. When you save a draft that has files, the page copies each one straight from the draft into that store (`GMAIL_GET_ATTACHMENT`) and attaches it from there, so the files never pass through your browser; a file you attach is written to the sandbox in pieces with `COMPOSIO_REMOTE_BASH_TOOL` and uploaded with `COMPOSIO_REMOTE_WORKBENCH`, which runs one fixed Python snippet to join the pieces and upload. Composio can't carry a picture that sits inside the email's text, so the editor warns before it saves a draft with one. The reply box doesn't attach files through Composio yet.
+- **Permissions.** The page holds `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, including sending from every Gmail account there, `COMPOSIO_REMOTE_BASH_TOOL`, which runs commands in your Composio sandbox, and `COMPOSIO_REMOTE_WORKBENCH`, which runs Python there. The page only calls the Gmail tools listed in [CONTRIBUTING.md](../CONTRIBUTING.md#add-another-email-platform), the read commands above and the upload snippet, read-only mode blocks every change, and writes are never retried.
 
 ## Native connectors or Composio?
 
@@ -51,7 +52,7 @@ gmail: {
 |---|---|---|
 | Setup | One claude.ai connector per app | One claude.ai connector, then connect apps inside Composio |
 | Apps | Those with a claude.ai connector | Hundreds, including web search (Firecrawl, Exa, Tavily, Perplexity) |
-| Permissions the page holds | Exactly the tools it uses, app by app | One tool, `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio |
+| Permissions the page holds | Exactly the tools it uses, app by app | `COMPOSIO_MULTI_EXECUTE_TOOL`, which can run any action on any app you've connected in Composio, plus the sandbox's shell and Python for large replies and draft attachments |
 | Errors | Each connector's own | Composio reports failures inside a successful response; the page unwraps them and shows the real message ("No active connection for toolkit=asana") |
 | Cost | Your apps' own plans | Composio's plan, plus any per-call cost of the apps it calls (web search credits, for example) |
 
@@ -112,7 +113,7 @@ A Firecrawl search returning 3 results used 2 Firecrawl credits when tested.
 3. Ask Claude to set up Chatterbuilt Mail and say you'd like to use Composio (the [starter prompt](install.md#claude) has a line for it). The setup skill:
    - finds each action with Composio's tool search and reads its exact arguments;
    - checks that each app has an active connection in Composio, and tells you which to connect if not;
-   - writes CONFIG and declares `COMPOSIO_MULTI_EXECUTE_TOOL` in the page's permissions;
+   - writes CONFIG and declares `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` and `COMPOSIO_REMOTE_WORKBENCH` in the page's permissions;
    - makes one read-only call per context source to check the results, and never runs a write as a test.
 
 The first time the page calls Composio, claude.ai asks you to allow it.

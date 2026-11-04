@@ -39,7 +39,7 @@ Composio is optional. Offer it only when it's already connected in the user's cl
 - list their Composio Gmail connections with Composio's tool search (its connection status lists each account's `id`, email and alias); ask which to include and a short label for each;
 - set `CONFIG.gmail = { via: "composio", accounts: [{ id, email, label, color }, ...] }`, with the account they use most first. With two or more accounts the page opens on All inboxes, which merges them; ask whether they'd like a color per account so they can tell them apart there (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`; leave it out for none), and whether to open on All inboxes or the first account (`start: "first"`);
 - one read-only check per account (a `GMAIL_FETCH_EMAILS` search with `max_results: 1`) confirms each connection works;
-- tell them attaching files to replies isn't available through Composio yet, and that `COMPOSIO_MULTI_EXECUTE_TOOL` can send from every Gmail account connected there.
+- tell them attaching files to replies isn't available through Composio yet (the Drafts tab does attach files through Composio), and that `COMPOSIO_MULTI_EXECUTE_TOOL` can send from every Gmail account connected there.
 
 For anything else they chose to run through Composio (context, tasks, contacts, Route actions, More context):
 - every adapter is `{ server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", input: { tools: [{ tool_slug, arguments }], sync_response_to_workbench: false } }`;
@@ -138,7 +138,7 @@ Declare capabilities from CONFIG, and only what's used:
 | When | Server | Tools |
 |---|---|---|
 | `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft` |
-| `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline) |
+| `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline), `COMPOSIO_REMOTE_WORKBENCH` (uploads a file attached to a draft) |
 
 Through Composio the page also reads each account's send-as addresses and HTML signatures with `GMAIL_LIST_SEND_AS` (read-only, through `COMPOSIO_MULTI_EXECUTE_TOOL`, so nothing new to declare). It feeds the reply box's **From** menu and the signature preview and **Insert signature**. With the Gmail connector the signature comes from the user's newest signed sent message (`search_threads`, `get_thread`), and there's no From menu.
 | `tasks` is set | its `server` | its `tool` |

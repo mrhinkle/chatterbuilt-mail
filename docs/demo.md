@@ -60,6 +60,8 @@ Each section links to its guide.
 | Pick several threads and move them at once | Your Gmail signature under the reply box: on or off, and Show |
 | ![Insert signature](images/drafts-signature.webp) | ![From](images/from.webp) |
 | Insert signature in the Drafts tab, with Remove | From: send from another account or an alias |
+| ![Tell Claude what to change](images/drafts-prompt.webp) | |
+| The prompt box under a draft: your instruction, Selected text only, and the draft's file | |
 | ![Offer a call](images/offer-call.webp) | ![Pre-send check](images/presend.webp) |
 | Offer a call, with open times from your calendar | The pre-send check catches the deck you promised |
 | ![Pre-draft](images/predraft.webp) | ![Snippets](images/snippets.webp) |

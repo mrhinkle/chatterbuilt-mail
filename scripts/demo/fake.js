@@ -122,6 +122,9 @@ module.exports = function fake() {
     if (slug === 'GMAIL_DELETE_DRAFT') { (window.__deletedDrafts = window.__deletedDrafts || []).push(a.draft_id); return {}; }
     // window.__htmlOnlyDraft: a draft saved as HTML only, the way Gmail returns many through Composio: one text/html
     // payload, and the same HTML (entities and all) in messageText.
+    if (slug === 'GMAIL_GET_DRAFT' && window.__attDraft && (a.draft_id === 'd1' || !a.draft_id)) return attDraftGx();
+    if (slug === 'GMAIL_UPDATE_DRAFT' && window.__attDraft && a.draft_id === 'd1') { window.__attSaved = a.attachment || []; window.__attSavedHtml = a.body || ''; return { id: 'd1', message: { id: 'md1c' } }; }
+    if (slug === 'GMAIL_GET_ATTACHMENT') { if (window.__failCopy) return { __fail: 'attachment not found' }; return { file: { name: a.file_name, mimetype: 'application/pdf', s3url: 'https://temp.demo.r2.cloudflarestorage.com/project_scope/demo/files/' + a.attachment_id + '.bin?X-Amz-Signature=x' } }; }
     if (slug === 'GMAIL_GET_DRAFT' && window.__outlookDraft && (a.draft_id === 'd1' || !a.draft_id)) return outlookDraft();
     if (slug === 'GMAIL_GET_DRAFT' && window.__htmlOnlyDraft) {
       const html = 'Hi Lee,<br><br>Thanks for the walkthrough. We&#x27;re set for Thursday at 10, and I&#x27;ll bring the floor plan.<br><br>Best,<br>Sam<br><br><div class="gmail_signature" data-smartmail="gmail_signature"><table cellpadding="0" cellspacing="0" style="margin:0px"><tbody><tr><td style="font-family:Inter,sans-serif;font-size:10px">Sam Rivera &middot; Rivera Labs</td></tr></tbody></table></div>';
@@ -146,6 +149,19 @@ module.exports = function fake() {
   const OUTLOOK_TEXT = '\r\n\r\n[Website]<https://riveralabs.example/>\r\n[LinkedIn]<https://www.linkedin.com/in/alexrivera-demo/>\r\n[Rivera Labs]\r\nAlex Rivera · Founder, Rivera Labs · 919.555.0100\r\n________________________________\r\nFrom: Lee Park <lee@venuehall.example>\r\nSent: Monday, November 2, 2026 7:46 PM\r\n\r\nHi Alex, want to walk the space before we sign?';
   const outlookDraft = () => ({ id: 'd1', message: { messageId: 'md1', threadId: 't2', sender: ME, to: 'Lee Park <lee@venuehall.example>', subject: 'Re: Venue walkthrough', messageTimestamp: iso(now - H), labelIds: ['DRAFT'], attachmentList: [], preview: { body: 'Website LinkedIn Alex Rivera Founder', subject: 'Re: Venue walkthrough' }, messageText: OUTLOOK_TEXT,
     payload: { mimeType: 'multipart/alternative', headers: [{ name: 'Subject', value: 'Re: Venue walkthrough' }, { name: 'To', value: 'Lee Park <lee@venuehall.example>' }], parts: [{ mimeType: 'text/plain', body: { data: u64(OUTLOOK_TEXT) } }, { mimeType: 'text/html', body: { data: u64(OUTLOOK_HTML) } }] } } });
+  // Tests: window.__attDraft gives a draft a PDF, a logo inside the email (cid:logo1) and a 0x0 spacer (cid:spacer1):
+  // d2 through the Gmail connector (its raw MIME too), d1 through Composio.
+  const ATT_HTML = '<div dir="ltr">Riley, the deck is attached.<br><br>Alex</div><div class="gmail_signature" data-smartmail="gmail_signature"><div>Alex Rivera</div><img src="cid:logo1" width="120" height="40" alt="Rivera Labs"><img src="cid:spacer1" width="0" height="0"></div>';
+  const ATT_RAW = 'MIME-Version: 1.0\r\nContent-Type: multipart/mixed; boundary="mx"\r\n\r\n--mx\r\nContent-Type: multipart/related; boundary="rl"\r\n\r\n--rl\r\nContent-Type: text/html; charset=UTF-8\r\n\r\n' + ATT_HTML + '\r\n--rl\r\nContent-Type: image/png; name="logo.png"\r\nContent-Disposition: inline; filename="logo.png"\r\nContent-ID: <logo1>\r\nContent-Transfer-Encoding: base64\r\n\r\niVBORw0KGgoAAAANSUhEUg==\r\n--rl\r\nContent-Type: image/gif; name="inline_image"\r\nContent-Disposition: inline; filename="inline_image"\r\nContent-ID: <spacer1>\r\nContent-Transfer-Encoding: base64\r\n\r\nR0lGODlhAQABAAAAACw=\r\n--rl--\r\n--mx\r\nContent-Type: application/pdf; name="deck.pdf"\r\nContent-Disposition: attachment; filename="deck.pdf"\r\nContent-Transfer-Encoding: base64\r\n\r\nJVBERi0xLjQKJcfsj6IK\r\n--mx--\r\n';
+  const ATT_META = [{ id: 'A1', filename: 'deck.pdf', mimeType: 'application/pdf' }, { id: 'A2', filename: 'logo.png', mimeType: 'image/png' }, { id: 'A3', filename: 'inline_image', mimeType: 'image/gif' }];
+  const attDraftGx = () => window.__attSaved ? { id: 'd1', message: { messageId: 'md1c', threadId: 't2', sender: ME, to: 'Lee Park <lee@venuehall.example>', subject: 'Re: Venue walkthrough', messageTimestamp: iso(now - H), labelIds: ['DRAFT'],
+    attachmentList: window.__attSaved.map((a, i) => ({ attachmentId: 'S' + i, filename: a.name, mimeType: a.mimetype })), preview: { body: 'Riley, the deck is attached.', subject: 'Re: Venue walkthrough' }, messageText: 'Riley, the deck is attached.',
+    payload: { mimeType: 'multipart/mixed', headers: [{ name: 'Subject', value: 'Re: Venue walkthrough' }], parts: [{ mimeType: 'text/html', body: { data: u64(window.__attSavedHtml || '') } }].concat(window.__attSaved.map((a, i) => ({ mimeType: a.mimetype, filename: a.name, headers: [], body: { attachmentId: 'S' + i, size: 10 } }))) } } }
+    : ({ id: 'd1', message: { messageId: 'md1b', threadId: 't2', sender: ME, to: 'Lee Park <lee@venuehall.example>', subject: 'Re: Venue walkthrough', messageTimestamp: iso(now - H), labelIds: ['DRAFT'],
+    attachmentList: ATT_META.map((a) => ({ attachmentId: a.id, filename: a.filename, mimeType: a.mimeType })), preview: { body: 'Riley, the deck is attached.', subject: 'Re: Venue walkthrough' }, messageText: 'Riley, the deck is attached.\n\nAlex',
+    payload: { mimeType: 'multipart/mixed', headers: [{ name: 'Subject', value: 'Re: Venue walkthrough' }, { name: 'To', value: 'Lee Park <lee@venuehall.example>' }], parts: [{ mimeType: 'multipart/related', parts: [{ mimeType: 'text/html', body: { data: u64(ATT_HTML) } },
+      { mimeType: 'image/png', filename: 'logo.png', headers: [{ name: 'Content-ID', value: '<logo1>' }], body: { attachmentId: 'A2', size: 16 } }, { mimeType: 'image/gif', filename: 'inline_image', headers: [{ name: 'Content-ID', value: '<spacer1>' }], body: { attachmentId: 'A3', size: 14 } }] },
+      { mimeType: 'application/pdf', filename: 'deck.pdf', headers: [], body: { attachmentId: 'A1', size: 15 } }] } } });
   // Composio shortens big replies: past window.__offloadAt characters (about 8K tokens) only a preview comes back and
   // the full response goes to a file in its sandbox, for COMPOSIO_REMOTE_BASH_TOOL to read. A test harness can back
   // that sandbox with a real folder and real bash and jq (window.__sbWrite and window.__bash); without one, bash fails.
@@ -157,6 +173,9 @@ module.exports = function fake() {
     return { successful: true, data: { results: res.data.results.map((r, i) => ({ response: { successful: true, data_preview: { note: '...more items' } }, tool_slug: r.tool_slug, index: i, structure_info: {} })), total_count: 1, remote_file_info: { message: 'Complete response was large. Full data saved to sandbox in ' + file + '.', file_path: file } }, error: null };
   };
   const bashTool = async (command) => {
+    // Upload pieces: kept here when there's no real sandbox, for the workbench stand-in below.
+    const up = /^mkdir -p (\/mnt\/files\/cbup\/\w+) && printf '%s' '([A-Za-z0-9+\/=]*)' > \1\/(p\d+)$/.exec(command);
+    if (up && !window.__bash) { const m = (window.__cbup = window.__cbup || {}); (m[up[1]] = m[up[1]] || {})[up[3]] = up[2]; return { successful: true, data: { stdout: '', stderr: '' }, error: null }; }
     if (!window.__bash) return { successful: false, data: { stdout: '', stderr: 'no sandbox in this demo' }, error: 'no sandbox' };
     const r = await window.__bash(command);
     if (r.stdout.length > 45000) return { successful: true, data: { stdout: r.stdout.slice(0, 2000) + '\n... (output truncated, full output saved to: /mnt/files/.composio/output/bash_x_stdout.txt)', stdout_file_path: '/mnt/files/.composio/output/bash_x_stdout.txt', stderr: r.stderr }, error: null };
@@ -186,6 +205,10 @@ module.exports = function fake() {
           if ((input || {}).view === 'DRAFT_VIEW_METADATA_ONLY' && window.__draftsTab !== false) return P({ drafts: Object.values(DRAFT_FULL).filter((d) => !gone(d.id)).map((d) => ({ id: d.id, threadId: d.threadId, toRecipients: d.toRecipients, ccRecipients: d.ccRecipients, date: d.date, viewUrl: d.viewUrl })) });
           return P({ drafts: DRAFTS.drafts.filter((d) => !gone(d.id)) });
         }
+        if (tool === 'get_draft' && window.__attDraft && (input || {}).draftId === 'd2' && (input || {}).messageFormat !== 'MINIMAL') {
+          if (input.messageFormat === 'RAW') { if (window.__failRaw) throw Object.assign(new Error('Gmail is not answering'), { code: 'upstream_error' }); return P({ id: 'd2', raw: b64(unescape(encodeURIComponent(ATT_RAW))) }); }
+          return P(Object.assign({}, DRAFT_FULL.d2, { htmlBody: ATT_HTML, attachments: ATT_META.map((x) => ({ id: x.id, filename: x.filename, mimeType: x.mimeType })) }));
+        }
         // Tests: window.__draftHtml[id] gives a draft this HTML.
         if (tool === 'get_draft' && window.__draftHtml && window.__draftHtml[(input || {}).draftId] && (input || {}).messageFormat !== 'MINIMAL') return P(Object.assign({}, DRAFT_FULL[input.draftId], { htmlBody: window.__draftHtml[input.draftId] }));
         if (tool === 'get_draft' && window.__outlookDraft && (input || {}).draftId === 'd1' && (input || {}).messageFormat !== 'MINIMAL') return P(Object.assign({}, DRAFT_FULL.d1, { htmlBody: OUTLOOK_HTML, plaintextBody: OUTLOOK_TEXT.replace(/\r\n/g, '\n') }));
@@ -205,11 +228,20 @@ module.exports = function fake() {
         { status: 'confirmed', start: { dateTime: iso(now + D) }, end: { dateTime: iso(now + D + H) } }
       ] });
       if (server === 'Composio') {
+        if (tool === 'COMPOSIO_REMOTE_WORKBENCH') {
+          // Stand-in for the upload: put the pieces back together and hand back a key, as upload_local_file does.
+          const code = String((input || {}).code_to_execute || ''); const dir = (/d = "([^"]+)"/.exec(code) || [])[1]; const name = (/os\.path\.join\(d, "([^"]+)"\)/.exec(code) || [])[1];
+          const parts = ((window.__cbup || {})[dir]) || {}; const b = Object.keys(parts).sort().map((k) => parts[k]).join('');
+          if (window.__failUpload || !dir || !name) return P({ successful: true, data: { stdout: 'CBUP' + JSON.stringify({ k: null, e: 'upload failed' }), stderr: '' } });
+          (window.__uploads = window.__uploads || []).push({ name: name, b64: b });
+          return P({ successful: true, data: { stdout: 'CBUP' + JSON.stringify({ k: 'session_scope/demo/files/' + name, e: '' }), stderr: '' } });
+        }
         if (tool === 'COMPOSIO_REMOTE_BASH_TOOL') return P(await bashTool(String((input || {}).command || '')));
         const it = (input.tools || [])[0] || {}; const slug = it.tool_slug;
         if (/^GMAIL_/.test(slug)) {
           if ((window.__failSearch && /^GMAIL_(FETCH_EMAILS|LIST_THREADS)$/.test(slug)) || (window.__failDelete && slug === 'GMAIL_DELETE_DRAFT')) return P({ successful: false, data: { results: [{ response: { successful: false, data: {}, error: 'Gmail is not answering' }, tool_slug: slug }] } });
           const r = gmailBridge(slug, it.arguments || {}, it.account);
+          if (r && r.__fail) return P({ successful: false, data: { results: [{ response: { successful: false, data: {}, error: r.__fail }, tool_slug: slug }] } });
           if (r && r.__404) return P({ successful: false, data: { results: [{ response: { successful: false, data: { http_error: '404 Client Error: Not Found for url: https://gmail.googleapis.com/gmail/v1/users/me/threads/' + r.__404, message: '{\n  "error": {\n    "code": 404,\n    "message": "Requested entity was not found.",\n    "status": "NOT_FOUND"\n  }\n}' }, error: '404 Client Error: Not Found' }, tool_slug: slug }] } });
           return P(await offload(env(r)));
         }

@@ -590,9 +590,22 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dsig .dsigx { position: absolute; top: 0; right: 10px; padding: 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: #ffffff; color: var(--muted); font-size: 12px; cursor: pointer; opacity: 0; transition: opacity 0.12s; }
 .dsig:hover .dsigx, .dsig:focus-within .dsigx { opacity: 1; } .dsig .dsigx:hover { color: #b42318; }
 @media (hover: none) { .dsig .dsigx { opacity: 1; } }
+.dfiles { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 16px 12px; } .dfiles[hidden] { display: none; } .dfiles .note.err { flex: 1 1 100%; margin: 0; }
+.dfile { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; padding: 4px 4px 4px 9px; border: 1px solid var(--line); border-radius: 8px; background: #f8f9fb; font-size: 12.5px; color: #3c4043; }
+.dfile .dfn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 260px; } .dfile svg { flex: none; color: #5f6368; }
+.dfile button { border: 0; background: transparent; color: #5f6368; font-size: 15px; line-height: 1; width: 22px; height: 22px; border-radius: 5px; cursor: pointer; } .dfile button:hover { background: rgba(180, 35, 24, 0.08); color: #b42318; }
 .dquote { margin: 0 16px 12px; } .dquote summary { cursor: pointer; color: #5f6368; font-size: 12.5px; } .dquote .body { margin-top: 8px; }
 .rtsheet .rtnote { margin: 0; padding: 0 16px 10px; font-size: 11.5px; }
 .dlink { display: flex; gap: 6px; padding: 6px 10px; border-bottom: 1px solid var(--line); background: #f8f9fb; } .dlink input { flex: 1; min-width: 0; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
+.dprompt { display: flex; flex-direction: column; gap: 8px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--field); }
+.dpromptrow { display: flex; gap: 8px; align-items: flex-end; }
+.dpromptrow textarea { flex: 1 1 auto; min-width: 0; min-height: 36px; max-height: 140px; resize: none; overflow-y: auto; padding: 8px 10px; border: 1px solid var(--line-2); border-radius: 8px; background: #ffffff; color: var(--fg); font: inherit; font-size: 13.5px; line-height: 1.4; }
+.dpromptrow textarea:focus { outline: none; border-color: rgba(37, 99, 235, 0.55); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
+.dpromptrow .btn { height: 36px; }
+.dquick { gap: 6px; } .dquick .note { margin: 0; }
+::highlight(cbsel) { background: rgba(37, 99, 235, 0.2); }
+.dselchip { display: inline-flex; align-items: center; gap: 2px; margin-left: auto; padding: 2px 4px 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); font-size: 12px; font-weight: 600; }
+.dselchip .dselx { border: 0; background: transparent; color: inherit; font-size: 16px; line-height: 1; cursor: pointer; padding: 0 5px; border-radius: 999px; } .dselchip .dselx:hover { background: rgba(37, 99, 235, 0.14); }
 .dcheck { border: 1px solid var(--line); border-radius: 6px; background: var(--field); padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
 .dcheck .dchead { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-weight: 650; font-size: 13px; }
 .dcheck label { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; cursor: pointer; }
@@ -1323,13 +1336,20 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const gxView = (id, A) => gxGmailUrl(A || curAcct(), "all/" + encodeURIComponent(id || ""));
   // Some Composio messages carry their HTML in messageText, with no text/html part: treat that as HTML, not text.
   const looksHtml = (t) => /<(br|div|p|span|table|td|ul|ol|li|a|b|strong|i|em|font|html|body)\b[^>]*>/i.test(String(t || "")) && /<\/(div|p|span|td|li|a|b|strong|font|body)>|<br\s*\/?>/i.test(String(t || ""));
+  // attachmentId → Content-ID, from the message's parts (or from the trimmed copy of a large reply, which keeps them as atts).
+  function gxCids(payload) {
+    const out = {}; if (!payload) return out;
+    (payload.atts || []).forEach((a) => { if (a && a.aid) out[a.aid] = String(a.cid || "").replace(/^<|>$/g, ""); });
+    (function walk(pt) { if (!pt) return; const aid = pt.body && pt.body.attachmentId; if (aid) { const h = (pt.headers || []).find((x) => /^content-id$/i.test(x.name || "")); if (h) out[aid] = String(h.value || "").trim().replace(/^<|>$/g, ""); } (pt.parts || []).forEach(walk); })(payload);
+    return out;
+  }
   function gxNorm(m, full, A) {
     A = A || curAcct();
     const id = m.messageId || m.id;
     const o = { id: id, threadId: m.threadId, acct: A && A.id, sender: m.sender || gxHdr(m, "from"), toRecipients: splitAddrs(m.to || gxHdr(m, "to")), ccRecipients: splitAddrs(gxHdr(m, "cc")), replyTo: splitAddrs(gxHdr(m, "reply-to")), inReplyTo: gxHdr(m, "in-reply-to"),
       date: m.messageTimestamp || m.date || "", subject: m.subject || (m.preview && m.preview.subject) || gxHdr(m, "subject"), labelIds: Array.isArray(m.labelIds) ? m.labelIds : [],
       snippet: deEnt((m.preview && m.preview.body) || m.snippet || ""), viewUrl: gxView(m.threadId || id, A),
-      attachments: (m.attachmentList || []).filter((x) => x && x.filename).map((x) => ({ id: x.attachmentId, filename: x.filename, mimeType: x.mimeType })) };
+      attachments: (m.attachmentList || []).filter((x) => x && x.filename).map((x) => ({ id: x.attachmentId, filename: x.filename, mimeType: x.mimeType, cid: gxCids(m.payload)[x.attachmentId] || "" })) };
     const hp = gxPart(m.payload, "text/html");
     if (m.messageText) o.plaintextBody = String(m.messageText).replace(/\r\n/g, "\n");
     else { const tp = gxPart(m.payload, "text/plain"); if (tp) o.plaintextBody = b64uText(tp.body.data); else if (hp) o.plaintextBody = (new DOMParser().parseFromString(b64uText(hp.body.data), "text/html").body.textContent || "").replace(/\n{3,}/g, "\n\n").trim(); }
@@ -1348,6 +1368,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     + ' def tp: [.. | objects | select(.mimeType? == "text/plain" and ((.body.data? // "") | length) > 0)][0];'
     + ' def msg: {messageId, id, threadId, sender, to, subject, messageTimestamp, labelIds, preview, attachmentList: [(.attachmentList // [])[] | {filename, mimeType, attachmentId}],'
     + ' messageText: ((.messageText // "") | .[0:20000]), payload: {headers: [(.payload.headers // [])[] | select(.name | ascii_downcase | IN("from","to","cc","reply-to","subject","date","in-reply-to","list-unsubscribe","list-unsubscribe-post"))],'
+    + ' atts: [(.payload // {}) | .. | objects | select(.body?.attachmentId? != null) | {aid: .body.attachmentId, cid: ([(.headers // [])[] | select(.name | ascii_downcase == "content-id") | .value][0] // "")}],'
     + ' parts: ([(if $full or ((.messageText // "") == "") then (.payload | hp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:200000])}}) else empty end),'
     + ' (if ((.messageText // "") == "") then (.payload | tp | select(. != null) | {mimeType, body: {data: (.body.data | .[0:40000])}}) else empty end)])}};';
   const GX_JQ = {
@@ -1522,6 +1543,36 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
     return gxOne(tool, input, opts, gxAcctFor(input));
   }
+  // Files for a Composio draft. A file already on the draft is copied by Composio (GMAIL_GET_ATTACHMENT stores it and
+  // its address is the key Gmail's tools take back); a new one is written to Composio's sandbox in pieces and uploaded
+  // with its workbench. The page never downloads an existing file.
+  async function gxFiles(list, opts, A) {
+    const out = [];
+    for (const f of list || []) {
+      const name = String(f.filename || "attachment"), type = f.mimeType && f.mimeType.includes("/") ? f.mimeType : "application/octet-stream";
+      out.push({ name: name, mimetype: type, s3key: f.content ? await gxUpload(name, f.content, opts) : await gxAttKey(f, opts, A) });
+    }
+    return out;
+  }
+  async function gxAttKey(f, opts, A) {
+    const d = await gx("GMAIL_GET_ATTACHMENT", { message_id: f.msgId, attachment_id: f.attId, file_name: f.filename || "attachment" }, opts, true, A);
+    let k = ""; try { k = decodeURIComponent(new URL(d && d.file && d.file.s3url).pathname.replace(/^\/+/, "")); } catch {}
+    if (!k) throw { code: "tool_error", message: "Composio couldn't copy " + (f.filename || "an attachment") + " from the draft, so nothing was saved" };
+    return k;
+  }
+  const GX_UP_CHUNK = 60000;
+  async function gxUpload(name, b64, opts) {
+    const dir = "/mnt/files/cbup/u" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    const clean = String(b64).replace(/[^A-Za-z0-9+/=]/g, ""); const n = Math.max(1, Math.ceil(clean.length / GX_UP_CHUNK));
+    // Each piece goes to its own file, so a read retry can't write a piece twice.
+    for (let i = 0; i < n; i++) await gxBash("mkdir -p " + dir + " && printf '%s' '" + clean.slice(i * GX_UP_CHUNK, (i + 1) * GX_UP_CHUNK) + "' > " + dir + "/p" + String(i).padStart(5, "0"), opts);
+    const safe = name.replace(/[^\w .()-]/g, "_").slice(0, 120) || "file";
+    const code = "import base64, glob, json, os\nd = " + JSON.stringify(dir) + "\nb = ''.join(open(q).read() for q in sorted(glob.glob(d + '/p*')))\nf = os.path.join(d, " + JSON.stringify(safe) + ")\nopen(f, 'wb').write(base64.b64decode(b))\nr, e = upload_local_file(f)\nprint('CBUP' + json.dumps({'k': (r or {}).get('s3key'), 'e': e}))";
+    const p = await call(GX_SERVER, "COMPOSIO_REMOTE_WORKBENCH", { code_to_execute: code, thought: "Chatterbuilt Mail: upload an attachment", current_step: "CHATTERBUILT_MAIL" }, { cache: false });
+    const out = String((p && p.data && (p.data.stdout || p.data.results)) || (p && p.stdout) || ""); const m = out.match(/CBUP(\{.*\})/); let r = null; try { r = m && JSON.parse(m[1]); } catch {}
+    if (!r || !r.k) throw { code: "tool_error", message: "couldn't upload " + safe + " to Composio, so nothing was saved" + (r && r.e ? " (" + String(r.e).slice(0, 120) + ")" : "") };
+    return r.k;
+  }
   async function gxOne(tool, input, opts, A) {
     const me = String((A && A.email) || OWN || "").toLowerCase();
     const mine = (x) => !!me && emailOf(x).toLowerCase() === me;
@@ -1581,8 +1632,10 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       case "delete_draft": return gx("GMAIL_DELETE_DRAFT", { draft_id: input.draftId }, opts, false, A);
       case "update_draft": {
         const to = [].concat(input.to || []);
+        // Every file is ready (copied or uploaded) before anything is written, so a failure here changes nothing.
+        const att = await gxFiles(input.attachments, opts, A);
         // Composio keeps what's left out; the body is HTML, already carrying any signature, so none is added.
-        return gx("GMAIL_UPDATE_DRAFT", { draft_id: input.draftId, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.htmlBody || input.body, is_html: !!input.htmlBody, thread_id: input.threadId, include_signature: false }, opts, false, A);
+        return gx("GMAIL_UPDATE_DRAFT", Object.assign({ draft_id: input.draftId, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.htmlBody || input.body, is_html: !!input.htmlBody, thread_id: input.threadId, include_signature: false }, att.length ? { attachment: att } : {}), opts, false, A);
       }
       case "create_draft": {
         gxNoAtt(input);
@@ -1980,7 +2033,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
     const disp = h["content-disposition"] || "";
     const fn = mimeWords(utf8Of(mimeParam(disp, "filename") || mimeParam(ct, "name")));
-    out.push({ type: ct.split(";")[0].trim().toLowerCase(), filename: fn, enc: (h["content-transfer-encoding"] || "").trim().toLowerCase(), body: body });
+    out.push({ type: ct.split(";")[0].trim().toLowerCase(), filename: fn, enc: (h["content-transfer-encoding"] || "").trim().toLowerCase(), body: body, cid: (h["content-id"] || "").trim().replace(/^<|>$/g, ""), disp: disp.split(";")[0].trim().toLowerCase() });
     return out;
   }
   function partBytes(p) {
@@ -4850,8 +4903,87 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     box.innerHTML = state.dQuote ? '<details class="dquote"><summary>Earlier messages</summary><div class="body"></div></details>' : "";
     const det = box.querySelector("details"); if (det) det.addEventListener("toggle", () => { const b = det.querySelector(".body"); if (det.open && !b.firstChild) mountMail(b, state.dQuote, true); });
   }
+  // ---------- Drafts: attachments ----------
+  // A draft's files show at the bottom of the sheet, each with ×, and the paperclip adds more. Gmail drops a draft's
+  // attachments unless every save sends them again, so Save sends them all: the ones the draft had and the ones added.
+  // Pictures inside the email (a signature's logo, referenced by cid:) go with it in place and aren't listed. Through the
+  // Gmail connector the draft's raw message is read when it opens; through Composio only the list is, and Composio copies
+  // each file itself on save. If the files can't be read, Save stops rather than drop them.
+  const D_ATT_MAX = 18 * 1024 * 1024;
+  const cidsIn = (h) => new Set([...String(h || "").matchAll(/cid:([^"'\s)>]+)/gi)].map((m) => m[1].toLowerCase()));
+  // A cid: picture drawn 0 or 1 pixel wide or tall is a spacer (Outlook adds them to signatures); nothing is lost without it.
+  function cidSpacers(h) {
+    const out = new Set(); const box = document.createElement("div"); box.innerHTML = String(h || "").replace(/<(script|style)[\s\S]*?<\/\1>/gi, "");
+    box.querySelectorAll('img[src^="cid:"]').forEach((im) => { const w = parseInt(im.getAttribute("width"), 10), hh = parseInt(im.getAttribute("height"), 10); if ((w >= 0 && w <= 1) || (hh >= 0 && hh <= 1)) out.add(im.getAttribute("src").slice(4).toLowerCase()); });
+    return out;
+  }
+  async function loadDraftFiles(c) {
+    const full = c.full; c.files = []; c.filesErr = null;
+    const metas = (full.attachments || []).filter((a) => a && (a.filename || a.id));
+    if (!metas.length && !(full.attachmentIds || []).length) return;
+    const html = full.htmlBody || "", cids = cidsIn(html), spacers = cidSpacers(html);
+    try {
+      if (GX) {
+        c.files = metas.map((a) => { const cid = String(a.cid || "").toLowerCase(); return { origin: "draft", name: a.filename || "attachment", type: a.mimeType || "application/octet-stream", size: +a.size || 0, attId: a.id, msgId: full.messageId || full.id, cid: cid, inline: !!cid && cids.has(cid), spacer: !!cid && spacers.has(cid) }; });
+        return;
+      }
+      const p = await call(GMAIL, "get_draft", { draftId: c.d.id, messageFormat: "RAW" }, { cache: false, full: true });
+      const raw = p && (p.raw || (p.message && p.message.raw));
+      if (!raw) throw { code: "tool_error", message: "Gmail didn't send the files" };
+      c.files = mimeParts(bytesLatin1(b64Bytes(raw)), []).filter((x) => x.filename || x.cid || x.disp === "attachment").filter((x) => !(/^text\/(plain|html)$/.test(x.type) && !x.filename)).map((x) => {
+        const b64 = x.enc === "base64" ? x.body.replace(/[^A-Za-z0-9+/=]/g, "") : btoa(bytesLatin1(partBytes(x))); const cid = x.cid.toLowerCase();
+        return { origin: "draft", name: x.filename || "image", type: x.type || "application/octet-stream", size: Math.floor(b64.length * 3 / 4), b64: b64, cid: cid, inline: !!cid && cids.has(cid), spacer: !!cid && spacers.has(cid) };
+      });
+    } catch (e) { c.filesErr = (e && e.message) || "Gmail didn't answer"; throw e; }
+  }
+  // After a save through Composio: the draft is a new message, so read its files again (kept files keep their place).
+  async function refreshDraftFiles(c) {
+    const m = await call(GMAIL, "get_draft", { draftId: c.d.id }, { cache: false });
+    if (m) { c.full = Object.assign(c.full, { messageId: m.messageId || m.id, attachments: m.attachments || [] }); }
+    const added = c.files.filter((f) => f.origin === "new"); await loadDraftFiles(c); return added;
+  }
+  function renderDraftFiles(c) {
+    const box = $("dFiles"); if (!box || state.dCur !== c) return;
+    const files = c.files.map((f, i) => [f, i]).filter(([f]) => !f.inline);
+    const loading = c.filesP && !c.filesSettled;
+    box.innerHTML = (c.filesErr ? '<p class="note err">Couldn\'t read this draft\'s attachments, so Save is off to keep from dropping them. Edit it in Gmail, or reopen it to try again.</p>' : "")
+      + files.map(([f, i]) => '<span class="dfile"><svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg><span class="dfn">' + esc(f.name) + '</span>' + (f.size ? '<span class="note">' + fmtSize(f.size) + '</span>' : "") + '<button type="button" data-dfx="' + i + '" title="Remove ' + esc(f.name) + '" aria-label="Remove ' + esc(f.name) + '">×</button></span>').join("");
+    box.hidden = !box.innerHTML; if ($("dSave")) $("dSave").disabled = !!c.filesErr || !!state.dBusy;
+  }
+  function addDraftFiles(c, input, dirty) {
+    const picked = [...(input.files || [])]; input.value = "";
+    let total = c.files.reduce((n, f) => n + (f.size || 0), 0);
+    (async () => {
+      for (const f of picked) {
+        if (total + f.size > D_ATT_MAX) { dNote("That would go over 18 MB. For bigger files, share a Drive link instead.", "err"); break; }
+        const b64 = await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).replace(/^data:[^,]*,/, "")); r.onerror = rej; r.readAsDataURL(f); });
+        if (state.dCur !== c) return;
+        c.files.push({ origin: "new", name: f.name, type: f.type || "application/octet-stream", size: f.size, b64: b64 }); total += f.size;
+      }
+      dirty(); renderDraftFiles(c); dNote("Attached. Save to keep it, or Send.", "");
+    })().catch(() => dNote("Couldn't read that file.", "err"));
+  }
+  // What Save sends: the files, and the HTML with each kept picture pointed at its place in the list (the Gmail
+  // connector's rule: cid:0 is the first attachment). Through Composio, pictures inside the email can't be kept, so their
+  // <img> goes too (no broken picture in the email); files are sent as references Composio resolves.
+  function draftAttPayload(c) {
+    const keep = c.files.filter((f) => !f.spacer || !f.inline); const list = [], map = {};
+    keep.forEach((f) => {
+      if (GX) { if (f.inline) return; list.push(f.origin === "new" ? { filename: f.name, mimeType: f.type, content: f.b64 } : { filename: f.name, mimeType: f.type, attId: f.attId, msgId: f.msgId }); return; }
+      if (f.inline) map[f.cid] = list.length;
+      list.push(Object.assign({ filename: f.name, mimeType: f.type, content: f.b64 }, f.inline ? { inline: true } : {}));
+    });
+    const gone = new Set(c.files.filter((f) => f.inline && (GX || f.spacer)).map((f) => f.cid));
+    const html = (h) => {
+      if (!c.files.some((f) => f.inline)) return h;
+      const box = document.createElement("div"); box.innerHTML = h;
+      box.querySelectorAll('img[src^="cid:"], img[src^="CID:"]').forEach((im) => { const k = im.getAttribute("src").slice(4).toLowerCase(); if (gone.has(k)) im.remove(); else if (k in map) im.setAttribute("src", "cid:" + map[k]); });
+      return box.innerHTML;
+    };
+    return { list: list, html: html };
+  }
   async function insertDraftSig() {
-    const c = state.dCur; if (!c || c.hasAtt) return; const id = c.d.id; dNote("Getting your signature…");
+    const c = state.dCur; if (!c) return; const id = c.d.id; dNote("Getting your signature…");
     try {
       const h = await mySignature(c.d.acct, c.full.sender);
       if (!state.dCur || state.dCur.d.id !== id) return;
@@ -5008,7 +5140,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     let theirs = null, thr = null;
     if (d.threadId) { try { const t = await thrP; thr = t; theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
     if (state.dSel !== id) return;
-    state.dCur = { d: d, full: full, theirs: theirs, thread: thr, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
+    state.dCur = { d: d, full: full, theirs: theirs, thread: thr, files: [] }; { const c0 = state.dCur; c0.filesP = loadDraftFiles(c0); c0.filesP.then(() => { c0.filesSettled = true; }, () => { c0.filesSettled = true; }); }
     state.rcpt.dto = toRc(full.toRecipients || d.toRecipients); state.rcpt.dcc = toRc(full.ccRecipients || d.ccRecipients); state.rcpt.dbcc = toRc(full.bccRecipients || d.bccRecipients);
     renderDraftEditor(); speedNote("Open a draft", performance.now() - t0, true, "action");
     { const i = state.drafts.findIndex((x) => x.id === id); draftAhead(state.drafts[i + 1]); }
@@ -5043,20 +5175,25 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       // The draft as it will look: one sheet with your text, then the signature in place, then earlier messages folded.
       + '<div class="rtsheet" id="dSheet"><div class="rtbar" role="toolbar" aria-label="Formatting">'
       + RT_TOOLS.map((b) => b ? '<button type="button" class="rtb" data-cmd="' + b[0] + '"' + (b[2] ? ' aria-pressed="false"' : "") + ' title="' + b[1] + '" aria-label="' + b[1].replace(/ \(.*\)$/, "") + '">' + RT_ICONS[b[0]] + '</button>' : '<span class="rtsep" aria-hidden="true"></span>').join("")
+      + '<span class="rtsep" aria-hidden="true"></span><button type="button" class="rtb" data-attach title="Attach files, up to 18 MB" aria-label="Attach files"><svg viewBox="0 0 24 24" width="17" height="17" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button>'
       + (featOn("signature") ? '<button type="button" class="rtsig" data-sig title="Add the signature you set in Gmail, or swap an old one for it"><svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17c2.5-3 4.5 1.5 7-1.5S12 9 15 9s2.5 3.5 6 3.5"/><path d="M3 21h18"/></svg><span>Insert signature</span></button>' : "")
       + '</div><div class="dlink" id="dLinkRow" hidden><input id="dLinkUrl" type="url" placeholder="https://…" aria-label="Link address"><button type="button" class="btn sm" id="dLinkAdd">Add link</button></div>'
-      + '<div class="rte" id="dEditor" contenteditable="' + (c.hasAtt ? "false" : "true") + '" role="textbox" aria-multiline="true" aria-label="Draft text" data-placeholder="Write your message…"></div>'
-      + '<div id="dSigBox"></div><div id="dQuoteBox"></div><p class="note rtnote" id="dSheetNote" hidden>Pictures show as boxes here; the email keeps the real ones.</p></div>'
-      + (c.hasAtt ? '<p class="note">This draft has attachments. Saving from here would drop them, so edit and send it in Gmail.</p>' : "")
+      + '<div class="rte" id="dEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Draft text" data-placeholder="Write your message…"></div>'
+      + '<div id="dSigBox"></div><div id="dQuoteBox"></div><p class="note rtnote" id="dSheetNote" hidden>Pictures show as boxes here; the email keeps the real ones.</p>'
+      + '<div class="dfiles" id="dFiles" aria-live="polite"></div><input type="file" id="dFileIn" multiple hidden></div>'
       + (GX && (full.inReplyTo || c.lostThread) ? '<p class="note warnline" id="dThreadWarn">' + (c.lostThread ? "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation." : "Heads up: Composio can't keep a reply's threading headers when it saves a draft. Gmail keeps it in your thread either way, but if you save here, their mail app may show it as a new conversation. To keep it threaded for them, make your edits in Gmail (Send from here is fine as long as you haven't saved).") + '</p>' : "")
-      + '<div class="mrow"><span class="note">Revise:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<input type="text" id="dRevise" placeholder="Or say what to change" aria-label="What to change" style="flex:1 1 160px;min-width:0"><button type="button" class="btn sm" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
+      + '<div class="dprompt" id="dPrompt"><div class="dpromptrow"><textarea id="dRevise" rows="1" placeholder="' + D_PROMPT_HINT + '" aria-label="What to change"></textarea><button type="button" class="btn sm primary" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
+      + '<div class="mrow dquick"><span class="note">Quick:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<span class="dselchip" id="dSelOnly" hidden>Selected text only<button type="button" class="dselx" id="dSelClear" aria-label="Revise the whole draft instead">×</button></span></div></div>'
       + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm primary" id="dAutoCheck">Check it for me</button></div><p class="note dhow">Claude reads the draft against the message it answers, what your systems know about this person and your writing rules. It ticks what passes and says what to fix. It never changes the draft.</p>'
       + '<div id="dChecks">' + dChecksHtml(d.id) + '</div></div>'
       + '<div class="mrow dfoot"><span class="note dnote" id="dNote" aria-live="polite"></span><div class="confirmbox" id="dConfirm" hidden><span id="dConfirmText"></span><button type="button" class="btn primary" id="dConfirmGo" data-mut>Yes, send it</button><button type="button" class="btn ghost" id="dConfirmNo">Cancel</button></div><button type="button" class="btn sm" id="dPrev">← Previous</button><button type="button" class="btn sm" id="dNext">Next →</button><span class="note">' + pos + ' of ' + ds.length + '</span><span class="spacer"></span>'
       + (d.viewUrl || full.viewUrl ? '<a class="btn sm ghost" href="' + esc(d.viewUrl || full.viewUrl) + '" target="_blank" rel="noopener">Open in Gmail ↗</a>' : "")
-      + '<button type="button" class="btn sm ghost dangerbtn" id="dDelete" data-mut title="Delete this draft from Gmail">Delete</button><button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut' + (c.hasAtt ? " disabled" : "") + '>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
+      + '<button type="button" class="btn sm ghost dangerbtn" id="dDelete" data-mut title="Delete this draft from Gmail">Delete</button><button type="button" class="btn sm" id="dDone">' + (ck ? "Checked ✓ · next" : "Mark checked · next") + '</button><button type="button" class="btn" id="dSave" data-mut>Save</button><button type="button" class="btn primary" id="dSend" data-mut>Send</button></div></div>';
     const ed = $("dEditor"); ed.innerHTML = startHtml; c.base = ed.innerHTML; rtEmpty(ed); renderDraftSig(); renderDraftQuote();
-    const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; rtEmpty(ed); };
+    const dirty = () => { state.dDirty = true; c.html = ed.innerHTML; rtEmpty(ed); dSelConsume(c); };
+    renderDraftFiles(c); c.filesP.then(() => { if (state.dCur === c) renderDraftFiles(c); }, () => { if (state.dCur === c) renderDraftFiles(c); });
+    $("dFileIn").addEventListener("change", () => addDraftFiles(c, $("dFileIn"), dirty));
+    $("dFiles").addEventListener("click", (ev) => { const x = ev.target.closest("[data-dfx]"); if (!x) return; c.files.splice(+x.dataset.dfx, 1); dirty(); renderDraftFiles(c); dNote("Removed. Save to keep the change.", ""); });
     ed.addEventListener("input", dirty); ed.addEventListener("keyup", rtState); ed.addEventListener("mouseup", rtState); $("dSubj").addEventListener("input", () => { state.dDirty = true; });
     ["dto", "dcc", "dbcc"].forEach((k) => { renderRcpt(k); wireRcpt(k, (msg) => dNote(msg, "err")); });
     ed.addEventListener("paste", (ev) => { ev.preventDefault(); const t = (ev.clipboardData || window.clipboardData).getData("text/plain"); document.execCommand("insertText", false, t); });
@@ -5064,7 +5201,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     reading.querySelector(".rtbar").addEventListener("mousedown", (ev) => { if (ev.target.closest("button")) ev.preventDefault(); });
     reading.querySelector(".rtbar").addEventListener("click", (ev) => {
       if (ev.target.closest("[data-sig]")) { insertDraftSig(); return; }
-      const b = ev.target.closest("[data-cmd]"); if (!b || c.hasAtt) return; ed.focus();
+      if (ev.target.closest("[data-attach]")) { $("dFileIn").click(); return; }
+      const b = ev.target.closest("[data-cmd]"); if (!b) return; ed.focus();
       if (b.dataset.cmd === "link") { const sel = window.getSelection(); saved = sel.rangeCount ? sel.getRangeAt(0).cloneRange() : null; $("dLinkRow").hidden = false; $("dLinkUrl").focus(); return; }
       document.execCommand(b.dataset.cmd, false, null); dirty(); rtState();
     });
@@ -5078,9 +5216,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("dLinkAdd").addEventListener("click", addLink); $("dLinkUrl").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); addLink(); } else if (ev.key === "Escape") { $("dLinkRow").hidden = true; ed.focus(); } });
     wireDChecks(d);
     reading.querySelectorAll("[data-drev]").forEach((b) => b.addEventListener("click", () => reviseDraft(b.dataset.drev)));
-    $("dReviseGo").addEventListener("click", () => { const v = $("dRevise").value.trim(); if (v) reviseDraft(v); });
-    $("dRevise").addEventListener("keydown", (ev) => { if (ev.key === "Enter") { ev.preventDefault(); const v = $("dRevise").value.trim(); if (v) reviseDraft(v); } });
-    $("dUndo").addEventListener("click", () => { if (c.undo == null) return; ed.innerHTML = c.undo; c.undo = null; $("dUndo").disabled = true; dirty(); });
+    const dAsk = () => { const v = $("dRevise").value.trim(); if (v) reviseDraft(v); };
+    $("dReviseGo").addEventListener("click", dAsk);
+    $("dRevise").addEventListener("keydown", (ev) => { if (ev.key === "Enter" && !ev.shiftKey) { ev.preventDefault(); dAsk(); } });
+    $("dRevise").addEventListener("input", () => dPromptSize($("dRevise")));
+    $("dUndo").addEventListener("click", () => { const u = c.undo && c.undo.pop(); if (u == null) return; ed.innerHTML = u; $("dUndo").disabled = !c.undo.length; dSelClear(c); dirty(); });
+    $("dSelClear").addEventListener("click", () => { dSelClear(c); $("dRevise").focus(); });
     $("dAutoCheck").addEventListener("click", checkDraft);
     $("dPrev").addEventListener("click", () => dMove(-1)); $("dNext").addEventListener("click", () => dMove(1));
     $("dDone").addEventListener("click", () => { setDChecked(d.id, true); renderDrafts(); dMove(1, true); });
@@ -5112,13 +5253,21 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   async function saveDraftEdit(quiet) {
     const c = state.dCur; if (!c) return false; const { d, full } = c;
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return false; }
-    if (c.hasAtt) { dNote("This draft has attachments; edit it in Gmail so they aren't dropped.", "err"); return false; }
+    // Gmail drops a draft's attachments unless every save sends them again, so the files must be in hand first.
+    try { await c.filesP; } catch {}
+    if (c.filesErr) { dNote("Couldn't read this draft's attachments (" + c.filesErr + "), so saving here would drop them. Edit it in Gmail, or reopen it to try again.", "err"); return false; }
+    // Through Composio a picture inside the email (a logo in the signature) can't go back in its place, so it asks first.
+    const pics = c.files.filter((f) => f.inline && !f.spacer);
+    if (GX && pics.length && !c.picsOk) { dNote("Saving through Composio drops the " + (pics.length === 1 ? "picture" : pics.length + " pictures") + " inside this email (" + pics.map((f) => f.name).join(", ") + "). Files stay attached.", "err"); const n = $("dNote"); if (n) { n.insertAdjacentHTML("beforeend", ' <button type="button" class="btn sm" id="dPicsOk">Save without them</button>'); $("dPicsOk").addEventListener("click", () => { c.picsOk = true; saveDraftEdit(false); }); } return false; }
     const to = dAddrs("dto"), cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); if (!to.length) { dNote("Add at least one person on To.", "err"); return false; }
-    const html = rteTrim(rteClean($("dEditor").innerHTML)) + (state.dSig ? "<br><br>" + state.dSig : "") + (state.dQuote || ""); const text = htmlToText(html);
+    const att = draftAttPayload(c);
+    const html = att.html(rteTrim(rteClean($("dEditor").innerHTML)) + (state.dSig ? "<br><br>" + state.dSig : "") + (state.dQuote || "")); const text = htmlToText(html);
     $("dSave").disabled = true; dNote("Saving…");
     try {
       // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
-      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id }, draftAcct(d), { to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false });
+      await call(GMAIL, "update_draft", Object.assign({ draftId: d.id }, draftAcct(d), { to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}, att.list.length ? { attachments: att.list } : {}), { cache: false });
+      // Through Composio the saved draft is a new message, so the files' ids change: read them again for the next save.
+      if (GX && c.files.length) { c.filesP = refreshDraftFiles(c); c.filesP.then(() => { if (state.dCur === c) renderDraftFiles(c); }, () => {}); }
       state.dDirty = false; d._meta = null; (state.draftsAll || []).forEach((x) => { if (x.id === d.id) x._meta = null; }); full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
       // Composio's GMAIL_UPDATE_DRAFT rewrites the message without its In-Reply-To and References headers. Gmail still files
       // it in your thread, but their mail app may show it as a new conversation.
@@ -5128,7 +5277,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       draftMeta(d).then(renderDrafts).catch(() => {});
       return true;
     } catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check the draft in Gmail before saving again." : ""), "err"); return false; }
-    finally { if ($("dSave")) $("dSave").disabled = c.hasAtt; }
+    finally { if ($("dSave")) $("dSave").disabled = false; }
   }
   function askSendDraft() {
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
@@ -5161,7 +5310,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // Send and Delete own the editor until Gmail answers: the other draft buttons are off, and no other draft can open.
   const D_BTNS = ["dDelete", "dSend", "dSave", "dDone", "dPrev", "dNext"];
   function dLock(verb) { state.dBusy = verb; D_BTNS.forEach((k) => { if ($(k)) $(k).disabled = true; }); }
-  function dUnlock(c) { state.dBusy = false; D_BTNS.forEach((k) => { if ($(k)) $(k).disabled = k === "dSave" ? !!(c && c.hasAtt) : false; }); }
+  function dUnlock(c) { state.dBusy = false; D_BTNS.forEach((k) => { if ($(k)) $(k).disabled = false; }); }
   // After a draft is sent or deleted: open the one that took its place, or say there are none left. Focus goes to the
   // editor, so the keyboard isn't left on a button that's gone.
   function dAfterGone(i, done) {
@@ -5210,15 +5359,67 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       dAfterGone(i, "Every draft is sent or checked");
     } finally { if (state.dBusy) dUnlock(c); else state.dBusy = false; }
   }
+  // ---------- Drafts: revise with a prompt ----------
+  // The prompt box under the editor takes an instruction in your words (or a quick one) and rewrites the draft in place.
+  // The draft goes to the model as HTML and comes back as HTML, so links, bold and lists survive; an answer that comes
+  // back as plain text is laid out as paragraphs. Select a passage first and only that passage is rewritten, with the
+  // rest of the draft sent along for context. Each revision goes on an undo stack.
+  const D_PROMPT_HINT = "Tell Claude what to change, e.g. \u201ccut the second paragraph\u201d or \u201cadd that I\u2019ll be in Pittsburgh on the 17th\u201d";
+  function dPromptSize(ta) { if (!ta) return; ta.style.height = "auto"; ta.style.height = Math.min(ta.scrollHeight, 140) + "px"; }
+  const dSelLive = (c, ed) => c.sel && !c.sel.collapsed && ed && ed.contains(c.sel.commonAncestorContainer) && c.sel.toString().trim() ? c.sel : null;
+  // The remembered passage stays tinted while you type the instruction (where the browser can paint a highlight).
+  const dSelPaint = (r) => { try { if (r && window.Highlight && CSS.highlights) CSS.highlights.set("cbsel", new Highlight(r)); else if (!r && window.CSS && CSS.highlights) CSS.highlights.delete("cbsel"); } catch (e) { /* no highlight API */ } };
+  function dSelClear(c) { if (c) c.sel = null; dSelPaint(null); const chip = $("dSelOnly"); if (chip) chip.hidden = true; const ta = $("dRevise"); if (ta) ta.placeholder = D_PROMPT_HINT; }
+  // Formatting uses the selection up: after you select a word and press Bold, the word is still selected, but the next
+  // Shorter means the whole draft. The same text stays ignored until the selection moves.
+  function dSelConsume(c) { if (c && c.sel) { const live = document.getSelection(); c.selSkip = (live && live.toString()) || c.sel.toString(); dSelClear(c); } }
+  // A selection made in the editor is remembered when focus moves to the prompt box; a click back into the editor that
+  // collapses it forgets it.
+  document.addEventListener("selectionchange", () => {
+    const c = state.dCur, ed = $("dEditor"); if (!c || !ed) return;
+    const s = document.getSelection(); if (!s || !s.rangeCount) return;
+    const r = s.getRangeAt(0); if (!ed.contains(r.commonAncestorContainer)) return;
+    if (s.isCollapsed || !r.toString().trim()) { c.selSkip = null; if (c.sel) dSelClear(c); return; }
+    if (c.selSkip != null && r.toString() === c.selSkip) return;
+    c.sel = r.cloneRange(); dSelPaint(c.sel); const chip = $("dSelOnly"); if (chip) chip.hidden = false; const ta = $("dRevise"); if (ta) ta.placeholder = "What should change in the selected text?";
+  });
+  const rangeHtml = (r) => { const box = document.createElement("div"); box.append(r.cloneContents()); return box.innerHTML; };
+  // The new passage goes where the old one was. A selection that spans whole paragraphs at the top of the editor takes
+  // paragraphs; one inside a paragraph takes inline content, with line breaks between what came back as paragraphs,
+  // so no paragraph ends up inside another.
+  function rangeReplace(r, html, ed) {
+    const box = document.createElement("div"); box.innerHTML = html;
+    const isBlock = (n) => n.nodeType === 1 && /^(P|DIV|UL|OL|BLOCKQUOTE)$/.test(n.tagName);
+    const frag = document.createDocumentFragment();
+    if (r.startContainer === ed && r.endContainer === ed) frag.append(...box.childNodes);
+    else [...box.childNodes].forEach((n, i) => { if (i && isBlock(n)) frag.append(document.createElement("br"), document.createElement("br")); if (isBlock(n) && /^(P|DIV)$/.test(n.tagName)) frag.append(...n.childNodes); else frag.append(n); });
+    r.deleteContents(); r.insertNode(frag);
+  }
+  // What the model sends back: HTML when it did as asked, plain text when it didn't. Either way it's cleaned.
+  function reviseHtml(text) {
+    const t = String(text || "").trim().replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/, "").trim();
+    if (!/<(p|br|a|b|i|u|strong|em|ul|ol|li|div|blockquote)\b[^>]*>/i.test(t)) return textToHtml(t);
+    return rteTrim(rteClean(t));
+  }
   async function reviseDraft(instr) {
-    const c = state.dCur; if (!c || c.hasAtt) return; const ed = $("dEditor"); const cur = htmlToText(ed.innerHTML); if (!cur.trim()) return;
-    const id = c.d.id; dNote("Revising…"); ed.setAttribute("aria-busy", "true");
+    const c = state.dCur; if (!c) return; const ed = $("dEditor"); const sel = dSelLive(c, ed);
+    const whole = rteClean(ed.innerHTML); if (!htmlToText(whole).trim()) return;
+    const part = sel ? rteClean(rangeHtml(sel)) : null;
+    const id = c.d.id; dNote("Revising…"); ed.setAttribute("aria-busy", "true"); $("dReviseGo").disabled = true;
+    const theirs = c.theirs ? "\n\nThe message it answers:\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 6000) : "";
+    const rules = " Keep every fact, name, date, link and commitment" + (part == null ? ", and keep the sign-off" : "") + ". Keep the formatting that still applies: links with their exact href, bold, italics, lists and paragraph breaks. Output only the " + (part == null ? "new email body" : "new passage") + " as simple HTML (p, br, a, b, i, u, ul, ol, li, blockquote): HTML this time, not plain text, with no markdown, no code fence and no html or body tags.";
     try {
-      const text = await ask(voicePrompt(), "Here is a draft email " + OWNER + " wrote. Rewrite it: " + instr + ". Keep every fact, name, date, link and commitment, and keep the sign-off. Output only the new email body, plain text." + (c.theirs ? "\n\nThe message it answers:\n" + splitQuoted(String(c.theirs.plaintextBody || "")).main.slice(0, 6000) : "") + "\n\nThe draft:\n" + cur, { max_tokens: 3000 });
+      const text = await ask(voicePrompt(), part == null
+        ? "Here is a draft email " + OWNER + " wrote, as HTML. Rewrite it: " + instr + "." + rules + theirs + "\n\nThe draft:\n" + whole
+        : "Here is one passage from a draft email " + OWNER + " wrote, as HTML, then the whole draft for context. Rewrite only the passage: " + instr + "." + rules + " Don't repeat the rest of the draft." + theirs + "\n\nThe passage to rewrite:\n" + part + "\n\nThe whole draft, for context only:\n" + whole, { max_tokens: 3000 });
       if (!state.dCur || state.dCur.d.id !== id || !text.trim()) return;
-      c.undo = ed.innerHTML; ed.innerHTML = textToHtml(text.trim()); $("dUndo").disabled = false; $("dRevise").value = ""; state.dDirty = true;
-      dNote("Revised. Formatting was reset; Undo puts the old version back. Nothing is saved until you press Save.");
-    } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); } finally { ed.removeAttribute("aria-busy"); }
+      const html = reviseHtml(text); if (!htmlToText(html).trim()) return;
+      (c.undo || (c.undo = [])).push(ed.innerHTML); if (c.undo.length > 20) c.undo.shift();
+      if (part != null && dSelLive(c, ed)) rangeReplace(c.sel, html, ed); else ed.innerHTML = html;
+      ed.querySelectorAll("p:empty, div:empty").forEach((n) => n.remove());
+      $("dUndo").disabled = false; $("dRevise").value = ""; dPromptSize($("dRevise")); dSelClear(c); state.dDirty = true; c.html = ed.innerHTML; rtEmpty(ed);
+      dNote((part != null ? "Revised the selected text." : "Revised.") + " Undo puts the old version back. Nothing is saved until you press Save.");
+    } catch (e) { dNote(mcpCopy(e, aiLabel()) || "", "err"); } finally { ed.removeAttribute("aria-busy"); const g = $("dReviseGo"); if (g) g.disabled = false; }
   }
   // The AI goes through the same checklist and ticks what passes, with a short note on anything that doesn't.
   async function checkDraft(auto) {
