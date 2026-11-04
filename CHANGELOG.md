@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.7.7 (2026-11-04)
+
+### Added
+- **Settings → Speed.** How long things take in this browser: opening a thread, opening a draft and loading the list, then every kind of call, slowest total first, with how many times, the typical (middle) time, the slow (1 in 10) time and the slowest. Each Gmail call is timed end to end and, through Composio, so is each step inside it, so you can see where the seconds go. **Copy for Claude** copies it as text. Only names and times are kept, in this browser.
+
 ## 0.7.6 (2026-11-04)
 
 ### Changed

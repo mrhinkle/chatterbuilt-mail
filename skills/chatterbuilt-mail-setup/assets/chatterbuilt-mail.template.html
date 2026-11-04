@@ -174,6 +174,9 @@ body.resizing, body.resizing * { cursor: col-resize !important; user-select: non
 .dangerbtn:hover, .btn.ghost.dangerbtn:hover { background: rgba(180, 35, 24, 0.07); color: #912018; }
 .btn.primary.dangerbtn { background: #b42318; border-color: #b42318; color: #ffffff; }
 .srtext { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+.speedwrap { overflow-x: auto; } .speedtab { width: 100%; border-collapse: collapse; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+.speedtab th, .speedtab td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; } .speedtab th:first-child, .speedtab td:first-child { text-align: left; white-space: normal; }
+.speedtab th { color: var(--muted); font-weight: 600; font-size: 11.5px; } .speedh { margin: 14px 0 4px; font-size: 13px; }
 .updbtn { color: var(--accent); border-color: rgba(37, 99, 235, 0.35); background: rgba(37, 99, 235, 0.07); font-weight: 600; }
 .updbtn .ic { color: var(--accent); }
 .today .trow .w { font-weight: 600; flex: none; max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -882,6 +885,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 <div class="menu glass-strong narrow" id="setMenu" role="menu" aria-label="Settings" hidden>
   <button class="mi" role="menuitem" id="voiceBtn" type="button" data-feat="voice"><span class="mt">Voice</span><span class="md">How drafts sound, and what it has learned</span></button>
   <button class="mi" role="menuitem" id="skillsBtn" type="button"><span class="mt">Skills</span><span class="md">Every feature, with on/off switches and help</span></button>
+  <button class="mi" role="menuitem" id="speedBtn" type="button"><span class="mt">Speed</span><span class="md">How long Gmail and your other connections take</span></button>
   <button class="mi" role="menuitem" id="acctBtn" type="button" hidden><span class="mt">Accounts</span><span class="md">A color for each account, and which ones All inboxes shows</span></button>
   <div class="msep"></div>
   <button class="mi" role="menuitemcheckbox" id="roToggle" type="button" aria-checked="false" title="Block every send, move, label change, draft, task and contact">Read-only</button>
@@ -1171,6 +1175,31 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       recentEdits: o.edits.slice(-8), recentRejects: o.rejects.slice(-15)
     }, null, 2);
   }
+  // Settings → Speed: what you wait for, then every kind of call, slowest total first. Typical is the median, slow is
+  // the 90th percentile. Copy gives the same as text, to paste to Claude when working on speed.
+  const fmtMs = (ms) => ms < 1000 ? Math.round(ms) + " ms" : (ms / 1000).toFixed(ms < 10000 ? 1 : 0) + " s";
+  function speedStats() {
+    const by = new Map(); state.speed.forEach((r) => { const k = r.k + "|" + r.l; if (!by.has(k)) by.set(k, { l: r.l, k: r.k, ms: [], bad: 0 }); const g = by.get(k); g.ms.push(r.ms); if (!r.ok) g.bad++; });
+    const pct = (a, q) => a[Math.min(a.length - 1, Math.floor(q * (a.length - 1) + 0.5))];
+    return [...by.values()].map((g) => { const a = g.ms.slice().sort((x, y) => x - y); return { l: g.l, k: g.k, n: a.length, bad: g.bad, mid: pct(a, 0.5), p90: pct(a, 0.9), max: a[a.length - 1], sum: a.reduce((x, y) => x + y, 0) }; })
+      .sort((x, y) => y.sum - x.sum);
+  }
+  function speedText() {
+    const st = speedStats(), since = state.speed.length ? new Date(state.speed[0].at).toLocaleString() : "";
+    const line = (r) => r.l + ": " + r.n + "×, typical " + fmtMs(r.mid) + ", slow " + fmtMs(r.p90) + ", slowest " + fmtMs(r.max) + (r.bad ? ", " + r.bad + " failed" : "");
+    return "Chatterbuilt Mail speed (" + (GX ? "Gmail through " + GX_SERVER : "Gmail connector") + "), " + state.speed.length + " timings since " + since + "\n\nWhat you wait for:\n" + st.filter((r) => r.k === "action").map(line).join("\n") + "\n\nEach call, slowest total first:\n" + st.filter((r) => r.k !== "action").map(line).join("\n");
+  }
+  function openSpeed() {
+    const st = speedStats();
+    const table = (rows, head) => rows.length ? '<div class="speedwrap"><table class="speedtab"><thead><tr><th>' + head + '</th><th>Times</th><th>Typical</th><th>Slow</th><th>Slowest</th></tr></thead><tbody>'
+      + rows.map((r) => '<tr><td>' + esc(r.l) + (r.bad ? ' <span class="note err">' + r.bad + ' failed</span>' : "") + '</td><td>' + r.n + '</td><td>' + fmtMs(r.mid) + '</td><td>' + fmtMs(r.p90) + '</td><td>' + fmtMs(r.max) + '</td></tr>').join("") + '</tbody></table></div>' : '<p class="note">Nothing yet.</p>';
+    openModal("Speed", '<p class="note">How long things take in this browser' + (state.speed.length ? ", from the last " + state.speed.length + " timings since " + esc(new Date(state.speed[0].at).toLocaleString()) : "") + '. <em>Typical</em> is the middle time, <em>slow</em> is 1 in 10. Only names and times are kept here, never any mail.</p>'
+      + '<h3 class="speedh">What you wait for</h3>' + table(st.filter((r) => r.k === "action"), "Action")
+      + '<h3 class="speedh">Each call, slowest total first</h3>' + table(st.filter((r) => r.k !== "action"), "Call")
+      + '<div class="mrow"><button type="button" class="btn sm primary" id="speedCopy">Copy for Claude</button><button type="button" class="btn sm ghost" id="speedClear">Clear</button><span class="note" id="speedNote"></span></div>');
+    $("speedCopy").addEventListener("click", () => copyText(speedText(), $("speedNote"), "Copied. Paste it to Claude."));
+    $("speedClear").addEventListener("click", () => { state.speed = []; ls.set("cm.speed", "[]"); openSpeed(); });
+  }
   function copyText(text, noteEl, okMsg) {
     const show = () => {
       let box = $("copyBox");
@@ -1213,7 +1242,28 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       default: return s + " call failed (" + (code || "unknown") + "). " + (e && e.message ? e.message.slice(0, 160) : "");
     }
   }
+  // ---------- Speed: how long things take, for Settings → Speed ----------
+  // Every connector call is timed: a Gmail call end to end ("Gmail: get_thread"), and through Composio each hop inside
+  // it too ("Composio: GMAIL_FETCH_MESSAGE_BY_THREAD_ID", and one entry per piece of a large reply read back from its
+  // sandbox). So are the three things you wait for: opening a thread, opening a draft and loading the list. Only the
+  // name and the time are kept, in this browser, never what was in the mail.
+  const SPEED_KEEP = 600;
+  state.speed = (() => { const v = lsJson("cm.speed", []); return Array.isArray(v) ? v.slice(-SPEED_KEEP) : []; })();
+  let speedSave = 0;
+  function speedNote(label, ms, ok, kind) {
+    state.speed.push({ l: label, ms: Math.round(ms), ok: !!ok, at: Date.now(), k: kind || "call" });
+    if (state.speed.length > SPEED_KEEP) state.speed.splice(0, state.speed.length - SPEED_KEEP);
+    clearTimeout(speedSave); speedSave = setTimeout(() => ls.set("cm.speed", JSON.stringify(state.speed)), 1500);
+  }
+  const speedLabel = (server, tool, input) => server === GMAIL ? "Gmail: " + tool
+    : tool === "COMPOSIO_MULTI_EXECUTE_TOOL" ? server + ": " + ((((input || {}).tools || [])[0] || {}).tool_slug || tool)
+    : tool === "COMPOSIO_REMOTE_BASH_TOOL" ? server + ": one piece of a large reply" : server + ": " + tool;
   async function call(server, tool, input, opts) {
+    const t0 = performance.now(); let ok = false;
+    try { const r = await callNow(server, tool, input, opts); ok = true; return r; }
+    finally { speedNote(speedLabel(server, tool, input), performance.now() - t0, ok); }
+  }
+  async function callNow(server, tool, input, opts) {
     if (!state.mcp) throw { code: "not_granted", message: "mcp unavailable" };
     if (state.readOnly && MUTATING.has(tool)) throw { code: "read_only", server: server, message: "read-only mode" };
     if (GX && server === GMAIL) return gmailComposio(tool, input || {}, opts);
@@ -1772,7 +1822,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   async function loadThreads(append) {
     if (append && (state.loadingMore || !state.hasMore || state.mode === "waiting" || state.mode === "drafts")) return;
-    const token = ++state.loadToken;
+    const token = ++state.loadToken; const t0 = performance.now();
     document.body.classList.toggle("drafts-mode", state.mode === "drafts");
     if (state.mode !== "drafts" && state.dSel) { if (state.dDirty && !state.readOnly) await saveDraftEdit(true); state.dSel = null; state.dCur = null; state.dDirty = false; if (!state.selectedId) clearDesk(); }
     if (state.mode === "waiting") return loadWaiting(token);
@@ -1815,7 +1865,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       $("moreBtn").hidden = !state.hasMore;
       $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate, state.threads.length) : "");
       if (soft) { const live = new Set(state.threads.map((t) => t.id)); [...state.picked].forEach((id) => { if (!live.has(id)) state.picked.delete(id); }); }
-      renderList();
+      renderList(); if (!append) speedNote("Load the list", performance.now() - t0, true, "action");
       loadPreviews();
       setStatus("connected", "live");
       listCache[key] = { threads: state.threads, nextToken: state.nextToken, hasMore: state.hasMore, estimate: state.estimate }; snapSave(key);
@@ -2054,6 +2104,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     return keepFull(id, t);
   }
   async function openThread(id) {
+    const t0 = performance.now();
     if (id !== state.selectedId) resetRcpts();
     state.selectedId = id; renderList();
     app.dataset.view = "thread";
@@ -2064,9 +2115,10 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const p = await fetchThread(id, { full: fmtOn() });
       if (state.selectedId !== id) return;
       state.thread = p;
-      renderThread();
+      renderThread(); speedNote("Open a thread", performance.now() - t0, true, "action");
     } catch (e) {
       if (state.selectedId !== id) return;
+      speedNote("Open a thread", performance.now() - t0, false, "action");
       $("subject").textContent = isNotFound(e) ? "Can't find this thread" : "Couldn't open thread";
       reading.innerHTML = '<div class="empty"><p>' + esc(mcpCopy(e, GMAIL)) + '</p>' + (isNotFound(e) ? '<button class="btn sm" type="button" data-refreshlist>Refresh the list</button>' : "") + '</div>';
     }
@@ -4943,6 +4995,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.dBusy) { toast("One moment: still " + state.dBusy + " that draft.", "", 2500); return; }
     const d = state.drafts.find((x) => x.id === id); if (!d) return;
     if (state.dDirty && state.dSel && state.dSel !== id && !state.readOnly) { const ok = await saveDraftEdit(true); if (!ok) return; }
+    const t0 = performance.now();
     state.dSel = id; state.dCur = null; state.dDirty = false; state.selectedId = null; state.thread = null; renderDrafts();
     app.dataset.view = "thread"; $("acts").hidden = true; compose.hidden = true; showSide(false); document.body.classList.add("thread-open");
     $("subject").textContent = "Draft"; reading.innerHTML = '<div class="empty"><span class="spin"></span>Getting the draft…</div>';
@@ -4957,7 +5010,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.dSel !== id) return;
     state.dCur = { d: d, full: full, theirs: theirs, thread: thr, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
     state.rcpt.dto = toRc(full.toRecipients || d.toRecipients); state.rcpt.dcc = toRc(full.ccRecipients || d.ccRecipients); state.rcpt.dbcc = toRc(full.bccRecipients || d.bccRecipients);
-    renderDraftEditor();
+    renderDraftEditor(); speedNote("Open a draft", performance.now() - t0, true, "action");
     { const i = state.drafts.findIndex((x) => x.id === id); draftAhead(state.drafts[i + 1]); }
     // Check it for me runs on its own the first time a draft opens; your own ticks are never overwritten.
     if (featOn("context") || featOn("more")) {
@@ -5469,6 +5522,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("voiceBtn").addEventListener("click", () => openVoice(false));
   $("skillsBtn").addEventListener("click", () => openSkills(false));
   $("acctBtn").addEventListener("click", openAccounts);
+  $("speedBtn").addEventListener("click", () => { closeMenus(); openSpeed(); });
   $("roToggle").addEventListener("click", toggleRO);
   $("paletteBtn").addEventListener("click", openPalette);
   $("variantsBtn").addEventListener("click", threeOptions);

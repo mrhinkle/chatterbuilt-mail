@@ -1,6 +1,6 @@
 {
   "name": "chatterbuilt-mail",
-  "version": "0.7.6",
+  "version": "0.7.7",
   "description": "A triage hub that connects Gmail to your other systems, published as your own Claude artifact. On each thread it checks meeting notes, calendar, tasks, pipeline, contacts and memory, and Route sends the thread on to them with your approval. It drafts in your voice, checks replies before sending, tracks who owes you, snoozes, suggests rules, and learns from your edits. A morning run drafts replies into Gmail. Includes setup, improve, morning, voice, feedback and contact cleanup skills.",
   "author": {
     "name": "Mark R. Hinkle"

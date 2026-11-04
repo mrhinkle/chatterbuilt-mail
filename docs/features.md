@@ -27,7 +27,7 @@ The layout follows a few common rules: keep the actions you use most visible, wi
 
 | Place | What's there |
 |---|---|
-| Top bar | **Tasks** drop zone, **Commands** (⌘K), **Settings** (Voice, Skills, Read-only, Model, shortcuts, docs), connection status. A dark **Read-only on** button appears while read-only is on. |
+| Top bar | **Tasks** drop zone, **Commands** (⌘K), **Settings** (Voice, Skills, Speed, Read-only, Model, shortcuts, docs), connection status. A dark **Read-only on** button appears while read-only is on. |
 | Thread list | Tabs (Inbox, Unread, Waiting, Primary, Starred, Files), the search box (press Enter; switch on **Ask** inside it to ask a question instead), **Triage**, and **Tools** (Review, Pre-draft, Rules, Sweep, Ask). A badge on Tools counts what's waiting in Review. After Triage, the list is grouped into **Needs you**, **Worth reading** and **FYI**. **Hide list** at the left of the thread title (or `[`) gives the thread the full width; **Show list** brings it back. |
 | No thread open | **Today**: drafts waiting in Gmail, what needs you, suggestions in Review, who owes you a reply, and your next meeting. |
 | Above a thread | **Archive, Snooze, Move**, then **Route, Task, Contact**, then **More** (Summarize, Star, Mark read, Unsubscribe, Formatted view, Open in Gmail). |
