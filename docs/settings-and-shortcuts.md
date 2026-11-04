@@ -12,7 +12,7 @@ Everything that controls the app itself sits in one **Settings** menu in the top
 |---|---|
 | **Voice** | How drafts sound, and what the app has learned from your edits. See [voice.md](voice.md). |
 | **Skills** | Every feature with a description, how to use it, and an on/off switch. |
-| **Speed** | How long things take in this browser. First what you wait for (opening a thread, opening a draft, loading the list), then every kind of call: each Gmail call end to end and, through Composio, each step inside it (including each piece of a large reply read back from its sandbox). *Typical* is the middle time, *slow* is 1 in 10. **Copy for Claude** copies it as text; **Clear** starts over. Only names and times are kept, in this browser, never any mail. |
+| **Speed** | How long things take in this browser. First what you wait for (opening a thread, opening a draft, loading the list), then every kind of call: each Gmail call end to end and, through Composio, each step inside it (including each piece of a large reply read back from its sandbox). *Typical* is the middle time, *slow* is 1 in 10. **Copy for Claude** copies it as text; **Clear** starts over. Timings keep only names and times, never any mail. At the top, **Open mail at once**: how many threads are kept in this browser and how much room they take, **Load ahead** (off, or the next 3, 5 or 10 threads), **Next brief too** (build the next thread's context brief ahead), and **Clear kept mail**. |
 | **Accounts** | Gmail through Composio only. A color for each account (it tints that account's rows in All inboxes) and which accounts All inboxes shows. Saved in this browser; Copy for Claude carries it into your copy. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy). |
 | **Read-only** | A switch that blocks every change. See below. |
 | **Model** | Which model drafts and sorts. Shows only when your copy lists extra models. |
@@ -25,7 +25,7 @@ Everything that controls the app itself sits in one **Settings** menu in the top
 
 Open **Settings → Skills**, or press `?`. Each row has the feature's name, what it does, and **How** to use it. Untick one and its buttons disappear right away; tick it to bring them back. A feature that needs a connector you haven't set up shows *needs setup* and says what's missing.
 
-The list covers: Triage, Waiting on reply, Per-recipient tone, Review queue, Pre-drafts with options, Plain-English rules, Unsubscribe sweep, Ask your inbox, Calendar-aware replies, Add to contacts, Voice, Self-improving, Tasks, Move and copy, Unsubscribe, Pre-send check, Context from your systems, More context, Today, Route, Snooze and remind-me, Drafts waiting in Gmail, Snippets, Gmail signature, Attachments, Formatted view, and Keyboard shortcuts.
+The list covers: Triage, Waiting on reply, Per-recipient tone, Review queue, Pre-drafts with options, Plain-English rules, Unsubscribe sweep, Ask your inbox, Calendar-aware replies, Add to contacts, Voice, Self-improving, Tasks, Move and copy, Unsubscribe, Pre-send check, Context from your systems, More context, Today, Route, Snooze and remind-me, Drafts waiting in Gmail, Snippets, Gmail signature, Attachments, Formatted view, Open mail at once, and Keyboard shortcuts.
 
 Below the list are the keyboard shortcuts, a short safety note, and links to the docs and to GitHub issues. **Reset to defaults** turns everything back to how your copy ships.
 

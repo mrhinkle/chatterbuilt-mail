@@ -1080,6 +1080,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own. Show previews it under the reply box, where you can leave it off one message, and Insert signature adds it to a draft in the Drafts tab.", how: "On by default. Turn it off if your drafts already end with a signature." },
     { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
     { key: "html", name: "Formatted view", desc: "Shows messages as they were written: their own layout, colors and links, with scripts and tracking images removed. Pictures show as boxes of their size.", how: "On by default. More, Formatted view, above the thread, switches to plain text and back." },
+    { key: "cache", name: "Open mail at once", desc: "Keeps a copy of the threads you open, and of the next few in the list, in this browser, so they open without waiting on Gmail. A copy is only used while it matches the list, so a new message is never hidden behind an old copy. The next thread's context brief is ready before you get to it, and the list opens where you left it.", how: "Settings, Speed: how far ahead to load, what's kept, and Clear." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
   let featState = {}; try { featState = JSON.parse(ls.get("cm.features") || "{}") || {}; } catch { featState = {}; }
@@ -1221,12 +1222,21 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const st = speedStats();
     const table = (rows, head) => rows.length ? '<div class="speedwrap"><table class="speedtab"><thead><tr><th>' + head + '</th><th>Times</th><th>Typical</th><th>Slow</th><th>Slowest</th></tr></thead><tbody>'
       + rows.map((r) => '<tr><td>' + esc(r.l) + (r.bad ? ' <span class="note err">' + r.bad + ' failed</span>' : "") + '</td><td>' + r.n + '</td><td>' + fmtMs(r.mid) + '</td><td>' + fmtMs(r.p90) + '</td><td>' + fmtMs(r.max) + '</td></tr>').join("") + '</tbody></table></div>' : '<p class="note">Nothing yet.</p>';
-    openModal("Speed", '<p class="note">How long things take in this browser' + (state.speed.length ? ", from the last " + state.speed.length + " timings since " + esc(new Date(state.speed[0].at).toLocaleString()) : "") + '. <em>Typical</em> is the middle time, <em>slow</em> is 1 in 10. Only names and times are kept here, never any mail.</p>'
-      + '<h3 class="speedh">What you wait for</h3>' + table(st.filter((r) => r.k === "action"), "Action")
+    const ks = tcStats(), mb = (ks.bytes / 1e6).toFixed(ks.bytes < 1e7 ? 1 : 0);
+    const kept = '<h3 class="speedh">Open mail at once</h3>' + (!cacheOn() ? '<p class="note">Off. Turn on <em>Open mail at once</em> in Settings → Skills to keep copies of threads in this browser so they open without waiting on Gmail.</p>'
+      : '<p class="note">' + (ks.n ? ks.n + " thread" + (ks.n === 1 ? "" : "s") + " kept in this browser (" + mb + " MB)" : "Nothing kept yet") + '. Copies stay in this browser and are only shown while they match your list; any change you make to a thread drops its copy.</p>'
+      + '<div class="mrow"><label class="note" for="aheadSel">Load ahead</label><select id="aheadSel">' + [0, 3, 5, 10].map((v) => '<option value="' + v + '"' + (v === aheadN() ? " selected" : "") + '>' + (v ? "next " + v + " threads" : "off") + '</option>').join("") + '</select>'
+      + '<label class="tog"><input type="checkbox" id="ctxAheadChk"' + (ls.get("cm.ctxAhead") === "0" ? "" : " checked") + '>Next brief too</label>'
+      + '<button type="button" class="btn sm ghost" id="tcClearBtn">Clear kept mail</button><span class="note" id="tcNote"></span></div>');
+    openModal("Speed", '<p class="note">How long things take in this browser' + (state.speed.length ? ", from the last " + state.speed.length + " timings since " + esc(new Date(state.speed[0].at).toLocaleString()) : "") + '. <em>Typical</em> is the middle time, <em>slow</em> is 1 in 10. Timings keep only names and times, never any mail.</p>'
+      + kept + '<h3 class="speedh">What you wait for</h3>' + table(st.filter((r) => r.k === "action"), "Action")
       + '<h3 class="speedh">Each call, slowest total first</h3>' + table(st.filter((r) => r.k !== "action"), "Call")
       + '<div class="mrow"><button type="button" class="btn sm primary" id="speedCopy">Copy for Claude</button><button type="button" class="btn sm ghost" id="speedClear">Clear</button><span class="note" id="speedNote"></span></div>');
     $("speedCopy").addEventListener("click", () => copyText(speedText(), $("speedNote"), "Copied. Paste it to Claude."));
     $("speedClear").addEventListener("click", () => { state.speed = []; ls.set("cm.speed", "[]"); openSpeed(); });
+    if ($("aheadSel")) $("aheadSel").addEventListener("change", (ev) => { ls.set("cm.ahead", ev.target.value); if (+ev.target.value) warmSoon(300); });
+    if ($("ctxAheadChk")) $("ctxAheadChk").addEventListener("change", (ev) => ls.set("cm.ctxAhead", ev.target.checked ? "1" : "0"));
+    if ($("tcClearBtn")) $("tcClearBtn").addEventListener("click", async () => { $("tcClearBtn").disabled = true; await tcClear(); openSpeed(); const n = $("tcNote"); if (n) { n.className = "note ok"; n.textContent = "Cleared."; } });
   }
   function copyText(text, noteEl, okMsg) {
     const show = () => {
@@ -1287,6 +1297,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     : tool === "COMPOSIO_MULTI_EXECUTE_TOOL" ? server + ": " + ((((input || {}).tools || [])[0] || {}).tool_slug || tool)
     : tool === "COMPOSIO_REMOTE_BASH_TOOL" ? server + ": one piece of a large reply" : server + ": " + tool;
   async function call(server, tool, input, opts) {
+    if (server === GMAIL && MUTATING.has(tool)) tcDropFor(input);
     const t0 = performance.now(); let ok = false;
     try { const r = await callNow(server, tool, input, opts); ok = true; return r; }
     finally { speedNote(speedLabel(server, tool, input), performance.now() - t0, ok); }
@@ -1850,7 +1861,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       while (i < todo.length && run === state.previewRun) {
         const id = todo[i++];
         try {
-          const p = await fetchThread(id);
+          const hit = await tcGet(id, false); const p = hit ? hit.t : await fetchThread(id, { full: cacheOn() && fmtOn() });
           state.preview[id] = makePreview(p);
           const ms = (p && p.messages) || []; const last = ms[ms.length - 1]; const t = state.threads.find((x) => x.id === id); const sm = t && t.messages && t.messages[0];
           if (sm && last) {
@@ -1934,7 +1945,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate, state.threads.length) : "");
       if (soft) { const live = new Set(state.threads.map((t) => t.id)); [...state.picked].forEach((id) => { if (!live.has(id)) state.picked.delete(id); }); }
       renderList(); if (!append) speedNote("Load the list", performance.now() - t0, true, "action");
-      loadPreviews();
+      loadPreviews(); if (!append && !state.selectedId) warmSoon(1500);
       setStatus("connected", "live");
       listCache[key] = { threads: state.threads, nextToken: state.nextToken, hasMore: state.hasMore, estimate: state.estimate }; snapSave(key);
       if (!append && !soft) { maybeAutoRules(); loadDraftsMap(); } else if (soft) loadDraftsMap();
@@ -1968,12 +1979,18 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function snapSave(key) {
     try {
       const rows = state.threads.slice(0, 50).map((t) => Object.assign({}, t, { _fresh: undefined, messages: (t.messages || []).map((m) => Object.assign({}, m, { plaintextBody: undefined, htmlBody: undefined })) }));
-      sessionStorage.setItem(SNAP + key, JSON.stringify({ at: Date.now(), threads: rows, estimate: state.estimate, hasMore: state.hasMore || state.threads.length > 50 }));
+      const v = JSON.stringify({ at: Date.now(), threads: rows, estimate: state.estimate, hasMore: state.hasMore || state.threads.length > 50 });
+      if (!cacheOn()) { sessionStorage.setItem(SNAP + key, v); return; }
+      localStorage.setItem(SNAP + key, v);
+      const ks = Object.keys(localStorage).filter((k) => k.startsWith(SNAP));
+      if (ks.length > 8) ks.map((k) => [k, (JSON.parse(localStorage.getItem(k) || "{}") || {}).at || 0]).sort((a, b) => a[1] - b[1]).slice(0, ks.length - 8).forEach((x) => localStorage.removeItem(x[0]));
     } catch { /* storage full or off: the list just loads normally */ }
   }
   function snapLoad(key) {
     try {
-      const v = JSON.parse(sessionStorage.getItem(SNAP + key) || "null"); if (!v || Date.now() - v.at >= 12 * 3600000) return null;
+      let v = JSON.parse(sessionStorage.getItem(SNAP + key) || "null");
+      if (!v && cacheOn()) { v = JSON.parse(localStorage.getItem(SNAP + key) || "null"); if (v && Date.now() - v.at >= 3 * 864e5) v = null; }
+      if (!v || Date.now() - v.at >= (cacheOn() ? 3 * 864e5 : 12 * 3600000)) return null;
       // Which account each thread and message is in, so opening one asks the right account (All inboxes).
       (v.threads || []).forEach((t) => { if (t.acct && !gxOwner["t:" + t.id]) gxOwner["t:" + t.id] = t.acct; (t.messages || []).forEach((m) => { const a = m.acct || t.acct; if (a && m.id && !gxOwner["m:" + m.id]) gxOwner["m:" + m.id] = a; }); });
       return { threads: v.threads, estimate: v.estimate, hasMore: v.hasMore, nextToken: null };
@@ -2002,6 +2019,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const have = new Map(state.threads.map((t) => [t.id, t])); let n = 0, changed = 0;
       ((p && p.threads) || []).forEach((t) => { const h = have.get(t.id); if (!h) n++; else if (rowSig(h) !== rowSig(t)) changed++; });
       showUpdates(n, changed);
+      if ((n || changed) && cacheOn() && aheadN()) warmRows(((p && p.threads) || []).filter((t) => { const h = have.get(t.id); return !h || rowSig(h) !== rowSig(t); }).slice(0, aheadN()), ++warmRun, null);
     } catch { /* a quiet check: nothing to say if it fails */ }
     finally { checking = false; }
   }
@@ -2161,15 +2179,170 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("webChk").checked = false; showSide(true); showDraftBox(); loadContext(false); updateIter();
     if (featOn("drafts") && Date.now() - draftsAt > 15000) loadDraftsMap(true);
   }
+  // ---------- Kept copies: mail that opens at once ("Open mail at once", on by default) ----------
+  // A copy of each thread you open, and of the next few in the list, is kept in this browser (IndexedDB), so opening it
+  // again, or moving on to the next one, doesn't wait on Gmail. A copy is used only while it has the newest message the
+  // list shows for that thread; otherwise the thread is fetched as before. A copy over a minute old is checked quietly
+  // after it opens. Any write to a thread (send, label, archive…) drops its copy. Copies never leave this browser; a
+  // small index of what's kept (keys, sizes, times, no mail) sits in local storage so the cap works without reading it all.
+  const TC_MAX = 300, TC_BYTES = 40e6, TC_DAYS = 14, TC_MEM = 60;
+  const cacheOn = () => featOn("cache");
+  const aheadN = () => { const v = parseInt(ls.get("cm.ahead"), 10); return isNaN(v) ? 5 : Math.max(0, Math.min(10, v)); };
+  const clone = (o) => { try { return structuredClone(o); } catch { return JSON.parse(JSON.stringify(o)); } };
+  const agoText = (ms) => { const m = Math.max(1, Math.round((Date.now() - ms) / 60000)); return m < 60 ? m + " min ago" : m < 1440 ? Math.round(m / 60) + " h ago" : Math.round(m / 1440) + " d ago"; };
+  // IndexedDB, with every step on a timer: if the browser blocks it or never answers, the page carries on without copies.
+  const idb = (() => {
+    let dbp = null;
+    const open = () => dbp || (dbp = new Promise((res) => {
+      const to = setTimeout(() => res(null), 1500);
+      try {
+        const r = indexedDB.open("cm-mail", 1);
+        r.onupgradeneeded = () => { ["threads", "ctx"].forEach((n) => { if (!r.result.objectStoreNames.contains(n)) r.result.createObjectStore(n); }); };
+        r.onsuccess = () => { clearTimeout(to); res(r.result); };
+        r.onerror = r.onblocked = () => { clearTimeout(to); res(null); };
+      } catch { clearTimeout(to); res(null); }
+    }));
+    const run = (store, mode, fn, wait) => new Promise((res) => {
+      const to = setTimeout(() => res(undefined), wait || 3000);
+      open().then((db) => {
+        if (!db) { clearTimeout(to); res(undefined); return; }
+        try {
+          const tx = db.transaction(store, mode); const rq = fn(tx.objectStore(store));
+          tx.oncomplete = () => { clearTimeout(to); res(rq ? rq.result : undefined); };
+          tx.onerror = tx.onabort = () => { clearTimeout(to); res(undefined); };
+        } catch { clearTimeout(to); res(undefined); }
+      });
+    });
+    return { get: (st, k, w) => run(st, "readonly", (o) => o.get(k), w), put: (st, k, v) => run(st, "readwrite", (o) => o.put(v, k)), del: (st, k) => run(st, "readwrite", (o) => o.delete(k)), clear: (st) => run(st, "readwrite", (o) => o.clear()) };
+  })();
+  const tcMem = new Map(), tcDropped = {};
+  let tcIdx = (() => { const v = lsJson("cm.tc", {}); return v && typeof v === "object" && !Array.isArray(v) ? v : {}; })(), tcIdxSave = 0;
+  // Gmail ids are per mailbox, so with several accounts a copy is filed under the account the thread is in.
+  const tcKey = (id) => (GX ? (gxOwner["t:" + id] || (curAcct() || {}).id || "gx") : "g") + ":" + id;
+  const lastId = (t) => { const ms = (t && t.messages) || []; return (ms[ms.length - 1] || {}).id || ""; };
+  const rowOf = (id) => state.threads.find((t) => t.id === id);
+  function tcSaveIdx() { clearTimeout(tcIdxSave); tcIdxSave = setTimeout(() => ls.set("cm.tc", JSON.stringify(tcIdx)), 800); }
+  // The copy for a thread, if it's good to show: as new as rowLast (the newest message the list knows of), or with no
+  // list row to go by, fetched in the last two minutes. needFull asks for one with the HTML (the formatted view).
+  async function tcEntry(id, needFull, rowLast, key) {
+    if (!cacheOn()) return null;
+    const k = key || tcKey(id); let e = tcMem.get(k);
+    if (!e && tcIdx[k]) { e = await idb.get("threads", k, 500); if (e && e.t) tcMemSet(k, e); else { e = null; delete tcIdx[k]; tcSaveIdx(); } }
+    if (!e || (needFull && !e.full) || Date.now() - e.at > TC_DAYS * 864e5) return null;
+    const rl = rowLast === undefined ? lastId(rowOf(id)) : rowLast;
+    if (rl ? !(e.ids || []).includes(rl) : Date.now() - e.at > 120000) return null;
+    return e;
+  }
+  async function tcGet(id, needFull) {
+    const e = await tcEntry(id, needFull); if (!e) return null;
+    const k = tcKey(id); if (tcIdx[k]) { tcIdx[k][2] = Date.now(); tcSaveIdx(); }
+    return { t: clone(e.t), at: e.at, full: e.full };
+  }
+  function tcMemSet(k, e) { tcMem.delete(k); tcMem.set(k, e); while (tcMem.size > TC_MEM) tcMem.delete(tcMem.keys().next().value); }
+  // started: when the fetch began. A copy fetched before a write to that thread is out of date, so it isn't kept.
+  function tcPut(id, t, full, started, key) {
+    if (!cacheOn() || !t || !Array.isArray(t.messages) || !t.messages.length) return;
+    const k = key || tcKey(id); if (tcDropped[k] && started && started <= tcDropped[k]) return;
+    const ids = t.messages.map((m) => m.id); const old = tcMem.get(k);
+    if (old && old.full && !full && ids.every((x) => (old.ids || []).includes(x))) return; // keep the copy with the HTML
+    let bytes = 0; try { bytes = JSON.stringify(t).length; } catch { return; }
+    if (bytes > 4e6) return;
+    const e = { at: Date.now(), full: !!full, ids: ids, t: clone(t) };
+    tcMemSet(k, e); tcIdx[k] = [e.at, bytes, Date.now()]; idb.put("threads", k, e); tcTrim(); tcSaveIdx();
+  }
+  function tcDrop(k) { tcDropped[k] = Date.now(); tcMem.delete(k); if (tcIdx[k]) { delete tcIdx[k]; tcSaveIdx(); idb.del("threads", k); } }
+  // Before any Gmail write: drop the copies of the threads it touches (by thread id, or by a message in a kept copy),
+  // and of the open thread, which is what a send or reply is about.
+  function tcDropFor(input) {
+    const i = input || {}; const tids = [i.threadId, i.thread_id, state.selectedId].filter(Boolean);
+    tids.forEach((id) => tcDrop(tcKey(id)));
+    const mids = [i.messageId, i.message_id].concat(i.messageIds || [], i.message_ids || []).filter(Boolean);
+    if (mids.length) tcMem.forEach((e, k) => { if ((e.ids || []).some((x) => mids.includes(x))) tcDrop(k); });
+  }
+  function tcTrim() {
+    const ks = Object.keys(tcIdx); let bytes = ks.reduce((a, k) => a + (+tcIdx[k][1] || 0), 0);
+    if (ks.length <= TC_MAX && bytes <= TC_BYTES) return;
+    ks.sort((a, b) => (tcIdx[a][2] || 0) - (tcIdx[b][2] || 0));
+    for (const k of ks) { if (Object.keys(tcIdx).length <= TC_MAX && bytes <= TC_BYTES) break; bytes -= +tcIdx[k][1] || 0; delete tcIdx[k]; tcMem.delete(k); idb.del("threads", k); }
+  }
+  function tcStats() { const v = Object.values(tcIdx); return { n: v.length, bytes: v.reduce((a, x) => a + (+x[1] || 0), 0) }; }
+  async function tcClear() {
+    tcMem.clear(); tcIdx = {}; ls.del("cm.tc"); Object.keys(state.ctx || {}).forEach((k) => { if (state.ctx[k] && state.ctx[k].at) delete state.ctx[k]; });
+    await Promise.all([idb.clear("threads"), idb.clear("ctx")]);
+    [localStorage, sessionStorage].forEach((st) => { try { Object.keys(st).filter((k) => k.startsWith(SNAP)).forEach((k) => st.removeItem(k)); } catch {} });
+  }
   // opts.full asks for the HTML too, so opening a thread in the formatted view (the default) is one call, not a plain
-  // fetch and then the same thread again for the formatted copy. That copy is kept for loadFormatted.
+  // fetch and then the same thread again for the formatted copy. That copy is kept for loadFormatted. opts.fresh skips
+  // the connector's short-term cache (the quiet check of a kept copy). Every fetch also refreshes the kept copy.
   async function fetchThread(id, opts) {
-    if (!(opts && opts.full)) return call(GMAIL, "get_thread", { threadId: id, messageFormat: "PLAIN_TEXT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
-    const t = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
+    const full = !!(opts && opts.full), started = Date.now(), k = tcKey(id);
+    const t = await call(GMAIL, "get_thread", { threadId: id, messageFormat: full ? "FULL_CONTENT" : "PLAIN_TEXT" }, opts && opts.fresh ? { cache: false } : { cache: { staleTime: 20000, gcTime: 300000 } });
     // The full format leaves a message's text empty when it was sent as HTML only (the plain format converts it), so
     // the text is made from the HTML here.
-    ((t && t.messages) || []).forEach((m) => { if (!m.plaintextBody && m.htmlBody) m.plaintextBody = htmlToText(m.htmlBody); });
-    return keepFull(id, t);
+    if (full) ((t && t.messages) || []).forEach((m) => { if (!m.plaintextBody && m.htmlBody) m.plaintextBody = htmlToText(m.htmlBody); });
+    tcPut(id, t, full, started, k);
+    return full ? keepFull(id, t) : t;
+  }
+  // The quiet check of a kept copy that opened: new messages show at once if you haven't started on a reply, and
+  // otherwise a note says so. Labels (read, starred) are brought up to date either way.
+  async function tcCheck(id, full) {
+    let p; try { p = await fetchThread(id, { full: full, fresh: true }); } catch { return; }
+    if (state.selectedId !== id || !state.thread || !p || !Array.isArray(p.messages)) return;
+    const have = new Set((state.thread.messages || []).map((m) => m.id)); const added = p.messages.filter((m) => !have.has(m.id)).length;
+    if (added) {
+      const busy = $("body").value.trim() || !$("confirmBox").hidden || compose.contains(document.activeElement);
+      if (!busy) { state.thread = clone(p); renderThread(); }
+      else showBanner(added === 1 ? "A new message came in on this thread. Open it again to see it." : added + " new messages came in on this thread. Open it again to see them.");
+      return;
+    }
+    const by = new Map(p.messages.map((m) => [m.id, m]));
+    (state.thread.messages || []).forEach((m) => { const f = by.get(m.id); if (f && Array.isArray(f.labelIds)) m.labelIds = f.labelIds; });
+    const ms = state.thread.messages || [];
+    $("readBtn").hidden = !ms.some((m) => (m.labelIds || []).includes("UNREAD"));
+    $("starBtn").querySelector(".lb").textContent = ms.some((m) => (m.labelIds || []).includes("STARRED")) ? "Unstar" : "Star";
+  }
+  // Load ahead: the next few threads below the one you're on (or the top of the list), two at a time, while the page is
+  // in view. The next thread's context brief is built too, so it's there when you get to it.
+  let warmRun = 0, warmTimer = 0;
+  function warmSoon(delay) { clearTimeout(warmTimer); if (cacheOn() && aheadN()) warmTimer = setTimeout(warmAhead, delay == null ? 700 : delay); }
+  async function warmRows(rows, run, withCtx) {
+    const full = fmtOn(), todo = [];
+    for (const t of rows) { if (!(await tcEntry(t.id, full, lastId(t)))) todo.push(t); }
+    const worker = async () => {
+      while (todo.length && run === warmRun && !document.hidden && cacheOn()) {
+        const t = todo.shift();
+        try { await fetchThread(t.id, { full: full }); }
+        catch (e) { if (e && (e.code === "rate_limited" || e.code === "needs_reauth" || e.code === "not_granted")) { todo.length = 0; } }
+      }
+    };
+    await Promise.all([worker(), worker()]);
+    if (withCtx && run === warmRun) warmCtx(withCtx);
+  }
+  async function warmAhead() {
+    if (!cacheOn() || document.hidden || state.mode === "drafts" || state.mode === "waiting" || !state.threads.length) return;
+    const run = ++warmRun, n = aheadN(); if (!n) return;
+    const i = state.threads.findIndex((t) => t.id === state.selectedId);
+    const rows = state.threads.slice(i + 1, i + 1 + n);
+    await warmRows(rows, run, i !== -1 ? rows[0] : null);
+  }
+  async function warmCtx(row) {
+    if (!row || !featOn("context") || !panelOn() || !(CONFIG.context || []).length || ls.get("cm.ctxAhead") === "0") return;
+    const id = row.id; if (state.ctx[id] || ctxRuns[id]) return;
+    const e = await tcEntry(id, false, lastId(row)); if (!e) return;
+    const t = clone(e.t); const who = personOf(t); if (!who || state.ctx[id] || ctxRuns[id]) return;
+    if (await ctxKept(id, t)) return;
+    ctxBuild(t, id, who, CONFIG.context).catch(() => {});
+  }
+  // Context briefs are kept too, for 12 hours, as long as the thread has no newer message than when it was built.
+  async function ctxKept(id, t) {
+    if (!cacheOn() || !id || String(id).startsWith("draft:")) return false;
+    const e = await idb.get("ctx", tcKey(id), 500);
+    if (!e || !e.c || Date.now() - e.at > 12 * 3600000 || e.last !== lastId(t)) return false;
+    state.ctx[id] = Object.assign({}, e.c, { at: e.at }); return true;
+  }
+  function ctxKeep(id, t, c) {
+    if (!cacheOn() || !id || String(id).startsWith("draft:") || !c || !c.text || /^Couldn't summarize/.test(c.text)) return;
+    idb.put("ctx", tcKey(id), { at: c.at || Date.now(), last: lastId(t), c: c });
   }
   async function openThread(id) {
     const t0 = performance.now();
@@ -2179,11 +2352,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("subject").textContent = "Loading…"; $("acts").hidden = true; document.body.classList.remove("thread-open"); compose.hidden = true; showBanner(""); showSide(true);
     $("sideBody").innerHTML = '<div class="sec"><div class="note"><span class="spin"></span>Opening the thread…</div></div>'; if ($("ctxBox")) $("ctxBox").innerHTML = "";
     reading.innerHTML = '<div class="empty"><span class="spin"></span>Fetching the thread…</div>';
+    const full = fmtOn(); const hit = await tcGet(id, full);
+    if (state.selectedId !== id) return;
+    if (hit) {
+      state.thread = hit.t; if (hit.full) keepFull(id, clone(hit.t));
+      renderThread(); speedNote("Open a thread (kept copy)", performance.now() - t0, true, "action");
+      if (Date.now() - hit.at > 60000) tcCheck(id, full);
+      warmSoon(); return;
+    }
     try {
-      const p = await fetchThread(id, { full: fmtOn() });
+      const p = await fetchThread(id, { full: full });
       if (state.selectedId !== id) return;
       state.thread = p;
-      renderThread(); speedNote("Open a thread", performance.now() - t0, true, "action");
+      renderThread(); speedNote("Open a thread", performance.now() - t0, true, "action"); warmSoon();
     } catch (e) {
       if (state.selectedId !== id) return;
       speedNote("Open a thread", performance.now() - t0, false, "action");
@@ -4127,17 +4308,28 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const t = inDraftCtx() ? state.dCur.ctxT : state.thread; const id = ctxKey();
     if (!t || !panelOn()) { if ($("ctxBox")) $("ctxBox").innerHTML = ""; $("sideBody").innerHTML = ""; return; }
     const who = personOf(t); if (!who) { state.ctx[id] = { nowho: true, who: {} }; renderContext(); return; }
-    if (state.ctx[id] && !force) { renderContext(); return; }
+    if (state.ctx[id] && !state.ctx[id].loading && !force) { renderContext(); return; }
     const srcs = featOn("context") ? (CONFIG.context || []) : [];
     if (!srcs.length) { state.ctx[id] = { text: "", results: [], used: [], who: who, raw: [], none: true }; renderContext(); return; }
+    if (!force && !ctxRuns[id] && await ctxKept(id, t)) { if (ctxKey() === id) renderContext(); return; }
     state.ctx[id] = { loading: true, who: who, n: srcs.length }; renderContext();
+    await ctxBuild(t, id, who, srcs, force);
+    if (ctxKey() === id) renderContext();
+  }
+  // Builds a thread's brief whether or not it's the one on screen (the next thread's is built ahead), once at a time
+  // per thread, and finishes even if you've moved on, so coming back shows it. A Refresh starts a new build; an older
+  // one that finishes later doesn't overwrite it.
+  const ctxRuns = {}, ctxGen = {};
+  function ctxBuild(t, id, who, srcs, force) {
+    if (ctxRuns[id] && !force) return ctxRuns[id];
+    const gen = ctxGen[id] = (ctxGen[id] || 0) + 1;
+    const run = (async () => {
     const results = await Promise.all(srcs.map(async (s) => {
       try {
         const p = await Promise.race([call(s.server, s.tool, fillTemplate(s.input || {}, who), { cache: { staleTime: 300000, gcTime: 600000 }, read: true }), new Promise((_, rej) => setTimeout(() => rej({ code: "server_unavailable", message: "timed out" }), 15000))]);
         return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p };
       } catch (e) { return { label: s.label || s.server, ok: false, err: mcpCopy(e, s.server) || (e && e.code) || "error" }; }
     }));
-    if (ctxKey() !== id) return;
     const usable = results.filter((r) => r.ok && !r.empty);
     let text = "Nothing relevant in your connected systems.";
     if (usable.length) {
@@ -4151,9 +4343,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
           { max_tokens: 2500 })).trim();
       } catch (e) { text = "Couldn't summarize: " + (mcpCopy(e, aiLabel()) || "stopped"); }
     }
-    if (ctxKey() !== id) return;
-    state.ctx[id] = { text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
-    renderContext();
+    const c = { at: Date.now(), text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
+    if (ctxGen[id] === gen) { state.ctx[id] = c; ctxKeep(id, t, c); }
+    return c;
+    })();
+    const done = () => { if (ctxRuns[id] === run) delete ctxRuns[id]; };
+    ctxRuns[id] = run; run.then(done, done);
+    return run;
   }
   const initials = (w) => { const n = (w.name || w.email || "?").replace(/["']/g, "").trim(); const p = n.split(/[\s@._-]+/).filter(Boolean); return ((p[0] || "?")[0] + (p.length > 1 ? p[1][0] : "")).toUpperCase(); };
   function citeLines(text, items) {
@@ -4175,7 +4371,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       if (c.loading) sys = '<div class="note"><span class="spin"></span>Checking ' + c.n + ' systems for ' + esc(who.who || "") + '…</div>';
       else {
         const chips = (c.results || []).map((r) => '<span class="src ' + (!r.ok ? "bad" : r.empty ? "none" : "hit") + '" title="' + esc(r.ok ? (r.empty ? "Nothing found" : "Found something") : r.err) + '">' + esc(r.label) + '</span>').join("");
-        sys = '<div class="ctxlines">' + citeLines(c.text, null) + '</div><div class="srcs2">' + chips + '</div>';
+        sys = '<div class="ctxlines">' + citeLines(c.text, null) + '</div><div class="srcs2">' + chips + '</div>'
+          + (c.at && Date.now() - c.at > 300000 ? '<div class="note">Checked ' + esc(agoText(c.at)) + '. Refresh checks again.</div>' : "");
       }
       sys = '<div class="sec"><div class="cap">From your systems<button type="button" class="btn sm ghost" data-ctx="refresh">Refresh</button></div>' + sys + '</div>';
     }

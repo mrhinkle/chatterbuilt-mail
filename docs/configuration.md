@@ -73,7 +73,7 @@ The model comes from where the page runs. In Claude, the page asks Claude withou
 | Key | What it is |
 |---|---|
 | `mailRules` | Rules built into your copy. A plain-English rule: `{ text: "Receipts and invoices", op: "move", labelName: "Finance" }`. A sender rule: `{ text: "Email from Stripe", from: "stripe.com", op: "archive" }`. `op` is `move`, `archive`, `star` or `read`. Rules you add in the app are saved in your browser and override these until the improve skill writes them back here. |
-| `features` | Default on/off per feature, for example `{ sweep: false, calendar: true }`. Keys: `triage`, `waiting`, `tone`, `review`, `predraft`, `rules`, `sweep`, `ask`, `calendar`, `contacts`, `voice`, `learn`, `tasks`, `move`, `unsub`, `precheck`, `context`, `more`, `today`, `route`, `snooze`, `drafts`, `snippets`, `attach`, `html`, `keys`. |
+| `features` | Default on/off per feature, for example `{ sweep: false, calendar: true }`. Keys: `triage`, `waiting`, `tone`, `review`, `predraft`, `rules`, `sweep`, `ask`, `calendar`, `contacts`, `voice`, `learn`, `tasks`, `move`, `unsub`, `precheck`, `context`, `more`, `today`, `route`, `snooze`, `drafts`, `snippets`, `attach`, `html`, `cache`, `keys`. |
 | `readOnly` | `true` starts in read-only mode. You can still switch it off in the app. |
 
 ## Other

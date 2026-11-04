@@ -30,7 +30,9 @@ module.exports = function fake() {
   const SIG = '<table cellpadding="0" cellspacing="0" style="margin:0px"><tbody><tr><td style="padding-right:12px"><a href="https://riveralabs.example/"><img src="https://riveralabs.example/logo.png" alt="Rivera Labs" width="40"></a></td><td><b style="font-size:14px">Alex Rivera</b><br><span style="color:#555">Events lead, Rivera Labs</span><br><a href="mailto:alex@riveralabs.example">alex@riveralabs.example</a> · <a href="https://riveralabs.example/">riveralabs.example</a></td></tr></tbody></table>';
   T.s1.messages[T.s1.messages.length - 1].htmlBody = '<div dir="ltr">Sam, happy to do the panel. Send the run of show and I will block the time.<br><br>Alex<br><br><div class="gmail_signature" data-smartmail="gmail_signature">' + SIG + '</div></div>';
   const order = ['t1', 't2', 't3', 't4', 't5', 't6', 't7', 't8'];
-  const summ = (id) => { const t = T[id]; const m = t.messages[t.messages.length - 1]; return { id, messageCount: t.messages.length, messages: [{ id: m.id, sender: m.sender, subject: m.subject, toRecipients: m.toRecipients, threadId: id }] }; };
+  // Tests: window.__newer[threadId] = messageId makes a new message arrive on that thread: the list shows it as the
+  // newest and get_thread returns it at the end.
+  const summ = (id) => { const t = T[id]; const m = t.messages[t.messages.length - 1]; const nw = (window.__newer || {})[id]; return { id, messageCount: t.messages.length + (nw ? 1 : 0), messages: [{ id: nw || m.id, sender: m.sender, subject: m.subject, toRecipients: m.toRecipients, threadId: id }] }; };
   const search = (q) => {
     if (/before:/.test(q)) return {};
     if (q === 'in:sent newer_than:180d') return { threads: ['s1', 's2', 's3', 'w1'].map(summ) };
@@ -207,6 +209,7 @@ module.exports = function fake() {
           // message (or a list of them) to the end (a reply that just arrived), copying the last one with the fields given.
           if (window.__mailHtml && window.__mailHtml[input.threadId]) t.messages[t.messages.length - 1].htmlBody = window.__mailHtml[input.threadId];
           if (window.__extraMsg && window.__extraMsg[input.threadId]) [].concat(window.__extraMsg[input.threadId]).forEach((x) => t.messages.push(Object.assign({}, t.messages[t.messages.length - 1], { date: new Date().toISOString() }, x)));
+          if (window.__newer && window.__newer[input.threadId]) t.messages.push(Object.assign({}, t.messages[t.messages.length - 1], { id: window.__newer[input.threadId], date: new Date().toISOString(), plaintextBody: 'A newer message on this thread.', htmlBody: '<p>A newer message on this thread.</p>' }));
           if (input.messageFormat !== 'FULL_CONTENT') t.messages.forEach((m) => { delete m.htmlBody; });
           return P(t);
         }
