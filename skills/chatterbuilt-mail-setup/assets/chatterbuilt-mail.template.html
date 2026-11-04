@@ -1944,7 +1944,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       $("moreBtn").hidden = !state.hasMore;
       $("countText").textContent = state.threads.length + (state.estimate ? " of ~" + Math.max(state.estimate, state.threads.length) : "");
       if (soft) { const live = new Set(state.threads.map((t) => t.id)); [...state.picked].forEach((id) => { if (!live.has(id)) state.picked.delete(id); }); }
-      renderList(); if (!append) speedNote("Load the list", performance.now() - t0, true, "action");
+      renderList(); if (!append) { speedNote("Load the list", performance.now() - t0, true, "action"); state.listLiveAt = Date.now(); }
       loadPreviews(); if (!append && !state.selectedId) warmSoon(1500);
       setStatus("connected", "live");
       listCache[key] = { threads: state.threads, nextToken: state.nextToken, hasMore: state.hasMore, estimate: state.estimate }; snapSave(key);
@@ -2287,7 +2287,17 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // The quiet check of a kept copy that opened: new messages show at once if you haven't started on a reply, and
   // otherwise a note says so. Labels (read, starred) are brought up to date either way.
   async function tcCheck(id, full) {
-    let p; try { p = await fetchThread(id, { full: full, fresh: true }); } catch { return; }
+    let p; try { p = await fetchThread(id, { full: full, fresh: true }); }
+    catch (e) {
+      // Deleted or moved since the copy was kept: say so, as opening it fresh would have.
+      if (!isNotFound(e)) return;
+      tcDrop(tcKey(id));
+      if (state.selectedId !== id || $("body").value.trim()) return;
+      state.thread = null; $("acts").hidden = true; document.body.classList.remove("thread-open"); compose.hidden = true;
+      $("subject").textContent = "Can't find this thread";
+      reading.innerHTML = '<div class="empty"><p>' + esc(mcpCopy(e, GMAIL)) + '</p><button class="btn sm" type="button" data-refreshlist>Refresh the list</button></div>';
+      return;
+    }
     if (state.selectedId !== id || !state.thread || !p || !Array.isArray(p.messages)) return;
     const have = new Set((state.thread.messages || []).map((m) => m.id)); const added = p.messages.filter((m) => !have.has(m.id)).length;
     if (added) {
@@ -2420,11 +2430,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
     if (!featOn("precheck") || state.dSel === d.id || dCheckRuns[d.id] || (state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length) || await dTicksKept(d)) return;
     const list = (l) => (l || []).join(", ");
-    const run = draftCheckAsk({ to: list(full.toRecipients || d.toRecipients), cc: list(full.ccRecipients || d.ccRecipients), bcc: list(full.bccRecipients || d.bccRecipients), subject: full.subject || "", text: splitQuoted(draftText(full)).main, ctx: state.ctx[cid], theirs: theirs });
+    const run = draftCheckAsk({ to: list(full.toRecipients || d.toRecipients), cc: list(full.ccRecipients || d.ccRecipients), bcc: list(full.bccRecipients || d.bccRecipients), subject: full.subject || "", text: draftWords(full), ctx: state.ctx[cid], theirs: theirs });
     dCheckRuns[d.id] = run;
     try {
       const o = await run;
-      if (!(state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length)) { const t = state.dTicks[d.id] = {}; DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; t[k] = { on: r.ok === true, note: String(r.note || "") }; }); dTicksKeep(d); }
+      if (!(state.dTicks[d.id] && Object.keys(state.dTicks[d.id]).length)) { const t = state.dTicks[d.id] = {}; DRAFT_CHECKS.forEach(([k]) => { const r = o[k] || {}; t[k] = { on: r.ok === true, note: String(r.note || "") }; }); dTicksKeep(d); (state.dTicksAhead = state.dTicksAhead || {})[d.id] = true; }
     } catch { /* it runs again when the draft opens */ }
     finally { delete dCheckRuns[d.id]; }
   }
@@ -2441,7 +2451,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (hit) {
       state.thread = hit.t; if (hit.full) keepFull(id, clone(hit.t));
       renderThread(); speedNote("Open a thread (kept copy)", performance.now() - t0, true, "action");
-      if (Date.now() - hit.at > 60000) tcCheck(id, full);
+      // Checked quietly when the copy is over a minute old, or when the list on screen hasn't come from Gmail since the
+      // page opened (Gmail didn't answer, so the list is the one kept from before).
+      if (Date.now() - hit.at > 60000 || !state.listLiveAt) tcCheck(id, full);
       warmSoon(); return;
     }
     try {
@@ -5508,6 +5520,20 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     state.dSig = cut >= 0 ? textToHtml(t.slice(cut).trim()) : "";
     return textToHtml((cut >= 0 ? t.slice(0, cut) : draftText(full)).trim());
   }
+  // A draft's own words, without its quoted history or signature, the way the editor shows them, for the check run
+  // ahead of opening it. Unlike draftHtml it leaves the open draft's signature and quote alone.
+  function draftWords(full) {
+    const html = full.htmlBody || (looksHtml(full.plaintextBody) ? full.plaintextBody : "");
+    if (!html) { const t = String(full.plaintextBody || "").replace(/\r/g, ""); const cut = t.search(/(^|\n)\[(image|Website|LinkedIn)[^\]]*\]/); return (cut >= 0 ? t.slice(0, cut) : splitQuoted(draftText(full)).main).trim(); }
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    let q = doc.querySelector(DRAFT_QUOTE);
+    if (q) {
+      if (q.matches('#divRplyFwdMsg, #x_divRplyFwdMsg') && q.previousElementSibling && q.previousElementSibling.tagName === "HR") q = q.previousElementSibling;
+      const r = doc.createRange(); r.setStartBefore(q); r.setEndAfter(doc.body.lastChild); r.deleteContents();
+    }
+    [DRAFT_SIG, DRAFT_SIG_PRE].forEach((sel) => { const e = doc.querySelector(sel); if (e) e.remove(); });
+    return htmlToText(doc.body.innerHTML).trim();
+  }
   const addrList = (v) => String(v || "").split(/[,;\n]+/).map((x) => emailOf(x.trim()).toLowerCase()).filter((x) => EMAIL_RE.test(x));
   async function openDraft(id) {
     // While a draft is being sent or deleted, the editor stays on it, so the answer can't land on another draft.
@@ -5539,6 +5565,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }
     // The check waits for the context brief, so it can catch a draft that forgets what your systems know.
     const unticked = () => !Object.keys(state.dTicks[id] || {}).length;
+    // A check that finished ahead is already in the checklist; its summary goes in the bar as if it had just run.
+    if (state.dTicksAhead && state.dTicksAhead[id]) { delete state.dTicksAhead[id]; showDChecks(id); }
     if (featOn("precheck") && unticked()) (async () => {
       if (dCheckRuns[id]) { try { await dCheckRuns[id]; } catch {} } else await dTicksKept(d);
       if (state.dSel !== id) return;
