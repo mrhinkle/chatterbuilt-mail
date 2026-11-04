@@ -581,6 +581,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 .dctx .body { white-space: pre-wrap; margin-top: 6px; max-height: 220px; overflow: auto; }
 .dfields { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 6px 10px; align-items: center; font-size: 13px; }
 .dfields span { color: var(--muted); font-weight: 600; font-size: 12px; }
+.dfromwrap { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; min-width: 0; }
+.dfromwrap select { max-width: 100%; padding: 5px 8px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); color: inherit; font: inherit; font-size: 13px; }
+.dfromwrap .note { flex: 1 1 220px; min-width: 0; margin: 0; }
 .dfields > input { width: 100%; padding: 6px 9px; border: 1px solid var(--line); border-radius: 6px; background: var(--field); font-size: 13px; }
 .rfwrap { position: relative; min-width: 0; } .rfwrap .sug { left: 0; }
 /* The draft editor is one sheet laid out like the email: toolbar, your text, the signature, earlier messages. */
@@ -1676,7 +1679,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
         const to = [].concat(input.to || []); const tid = gxThreadOf(input.replyToMessageId);
         if (tid && !input.fromEmail) return gx("GMAIL_REPLY_TO_THREAD", { thread_id: tid, recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, message_body: input.body, include_signature: !!input.includeSignature }, opts, false, A);
         // From a chosen address (another account, or an alias set up under "Send mail as"): a new message with that From.
-        return gx("GMAIL_SEND_EMAIL", Object.assign({ recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.body, include_signature: !!input.includeSignature }, input.fromEmail ? { from_email: input.fromEmail } : {}), opts, false, A);
+        return gx("GMAIL_SEND_EMAIL", Object.assign({ recipient_email: to[0], extra_recipients: to.slice(1), cc: input.cc, bcc: input.bcc, subject: input.subject, body: input.htmlBody || input.body, include_signature: !!input.includeSignature }, input.htmlBody ? { is_html: true } : {}, input.fromEmail ? { from_email: input.fromEmail } : {}), opts, false, A);
       }
       case "reply": {
         gxNoAtt(input);
@@ -5065,6 +5068,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.readOnly) { toast(esc(mcpCopy({ code: "read_only" })), "err", 5000); return; }
     if (state.dBusy || state.dApplying) return;
     const p = dPlanSummary(); if (!p.sends.length && !p.dels.length) return;
+    const other = p.sends.find((d) => state.dFrom[d.id]);
+    if (other) { toast("“" + esc((other._meta && other._meta.subject) || "A draft") + "” is set to go from " + esc(state.dFrom[other.id].email) + ". Send that one from its editor, or set its From back, then apply the plan.", "err", 9000); return; }
     // Unsaved edits on the open draft go first, as Send does; if they can't be saved, nothing happens.
     if (state.dCur && state.dDirty && (p.sends.some((d) => d.id === state.dSel) || p.dels.some((d) => d.id === state.dSel))) { if (p.sends.some((d) => d.id === state.dSel)) { if (!(await saveDraftEdit(true))) return; } else state.dDirty = false; }
     state.dApplying = true; state.dApplyAsk = false; renderDrafts();
@@ -5374,6 +5379,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // With no draft open, the desk says how many are left to review and starts you on the first.
   function renderDraftsHome(word) {
     $("subject").textContent = "Drafts";
+    if (state.selectedId || !compose.hidden) { state.selectedId = null; state.thread = null; $("acts").hidden = true; compose.hidden = true; showSide(false); }
     const all = state.drafts || [], left = all.filter((d) => !dChecked()[d.id]);
     reading.innerHTML = '<div class="empty"><h2>' + esc(word || (all.length ? (left.length ? left.length + " of " + all.length + " draft" + (all.length === 1 ? "" : "s") + " to review" : "Every draft is checked") : "No drafts")) + '</h2>'
       + '<p>' + (all.length ? "Open one on the left, or go through them in order. Each one gets the review checklist before it goes." : "Drafts from the morning run, from chat or from Gmail show up here.") + '</p>'
@@ -5583,7 +5589,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // The "Write your message…" prompt shows while the editor has no text.
   const rtEmpty = (ed) => ed.classList.toggle("isempty", !ed.textContent.replace(/\u00a0/g, " ").trim() && !ed.querySelector("img, li, hr"));
   function renderDraftEditor() {
-    const c = state.dCur; if (!c) return; const { d, full, theirs } = c; const ticks = state.dTicks[d.id] || (state.dTicks[d.id] = {});
+    const c = state.dCur; if (!c) return; setTimeout(() => dFromSetup(c), 0); const { d, full, theirs } = c; const ticks = state.dTicks[d.id] || (state.dTicks[d.id] = {});
     const subj = full.subject || ""; $("subject").textContent = subj || "Draft";
     const ck = dChecked()[d.id]; const ds = state.drafts; const pos = ds.findIndex((x) => x.id === d.id) + 1;
     const addr = (l) => (l || []).map((a) => emailOf(a)).join(", ");
@@ -5592,7 +5598,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + (state.readOnly ? '<p class="note err">Read-only is on. You can read and edit here, but Save and Send are off.</p>' : "")
       + '<div id="ctxBox"></div>'
       + (theirs ? '<details class="dctx"' + (pos <= 1 ? " open" : "") + '><summary>Replying to <strong>' + esc(nameOf(theirs.sender)) + '</strong> · ' + esc(fmtDate(theirs.date)) + '</summary><div class="body">' + esc(splitQuoted(String(theirs.plaintextBody || theirs.snippet || "").replace(/\r/g, "")).main.slice(0, 4000)) + '</div></details>' : (d.threadId ? "" : '<p class="note">A new email, not a reply.</p>'))
-      + '<div class="dfields">' + ["dto", "dcc", "dbcc"].map((k) => '<span>' + rcptLabel[k] + '</span><div class="rfwrap"><div class="rbox" data-rk="' + k + '"><input type="text" id="' + k + 'In" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="' + rcptLabel[k] + '" aria-autocomplete="list" aria-controls="' + k + 'Sug"></div><div class="sug" id="' + k + 'Sug" role="listbox" aria-label="Suggestions" hidden></div></div>').join("") + '<span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
+      + '<div class="dfields"><span id="dFromLbl" hidden>From</span><div class="dfromwrap" id="dFromWrap" hidden><select id="dFromSel" aria-label="Send from"></select><div class="note" id="dFromNote"></div></div>' + ["dto", "dcc", "dbcc"].map((k) => '<span>' + rcptLabel[k] + '</span><div class="rfwrap"><div class="rbox" data-rk="' + k + '"><input type="text" id="' + k + 'In" autocomplete="off" spellcheck="false" placeholder="Add a name or email" aria-label="' + rcptLabel[k] + '" aria-autocomplete="list" aria-controls="' + k + 'Sug"></div><div class="sug" id="' + k + 'Sug" role="listbox" aria-label="Suggestions" hidden></div></div>').join("") + '<span>Subject</span><input id="dSubj" value="' + esc(subj) + '" aria-label="Subject"></div>'
       // The draft as it will look: one sheet with your text, then the signature in place, then earlier messages folded.
       + '<div class="rtsheet" id="dSheet"><div class="rtbar" role="toolbar" aria-label="Formatting">'
       + RT_TOOLS.map((b) => b ? '<button type="button" class="rtb" data-cmd="' + b[0] + '"' + (b[2] ? ' aria-pressed="false"' : "") + ' title="' + b[1] + '" aria-label="' + b[1].replace(/ \(.*\)$/, "") + '">' + RT_ICONS[b[0]] + '</button>' : '<span class="rtsep" aria-hidden="true"></span>').join("")
@@ -5704,7 +5710,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.readOnly) { dNote(mcpCopy({ code: "read_only" }), "err"); return; }
     const to = dAddrs("dto"); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
     const cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
-    $("dConfirmText").textContent = "Send this to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
+    const F = GX && state.dCur && state.dFrom[state.dCur.d.id];
+    if (F && state.dCur.files && state.dCur.files.length) { dNote("This draft has files, and they can't go along to another account yet. Send it from its own address, or remove the files first.", "err"); return; }
+    $("dConfirmText").textContent = "Send this" + (F ? " from " + F.email : "") + " to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (F ? " It goes out as a new email" + (state.dCur.d.threadId ? ", not inside the thread" : "") + ", and this draft is then deleted." : "") + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
     state.dConfirmAct = "send"; $("dConfirmGo").textContent = "Yes, send it"; $("dConfirmGo").classList.remove("dangerbtn");
     $("dConfirm").hidden = false; state.dConfirmAt = performance.now(); $("dConfirmGo").focus();
   }
@@ -5764,8 +5772,56 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       dAfterGone(i, "No drafts left");
     } finally { if (state.dBusy) dUnlock(c); else state.dBusy = false; }
   }
+  // ---------- Drafts: send from another address or account ----------
+  // Through Composio a draft can go out from any address on any connected account, as the reply box can: each account's
+  // own address and its "Send mail as" aliases. Its own account's address sends the draft itself, as always. Any other
+  // address sends what's in the editor as a new email from there, then deletes the draft, since no tool can move a draft
+  // to another account or send it under another From. A reply sent that way isn't inside the thread. The draft's own
+  // signature stays behind; the other address's Gmail signature goes on instead. Files don't travel yet.
+  state.dFrom = {};
+  function dHomeFrom(d) { const A = acctById(d.acct) || ownerOf("d", d.id) || homeAcct(); const l = (fromOpts || []).filter((o) => A && o.acct === A.id); return l.find((o) => o.isDefault) || l.find((o) => o.isPrimary) || l[0] || null; }
+  const acctLabel = (id) => { const A = acctById(id); return (A && (A.label || A.email)) || id; };
+  async function dFromSetup(c) {
+    if (!GX || !c) return; let l; try { l = await loadFromOpts(); } catch { return; }
+    if (state.dCur !== c || l.length < 2 || !$("dFromSel")) return;
+    const home = dHomeFrom(c.d); if (!home) return;
+    const pick = state.dFrom[c.d.id] || home; const groups = [...new Set(l.map((o) => o.acct))];
+    $("dFromSel").innerHTML = groups.map((a) => { const os = l.filter((o) => o.acct === a); return '<optgroup label="' + esc(os[0].label) + '">' + os.map((o) => '<option value="' + esc(o.acct + "|" + o.email) + '"' + (o.acct === pick.acct && o.email === pick.email ? " selected" : "") + '>' + esc(o.email) + '</option>').join("") + '</optgroup>'; }).join("");
+    $("dFromLbl").hidden = false; $("dFromWrap").hidden = false; dFromNote(c);
+  }
+  function dFromNote(c) {
+    const n = $("dFromNote"); if (!n) return; const F = state.dFrom[c.d.id]; const home = dHomeFrom(c.d);
+    n.className = "note"; n.textContent = !F ? "" : "Goes out as a new email from " + F.email + (c.d.threadId ? ", not inside the thread" : "") + ", then this draft is deleted from " + acctLabel(home ? home.acct : c.d.acct) + "." + (c.files && c.files.length ? " Its files can't go along to another account yet." : "");
+    if (F && c.files && c.files.length) n.className = "note err";
+  }
+  function dPickFrom() {
+    const c = state.dCur; if (!c) return; const v = $("dFromSel").value.split("|"); const o = (fromOpts || []).find((x) => x.acct === v[0] && x.email === v[1]); const home = dHomeFrom(c.d);
+    if (o && home && (o.acct !== home.acct || o.email !== home.email)) state.dFrom[c.d.id] = o; else delete state.dFrom[c.d.id];
+    dFromNote(c);
+  }
+  document.addEventListener("change", (ev) => { if (ev.target && ev.target.id === "dFromSel") dPickFrom(); });
+  async function sendDraftFrom(c) {
+    const { d } = c; const F = state.dFrom[d.id]; const home = dHomeFrom(d);
+    const to = dAddrs("dto"), cc = dAddrs("dcc"), bcc = dAddrs("dbcc");
+    const html = rteTrim(rteClean($("dEditor").innerHTML)) + (state.dQuote || ""); const subject = $("dSubj").value.trim() || c.full.subject || "";
+    dLock("sending"); dNote("Sending from " + F.email + "…");
+    try {
+      try { await call(GMAIL, "send_message", Object.assign({ to: to, subject: subject, body: htmlToText(html), htmlBody: html, includeSignature: !!state.dSig && featOn("signature"), fromEmail: F.email, acct: F.acct }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false }); }
+      catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check the Sent folder of " + F.email + " before sending again." : ""), "err"); return; }
+      // Sent. The draft it came from goes, so it isn't sent twice. If that fails, it says so; a write is never retried.
+      let left = false;
+      try { await call(GMAIL, "delete_draft", Object.assign({ draftId: d.id }, draftAcct(d)), { cache: false }); } catch (e) { if (!isNotFound(e)) left = true; }
+      state.dDirty = false; delete state.dFrom[d.id]; const i = dropDraftLocally(d);
+      try { await invalGmail(); } catch {}
+      toast(left ? "Sent from " + esc(F.email) + ". The draft is still in Gmail drafts for " + esc(acctLabel(home ? home.acct : d.acct)) + ", so delete it there." : "Sent from " + esc(F.email) + ".", left ? "" : "ok", left ? 10000 : 4000);
+      state.dBusy = false;
+      if (state.mode !== "drafts" || state.dSel !== d.id) { renderDrafts(); return; }
+      dAfterGone(i, "Every draft is sent or checked");
+    } finally { if (state.dBusy) dUnlock(c); else state.dBusy = false; }
+  }
   async function sendDraftEdit() {
     const c = state.dCur; if (!c || state.dBusy) return; const { d } = c; $("dConfirm").hidden = true;
+    if (GX && state.dFrom[d.id]) return sendDraftFrom(c);
     if (state.dDirty && !(await saveDraftEdit(true))) return;
     if (state.dCur !== c) return;
     dLock("sending"); dNote("Sending…");

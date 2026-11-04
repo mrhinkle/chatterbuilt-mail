@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.8.1 (2026-11-04)
+
+### Added
+- **Send a draft from another address or account.** With Gmail through Composio, the draft editor has a **From** menu with every address on every connected account, its own picked. Pick another and Send goes out from there as a new email with what's in the editor, then deletes the draft from its own account so it can't go out twice. A reply sent that way isn't inside the thread, and the note under From says so first. The other address's Gmail signature goes on instead of the draft's. A draft with files can't switch accounts yet, and Apply plan won't send a draft that's set to another address from its own.
+
+### Fixed
+- **The Drafts tab no longer shows the last thread's reply box.** Switching to Drafts with a thread open left that thread's actions, reply box and Send on screen under "drafts to review".
+
 ## 0.8.0 (2026-11-04)
 
 ### Added

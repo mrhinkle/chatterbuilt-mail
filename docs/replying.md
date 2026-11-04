@@ -102,6 +102,7 @@ With Gmail through Composio, a **From** menu sits over the recipients. It lists 
 - It starts on the thread's own address, and **Send** is a normal reply in the thread.
 - Pick another address and the reply goes out from there as a new email, with "Re:" and the thread's subject, to the same people (Reply all and your Cc and Bcc included). The line under the menu says so, and so does the send confirmation. Gmail can't reply inside a thread from another account or alias, so that conversation starts fresh for them.
 - **Show** under the reply box previews the signature of the address you picked.
+- A draft waiting in Gmail can switch addresses too, in the Drafts tab: see [drafts.md](drafts.md#from-send-it-from-another-address-or-account).
 - **Save draft** from another account saves the draft in that account. Drafts can't be saved from an alias here; send it, or pick the account's own address.
 - The next thread starts on its own address again.
 

@@ -76,6 +76,19 @@ Sending doesn't need every box ticked. The confirmation just tells you how many 
 
 - **Replies saved through Composio lose their threading headers.** Composio's draft update rewrites the message without `In-Reply-To` and `References`. Gmail still keeps the draft in your thread, but the other person's mail app may show it as a new conversation. On a reply draft the editor says so before you save. If threading matters, make your edits in Gmail; sending an unsaved draft from here is fine. The Gmail connector doesn't have this problem.
 
+## From: send it from another address or account
+
+With Gmail through Composio and more than one address to send from, a **From** menu sits over To. It lists every address on every connected account: each account's own address and the aliases you've set up in Gmail under *Send mail as*. The draft's own address is picked, and Send works as always.
+
+Pick another address and Send goes out from there as a new email, with what's in the editor, to the same To, Cc and Bcc. The draft is then deleted from the account it was in, so it can't go out twice. If that delete fails, a note says the draft is still there so you can delete it in Gmail; a write is never retried. Good to know:
+
+- A reply sent this way isn't inside the thread, since no tool can reply in a thread from another account or alias. The note under From says so before you send.
+- The draft's own signature stays behind and the other address's Gmail signature goes on instead.
+- A draft with files can't switch accounts yet: Send says so and stops. Send it from its own address, or remove the files.
+- The choice lasts while the page is open. **Apply plan** won't quietly send a draft that's set to another address from its own; it stops and names the draft.
+
+With the Gmail connector there's one account, so there's no From menu.
+
 ## Attachments
 
 A draft's files show under the sheet when it opens, each with an ×, and the **paperclip** in the toolbar adds more (up to 18 MB in all per save). Pictures inside the email, such as the logo in a signature, stay where they are and aren't listed. **Save** keeps the files you left and adds the ones you attached; **Send** sends the draft as saved.
@@ -100,10 +113,11 @@ The reply box on an open thread attaches files the same way through the Gmail co
 | Opening a draft with attachments | the draft's raw message (`get_draft` as RAW), for the files it holds; through Composio, only their list | nothing | nothing |
 | Save | | the Gmail draft (`update_draft`), with its files; through Composio, `GMAIL_GET_ATTACHMENT` copies each file the draft had and a new file goes up through `COMPOSIO_REMOTE_WORKBENCH` | |
 | Send | | sends the draft (`send_message` with the draft) | |
+| Send from another address | the addresses you can send from (`GMAIL_LIST_SEND_AS` for each account, once per session) | a new email from that address (`GMAIL_SEND_EMAIL` with `from_email`), then deletes the draft (`GMAIL_DELETE_DRAFT`); never retried | |
 | Delete | | deletes the draft, after you confirm (`delete_draft`); never retried | |
 | Apply plan | | sends each marked draft (`send_message` with the draft), then deletes each marked draft (`delete_draft`), one at a time after one confirmation; never retried | |
 
-Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT`, `GMAIL_SEND_DRAFT` and `GMAIL_DELETE_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
+Through Composio, the same steps use `GMAIL_LIST_DRAFTS`, `GMAIL_GET_DRAFT`, `GMAIL_LIST_SEND_AS`, `GMAIL_UPDATE_DRAFT`, `GMAIL_SEND_DRAFT`, `GMAIL_SEND_EMAIL` (sending from another address) and `GMAIL_DELETE_DRAFT`. Turn the tab off in **Settings → Skills → Drafts**.
 
 ## Related
 
