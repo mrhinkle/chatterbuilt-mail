@@ -108,7 +108,7 @@ The viewer reads the message's source through the same Gmail read the page alrea
 
 ## Formatted view
 
-Messages open formatted: their own layout, colors, fonts, links, headings, lists and tables. The thread shows as text for a moment, then the formatted version replaces it. **More → Formatted view** switches to plain text and back, and the page remembers your choice.
+Messages open formatted: their own layout, colors, fonts, links, headings, lists and tables. The thread comes with its HTML in one fetch, so it opens formatted. **More → Formatted view** switches to plain text and back, and the page remembers your choice.
 
 ![A newsletter in Formatted view, with headings, a link and a table](images/formatted.webp)
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.7.6 (2026-11-04)
+
+### Changed
+- **Threads open with one fetch.** In the formatted view (the default) a thread used to be fetched twice, once as text and again for the formatted copy; through Composio that was the same request both times. It now comes with its HTML in one call, and a message sent as HTML only gets its text from the HTML.
+- **Drafts open faster.** A draft and the thread it answers are fetched at the same time instead of one after the other, and while you're on one draft the next loads in the background, so **Next** opens at once. A copy loaded ahead is used for up to three minutes.
+
 ## 0.7.5 (2026-11-03)
 
 ### Changed

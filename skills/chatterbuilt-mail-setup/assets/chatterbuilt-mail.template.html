@@ -2043,8 +2043,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("webChk").checked = false; showSide(true); showDraftBox(); loadContext(false); updateIter();
     if (featOn("drafts") && Date.now() - draftsAt > 15000) loadDraftsMap(true);
   }
-  async function fetchThread(id) {
-    return call(GMAIL, "get_thread", { threadId: id, messageFormat: "PLAIN_TEXT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
+  // opts.full asks for the HTML too, so opening a thread in the formatted view (the default) is one call, not a plain
+  // fetch and then the same thread again for the formatted copy. That copy is kept for loadFormatted.
+  async function fetchThread(id, opts) {
+    if (!(opts && opts.full)) return call(GMAIL, "get_thread", { threadId: id, messageFormat: "PLAIN_TEXT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
+    const t = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 20000, gcTime: 300000 } });
+    // The full format leaves a message's text empty when it was sent as HTML only (the plain format converts it), so
+    // the text is made from the HTML here.
+    ((t && t.messages) || []).forEach((m) => { if (!m.plaintextBody && m.htmlBody) m.plaintextBody = htmlToText(m.htmlBody); });
+    return keepFull(id, t);
   }
   async function openThread(id) {
     if (id !== state.selectedId) resetRcpts();
@@ -2054,7 +2061,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     $("sideBody").innerHTML = '<div class="sec"><div class="note"><span class="spin"></span>Opening the thread…</div></div>'; if ($("ctxBox")) $("ctxBox").innerHTML = "";
     reading.innerHTML = '<div class="empty"><span class="spin"></span>Fetching the thread…</div>';
     try {
-      const p = await fetchThread(id);
+      const p = await fetchThread(id, { full: fmtOn() });
       if (state.selectedId !== id) return;
       state.thread = p;
       renderThread();
@@ -4484,7 +4491,10 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   async function fullThread(id, onScreen) {
     const have = state.full[id]; const ids = new Set(((have && have.messages) || []).map((m) => m.id));
     if (have && (onScreen || []).every((m) => ids.has(m.id))) return have;
-    const full = await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } });
+    return keepFull(id, await call(GMAIL, "get_thread", { threadId: id, messageFormat: "FULL_CONTENT" }, { cache: { staleTime: 60000, gcTime: 300000 } }));
+  }
+  function keepFull(id, full) {
+    if (!full || !full.messages) return full;
     delete state.full[id]; state.full[id] = full; const keys = Object.keys(state.full); if (keys.length > 20) delete state.full[keys[0]];
     return full;
   }
@@ -4828,7 +4838,18 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     d._meta = { subject: m.subject || "", snippet: decodeEnt(String(m.snippet || draftText(m) || "")).replace(/\s+/g, " ").slice(0, 160), to: m.toRecipients || d.toRecipients || [], date: m.date || d.date };
     return d._meta;
   }
-  async function draftWhole(d) {
+  // Going through drafts one at a time: while you're on one, the next one (and the thread it answers) loads quietly,
+  // so Next opens at once. A copy is used for up to three minutes; Save, Send and Delete only touch the open draft.
+  const DRAFT_AHEAD_MS = 180000;
+  function draftAhead(d) {
+    if (!d || (d._ahead && Date.now() - d._ahead.at < DRAFT_AHEAD_MS)) return;
+    const a = { at: Date.now() }; d._ahead = a;
+    a.whole = draftWhole(d, true); a.thr = d.threadId ? fetchThread(d.threadId) : Promise.resolve(null);
+    a.whole.catch(() => { if (d._ahead === a) d._ahead = null; }); a.thr.catch(() => {});
+  }
+  function takeAhead(d) { const a = d._ahead; d._ahead = null; return a && Date.now() - a.at < DRAFT_AHEAD_MS ? a : null; }
+  async function draftWhole(d, ahead) {
+    if (!ahead) { const a = takeAhead(d); if (a) { try { const m = await a.whole; if (m) return m; } catch {} } }
     try { const m = await call(GMAIL, "get_draft", { draftId: d.id }, { cache: false }); if (m && (m.plaintextBody || m.htmlBody)) return m; } catch (e) { if (GX) throw e; }
     d._full = undefined; return draftFull(d);
   }
@@ -4925,15 +4946,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     state.dSel = id; state.dCur = null; state.dDirty = false; state.selectedId = null; state.thread = null; renderDrafts();
     app.dataset.view = "thread"; $("acts").hidden = true; compose.hidden = true; showSide(false); document.body.classList.add("thread-open");
     $("subject").textContent = "Draft"; reading.innerHTML = '<div class="empty"><span class="spin"></span>Getting the draft…</div>';
+    // The draft and the thread it answers are fetched at the same time (or come from the copy loaded ahead).
+    const ahead = d._ahead && Date.now() - d._ahead.at < DRAFT_AHEAD_MS ? d._ahead : null;
+    const thrP = d.threadId ? (ahead ? ahead.thr : fetchThread(d.threadId)) : Promise.resolve(null); thrP.catch(() => {});
     let full; try { full = await draftWhole(d); } catch (e) { if (state.dSel === id) reading.innerHTML = '<div class="empty"><h2>Couldn\'t open this draft</h2><p>' + esc(mcpCopy(e, GMAIL) || "") + '</p></div>'; return; }
     if (state.dSel !== id) return;
     if (!full) { reading.innerHTML = '<div class="empty"><h2>Couldn\'t read this draft here</h2>' + (d.viewUrl ? '<p><a href="' + esc(d.viewUrl) + '" target="_blank" rel="noopener">Open it in Gmail</a></p>' : "") + '</div>'; return; }
     let theirs = null, thr = null;
-    if (d.threadId) { try { const t = await fetchThread(d.threadId); thr = t; theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
+    if (d.threadId) { try { const t = await thrP; thr = t; theirs = ((t && t.messages) || []).filter((m) => !(m.labelIds || []).includes("DRAFT") && m.id !== full.id && !isOwn(m)).pop() || null; } catch { /* the draft still opens */ } }
     if (state.dSel !== id) return;
     state.dCur = { d: d, full: full, theirs: theirs, thread: thr, hasAtt: !!((full.attachments && full.attachments.length) || (full.attachmentIds && full.attachmentIds.length)) };
     state.rcpt.dto = toRc(full.toRecipients || d.toRecipients); state.rcpt.dcc = toRc(full.ccRecipients || d.ccRecipients); state.rcpt.dbcc = toRc(full.bccRecipients || d.bccRecipients);
     renderDraftEditor();
+    { const i = state.drafts.findIndex((x) => x.id === id); draftAhead(state.drafts[i + 1]); }
     // Check it for me runs on its own the first time a draft opens; your own ticks are never overwritten.
     if (featOn("context") || featOn("more")) {
       // A reply uses its thread; a new email gets a stand-in thread so the panel looks up the person it's to.
