@@ -16,14 +16,16 @@ The interface starts in read-only mode. Turning it off permits a confirmation di
 
 ## Develop and check
 
-Node 20+ is enough; no package installation is required.
+Node 20+ and OpenSSL (for a local development certificate) are enough; no package installation is required. The preview binds only to loopback and requires HTTPS.
 
 ```sh
-node --test test/worker.test.mjs
+node --test test/*.test.mjs
+mkdir -p .preview-tls
+openssl req -x509 -newkey rsa:2048 -nodes -keyout .preview-tls/key.pem -out .preview-tls/cert.pem -days 7 -subj '/CN=localhost' -addext 'subjectAltName=DNS:localhost,IP:127.0.0.1'
 node scripts/preview.mjs
 ```
 
-Open `http://127.0.0.1:4387/test-host` for a synthetic MCP host with made-up `.example` mail. The test host and its fixture are development-only. The deterministic deployment copies only `worker/index.js` and the deployment manifest:
+Open `https://127.0.0.1:4387/test-host` for a synthetic MCP host with made-up `.example` mail. The browser will warn about the self-signed development certificate; accept it only for this local preview. `.preview-tls/` is ignored by Git and excluded from the build. Do not use production certificates or real mail in this preview. The test host and its fixture are development-only. The deterministic deployment copies only `worker/index.js` and the deployment manifest:
 
 ```sh
 node scripts/build.mjs
@@ -33,6 +35,8 @@ node scripts/validate-artifact.mjs
 The worker implements MCP discovery, initialize, tools and UI resources over JSON-RPC `POST /mcp`. Mail rendering requires the Site-authenticated user header. This assumes Sites' authenticated ingress; do not host this worker behind an untrusted header-forwarding proxy. Configure your own ignored `.openai/hosting.json` from `.openai/hosting.example.json` and bind it to your private Site. Do not commit that personal Site ID. Sites source synchronization uses a separate private deployment checkout; include its real hosting manifest there.
 
 Publish through the Sites workflow with the `mcp` capability. Sites creates the associated private plugin. Check its connection metadata and verify tool calls in the intended ChatGPT account. Publication and a local fixture test do not prove hosted plugin rendering or live connector writes.
+
+The bridge derives its parent’s HTTPS origin from the browser-provided document referrer before sending a data-free `ui/initialize` request to that exact origin. Only a matching successful response establishes the session; tool results are ignored until then. All incoming messages must match both parent and origin, and outgoing messages target that exact origin. This trusts the embedding MCP host, not arbitrary windows. Hosts must preserve an HTTPS referrer when embedding the panel; HTTP, opaque-origin, and no-referrer MCP hosts cannot use the message bridge (the ChatGPT `window.openai` extension and copy fallback remain available).
 
 ## Limits
 

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+- The experimental ChatGPT panel now rejects tool results before its host handshake and pins messages to the parent’s HTTPS origin. Its local preview uses HTTPS and serves MCP results only as JSON with HTML delimiters escaped.
+
 ### Added
 - **A context source can set `maxChars`.** Trimmed JSON sent into the brief is still cut at 3,500 characters. A smaller `maxChars` cuts that one source sooner. Leave it unset and the cap stays 3,500.
 
