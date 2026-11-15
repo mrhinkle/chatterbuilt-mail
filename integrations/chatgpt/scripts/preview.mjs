@@ -9,7 +9,10 @@ window.addEventListener('message', event=>{if(event.source!==frame.contentWindow
 createServer(async (req, res) => {
   try {
     if (req.url === '/test-host') { res.writeHead(200, { 'content-type': 'text/html' }); res.end(host); return; }
-    const request = new Request('http://127.0.0.1:4387' + req.url, { method: req.method, headers: req.headers });
+    const hasBody = req.method !== 'GET' && req.method !== 'HEAD';
+    let body;
+    if (hasBody) { const chunks = []; for await (const chunk of req) chunks.push(chunk); body = Buffer.concat(chunks); }
+    const request = new Request('http://127.0.0.1:4387' + req.url, { method: req.method, headers: req.headers, ...(hasBody ? { body } : {}) });
     const response = await worker.fetch(request);
     res.writeHead(response.status, Object.fromEntries(response.headers)); res.end(Buffer.from(await response.arrayBuffer()));
   } catch { res.writeHead(500); res.end('Preview error'); }

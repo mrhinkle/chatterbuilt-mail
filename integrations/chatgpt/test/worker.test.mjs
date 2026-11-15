@@ -22,6 +22,7 @@ test('MCP discovery, initialization, tool metadata and UI resource agree', async
   assert.match(resource.text, /id="reply"/);
   const script = resource.text.match(/<script>([\s\S]*)<\/script>/)[1];
   new vm.Script(script);
+  assert.match(script, /window\.addEventListener\('openai:set_globals'/);
 });
 test('mail rendering requires an authenticated caller', async () => {
   const result = await invoke('tools/call', { name: 'show_mail', arguments: sample() }, false);

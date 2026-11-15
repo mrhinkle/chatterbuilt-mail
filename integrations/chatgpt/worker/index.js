@@ -168,8 +168,9 @@ function browser() {
       if (message.error) call.reject(Error(message.error.message || 'ChatGPT could not complete this request.')); else call.resolve(message.result);
     }
     if (message.method === 'ui/notifications/tool-result') apply(message.params?.structuredContent);
-    if (message.method === 'openai:set_globals') apply(message.params?.globals?.toolOutput);
   });
+  // ChatGPT sends openai:set_globals as a CustomEvent on window, not through postMessage.
+  window.addEventListener('openai:set_globals', event => apply(event.detail?.globals?.toolOutput ?? window.openai?.toolOutput));
   $('account').onchange = () => { active = $('account').value; renderList(); updateContext(); };
   $('searchForm').onsubmit = event => { event.preventDefault(); request('search_inbox'); };
   $('load').onclick = () => request('load_inbox', { limitPerAccount: 10 });

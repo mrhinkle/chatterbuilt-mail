@@ -26,7 +26,7 @@ node scripts/preview.mjs
 Open `http://127.0.0.1:4387/test-host` for a synthetic MCP host with made-up `.example` mail. The test host and its fixture are development-only. The deterministic deployment copies only `worker/index.js` and the deployment manifest:
 
 ```sh
-bash scripts/build.sh
+node scripts/build.mjs
 node scripts/validate-artifact.mjs
 ```
 
