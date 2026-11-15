@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+- The experimental ChatGPT panel now rejects tool results before its host handshake and pins messages to the parent’s HTTPS origin. Its local preview uses HTTPS and serves MCP results only as JSON with HTML delimiters escaped.
+
 ### Added
 - An experimental ChatGPT mail panel under `integrations/chatgpt/`: a private MCP App with an inbox, thread reader and plain-text reply editor. ChatGPT uses existing native Gmail or Composio tools to fetch mail and carry out explicitly approved actions; the panel's server only renders supplied results. It starts read-only and has no email credentials or server-side mail storage. This is a smaller integration than the Claude artifact; see `docs/chatgpt-panel.md` for setup and limits.
 

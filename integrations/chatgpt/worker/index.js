@@ -64,16 +64,23 @@ function browser() {
   let state = { accounts: [], messages: [], query: 'in:inbox' };
   let active = '', selected = null, dirty = false, confirmedDraft = null, waiting = false, previousDraft = null;
   const draftCache = new Map();
-  const calls = new Map(); let counter = 0, origin = null, initialized = false;
+  const calls = new Map(); let counter = 0, initialized = false;
+  // Use browser-provided embedding context, never an origin supplied in a message.
+  let origin = null;
+  try {
+    const referrer = new URL(document.referrer);
+    if (referrer.protocol === 'https:') origin = referrer.origin;
+  } catch { /* A missing/opaque referrer leaves the bridge disabled. */ }
   const key = item => item.accountId + ':' + item.threadId;
   function element(tag, text, cls) { const el = document.createElement(tag); if (text !== undefined) el.textContent = text; if (cls) el.className = cls; return el; }
   function status(text, error = false) { $('status').textContent = text; $('status').className = error ? 'status error' : 'status'; }
   function bridge(method, params) {
     return new Promise((resolve, reject) => {
+      if (!origin || (!initialized && method !== 'ui/initialize')) { reject(Error('Host is not initialized.')); return; }
       const id = ++counter;
       const timer = setTimeout(() => { calls.delete(id); reject(Error('ChatGPT did not answer. Please use the conversation to continue.')); }, 15000);
       calls.set(id, { resolve, reject, timer, method });
-      window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, origin || '*');
+      window.parent.postMessage({ jsonrpc: '2.0', id, method, params }, origin);
     });
   }
   function updateContext() {
@@ -158,17 +165,24 @@ function browser() {
     status(data.notice || (data.fetchedAt ? 'Mail read ' + new Date(data.fetchedAt).toLocaleString() : 'Use Load inbox to start.'));
     renderList(); renderThread(); updateContext();
   }
-  window.addEventListener('message', event => {
-    if (event.source !== window.parent || !event.data || event.data.jsonrpc !== '2.0') return;
-    if (origin && event.origin !== origin) return;
+  function onHostMessage(event) {
+    if (!origin || event.source !== window.parent) return;
+    if (event.origin !== origin) return;
     const message = event.data;
+    if (!message || message.jsonrpc !== '2.0') return;
+    if (!initialized) {
+      const pending = calls.get(message.id);
+      if (pending?.method !== 'ui/initialize' || message.error || !message.result ||
+          typeof message.result.protocolVersion !== 'string' || message.method) return;
+      initialized = true;
+    }
     if (message.id && calls.has(message.id)) {
       const call = calls.get(message.id); clearTimeout(call.timer); calls.delete(message.id);
-      if (call.method === 'ui/initialize' && !message.error) origin = event.origin;
       if (message.error) call.reject(Error(message.error.message || 'ChatGPT could not complete this request.')); else call.resolve(message.result);
     }
     if (message.method === 'ui/notifications/tool-result') apply(message.params?.structuredContent);
-  });
+  }
+  window.addEventListener('message', onHostMessage);
   // ChatGPT sends openai:set_globals as a CustomEvent on window, not through postMessage.
   // Events without toolOutput (a theme change, say) are ignored so they cannot reapply stale output.
   window.addEventListener('openai:set_globals', event => apply(event.detail?.globals?.toolOutput));
@@ -210,14 +224,14 @@ function browser() {
     if (waiting) { status(busyNotice, true); return; }
     const approved = confirmedDraft; confirmedDraft = null; $('confirm').close(); if (approved) request(approved.action, { reply: approved.reply, userApprovedExactReply: true }); };
   renderList(); renderThread();
-  if (window.parent !== window) {
+  if (window.openai?.toolOutput) apply(window.openai.toolOutput);
+  if (window.parent !== window && origin) {
     bridge('ui/initialize', { appInfo: { name: 'Chatterbuilt Mail', version: '0.1.0' }, appCapabilities: {}, protocolVersion: '2026-01-26' }).then(() => {
       initialized = true;
-      window.parent.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/initialized', params: {} }, origin || '*');
-      if (window.openai?.toolOutput) apply(window.openai.toolOutput);
+      window.parent.postMessage({ jsonrpc: '2.0', method: 'ui/notifications/initialized', params: {} }, origin);
       status('Ready · load your connected inbox.');
     }).catch(error => status(error.message, true));
-  } else {
+  } else if (!window.openai?.toolOutput) {
     status('Open this panel through the Chatterbuilt Mail plugin in ChatGPT.');
   }
 }
