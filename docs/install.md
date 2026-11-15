@@ -68,6 +68,8 @@ Install Chatterbuilt Mail from https://github.com/mrhinkle/chatterbuilt-mail as 
 
 ## ChatGPT
 
+**Experimental interactive option:** [the ChatGPT mail panel](chatgpt-panel.md) provides an inbox, thread reader and reply editor through a private plugin. It uses the existing connectors through the conversation and has a smaller feature set than the Claude artifact. The instructions below describe the original prompt-only workflow.
+
 **Before you start:**
 - On a paid plan, connect Gmail in ChatGPT's settings.
 - Also connect Google Calendar, Notion, Slack or anything else you want checked.

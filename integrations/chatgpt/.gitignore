@@ -1,0 +1,4 @@
+dist/
+.openai/hosting.json
+.sites-runtime/
+node_modules/
