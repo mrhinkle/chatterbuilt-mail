@@ -55,6 +55,8 @@ Guide: [reading-and-triage.md](reading-and-triage.md).
 - It reads the top five threads and answers with numbered sources.
 - Click a source to open the thread.
 
+**Open mail at once.** A copy of each thread you open, and of the next few in the list, is kept in this browser, so opening it again or moving on with `j` doesn't wait on Gmail. A copy is only used while it has the newest message your list shows for that thread; otherwise the thread is fetched as before. A copy more than a minute old opens at once and is then checked quietly: a message that came in since appears (or, if you've started a reply, a note says so). Anything you change on a thread (send, archive, star, label) drops its copy. The next thread's [context brief](context-panel.md) is built before you get there, and the list opens where you left it, even after you close the page. Every few minutes the list checks Gmail in the background; new and changed threads load then, so **Update** opens them at once. **Settings → Speed** sets how far ahead to load (off, 3, 5 or 10), shows what's kept, and **Clear kept mail** removes it. The Drafts tab works the same way: the next drafts load ahead, and the next one's brief and checklist are ready before you get to it. Switch it off in **Settings → Skills**.
+
 **Formatted view.** Messages open formatted, with their own layout, colors, links, lists and tables, each in a sealed-off box. Scripts, style sheets, forms and `javascript:` links are stripped first, pictures show as boxes of their size, links open in a new tab, and quoted history folds away. **More → Formatted view** above the thread switches to plain text and back, and the choice is remembered.
 
 ## Connecting your systems
@@ -197,7 +199,7 @@ Guide: [tasks-and-contacts.md](tasks-and-contacts.md).
 - The task gets the subject, sender, a link back to Gmail, and the message quoted.
 - It works with any task app that has a claude.ai connector. See [connectors.md](connectors.md).
 
-**Drafts.** The **Drafts** tab lists every Gmail draft as a checklist (tick each as you review it; **Hide checked**). Open one to edit it in a rich-text editor under the message it answers, revise it, run the **Before you send** checklist yourself or with **Check it for me**, then **Save**, **Send** (it asks once), **Delete** (it asks too; Gmail keeps no copy) or **Mark checked · next**. Guide: [drafts.md](drafts.md).
+**Drafts.** The **Drafts** tab lists every Gmail draft as a checklist (tick each as you review it; **Hide checked**). From the list, mark each draft **Send**, **Skip** or **Delete** (rows flag *No recipient*, *Empty*, *[TK] to fill in* and *Duplicate*) and **Apply plan** sends and deletes them one at a time after one confirmation. Open one to edit it in a rich-text editor under the message it answers, attach files, tell Claude what to change (in your words, or Shorter, Warmer, More direct, Polish; a selected passage on its own), run the **Before you send** checklist yourself or with **Check it for me**, then **Save**, **Send** (it asks once), **Delete** (it asks too; Gmail keeps no copy) or **Mark checked · next**. Guide: [drafts.md](drafts.md).
 
 **Select several.** Tick a row's box (on hover), Cmd/Ctrl-click, press `x`, or Shift-click a range; the bar over the list archives, moves, marks read or stars them all, with one Undo.
 
@@ -260,7 +262,7 @@ Guide: [settings-and-shortcuts.md](settings-and-shortcuts.md).
 
 **Read-only.** A switch in **Settings**. While it's on, a dark **Read-only on** button shows in the top bar; click it to turn read-only off. While it's on, buttons that change something are greyed out, and nothing can be sent, moved, labeled, drafted, filed or saved. Route and Contact still open, so you can see suggestions or copy a vCard, and they say saving is off. Reading, summaries, triage, Ask and drafting on the page still work.
 
-**Phones.** One pane at a time, with a tab bar at the bottom of the list: **Today, Inbox, Waiting, Tools**. In a thread, the actions sit in a bar at the bottom, in thumb reach: **Archive, Snooze, Route, Reply, More**. Reply jumps to the reply box, and the bar hides while you type. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
+**Phones.** One pane at a time, with a tab bar at the bottom of the list: **Today, Inbox, Waiting, Tools**. In a thread, the actions sit in a bar at the bottom, in thumb reach: **Archive, Snooze, Route, Reply, More**. Reply jumps to the reply box, and while it's open the bar with Send sits just above the action bar. On a touch screen the action bar steps aside while the keyboard is up. Menus and dialogs open as bottom sheets with a Close button, and notices show at the top so they never cover Send.
 
 ## Layout
 

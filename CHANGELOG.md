@@ -5,6 +5,48 @@
 ### Added
 - An experimental ChatGPT mail panel under `integrations/chatgpt/`: a private MCP App with an inbox, thread reader and plain-text reply editor. ChatGPT uses existing native Gmail or Composio tools to fetch mail and carry out explicitly approved actions; the panel's server only renders supplied results. It starts read-only and has no email credentials or server-side mail storage. This is a smaller integration than the Claude artifact; see `docs/chatgpt-panel.md` for setup and limits.
 
+## 0.8.1 (2026-11-04)
+
+### Added
+- **Send a draft from another address or account.** With Gmail through Composio, the draft editor has a **From** menu with every address on every connected account, its own picked. Pick another and Send goes out from there as a new email with what's in the editor, then deletes the draft from its own account so it can't go out twice. A reply sent that way isn't inside the thread, and the note under From says so first. The other address's Gmail signature goes on instead of the draft's. A draft with files can't switch accounts yet, and Apply plan won't send a draft that's set to another address from its own.
+
+### Fixed
+- **Settings → Speed keeps the last few timings across a reload.** Timings are saved a moment after they come in; a reload in that moment lost them. They're now saved as the page goes away too.
+- **The Drafts tab no longer shows the last thread's reply box.** Switching to Drafts with a thread open left that thread's actions, reply box and Send on screen under "drafts to review".
+
+## 0.8.0 (2026-11-04)
+
+### Added
+- **Open mail at once.** A copy of each thread you open, and of the next few in the list, is kept in this browser, so opening it again, or moving on with `j`, doesn't wait on Gmail. A copy is only used while it has the newest message the list shows for that thread, so new mail is never hidden behind an old copy; a copy over a minute old opens at once and is then checked quietly, and a message that came in since appears (or, if you've started a reply, a note says so). Anything you change on a thread drops its copy. Up to 300 threads, none older than 14 days. On by default; switch it off in Settings → Skills.
+- **Load ahead.** After the list loads, and each time you open a thread, the next few threads load in the background, two at a time, while the page is in view. Settings → Speed sets how far: off, 3, 5 (the default) or 10. Through the claude.ai Gmail connector the list's first lines already fetch each thread, and those fetches are kept now too.
+- **Background refresh fills the cache.** The list's quiet check every few minutes now loads the new and changed threads it finds, so **Update** opens them at once.
+- **Context briefs are kept and built ahead.** A brief is kept for 12 hours as long as no newer message comes in (for a draft, as long as the draft is unchanged), and the next thread's brief is built while you read this one, so it's there when you get to it (Settings → Speed → Get the next one ready, which also covers drafts). Each brief made ahead is an AI call made a step early; turn the switch off if you skip a lot. A kept brief more than five minutes old says when it was checked. A brief also finishes if you move on before it's done, instead of spinning when you come back.
+- **Drafts open at once too.** In the Drafts tab the top drafts load ahead when the list opens, and the next few each time you open one (they used to load one at a time, in memory, for three minutes). A kept draft is used only while it's the version Gmail has, since each save gives a draft a new version; saving or sending drops it. The very next draft also gets its context brief and its *Check it for me* checklist ahead, so Next opens with the editor, the brief and the checklist all there. Checklist results are kept per version of a draft, so reopening one, even after a reload, doesn't ask again.
+- **The list survives closing the page.** With Open mail at once on, the last list of each view is kept for three days (it used to last only for the session), so the page opens on it and then brings it up to date.
+- **Settings → Speed** shows how many threads are kept and how much room they take, with **Load ahead**, **Get the next one ready** and **Clear kept mail**. Opening a thread from a copy is timed separately, as *Open a thread (kept copy)*.
+
+## 0.7.10 (2026-11-04)
+
+### Fixed
+- **The bottom bars stay put.** With the reply box open, the bar with **Save draft** and **Send** is pinned to the bottom at every width. It used to pin only on a wide screen, so in the Claude app's side pane or on a phone it sat at the end of a long thread, off the screen. On a narrow screen it rides just above the thread's action bar (Archive, Snooze, Route, Reply, More), and both stay on screen.
+- **The action bar no longer disappears while you type.** In a narrow window on a computer, such as the Claude app's side pane, it used to hide whenever the reply box had focus, and sometimes stayed hidden after. Now it hides only on a touch screen, while the keyboard is up.
+- **Send, Skip and Delete stay readable on the selected draft row.** They were dark on the selected row's blue.
+
+## 0.7.9 (2026-11-04)
+
+### Added
+- **Batch review in the Drafts tab.** Every row has Send, Skip and Delete. Mark the pile from the list, then **Apply plan** asks once (who the sends go to, which drafts go) and sends the marked drafts one at a time, in list order, with the deletes after the sends. Each leaves the list as it goes. If one fails the run stops there and says what went through before it; a write is never retried. The plan is kept in this browser, Skip is the checkbox, and Clear plan unmarks everything.
+- **Flags on draft rows.** *No recipient*, *Empty* (nothing written, or only a signature), *[TK] to fill in* and *Duplicate* (same people, same subject as another draft). A draft that can't be sent as it is has Send switched off, with the reason.
+
+## 0.7.8 (2026-11-04)
+
+### Added
+- **Attachments on drafts.** A draft with files opens editable (it used to be read-only here): its files sit under the sheet, each with an ×, and the paperclip in the toolbar adds more, up to 18 MB a save. Gmail drops a draft's attachments unless every save sends them all again, so Save sends the ones you kept and the ones you added; if the draft's files can't be read, Save stays off rather than lose them. Pictures inside the email, such as a signature's logo, stay in place. Through Composio, Save copies each file from the draft into Composio's store and uploads new ones through its workbench, so nothing passes through the browser; Composio can't carry a picture inside the text, so the editor says so first and **Save without them** goes ahead with it taken out. The page now declares `COMPOSIO_REMOTE_WORKBENCH` when Gmail goes through Composio.
+- **Tell Claude what to change.** The one-line Revise field is now a prompt box under the editor: type what to change in your own words and press Enter (Shift+Enter for a new line), or use the Quick chips. The rewrite keeps links, bold and lists instead of resetting the formatting, and a plain-text answer is laid out as paragraphs. Select a passage first and only that passage is rewritten, with the rest sent along for context; a **Selected text only** chip shows while that's on. Undo steps back through every revision, not just the last.
+
+### Fixed
+- **Drafts in All inboxes are in date order.** Through Composio the list of drafts comes without dates, one account after another, so a draft saved this morning in the second account sat under yesterday's drafts from the first. Once each draft's details are in, the list is put in order, newest first.
+
 ## 0.7.7 (2026-11-04)
 
 ### Added

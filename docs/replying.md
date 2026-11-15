@@ -9,7 +9,7 @@ Pick a reply from the **Reply** menu or say what you want, and you get a reply i
 ## How to use it
 
 1. Open a thread. The reply box sits under the messages, folded to its **Reply** header (with who it's to) and one line: the **Reply** menu, a box for what to say, and **Draft**. It opens up when you use it, so the message keeps the room while you read. Click anywhere on the **Reply** header to open or close it by hand, and the app remembers which you prefer. The bar with Snippets, Attach, Reply all, Remind me, **Save draft** and **Send** stays at the bottom of the pane either way; using it while the box is folded opens the box. On a phone, tap **Reply** in the bottom bar.
-   - Open, the reply box opens all the way: the thread and your reply scroll together as one page, with the thread's title kept at the top and the bar with **Send** kept at the bottom, and the text box grows with what you write instead of scrolling inside itself.
+   - Open, the reply box opens all the way: the thread and your reply scroll together as one page, with the thread's title kept at the top and the bar with **Send** kept at the bottom (at every width, the Claude app's side pane and a phone included), and the text box grows with what you write instead of scrolling inside itself.
 
    ![The Reply menu open over the folded reply box](images/reply-menu.webp)
 
@@ -102,6 +102,7 @@ With Gmail through Composio, a **From** menu sits over the recipients. It lists 
 - It starts on the thread's own address, and **Send** is a normal reply in the thread.
 - Pick another address and the reply goes out from there as a new email, with "Re:" and the thread's subject, to the same people (Reply all and your Cc and Bcc included). The line under the menu says so, and so does the send confirmation. Gmail can't reply inside a thread from another account or alias, so that conversation starts fresh for them.
 - **Show** under the reply box previews the signature of the address you picked.
+- A draft waiting in Gmail can switch addresses too, in the Drafts tab: see [drafts.md](drafts.md#from-send-it-from-another-address-or-account).
 - **Save draft** from another account saves the draft in that account. Drafts can't be saved from an alias here; send it, or pick the account's own address.
 - The next thread starts on its own address again.
 
@@ -119,7 +120,7 @@ With the Gmail connector there's one account and no aliases to pick, so the menu
   - **Signature** under the reply box is on by default. Switch it off to leave the signature off one message; the next thread starts with it on again.
   - **Show** previews the signature that will go on, laid out as it will look in the email (its tables, colors, fonts and links), read from Gmail: through Composio from the account's settings (the From address's own signature when it has one), and with the Gmail connector from the newest message you sent that carries one. The page can't load outside images, so each picture shows as a box of its real size with its name; the real email gets the real images.
   - If your drafts already end with a signature block, switch it off for that message, or turn **Gmail signature** off in Skills so you don't get two.
-- **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet when Gmail goes through Composio.)
+- **Attach:** files on a reply, a follow-up or a Gmail draft, up to 18 MB in total. For bigger files, share a Drive link. (Not available yet in the reply box when Gmail goes through Composio; the [Drafts tab](drafts.md#attachments) attaches files on both paths.)
 - **Reply all:** off by default. The pre-send check warns when reply-all looks risky. The line above the reply says who it goes to.
 - **Cc and Bcc:** press **Cc** or **Bcc** above the reply and start typing a name. Suggestions come from the people in your threads and, when it's set up, your address book (Google Contacts). **Enter**, **Tab** or a comma adds someone; **×** or Backspace removes them. The confirmation before sending and the pre-send check both name everyone on Cc and Bcc. With reply-all on, the people already on Cc stay on it. Cc and Bcc also go with **Save draft**.
 
