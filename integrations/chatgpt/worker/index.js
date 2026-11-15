@@ -107,7 +107,7 @@ function browser() {
     const supplied = selected && state.draft && key(state.draft) === key(selected) ? state.draft : null;
     const current = cached || supplied;
     $('to').value = current?.to || '';
-    $('subject').value = current?.subject || (selected ? 'Re: ' + selected.subject.replace(/^Re:\s*/i, '') : '');
+    $('subject').value = current?.subject ?? (selected ? 'Re: ' + selected.subject.replace(/^Re:\s*/i, '') : '');
     $('reply').value = current?.body || '';
     $('editor').hidden = !selected;
     $('draftState').textContent = cached ? 'Your unsaved edits are kept in this panel.' : supplied ? 'Proposed reply · not saved to Gmail' : 'Write here or ask ChatGPT for a draft.';
@@ -170,7 +170,8 @@ function browser() {
     if (message.method === 'ui/notifications/tool-result') apply(message.params?.structuredContent);
   });
   // ChatGPT sends openai:set_globals as a CustomEvent on window, not through postMessage.
-  window.addEventListener('openai:set_globals', event => apply(event.detail?.globals?.toolOutput ?? window.openai?.toolOutput));
+  // Events without toolOutput (a theme change, say) are ignored so they cannot reapply stale output.
+  window.addEventListener('openai:set_globals', event => apply(event.detail?.globals?.toolOutput));
   $('account').onchange = () => { active = $('account').value; renderList(); updateContext(); };
   $('searchForm').onsubmit = event => { event.preventDefault(); request('search_inbox'); };
   $('load').onclick = () => request('load_inbox', { limitPerAccount: 10 });
@@ -191,8 +192,10 @@ function browser() {
   ['to', 'subject', 'reply'].forEach(id => $(id).oninput = () => { dirty = true; $('draftState').textContent = 'Unsaved edits in this panel'; preserveDraft(); updateContext(); });
   $('readOnly').onchange = () => { $('save').disabled = $('readOnly').checked; $('send').disabled = $('readOnly').checked; };
   $('copy').onclick = async () => { try { await navigator.clipboard.writeText($('reply').value); status('Reply copied.'); } catch { status('Select the reply text and copy it.', true); } };
+  const busyNotice = 'Another request is still running. Wait for it to finish or cancel it, then try again.';
   function confirmWrite(action) {
     if ($('readOnly').checked || !selected) return;
+    if (waiting) { status(busyNotice, true); return; }
     const draft = readDraft(); if (!draft.to || !draft.body.trim()) { status('Add a recipient and reply first.', true); return; }
     confirmedDraft = { action, reply: draft };
     const account = state.accounts.find(a => a.id === draft.accountId);
@@ -202,7 +205,10 @@ function browser() {
   }
   $('save').onclick = () => confirmWrite('save_draft'); $('send').onclick = () => confirmWrite('send_reply');
   $('confirmCancel').onclick = () => { confirmedDraft = null; $('confirm').close(); };
-  $('confirmGo').onclick = () => { const approved = confirmedDraft; confirmedDraft = null; $('confirm').close(); if (approved) request(approved.action, { reply: approved.reply, userApprovedExactReply: true }); };
+  $('confirmGo').onclick = () => {
+    // request() drops calls made while another is pending, so keep the dialog and the approved reply until it can go.
+    if (waiting) { status(busyNotice, true); return; }
+    const approved = confirmedDraft; confirmedDraft = null; $('confirm').close(); if (approved) request(approved.action, { reply: approved.reply, userApprovedExactReply: true }); };
   renderList(); renderThread();
   if (window.parent !== window) {
     bridge('ui/initialize', { appInfo: { name: 'Chatterbuilt Mail', version: '0.1.0' }, appCapabilities: {}, protocolVersion: '2026-01-26' }).then(() => {
