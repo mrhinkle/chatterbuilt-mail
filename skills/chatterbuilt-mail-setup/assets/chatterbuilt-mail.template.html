@@ -4289,17 +4289,21 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     return { email: email, name: name, who: name || email, domain: domain, org: org, orgOrEmail: org || email, subject: cleanSubject(last.subject), today: ymd(Date.now()), since90: ymd(Date.now() - 90 * 864e5) };
   }
   // Empty means no records: "", "No results", {}, [], or an object whose lists are all empty and whose other fields are
-  // only counts, flags or short strings (e.g. {transcripts: [], total: 0}). Such results show as grey chips.
+  // only counts, flags, short strings or informational notes (warning, warnings, notice, hint and the like; e.g.
+  // {transcripts: [], total: 0} or {results: [], warnings: ["…"]}). Such results show as grey chips. `message` is kept,
+  // because some connectors put real content there.
+  const INFO_KEYS = /^(warning|warnings|notice|notices|hint|hints)$/i;
   const nothingFound = (p) => {
     if (p == null) return true;
     if (typeof p === "string") return !p.trim() || /^no (entity|entities|results?|matches?|records?|transcripts?|meetings?)/i.test(p.trim());
     if (Array.isArray(p)) return p.length === 0;
+    if (p && typeof p === "object") { const q = {}; Object.keys(p).forEach((k) => { if (!INFO_KEYS.test(k)) q[k] = p[k]; }); p = q; }
     const s = JSON.stringify(p); if (s === "{}" || s === "[]") return true;
     if (typeof p === "object") {
       const vals = Object.values(p); const lists = vals.filter(Array.isArray);
       if (lists.length && lists.every((a) => a.length === 0) && vals.every((v) => Array.isArray(v) || v == null || typeof v === "number" || typeof v === "boolean" || (typeof v === "string" && v.length < 60))) return true;
     }
-    return /"(results|events|subscriptions|threads|items|transcripts|pages|records|contacts|entities|matches|web)":\[\]/.test(s) && s.length < 160;
+    return /"(results|events|subscriptions|threads|items|transcripts|pages|records|contacts|entities|matches|web|data)":\[\]/.test(s) && s.length < 160;
   };
   state.web = {}; state.steps = {};
   const wideMQ = window.matchMedia("(min-width: 1180px)");

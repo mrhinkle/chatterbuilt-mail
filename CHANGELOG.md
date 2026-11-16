@@ -5,6 +5,9 @@
 ### Added
 - An experimental ChatGPT mail panel under `integrations/chatgpt/`: a private MCP App with an inbox, thread reader and plain-text reply editor. ChatGPT uses existing native Gmail or Composio tools to fetch mail and carry out explicitly approved actions; the panel's server only renders supplied results. It starts read-only and has no email credentials or server-side mail storage. This is a smaller integration than the Claude artifact; see `docs/chatgpt-panel.md` for setup and limits.
 
+### Fixed
+- **An empty lookup that carries a warning counts as empty.** Notion and Fireflies attach a warning when a search finds nothing. Those replies now show as grey chips and stay out of the brief. A reply that also has a real result still counts.
+
 ## 0.8.1 (2026-11-04)
 
 ### Added
