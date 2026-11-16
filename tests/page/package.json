@@ -1,0 +1,8 @@
+{
+  "name": "chatterbuilt-mail-page-tests",
+  "private": true,
+  "description": "Test-only dependencies for the page suites. Playwright comes from the environment (see run-all.sh).",
+  "devDependencies": {
+    "pdfjs-dist": "3.11.174"
+  }
+}

@@ -4,7 +4,7 @@
     // examples/config.full.example.js shows every option filled in.
     ownerName: "Your Name",
     ownEmail: "you@example.com",
-    gmail: null,              // claude.ai's Gmail connector. Several Gmail accounts through Composio: see docs/composio.md
+    gmail: null,              // claude.ai's Gmail connector. Several accounts: via "composio" (docs/composio.md) or via "chatterbuilt" (docs/hosted.md)
     about: "",                // one or two sentences on who you are and what you do
     voice: "",                // how you write; the setup skill can learn it from your sent mail
     rules: "",

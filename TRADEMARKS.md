@@ -2,7 +2,7 @@
 
 "Chatterbuilt" and "Chatterbuilt Mail" are trademarks of Mark R. Hinkle (unregistered).
 
-The source code in this repository is licensed under the Apache License, Version 2.0. Section 6 of that license does not grant permission to use these names, logos or other marks, except as needed to describe where the software came from and to reproduce the NOTICE file.
+The source code in this repository is licensed under the Apache License, Version 2.0, except the hosted mail server in `server/`, which is licensed under the GNU Affero General Public License, version 3 only. Neither license grants trademark rights. Section 6 of the Apache License does not grant permission to use these names, logos or other marks, except as needed to describe where the software came from and to reproduce the NOTICE file.
 
 You may:
 - Use, modify and redistribute the code under the Apache License.
