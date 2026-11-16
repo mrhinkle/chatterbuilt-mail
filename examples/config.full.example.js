@@ -47,7 +47,7 @@
       { label: "Meetings", server: "Fireflies", tool: "fireflies_get_transcripts", input: { participants: ["{{email}}"], limit: 3, format: "json" } },
       { label: "Calendar", server: "Google Calendar", tool: "search_events", input: { query: "{{who}}", pageSize: 5 } },
       { label: "Notes", server: "Notion", tool: "notion-search", input: { query: "{{who}}", page_size: 5, max_highlight_length: 160 } },
-      { label: "Pipeline", server: "Notion", tool: "notion-search", input: { query: "{{orgOrEmail}}", data_source_url: "collection://00000000-0000-0000-0000-000000000000", page_size: 3, max_highlight_length: 200 } }
+      { label: "Pipeline", server: "Notion", tool: "notion-search", needs: ["org"], input: { query: "{{org}}", data_source_url: "collection://00000000-0000-0000-0000-000000000000", page_size: 3, max_highlight_length: 200 } }
     ],
 
     // Route: extra places a thread can go. "ai" fields are written by the AI and editable before you apply.

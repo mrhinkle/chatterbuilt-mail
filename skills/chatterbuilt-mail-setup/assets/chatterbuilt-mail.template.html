@@ -1006,7 +1006,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     lessons: "",              // lessons learned from your edits; the chatterbuilt-mail-improve skill writes these
     mailRules: [],            // durable rules, e.g. [{ text: "Receipts and invoices", op: "move", labelName: "Finance" }, { text: "Email from Stripe", from: "stripe.com", op: "archive" }]
     features: {},             // default on/off per feature for the Skills picker, e.g. { sweep: false }
-    context: [],              // read-only lookups on the person you're emailing: [{ label, server, tool, input with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}} }]
+    context: [],              // read-only lookups on the person you're emailing: [{ label, server, tool, needs, input with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}} }]. needs: ["org"] skips that source when the company is empty.
     actions: [],              // extra Route actions: [{ key, label, server, tool, input with {{placeholders}}, ai: { field: "what the AI writes" }, when: "when it applies" }]
     snippets: [],             // [{ name, text }]; {{firstName}} and {{myName}} are filled in
     lookup: [],               // More context: web lookups run only when you press it: [{ label, server, tool, input with {{personQuery}} {{companyQuery}} {{name}} {{org}} {{domain}} {{email}}, needs: ["companyQuery"] }]
@@ -4550,7 +4550,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 
 
   // ---------- context: what your other systems know about this person ----------
-  // CONFIG.context = [{ label, server, tool, input, maxChars }] with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}}.
+  // CONFIG.context = [{ label, server, tool, needs, input, maxChars }] with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}}.
+  // needs names person fields, the same rule as More context. The source runs only when every one is non-empty.
   // maxChars below 3500 lowers how much of that source's trimmed JSON goes into the brief. Anything else stays at 3500.
   // Every source is read-only. Raw results are trimmed and handed to the AI, which keeps only what's about this person or thread.
   state.ctx = {};
@@ -4691,15 +4692,26 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // The context panel follows the open thread, or in the Drafts tab the open draft (its thread, or the person it's to).
   const inDraftCtx = () => state.mode === "drafts" && !!(state.dCur && state.dCur.ctxT);
   const ctxKey = () => (inDraftCtx() ? "draft:" + state.dCur.d.id : state.selectedId);
+  // Same rule as More context: a source with needs runs only when every named field on the person is non-empty.
+  // A source with no needs always runs. none means nothing is configured, not that every source was skipped.
+  function contextSourceOn(s, who) {
+    return !s.needs || [].concat(s.needs).every((k) => who[k]);
+  }
+  function contextPlan(srcs, who) {
+    const run = [], skip = [];
+    (srcs || []).forEach((s) => (contextSourceOn(s, who) ? run : skip).push(s));
+    return { none: !(srcs || []).length, run: run, skip: skip };
+  }
   async function loadContext(force) {
     const t = inDraftCtx() ? state.dCur.ctxT : state.thread; const id = ctxKey();
     if (!t || !panelOn()) { if ($("ctxBox")) $("ctxBox").innerHTML = ""; $("sideBody").innerHTML = ""; return; }
     const who = personOf(t); if (!who) { state.ctx[id] = { nowho: true, who: {} }; renderContext(); return; }
     if (state.ctx[id] && !state.ctx[id].loading && !force) { renderContext(); return; }
     const srcs = featOn("context") ? (CONFIG.context || []) : [];
-    if (!srcs.length) { state.ctx[id] = { text: "", results: [], used: [], who: who, raw: [], none: true }; renderContext(); return; }
+    const plan = contextPlan(srcs, who);
+    if (plan.none) { state.ctx[id] = { text: "", results: [], used: [], who: who, raw: [], none: true }; renderContext(); return; }
     if (!force && !ctxRuns[id] && await ctxKept(id, t)) { if (ctxKey() === id) renderContext(); return; }
-    state.ctx[id] = { loading: true, who: who, n: srcs.length }; renderContext();
+    if (plan.run.length) { state.ctx[id] = { loading: true, who: who, n: plan.run.length }; renderContext(); }
     await ctxBuild(t, id, who, srcs, force);
     if (ctxKey() === id) renderContext();
   }
@@ -4717,7 +4729,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (ctxRuns[id] && !force) return ctxRuns[id];
     const gen = ctxGen[id] = (ctxGen[id] || 0) + 1;
     const run = (async () => {
-    const results = await Promise.all(srcs.map(async (s) => {
+    const plan = contextPlan(srcs, who);
+    const results = await Promise.all(plan.run.map(async (s) => {
       try {
         const p = await Promise.race([call(s.server, s.tool, fillTemplate(s.input || {}, who), { cache: { staleTime: 300000, gcTime: 600000 }, read: true }), new Promise((_, rej) => setTimeout(() => rej({ code: "server_unavailable", message: "timed out" }), 15000))]);
         return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p, cap: ctxSourceCap(s) };
@@ -4736,7 +4749,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
           { max_tokens: 2500 })).trim();
       } catch (e) { text = "Couldn't summarize: " + (mcpCopy(e, aiLabel()) || "stopped"); }
     }
-    const c = { at: Date.now(), text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
+    const c = { at: Date.now(), text: text, results: results.map((r) => ({ label: r.label, ok: r.ok, empty: r.empty, err: r.err })), skipped: plan.skip.map((s) => s.label || s.server), used: usable.map((r) => r.label), who: who, raw: usable.map((r) => ({ label: r.label, data: trimForAI(r.data) })) };
     if (ctxGen[id] === gen) { state.ctx[id] = c; ctxKeep(id, t, c); }
     return c;
     })();
@@ -4763,9 +4776,16 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (featOn("context") && !c.none) {
       if (c.loading) sys = '<div class="note"><span class="spin"></span>Checking ' + c.n + ' systems for ' + esc(who.who || "") + '…</div>';
       else {
-        const chips = (c.results || []).map((r) => '<span class="src ' + (!r.ok ? "bad" : r.empty ? "none" : "hit") + '" title="' + esc(r.ok ? (r.empty ? "Nothing found" : "Found something") : r.err) + '">' + esc(r.label) + '</span>').join("");
-        sys = '<div class="ctxlines">' + citeLines(c.text, null) + '</div><div class="srcs2">' + chips + '</div>'
-          + (c.at && Date.now() - c.at > 300000 ? '<div class="note">Checked ' + esc(agoText(c.at)) + '. Refresh checks again.</div>' : "");
+        const age = (c.at && Date.now() - c.at > 300000 ? '<div class="note">Checked ' + esc(agoText(c.at)) + '. Refresh checks again.</div>' : "");
+        // Chips are only sources that were called. A skipped source is left out, not shown as empty.
+        // When every source was skipped, this section still shows. That is not "nothing is configured".
+        if (!(c.results || []).length && (c.skipped || []).length) {
+          const n = c.skipped.length;
+          sys = '<div class="note">' + esc(c.skipped.join(", ")) + (n === 1 ? " was" : " were") + " left out. " + (n === 1 ? "A detail it needs is empty, so it was not called." : "A detail they need is empty, so they were not called.") + "</div>" + age;
+        } else {
+          const chips = (c.results || []).map((r) => '<span class="src ' + (!r.ok ? "bad" : r.empty ? "none" : "hit") + '" title="' + esc(r.ok ? (r.empty ? "Nothing found" : "Found something") : r.err) + '">' + esc(r.label) + '</span>').join("");
+          sys = '<div class="ctxlines">' + citeLines(c.text, null) + '</div><div class="srcs2">' + chips + '</div>' + age;
+        }
       }
       sys = '<div class="sec"><div class="cap">From your systems<button type="button" class="btn sm ghost" data-ctx="refresh">Refresh</button></div>' + sys + '</div>';
     }

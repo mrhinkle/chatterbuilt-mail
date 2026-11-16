@@ -1,6 +1,6 @@
 # The context panel
 
-When you open a thread, Chatterbuilt Mail checks every system you've connected for that person and that topic, all at once, and writes a short brief before you reply. Each line names the system it came from. Chips underneath show which systems found something, came back empty, or failed.
+When you open a thread, Chatterbuilt Mail checks every system you've connected for that person and that topic, all at once, and writes a short brief before you reply. Each line names the system it came from. Chips underneath show which systems found something, came back empty, or failed. A source that was left out because a detail it needs is empty is not in that row, because it was not called.
 
 This is the feature the rest of the app is built around. The brief also feeds the draft, the pre-send check, Route and the morning run, so the whole app knows what you know.
 
@@ -66,7 +66,7 @@ That's the loop: your meeting notes caught a promise, the brief put it in front 
 ## How it works
 
 1. You open a thread. The page works out who the other person is (the sender, or whoever you wrote to if you had the last word), plus their name, email domain and company.
-2. Every source in `CONFIG.context` runs at once with those details filled in. Each one gets 15 seconds. Results are cached for five minutes, and **Refresh** runs them again. With **Open mail at once** on (the default), the finished brief is kept in this browser for 12 hours, as long as no newer message comes in on the thread, so it's there at once when you come back; one older than five minutes says when it was checked. The next thread's brief is built while you read this one, and in the Drafts tab the next draft's (**Settings → Speed → Get the next one ready** turns that off). A draft's brief is kept while the draft is unchanged.
+2. Every source in `CONFIG.context` that can run does so at once with those details filled in. A source with `needs` is left out when one of those details is empty, and it is not called. If every source is left out, **From your systems** still shows and names them. That is not "no sources are set up." Each source that runs gets 15 seconds. Results are cached for five minutes, and **Refresh** runs them again. With **Open mail at once** on (the default), the finished brief is kept in this browser for 12 hours, as long as no newer message comes in on the thread, so it's there at once when you come back; one older than five minutes says when it was checked. A brief where every source was left out is kept the same way. The next thread's brief is built while you read this one, and in the Drafts tab the next draft's (**Settings → Speed → Get the next one ready** turns that off). A draft's brief is kept while the draft is unchanged.
 3. Empty results become grey chips and are dropped. Failures become red chips. Anything else is trimmed and sent to Claude, or to the model you picked.
 4. The model writes two to seven lines covering:
    - who they are to you;
