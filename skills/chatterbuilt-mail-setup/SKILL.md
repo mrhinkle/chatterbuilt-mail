@@ -94,7 +94,7 @@ These make it a hub rather than a client. Details and placeholders are in `docs/
 
 **Context (`CONFIG.context`).** Read-only lookups run on every thread the user opens.
 1. For each system the user wants checked, find a **read-only** tool that looks a person up: by email if possible (meeting participants, CRM contact), otherwise by name or company.
-2. Read its schema and use the exact argument names. Typical inputs: `{{email}}` for exact filters, `{{who}}` for name search, `{{orgOrEmail}}` for company search. Search by bare company name (`acme`), never by domain (`acme.com`); domain searches return noise.
+2. Read its schema and use the exact argument names. Typical inputs: `{{email}}` for exact filters, `{{who}}` for name search. Company and pipeline searches use `{{org}}` with `needs: ["org"]`, not `{{orgOrEmail}}`. `{{org}}` is empty for Gmail, Outlook and other free mail, and `needs` then skips that source so it is never called. Searching the email address stays available for sources that filter on an exact email field. Search by bare company name (`acme`), never by domain (`acme.com`); domain searches return noise.
 3. Make one read-only call per source with a real address from the user's recent mail, to confirm the shape and that results are relevant. Note any source that returns noise and tighten it (a `data_source_url`, a smaller page size) or drop it.
 4. Never put a tool that creates, updates, sends or deletes in `context`.
 5. Keep it to about eight sources.

@@ -68,8 +68,8 @@ These action names and arguments were read from Composio in November 2026. The s
 
 ```js
 context: [
-  { label: "Notion", server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL",
-    input: { tools: [{ tool_slug: "NOTION_SEARCH_NOTION_PAGE", arguments: { query: "{{orgOrEmail}}", page_size: 5 } }], sync_response_to_workbench: false } }
+  { label: "Notion", server: "Composio", tool: "COMPOSIO_MULTI_EXECUTE_TOOL", needs: ["org"],
+    input: { tools: [{ tool_slug: "NOTION_SEARCH_NOTION_PAGE", arguments: { query: "{{org}}", page_size: 5 } }], sync_response_to_workbench: false } }
 ]
 ```
 

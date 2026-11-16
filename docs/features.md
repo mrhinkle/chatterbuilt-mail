@@ -76,7 +76,7 @@ This is what sets Chatterbuilt Mail apart from email clients with AI added: each
 - newsletter subscriber lists;
 - your memory system.
 
-The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show which systems found something, came back empty, or failed. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
+A source with `needs` is left out when that detail is empty, and it is not called. The AI keeps only what matters for the reply, two to seven lines, each tagged with its source: who they are to you, open commitments either way (especially action items assigned to you), the last and next meeting, pipeline status. Chips under the card show the systems that ran: which found something, came back empty, or failed. A skipped source is not in that row. Lookups are read-only, cached for five minutes, and time out after 15 seconds each so one slow system never holds up the rest.
 
 Drafts and the pre-send check use the card. Turn off **Context** under *Draft with* in the reply box to leave it out of a draft. The full story, with examples: [context-panel.md](context-panel.md).
 

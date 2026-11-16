@@ -48,7 +48,7 @@ The model comes from where the page runs. In Claude, the page asks Claude withou
 
 | Key | Default | What it is |
 |---|---|---|
-| `context` | `[]` | Read-only lookups run when you open a thread: `[{ label, server, tool, input }]`. Feeds the context card, drafts, the pre-send check, Route and the morning run. See [connectors.md](connectors.md#context-sources). |
+| `context` | `[]` | Read-only lookups run when you open a thread: `[{ label, server, tool, input, needs }]`. `needs: ["org"]` skips that source when the person has no company. Feeds the context card, drafts, the pre-send check, Route and the morning run. See [connectors.md](connectors.md#context-sources). |
 | `slack` | `false` | `true` adds **Message someone in Slack** to Route: you name a person or `#channel`, and it leaves a draft in Slack for you to send. Needs the Slack connector. |
 | `actions` | `[]` | Custom Route actions: `[{ key, label, server, tool, input, ai, when }]`. `ai` names the fields the AI writes; `when` tells it when the action fits. See [connectors.md](connectors.md#route-actions). |
 | `lookup` | `[]` | **More context** web lookups: `[{ label, server, tool, input, needs }]`. Placeholders `{{personQuery}}`, `{{companyQuery}}`, `{{name}}`, `{{org}}`, `{{domain}}`, `{{email}}`. `needs: ["companyQuery"]` skips an entry when the person has no company domain. See [connectors.md](connectors.md#more-context-web-lookups). |
