@@ -90,6 +90,7 @@ Every source is a read-only lookup. Nothing is written anywhere when you open a 
 ## Getting good briefs
 
 - **Use exact filters.** A meeting-notes search by participant email is better than a free-text search for their name. A pipeline search inside one database is better than a search of your whole workspace.
+- **A broad name search almost never comes back empty.** It costs tokens on every thread. Scope it, or leave it out if a memory system or CRM already answers "who is this person to me."
 - **Six to eight sources is plenty.** Each one is a call every time you open a thread.
 - **Put a memory system in.** One that answers "who is this person to me" (Cortex, a Notion people database, your CRM) gives the brief its first line.
 - **Add your lists.** A newsletter subscriber lookup tells you whether someone already reads your work before you pitch them.
