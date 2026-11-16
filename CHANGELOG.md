@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+### Added
+- **A context source can set `maxChars`.** Trimmed JSON sent into the brief is still cut at 3,500 characters. A smaller `maxChars` cuts that one source sooner. Leave it unset and the cap stays 3,500.
+
+### Changed
+- **Setup avoids a workspace-wide name search.** Context sources should be an exact email filter, one database (`data_source_url`), or a memory system. An unscoped name search is added only if you ask, with a page size of 2 or 3, and the test call reports how big each reply was. A broad name search almost never comes back empty, so it costs tokens on every thread.
+
 ## 0.10.0 (2026-11-16)
 
 ### Fixed
