@@ -4265,7 +4265,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
 
 
   // ---------- context: what your other systems know about this person ----------
-  // CONFIG.context = [{ label, server, tool, input }] with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}}.
+  // CONFIG.context = [{ label, server, tool, input, maxChars }] with {{email}} {{name}} {{who}} {{org}} {{orgOrEmail}} {{domain}} {{subject}} {{today}} {{since90}}.
+  // maxChars below 3500 lowers how much of that source's trimmed JSON goes into the brief. Anything else stays at 3500.
   // Every source is read-only. Raw results are trimmed and handed to the AI, which keeps only what's about this person or thread.
   state.ctx = {};
   const TRIM_KEYS = /^(description|conferenceData|htmlLink|joiningNotesText|meetingLink|iconLink|etag|hangoutLink|reminders|defaultReminders|guestPermissions|htmlBody|attachmentIds|historyId|internalDate|sizeEstimate|telemetry|creator|useDefaultReminders|eventType|videoEntryPoint)$/i;
@@ -4421,6 +4422,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // per thread, and finishes even if you've moved on, so coming back shows it. A Refresh starts a new build; an older
   // one that finishes later doesn't overwrite it.
   const ctxRuns = {}, ctxGen = {};
+  // Characters of one source's trimmed JSON that go into the brief. The cap is 3500.
+  // maxChars on a source can only lower it. Missing, not a positive number, or above 3500 stays at 3500.
+  function ctxSourceCap(s) {
+    const n = s && typeof s.maxChars === "number" && Number.isFinite(s.maxChars) ? Math.floor(s.maxChars) : 0;
+    return n > 0 && n < 3500 ? n : 3500;
+  }
   function ctxBuild(t, id, who, srcs, force) {
     if (ctxRuns[id] && !force) return ctxRuns[id];
     const gen = ctxGen[id] = (ctxGen[id] || 0) + 1;
@@ -4428,13 +4435,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const results = await Promise.all(srcs.map(async (s) => {
       try {
         const p = await Promise.race([call(s.server, s.tool, fillTemplate(s.input || {}, who), { cache: { staleTime: 300000, gcTime: 600000 }, read: true }), new Promise((_, rej) => setTimeout(() => rej({ code: "server_unavailable", message: "timed out" }), 15000))]);
-        return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p };
+        return { label: s.label || s.server, ok: true, empty: nothingFound(p), data: p, cap: ctxSourceCap(s) };
       } catch (e) { return { label: s.label || s.server, ok: false, err: mcpCopy(e, s.server) || (e && e.code) || "error" }; }
     }));
     const usable = results.filter((r) => r.ok && !r.empty);
     let text = "Nothing relevant in your connected systems.";
     if (usable.length) {
-      const blocks = usable.map((r) => "### " + r.label + "\n" + JSON.stringify(trimForAI(r.data)).slice(0, 3500)).join("\n\n");
+      const blocks = usable.map((r) => "### " + r.label + "\n" + JSON.stringify(trimForAI(r.data)).slice(0, r.cap || 3500)).join("\n\n");
       const lastMsg = lastMessage(t) || {};
       try {
         text = (await ask(MARK + " You brief " + OWNER + " before they reply to an email. Plain text only.",

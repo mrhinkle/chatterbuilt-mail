@@ -4,6 +4,10 @@
 
 ### Added
 - An experimental ChatGPT mail panel under `integrations/chatgpt/`: a private MCP App with an inbox, thread reader and plain-text reply editor. ChatGPT uses existing native Gmail or Composio tools to fetch mail and carry out explicitly approved actions; the panel's server only renders supplied results. It starts read-only and has no email credentials or server-side mail storage. This is a smaller integration than the Claude artifact; see `docs/chatgpt-panel.md` for setup and limits.
+- **A context source can set `maxChars`.** Trimmed JSON sent into the brief is still cut at 3,500 characters. A smaller `maxChars` cuts that one source sooner. Leave it unset and the cap stays 3,500.
+
+### Changed
+- **Setup avoids a workspace-wide name search.** Context sources should be an exact email filter, one database (`data_source_url`), or a memory system. An unscoped name search is added only if you ask, with a page size of 2 or 3, and the test call reports how big each reply was. A broad name search almost never comes back empty, so it costs tokens on every thread.
 
 ## 0.8.1 (2026-11-04)
 
