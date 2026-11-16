@@ -27,7 +27,8 @@
 | Everything is greyed out | Read-only is on. Click the dark **Read-only on** button in the top bar to turn it off. |
 | A context chip is red | That source failed or took over 15 seconds; hover for the reason. The rest of the panel still works. Press Refresh to try again. |
 | The context panel mentions the wrong person or company | A search source is too loose. Ask Claude to tighten it: an exact email filter, a specific database, or the bare company name instead of the domain. |
-| No "From your systems" section | `CONFIG.context` is empty, or Context is off in Settings → Skills. |
+| No "From your systems" section | `CONFIG.context` is empty, or Context is off in Settings → Skills. A source left out because `needs` isn't met does not do this: the section still shows. |
+| A context source is missing from the chips | It has `needs`, and this person is missing one of those values. A free mail address has no company, so a pipeline source with `needs: ["org"]` is left out and not called. If every source is left out, the section names them. |
 | Route suggests nothing | Nothing in the thread clearly called for it. Tick an action anyway and fill in the fields. |
 | A snoozed thread didn't come back | The app brings it back the next time it opens, and the morning run each weekday. It's under the `CB/Snooze/<date>` label in Gmail meanwhile. |
 | No *draft in Gmail* tag on a thread you drafted | Drafts are checked once a minute. Reload the inbox. |

@@ -4,6 +4,7 @@
 
 ### Added
 - An experimental ChatGPT mail panel under `integrations/chatgpt/`: a private MCP App with an inbox, thread reader and plain-text reply editor. ChatGPT uses existing native Gmail or Composio tools to fetch mail and carry out explicitly approved actions; the panel's server only renders supplied results. It starts read-only and has no email credentials or server-side mail storage. This is a smaller integration than the Claude artifact; see `docs/chatgpt-panel.md` for setup and limits.
+- **Context sources can skip a lookup when a detail is empty.** A source with `needs`, such as `needs: ["org"]` on a pipeline search for `{{org}}`, runs only when those fields are set for the person. The same rule More context already uses. A skipped source is left out of the chip row and never called. If every source is skipped, **From your systems** still shows and names what was left out.
 
 ## 0.8.1 (2026-11-04)
 
