@@ -6,3 +6,7 @@ demo-out/
 # Your own copy. Settings and memory stay out of git; commit them (git add -f) only in a private repo you own.
 my/
 memory/EMAIL-MEMORY.md
+
+# Built from the template by server/scripts/build-app.mjs. Do not edit by hand.
+server/app/page.html
+server/app/icon.svg

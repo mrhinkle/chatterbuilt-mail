@@ -8,13 +8,15 @@ python3 scripts/build.py skills/chatterbuilt-mail-setup/assets/chatterbuilt-mail
 
 You don't need to edit this by hand. Ask Claude, and the setup skill does it. This page is the reference. A first install starts from [`examples/config.example.js`](../examples/config.example.js): Gmail and Claude, nothing else. Every option filled in is in [`examples/config.full.example.js`](../examples/config.full.example.js).
 
+The hosted server ([hosted.md](hosted.md)) can run as `MAIL_PROVIDER=gmail` or `MAIL_PROVIDER=live`. `gmail` keeps the dogfood Google client and can also store IMAP and Microsoft accounts. `live` turns on every real provider, and each one works only when its own config is present. An IMAP account is usable once it is connected (`POST /connect/imap`; the browser setup page is a later lane). Microsoft mail works when `MICROSOFT_CLIENT_ID` is set. Until then, a Microsoft tool call says Microsoft sign-in is not set up. The page reads `id`, `email`, `label`, `color`, `kind`, and `capabilities`. Hosted error text uses `kind` (Gmail, Outlook, or the IMAP provider name when the account carries one, otherwise "your mail server"). `capabilities` decides which filters that account shows. `IMAP_ALLOW_PRIVATE_HOSTS=1` allows a private or loopback IMAP host for dev and tests. Production refuses to start if that name is set.
+
 ## You
 
 | Key | What it is | Example |
 |---|---|---|
 | `ownerName` | Your name, as drafts should use it | `"Alex"` |
 | `ownEmail` | Your Gmail address; used to tell your messages from theirs | `"alex@example.com"` |
-| `gmail` | `null` for claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts and a switcher: `{ via: "composio", accounts: [{ id, email, label, color }] }`. With two or more, the page opens on All inboxes, which merges them; `color` (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`) tints that account's rows there, and `start: "first"` opens on the first account instead. With accounts, each account's `email` replaces `ownEmail`. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy) | |
+| `gmail` | `null` for claude.ai's Gmail connector. Or Gmail through Composio: `{ via: "composio", accounts: [{ id, email, label, color }] }`. Or the Chatterbuilt Mail server: `{ via: "chatterbuilt", server: "Chatterbuilt Mail", accounts: [{ id, email, label, color }] }`, where `id`, `email`, `label` and `color` are what `list_accounts` returns and `server` is the connector's name in claude.ai. With two or more accounts, the page opens on All inboxes, which merges them; `color` (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`) tints that account's rows there, and `start: "first"` opens on the first account instead. With accounts, each account's `email` replaces `ownEmail`. See [composio.md](composio.md#gmail-through-composio-several-accounts-in-one-copy) and [hosted.md](hosted.md#point-the-page-at-the-server). | |
 | `about` | One or two sentences on who you are; context for every prompt | `"Alex runs partnerships at Example Co."` |
 | `voice` | How you write | `"Warm, brief, a little dry."` |
 | `rules` | Hard writing rules, checked again before you send | `"Never use 'synergy'. US spelling."` |

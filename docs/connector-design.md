@@ -109,6 +109,6 @@ Measured with **Settings → Speed**, against today's Composio numbers on the sa
 
 ## Open questions
 
-- **License.** This repo is Apache-2.0. Chatterbuilt's open core plan is AGPL-3.0 with a commercial option. Which does the connector use?
+- **License (decided 2026-11-05).** The hosted server is AGPL-3.0-only, with a commercial option from the copyright holder. The page and skills stay Apache-2.0.
 - **Phones.** Confirm custom connectors work in the Claude phone apps (see above).
 - **Hosting IMAP.** Vercel functions, or a small always-on host for IMAP accounts (see Speed targets).
