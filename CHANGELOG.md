@@ -42,6 +42,9 @@
 - **Gmail through the Chatterbuilt Mail server.** Set `CONFIG.gmail` to `{ via: "chatterbuilt", server: "Chatterbuilt Mail", accounts: [...] }`. `accounts` is what `list_accounts` returns (`id`, `email`, `label`, `color`). Calls use the page's own tool names plus `account`. All inboxes, the account picker, per-thread ownership and From on drafts stay. On this path the page also does what Composio cannot: Settings → Filters and a rule's Skip the inbox action (`create_filter`), a same-account alias reply that stays in the thread, attachments on the reply box, and drafts that keep their threading headers. A rejected `tool_error` whose text is the server's `{code, message}` becomes that code, so reconnect and not-found copy match the other paths. Reads still retry once. Writes never do. Kept copies stay on.
 - **Context sources can skip a lookup when a detail is empty.** A source with `needs`, such as `needs: ["org"]` on a pipeline search for `{{org}}`, runs only when those fields are set for the person. The same rule More context already uses. A skipped source is left out of the chip row and never called. If every source is skipped, **From your systems** still shows and names what was left out.
 
+### Fixed
+- **An empty lookup that carries a warning counts as empty.** Notion and Fireflies attach a warning when a search finds nothing. Those replies now show as grey chips and stay out of the brief. A reply that also has a real result still counts.
+
 ## 0.8.1 (2026-11-04)
 
 ### Added
