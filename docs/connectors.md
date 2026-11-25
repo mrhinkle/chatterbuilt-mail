@@ -100,7 +100,7 @@ If every source is skipped, **From your systems** still shows and names what was
 
 **How results are used:**
 - Each source has 15 seconds. A slow or failing one shows as a red chip and the rest carry on.
-- Empty results show as grey chips and aren't sent to the AI. Empty means `[]`, `{}`, "No results", "No entity", or an object whose lists are all empty, like `{ "transcripts": [], "total": 0 }`.
+- Empty results show as grey chips and aren't sent to the AI. Empty means `[]`, `{}`, "No results", "No entity", or an object whose lists are all empty, like `{ "transcripts": [], "total": 0 }` or `{ "data": [] }`. A warning, notice or hint on that reply still counts as empty. A `message` counts as content, because some connectors put the answer there.
 - The rest are trimmed (long text cut, calendar links, meeting URLs, HTML bodies and similar dropped) and sent to the AI, which writes the card. It's told to ignore matches that aren't about this person, their company or the thread, never to merge a lookalike match into this person, and to say what's missing when the reply needs something no source has. More in [context-panel.md](context-panel.md).
 - Each source's trimmed JSON is cut at 3,500 characters before it goes into the brief. Set `maxChars` on a source to a smaller positive number to cut that source sooner. Leave it off, or set 0 or anything above 3,500, and the cap stays 3,500.
 - Results are cached for five minutes. **Refresh** on the card runs them again.
