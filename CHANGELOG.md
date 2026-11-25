@@ -43,7 +43,7 @@
 - **Context sources can skip a lookup when a detail is empty.** A source with `needs`, such as `needs: ["org"]` on a pipeline search for `{{org}}`, runs only when those fields are set for the person. The same rule More context already uses. A skipped source is left out of the chip row and never called. If every source is skipped, **From your systems** still shows and names what was left out.
 
 ### Fixed
-- **An empty lookup that carries a warning counts as empty.** Notion and Fireflies attach a warning when a search finds nothing. Those replies now show as grey chips and stay out of the brief. A reply that also has a real result still counts.
+- **An empty lookup that carries a warning counts as empty.** Notion and Fireflies attach a warning when a search finds nothing. Those replies now show as grey chips and stay out of the brief. A reply that also has a real result still counts. So does a reply with a non-empty `message`, or with any list that has an item.
 
 ## 0.8.1 (2026-11-04)
 

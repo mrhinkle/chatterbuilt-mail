@@ -4586,11 +4586,14 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (Array.isArray(p)) return p.length === 0;
     if (p && typeof p === "object") { const q = {}; Object.keys(p).forEach((k) => { if (!INFO_KEYS.test(k)) q[k] = p[k]; }); p = q; }
     const s = JSON.stringify(p); if (s === "{}" || s === "[]") return true;
+    // A message with real words is content, even next to an empty list.
+    if (typeof p.message === "string" && p.message.trim() && !nothingFound(p.message)) return false;
     if (typeof p === "object") {
       const vals = Object.values(p); const lists = vals.filter(Array.isArray);
       if (lists.length && lists.every((a) => a.length === 0) && vals.every((v) => Array.isArray(v) || v == null || typeof v === "number" || typeof v === "boolean" || (typeof v === "string" && v.length < 60))) return true;
     }
-    return /"(results|events|subscriptions|threads|items|transcripts|pages|records|contacts|entities|matches|web|data)":\[\]/.test(s) && s.length < 160;
+    // One empty list is not enough: any list with an item anywhere in the reply means it has content.
+    return /"(results|events|subscriptions|threads|items|transcripts|pages|records|contacts|entities|matches|web|data)":\[\]/.test(s) && !/\[\s*[^\]\s]/.test(s) && s.length < 160;
   };
   state.web = {}; state.steps = {};
   const wideMQ = window.matchMedia("(min-width: 1180px)");
