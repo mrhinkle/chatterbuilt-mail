@@ -62,7 +62,7 @@ Write tools (send, labels, tasks, contacts, Slack drafts) and Clay were never ca
 
 ## Context sources
 
-`CONFIG.context` is a list of read-only lookups the page runs, all at once, when you open a thread. Each entry is one connector tool:
+`CONFIG.context` is a list of read-only lookups the page runs when you open a thread, all at once. A source whose `needs` aren't met is left out and not called (see below). Each entry is one connector tool:
 
 ```js
 context: [
@@ -70,8 +70,8 @@ context: [
     input: { participants: ["{{email}}"], limit: 3, format: "json" } },
   { label: "Calendar", server: "Google Calendar", tool: "search_events",
     input: { query: "{{who}}", pageSize: 5 } },
-  { label: "Pipeline", server: "Notion", tool: "notion-search",
-    input: { query: "{{orgOrEmail}}", data_source_url: "collection://YOUR-PIPELINE-ID", page_size: 3 } },
+  { label: "Pipeline", server: "Notion", tool: "notion-search", needs: ["org"],
+    input: { query: "{{org}}", data_source_url: "collection://YOUR-PIPELINE-ID", page_size: 3 } },
   { label: "Memory", server: "Cortex", tool: "cortex_who_is", input: { name: "{{who}}" } }
 ]
 ```
@@ -87,10 +87,16 @@ These are the argument names those connectors took in November 2026. Connectors 
 | `{{who}}` | Name if known, otherwise email |
 | `{{domain}}` | Their email domain |
 | `{{org}}` | The company part of the domain (`acme` from `jo@mail.acme.example`); empty for Gmail, Outlook and other free mail |
-| `{{orgOrEmail}}` | `{{org}}`, or the email when there's no company |
+| `{{orgOrEmail}}` | `{{org}}`, or the email when there's no company. A company or pipeline search should use `{{org}}` with `needs` instead, so a free-mail address is skipped rather than searched as a whole address |
 | `{{subject}}` | Thread subject without Re:/Fwd: |
 | `{{today}}` | Today, YYYY-MM-DD |
 | `{{since90}}` | 90 days ago, YYYY-MM-DD |
+
+**Skipping a source (`needs`).** A source can list person fields in `needs`. It runs only when every one of them is non-empty for this person, the same rule More context uses. A source with no `needs` always runs.
+
+`needs: ["org"]` on a pipeline search for `{{org}}` skips Gmail, Outlook and other free mail, where there is no company. The source is never called. It is left out of the chip row: a chip means the source ran (found something, came back empty, or failed). An empty chip would mean it ran and found nothing, so a skipped source is not shown as one.
+
+If every source is skipped, **From your systems** still shows and names what was left out. That is not the "no sources are set up" state, which is an empty `CONFIG.context` (or Context turned off). The brief is still kept for 12 hours, the same as any other brief, and **Refresh** checks again. Searching an exact email field stays `{{email}}` with no `needs`.
 
 **How results are used:**
 - Each source has 15 seconds. A slow or failing one shows as a red chip and the rest carry on.
