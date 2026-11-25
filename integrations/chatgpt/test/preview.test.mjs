@@ -17,11 +17,12 @@ test('HTTPS preview restricts routes, bounds bodies, and serves hostile RPC text
   }
   execFileSync('openssl', ['req', '-x509', '-newkey', 'rsa:2048', '-nodes', '-keyout', join(dir, '.preview-tls/key.pem'), '-out', join(dir, '.preview-tls/cert.pem'), '-days', '1', '-subj', '/CN=localhost', '-addext', 'subjectAltName=IP:127.0.0.1'], { stdio: 'ignore' });
   const ca = await readFile(join(dir, '.preview-tls/cert.pem'));
-  const server = spawn(process.execPath, ['scripts/preview.mjs'], { cwd: dir, stdio: ['ignore', 'pipe', 'pipe'] });
+  const server = spawn(process.execPath, ['scripts/preview.mjs'], { cwd: dir, env: { ...process.env, PREVIEW_PORT: '0' }, stdio: ['ignore', 'pipe', 'pipe'] });
   t.after(async () => { if (server.exitCode === null) { const exited = once(server, 'exit'); server.kill(); await exited; } });
-  await new Promise((resolve, reject) => { server.stdout.once('data', resolve); server.once('error', reject); server.once('exit', code => reject(Error('Preview exited: ' + code))); });
+  const ready = await new Promise((resolve, reject) => { server.stdout.once('data', d => resolve(String(d))); server.once('error', reject); server.once('exit', code => reject(Error('Preview exited: ' + code))); });
+  const port = Number(/:(\d+)\//.exec(ready)[1]);
   const call = (path, method = 'GET', body = '', headers = {}) => new Promise((resolve, reject) => {
-    const req = request({ hostname: '127.0.0.1', port: 4387, path, method, ca, headers }, res => {
+    const req = request({ hostname: '127.0.0.1', port, path, method, ca, headers }, res => {
       const chunks = []; res.on('data', c => chunks.push(c));
       res.on('end', () => resolve({ status: res.statusCode, headers: res.headers, body: Buffer.concat(chunks).toString() }));
     }); req.on('error', reject); req.end(body);

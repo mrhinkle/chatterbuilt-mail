@@ -11,7 +11,7 @@ window.addEventListener('message', event=>{if(event.source!==frame.contentWindow
 const keyPath = new URL('../.preview-tls/key.pem', import.meta.url);
 const certPath = new URL('../.preview-tls/cert.pem', import.meta.url);
 const panel = await (await worker.fetch(new Request('https://preview.invalid/'))).text();
-createServer({ key: await readFile(keyPath), cert: await readFile(certPath), minVersion: 'TLSv1.2' }, async (req, res) => {
+const server = createServer({ key: await readFile(keyPath), cert: await readFile(certPath), minVersion: 'TLSv1.2' }, async (req, res) => {
   try {
     res.setHeader('x-content-type-options', 'nosniff');
     res.setHeader('cache-control', 'no-store');
@@ -39,4 +39,7 @@ createServer({ key: await readFile(keyPath), cert: await readFile(certPath), min
     // Escape HTML delimiters as valid JSON escapes as defense in depth.
     res.end(JSON.stringify(data).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026'));
   } catch { res.writeHead(500); res.end('Preview error'); }
-}).listen(4387, '127.0.0.1', () => console.log('Local: https://127.0.0.1:4387/test-host'));
+});
+// PREVIEW_PORT=0 lets the OS pick a free port (the tests use it); the default stays 4387.
+const port = Number(process.env.PREVIEW_PORT ?? 4387);
+server.listen(port, '127.0.0.1', () => console.log('Local: https://127.0.0.1:' + server.address().port + '/test-host'));

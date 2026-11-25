@@ -25,7 +25,7 @@ openssl req -x509 -newkey rsa:2048 -nodes -keyout .preview-tls/key.pem -out .pre
 node scripts/preview.mjs
 ```
 
-Open `https://127.0.0.1:4387/test-host` for a synthetic MCP host with made-up `.example` mail. The browser will warn about the self-signed development certificate; accept it only for this local preview. `.preview-tls/` is ignored by Git and excluded from the build. Do not use production certificates or real mail in this preview. The test host and its fixture are development-only. The deterministic deployment copies only `worker/index.js` and the deployment manifest:
+Open `https://127.0.0.1:4387/test-host` for a synthetic MCP host (set `PREVIEW_PORT` to use another port) with made-up `.example` mail. The browser will warn about the self-signed development certificate; accept it only for this local preview. `.preview-tls/` is ignored by Git and excluded from the build. Do not use production certificates or real mail in this preview. The test host and its fixture are development-only. The deterministic deployment copies only `worker/index.js` and the deployment manifest:
 
 ```sh
 node scripts/build.mjs
