@@ -1,0 +1,40 @@
+  const CONFIG = {
+    ownerName: "Alex Rivera",
+    ownEmail: "alex@riveralabs.example",
+    gmail: {
+      via: "chatterbuilt",
+      server: "Chatterbuilt Mail",
+      accounts: [] /* CBM_ACCOUNTS */
+    },
+    about: "Alex runs partnerships at Rivera Labs and hosts a monthly AI meetup.",
+    voice: "Warm, brief, a little dry. Short paragraphs.",
+    rules: "US spelling. No exclamation points.",
+    signoff: "Alex",
+    defaultModel: "claude",
+    models: [],
+    notion: null,
+    copyTargets: [],
+    searchExample: "from:dana newer_than:7d",
+    tasks: null,
+    contacts: null,
+    clay: false,
+    calendar: false,
+    workHours: [9, 17],
+    waitingDays: 3,
+    readOnly: false,
+    voiceSource: "",
+    lessons: "",
+    mailRules: [],
+    features: {},
+    context: [
+      { label: "Notion", server: "Notion", tool: "search", input: { query: "{{email}}" } },
+      { label: "Calendar", server: "Google Calendar", tool: "list-events", input: { q: "{{email}}" } },
+      { label: "Fireflies", server: "Fireflies", tool: "get_transcripts", input: { query: "{{who}}" } }
+    ],
+    actions: [],
+    lookup: [],
+    snippets: [],
+    labelPrefix: "CB",
+    repoUrl: "https://github.com/mrhinkle/chatterbuilt-mail",
+    supportUrl: "https://github.com/mrhinkle/chatterbuilt-mail/issues"
+  };

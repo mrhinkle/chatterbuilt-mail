@@ -126,5 +126,7 @@ If it saves you twenty minutes a day, great. If it doesn't, you know where the f
 
 ## License
 
-Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+The page, skills and docs are under the Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
+
+The hosted mail server in [`server/`](server/) is under the GNU Affero General Public License, version 3 only (AGPL-3.0-only). See [server/LICENSE](server/LICENSE). If you run a changed copy of the server for other people over a network, the AGPL asks you to offer them its source. The copyright holder also offers the server under a commercial license.
 Copyright 2026 Mark R. Hinkle. "Chatterbuilt" and "Chatterbuilt Mail" are trademarks of Mark R. Hinkle; the license does not grant rights to the names. See [TRADEMARKS.md](TRADEMARKS.md).

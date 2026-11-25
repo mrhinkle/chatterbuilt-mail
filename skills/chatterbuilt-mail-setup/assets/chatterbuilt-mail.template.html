@@ -473,6 +473,8 @@ body.reply-open .desk > .cfoot { position: sticky; bottom: 0; z-index: 3; paddin
 .pop .quick { display: flex; gap: 6px; flex-wrap: wrap; }
 
 .modal-back { position: fixed; inset: 0; z-index: 40; display: flex; align-items: flex-start; justify-content: center; background: rgba(15, 23, 42, 0.2); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); padding-block: max(44px, env(safe-area-inset-top, 0px)) 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); animation: fade 0.16s ease-out; }
+/* Author display beats the hidden attribute, so a closed modal, menu or popover still covers the page. */
+.modal-back[hidden], .menu[hidden], .pop[hidden] { display: none; }
 .modal { width: min(640px, 100%); max-height: calc(100vh - 70px); display: flex; flex-direction: column; border-radius: 20px; overflow: hidden; animation: rise 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
 .modal.wide { width: min(820px, 100%); }
 .modal-head { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid var(--line); }
@@ -918,6 +920,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   <button class="mi" role="menuitem" id="skillsBtn" type="button"><span class="mt">Skills</span><span class="md">Every feature, with on/off switches and help</span></button>
   <button class="mi" role="menuitem" id="speedBtn" type="button"><span class="mt">Speed</span><span class="md">How long Gmail and your other connections take</span></button>
   <button class="mi" role="menuitem" id="acctBtn" type="button" hidden><span class="mt">Accounts</span><span class="md">A color for each account, and which ones All inboxes shows</span></button>
+  <button class="mi" role="menuitem" id="filtersBtn" type="button" hidden><span class="mt">Filters</span><span class="md">Gmail filters, including skip the inbox</span></button>
   <div class="msep"></div>
   <button class="mi" role="menuitemcheckbox" id="roToggle" type="button" aria-checked="false" title="Block every send, move, label change, draft, task and contact">Read-only</button>
   <label class="mrowsel model">Model<select id="modelSel" aria-label="Model"></select></label>
@@ -975,11 +978,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const CONFIG = {
     ownerName: "",            // your name, e.g. "Alex Rivera"
     ownEmail: "",             // your Gmail address (used to skip yourself when unsubscribing/copying)
-    gmail: null,              // null: claude.ai's Gmail connector. Or Gmail through Composio, with one or more accounts:
+    gmail: null,              // null: claude.ai's Gmail connector. Or one of:
                               //   { via: "composio", accounts: [{ id: "gmail_xxx", email: "you@work.example", label: "Work", color: "blue" }, ...] }
-                              //   id is the Composio connected-account id. With two or more, All inboxes merges them and opens
-                              //   by default; color (blue, red, green, amber, purple, teal, pink, gray or #hex) tints that
-                              //   account's rows there. Settings → Accounts changes colors in the page.
+                              //   { via: "chatterbuilt", server: "Chatterbuilt Mail", accounts: [{ id, email, label, color }, ...] }
+                              //   id is the Composio connected-account id, or the id list_accounts returns for the hosted server.
+                              //   With two or more, All inboxes merges them and opens by default; color (blue, red, green, amber,
+                              //   purple, teal, pink, gray or #hex) tints that account's rows there. Settings → Accounts changes colors.
     about: "",                // one or two sentences on who you are and what you do
     voice: "",                // how you write, e.g. "Warm, brief, a little dry. Short paragraphs."
     rules: "",                // hard rules, e.g. "Never use the word 'synergy'. US spelling."
@@ -1013,10 +1017,18 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const GMAIL = "Gmail", ROUTER = "OpenRouter", NOTION = "Notion", CAL = "Google Calendar", CLAY = "Clay", SLACK = "Slack";
   const aiLabel = () => (state.model === "claude" ? "Claude" : "OpenRouter");
   const OWNER = CONFIG.ownerName || "the user";
-  // Gmail through Composio, with one or more accounts (see CONFIG.gmail). acctIdx is the account on screen; -1 is
-  // All inboxes, which merges the accounts you've left on, newest first, and sends each action to the thread's own account.
-  const GX = CONFIG.gmail && CONFIG.gmail.via === "composio" && Array.isArray(CONFIG.gmail.accounts) && CONFIG.gmail.accounts.some((a) => a && a.id) ? Object.assign({}, CONFIG.gmail, { accounts: CONFIG.gmail.accounts.filter((a) => a && a.id) }) : null;
-  const GX_SERVER = GX ? (GX.server || "Composio") : "";
+  // Gmail through Composio or a Chatterbuilt Mail server, with one or more accounts (see CONFIG.gmail).
+  // acctIdx is the account on screen; -1 is All inboxes, which merges the accounts you've left on, newest first,
+  // and sends each action to the thread's own account. Both paths share that. Only Composio translates tool names.
+  // server_info keeps its name. The hosted path calls the server. The claude.ai Gmail and Composio paths
+  // answer it here, so it is not added to those translators. Add an account links to /connect on the
+  // standalone page, and to the server's public URL on the connector path.
+  const gmailCfg = CONFIG.gmail && (CONFIG.gmail.via === "composio" || CONFIG.gmail.via === "chatterbuilt") && Array.isArray(CONFIG.gmail.accounts) && CONFIG.gmail.accounts.some((a) => a && a.id)
+    ? Object.assign({}, CONFIG.gmail, { accounts: CONFIG.gmail.accounts.filter((a) => a && a.id) }) : null;
+  const GX = gmailCfg;
+  const GX_COMPOSIO = !!(GX && GX.via === "composio");
+  const GX_HOSTED = !!(GX && GX.via === "chatterbuilt");
+  const GX_SERVER = GX ? (GX.server || (GX_HOSTED ? "Chatterbuilt Mail" : "Composio")) : "";
   const MULTI = !!GX && GX.accounts.length > 1;
   const lsGet = (k) => { try { return localStorage.getItem(k); } catch { return null; } };
   const lsJson = (k, d) => { try { const v = JSON.parse(lsGet(k) || "null"); return v == null ? d : v; } catch { return d; } };
@@ -1042,8 +1054,35 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   if (!taskAdapter()) document.body.classList.add("no-tasks");
   if (!CONFIG.models.length) document.body.classList.add("no-model-pick");
   const $ = (id) => document.getElementById(id);
+  // Skip the inbox and Settings → Filters follow the account, including inside All inboxes.
+  // A connector config has no capabilities. Treat that as Gmail until list_accounts says otherwise.
+  const hasFilters = (a) => {
+    if (!a) return false;
+    if (!a.capabilities) return true;
+    return a.capabilities.filters === true;
+  };
+  const filterAccts = () => {
+    if (!GX_HOSTED) return [];
+    const pool = isAll() ? allAccts() : [curAcct()];
+    return pool.filter(hasFilters);
+  };
+  const filtMenu = (id) => {
+    const rows = filterAccts();
+    if (!rows.length || (rows.length < 2 && !isAll())) return "";
+    return '<select id="' + id + '" aria-label="Account" style="width:auto">' + rows.map((a) => '<option value="' + esc(a.id) + '">' + esc(acctName(a)) + '</option>').join("") + '</select>';
+  };
+  const pickFilt = (id) => {
+    const rows = filterAccts();
+    const sel = $(id);
+    if (sel) { const hit = rows.find((a) => a.id === sel.value); if (hit) return hit; }
+    return rows[0] || null;
+  };
+  function syncFilterUi() {
+    const btn = $("filtersBtn");
+    if (btn) btn.hidden = filterAccts().length === 0;
+  }
   const app = $("app"), list = $("list"), reading = $("reading"), compose = $("compose"), taskdrop = $("taskdrop");
-  const state = { picked: new Set(), mcp: null, query: "in:inbox", key: "inbox", threads: [], nextToken: null, selectedId: null, thread: null, triage: {}, preview: {}, previewRun: 0, sending: false, ctl: null, loadToken: 0, model: CONFIG.defaultModel || "claude", llmOk: true, notionOk: true, mode: "normal", age: {}, variants: {}, aiDraft: {}, queue: [], undo: [], readOnly: false, waitDays: CONFIG.waitingDays || 3 };
+  const state = { picked: new Set(), mcp: null, query: "in:inbox", key: "inbox", threads: [], nextToken: null, selectedId: null, thread: null, triage: {}, preview: {}, previewRun: 0, sending: false, ctl: null, loadToken: 0, model: CONFIG.defaultModel || "claude", llmOk: true, notionOk: true, mode: "normal", age: {}, variants: {}, aiDraft: {}, queue: [], undo: [], readOnly: false, waitDays: CONFIG.waitingDays || 3, hostedPublicUrl: "" };
 
   // ---------- helpers ----------
   const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -1081,13 +1120,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     { key: "drafts", name: "Drafts waiting in Gmail", desc: "Threads with a draft in Gmail (from the morning run or your own) get a tag. Open one and load the draft in a click; sending replaces it.", how: "Set up the morning run, or write drafts in Gmail." },
     { key: "snippets", name: "Snippets", desc: "Reusable text with the person's first name filled in.", how: "Snippets under the reply buttons." },
     { key: "signature", name: "Gmail signature", desc: "Adds the signature you set in Gmail (Settings → Signature) to replies, drafts and forwards, with its formatting, links and images. Each account uses its own. Show previews it under the reply box, where you can leave it off one message, and Insert signature adds it to a draft in the Drafts tab.", how: "On by default. Turn it off if your drafts already end with a signature." },
-    { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
+    { key: "attach", name: "Attachments", desc: "Attach files to replies and drafts, up to 18 MB.", how: "Attach under the reply buttons.", needs: () => !GX_COMPOSIO, need: "Not available yet when Gmail goes through Composio. Attach in Gmail instead." },
     { key: "html", name: "Formatted view", desc: "Shows messages as they were written: their own layout, colors and links, with scripts and tracking images removed. Pictures show as boxes of their size.", how: "On by default. More, Formatted view, above the thread, switches to plain text and back." },
     { key: "cache", name: "Open mail at once", desc: "Keeps a copy of the threads and drafts you open, and of the next few in the list, in this browser, so they open without waiting on Gmail. A copy is only used while it matches the list, so a new message or a newer version of a draft is never hidden behind an old copy. The next one's context brief (and in Drafts, its checklist) is ready before you get to it, and the list opens where you left it.", how: "Settings, Speed: how far ahead to load, what's kept, and Clear." },
     { key: "keys", name: "Keyboard shortcuts", desc: "j and k to move, e archive, s star, m move, r reply, c contact, / search, z undo, ⌘K for every command.", how: "Press ? for the full list." }
   ];
   let featState = {}; try { featState = JSON.parse(ls.get("cm.features") || "{}") || {}; } catch { featState = {}; }
+  const STANDALONE_AI = new Set(["triage", "predraft", "ask", "precheck", "tone", "learn", "route"]);
   function featOn(k) {
+    if (document.documentElement.classList.contains("no-sample") && STANDALONE_AI.has(k)) return false;
     const f = FEATURES.find((x) => x.key === k);
     if (f && f.needs && !f.needs()) return false;
     if (featState[k] !== undefined) return !!featState[k];
@@ -1096,13 +1137,17 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   function applyFeatures() {
     document.querySelectorAll("[data-feat]").forEach((el) => el.classList.toggle("feat-off", !featOn(el.dataset.feat)));
+    // Nudge shares data-feat="waiting" with the Waiting filter. The filter stays. The button is a model call.
+    if (document.documentElement.classList.contains("no-sample")) {
+      const nudge = document.getElementById("nudgeBtn"); if (nudge) nudge.classList.add("feat-off");
+    }
     FEATURES.forEach((f) => document.body.classList.toggle("off-" + f.key, !featOn(f.key)));
     const tm = document.getElementById("toolMenu"), tb = document.getElementById("toolsBtn");
     if (tm && tb) tb.hidden = ![...tm.querySelectorAll(".mi")].some((b) => !b.classList.contains("feat-off"));
   }
 
   // ---------- read-only ----------
-  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "update_draft", "forward", "create_label", "notion-create-pages", "delete_draft"]);
+  const MUTATING = new Set(["update_message_labels", "label_thread", "unlabel_thread", "send_message", "reply", "create_draft", "update_draft", "forward", "create_label", "notion-create-pages", "delete_draft", "create_filter", "delete_filter"]);
   function setRO(on, persist) {
     state.readOnly = !!on; document.body.classList.toggle("ro", state.readOnly);
     $("roToggle").setAttribute("aria-checked", String(state.readOnly)); $("roPill").hidden = !state.readOnly;
@@ -1260,12 +1305,33 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // Gmail's own "isn't there" answers (a 404, "Requested entity was not found", notFound), not a missing account or
   // connection, which also say "not found" but mean something else.
   const isNotFound = (e) => { const t = String((e && (e.message || e.detail)) || e || ""); return /\b404\b|not ?found|notFound|Requested entity was not found/i.test(t) && !/account|connection|toolkit|no such tool/i.test(t); };
-  function mcpCopy(e, server) {
+  // Hosted error text names the mailbox. claude.ai and Composio keep the Gmail sentences below.
+  function mailboxName(account) {
+    const a = account || curAcct();
+    const kind = String((a && a.kind) || "").toLowerCase();
+    if (kind === "gmail") return "Gmail";
+    if (kind === "microsoft") return "Outlook";
+    if (kind === "imap") {
+      const provider = a && String(a.provider || "").trim();
+      return provider || "your mail server";
+    }
+    return "your mail server";
+  }
+  function hostedReconnect(name) {
+    if (window.__cbmStandalone) return name + " needs to be reconnected. Open Connect (/connect) and connect it again.";
+    const href = connectLink(state.hostedPublicUrl || "");
+    if (href) return name + " needs to be reconnected. Open Connect (" + href + ") and connect it again.";
+    return name + " needs to be reconnected. Open your mail server's Connect page.";
+  }
+  function mcpCopy(e, server, account) {
     const code = e && e.code; const s = server || (e && e.server) || "the connector";
-    if (s === GMAIL && isNotFound(e) && (!code || code === "tool_error" || code === "upstream_error")) return "Gmail can't find this any more. It was probably deleted or moved since the list loaded. Refresh the list to bring it up to date.";
+    const who = GX_HOSTED ? mailboxName(account) : "Gmail";
+    if (s === GMAIL && isNotFound(e) && (!code || code === "tool_error" || code === "upstream_error")) return who + " can't find this any more. It was probably deleted or moved since the list loaded. Refresh the list to bring it up to date.";
+    if (GX_HOSTED && (code === "needs_reauth" || code === "server_not_found")) return hostedReconnect(who);
+    if (GX_HOSTED && code === "upstream_error") return who + " couldn't finish that just now. Wait a moment and try again.";
     switch (code) {
       case "needs_reauth": return s + " needs to be reconnected. Open claude.ai Settings → Connectors and reconnect it.";
-      case "server_not_connected": return s + " isn't connected for this account. Add it in claude.ai Settings → Connectors.";
+      case "server_not_connected": return window.__cbmStandalone ? s + " isn't available outside Claude. Only this mailbox is connected here." : s + " isn't connected for this account. Add it in claude.ai Settings → Connectors.";
       case "selection_required": return "You have more than one " + s + " connector. Choose one when claude.ai asks, then refresh.";
       case "not_in_manifest": return "This page isn't allowed to use " + s + " for you. Allow it in the artifact's Permissions menu.";
       case "blocked_by_policy": return "Your organization's policy blocks this " + s + " action here.";
@@ -1308,9 +1374,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     finally { speedNote(speedLabel(server, tool, input), performance.now() - t0, ok); }
   }
   async function callNow(server, tool, input, opts) {
+    // server_info is a hosted read. It is not mapped onto the Gmail connector or Composio.
+    if (tool === "server_info" && server === GMAIL) {
+      if (GX_HOSTED) {
+        const info = await hostedOne("server_info", {}, opts, null);
+        if (info && Object.prototype.hasOwnProperty.call(info, "publicUrl")) state.hostedPublicUrl = info.publicUrl || "";
+        return info;
+      }
+      return { publicUrl: "", version: APP_VERSION, providers: { google: false, microsoft: false, imap: false } };
+    }
     if (!state.mcp) throw { code: "not_granted", message: "mcp unavailable" };
     if (state.readOnly && MUTATING.has(tool)) throw { code: "read_only", server: server, message: "read-only mode" };
-    if (GX && server === GMAIL) return gmailComposio(tool, input || {}, opts);
+    if (GX_COMPOSIO && server === GMAIL) return gmailComposio(tool, input || {}, opts);
+    if (GX_HOSTED && server === GMAIL) return gmailHosted(tool, input || {}, opts);
     // Reads get one retry when the runtime marks the failure retryable: a short outage, or a call that ran while
     // claude.ai's "allow this connector" prompt was still open. Writes never retry: a failure isn't proof they didn't run.
     const isRead = !MUTATING.has(tool) && (tool !== "COMPOSIO_MULTI_EXECUTE_TOOL" || !!(opts && opts.read));
@@ -1501,11 +1577,12 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const gxWhen = (t) => Date.parse(((t.messages && t.messages[0]) || {}).date || "") || 0;
   const gxKey = (t) => { const m = (t.messages && t.messages[0]) || {}; return [emailOf(m.sender).toLowerCase(), String(m.subject || ""), m.date || ""].join("|"); };
   const gxAddressed = (t) => { const A = acctById(t.acct); const m = (t.messages && t.messages[0]) || {}; const e = A && A.email && A.email.toLowerCase(); return !!e && [].concat(m.toRecipients || [], m.ccRecipients || []).some((x) => emailOf(x).toLowerCase() === e); };
-  function gxFailed(fails) { return fails.map((f) => ({ label: f.A.label || f.A.email || f.A.id, message: mcpCopy(f.e, GX_SERVER) })); }
-  async function gxAllSearch(input, opts) {
+  function gxFailed(fails) { return fails.map((f) => ({ label: f.A.label || f.A.email || f.A.id, message: mcpCopy(f.e, GX_SERVER, f.A) })); }
+  async function gxAllSearch(input, opts, leafFn) {
+    const leaf = leafFn || gxOne;
     const accts = allAccts();
     if (input.view === "THREAD_VIEW_IDS_ONLY") {
-      const rs = await Promise.allSettled(accts.map((A) => gxOne("search_threads", Object.assign({}, input, { pageToken: undefined }), opts, A)));
+      const rs = await Promise.allSettled(accts.map((A) => leaf("search_threads", Object.assign({}, input, { pageToken: undefined }), opts, A)));
       const ok = rs.filter((r) => r.status === "fulfilled").map((r) => r.value);
       if (!ok.length) throw rs[0].reason;
       return { threads: [].concat(...ok.map((v) => v.threads)), nextPageToken: null, resultCountEstimate: ok.reduce((s, v) => s + (+v.resultCountEstimate || 0), 0) };
@@ -1513,7 +1590,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const st = (input.pageToken && gxPages[input.pageToken]) || { toks: {}, done: {}, low: {}, est: {}, buf: [], shown: new Set() };
     if (input.pageToken) delete gxPages[input.pageToken];
     const todo = accts.filter((A) => !st.done[A.id]);
-    const rs = await Promise.allSettled(todo.map((A) => gxOne("search_threads", Object.assign({}, input, { pageToken: st.toks[A.id] || undefined }), opts, A)));
+    const rs = await Promise.allSettled(todo.map((A) => leaf("search_threads", Object.assign({}, input, { pageToken: st.toks[A.id] || undefined }), opts, A)));
     const fails = [];
     rs.forEach((r, i) => {
       const A = todo[i];
@@ -1704,9 +1781,141 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       default: throw { code: "bad_request", message: tool + " isn't mapped to Composio yet" };
     }
   }
+  // ---------- Gmail through the Chatterbuilt Mail server (CONFIG.gmail.via === "chatterbuilt") ----------
+  // Same account routing as Composio. The tool names stay the page's own; each call adds account. A rejected
+  // tool_error whose text is the server's {code, message} is unwrapped so the page's error copy matches the
+  // other paths. Reads retry once when that code is upstream_error or rate_limited and the runtime said
+  // retryable. needs_reauth and not-found are not retried. Writes are never retried.
+  function hostedUnwrap(e) {
+    if (!e || e.code !== "tool_error" || !e.result) return e;
+    let text = "";
+    const content = e.result.content || (e.result.payload && e.result.payload.content);
+    if (Array.isArray(content)) { const part = content.find((x) => x && x.type === "text" && x.text); text = part ? String(part.text) : ""; }
+    else if (typeof e.result.text === "string") text = e.result.text;
+    let inner = null; try { inner = JSON.parse(text); } catch { inner = null; }
+    if (!inner || typeof inner !== "object" || !inner.code) return e;
+    const out = { code: String(inner.code), message: String(inner.message || ""), server: GX_SERVER };
+    if ((out.code === "upstream_error" || out.code === "rate_limited") && e.retryable === true) { out.retryable = true; if (e.retryAfterMs) out.retryAfterMs = e.retryAfterMs; }
+    return out;
+  }
+  function hostedRemember(A, data) {
+    if (!A || !data || typeof data !== "object") return data;
+    const own = (kind, id) => { if (id) gxOwner[kind + ":" + id] = A.id; };
+    const thread = (t) => { if (!t || !t.id) return; t.acct = t.acct || A.id; own("t", t.id); (t.messages || []).forEach((m) => { if (m && m.id) own("m", m.id); }); };
+    if (Array.isArray(data.threads)) data.threads.forEach(thread);
+    if (Array.isArray(data.drafts)) data.drafts.forEach((d) => { if (!d || !d.id) return; d.acct = d.acct || A.id; own("d", d.id); if (d.threadId) gxOwner["t:" + d.threadId] = gxOwner["t:" + d.threadId] || A.id; });
+    if (data.messages && data.id) thread(data);
+    else if (data.id && (data.threadId || data.messageId || data.plaintextBody || data.htmlBody)) { data.acct = data.acct || A.id; own("d", data.id); if (data.threadId) gxOwner["t:" + data.threadId] = gxOwner["t:" + data.threadId] || A.id; if (data.messageId) own("m", data.messageId); }
+    return data;
+  }
+  let hostedLabelCache = {};
+  async function hostedOne(tool, input, opts, A) {
+    const body = Object.assign({}, input || {});
+    delete body.acct;
+    if (A && A.id) body.account = A.id;
+    Object.keys(body).forEach((k) => { if (body[k] === undefined || body[k] === null || body[k] === "") delete body[k]; });
+    const isRead = !MUTATING.has(tool);
+    let mo = opts; if (opts && ("read" in opts || "full" in opts)) { mo = Object.assign({}, opts); delete mo.read; delete mo.full; }
+    const go = () => state.mcp.callTool(GX_SERVER, tool, body, mo);
+    const take = async () => { try { return await go(); } catch (e) { throw hostedUnwrap(e); } };
+    let raw;
+    try { raw = await take(); }
+    catch (e) {
+      if (!isRead || !e || e.retryable !== true) throw e;
+      const wait = Math.min(Math.max(+e.retryAfterMs || 0, 500), 60000) + Math.floor(Math.random() * 700);
+      await new Promise((res) => setTimeout(res, wait));
+      raw = await take();
+    }
+    if (raw && raw.isError) throw hostedUnwrap({ code: "tool_error", result: raw });
+    const p = raw && raw.payload !== undefined ? raw.payload : raw;
+    if (p && p.isError) throw hostedUnwrap({ code: "tool_error", result: p });
+    return hostedRemember(A, p);
+  }
+  // The connector path does not ship capabilities. Ask once, then hide filters only where the server says so.
+  async function learnAccountCaps() {
+    if (!GX_HOSTED || !GX || !state.mcp) return;
+    if (!GX.accounts.some((a) => a && !a.capabilities)) return;
+    try {
+      const data = await hostedOne("list_accounts", {}, { cache: false }, null);
+      const rows = data && Array.isArray(data.accounts) ? data.accounts : [];
+      const byId = {};
+      rows.forEach((row) => { if (row && row.id) byId[row.id] = row; });
+      GX.accounts.forEach((a) => {
+        const row = byId[a.id];
+        if (!row) return;
+        if (row.kind) a.kind = row.kind;
+        if (row.provider && String(row.provider).trim()) a.provider = String(row.provider).trim();
+        if (row.capabilities) a.capabilities = row.capabilities;
+      });
+    } catch { /* keep showing filters when the server does not answer */ }
+    syncFilterUi();
+  }
+  async function hostedLabelsOf(A, opts) {
+    if (!A) return [];
+    if (hostedLabelCache[A.id]) return hostedLabelCache[A.id];
+    const d = await hostedOne("list_labels", {}, { cache: { staleTime: 300000, gcTime: 600000 }, signal: opts && opts.signal }, A);
+    hostedLabelCache[A.id] = ((d && d.labels) || []).filter((l) => l && l.labelId);
+    return hostedLabelCache[A.id];
+  }
+  async function hostedLabelIds(A, ids, create, opts) {
+    const out = [];
+    for (const id of ids || []) {
+      const s = String(id);
+      if (!s.startsWith("gxname:")) { out.push(s); continue; }
+      const name = s.slice(7);
+      let l = (await hostedLabelsOf(A, opts)).find((x) => String(x.name).toLowerCase() === name.toLowerCase());
+      if (!l && create) { const d = await hostedOne("create_label", { displayName: name }, { cache: false }, A); hostedLabelCache[A.id] = null; l = { labelId: d && (d.labelId || d.id), name: name }; }
+      if (l && l.labelId) out.push(l.labelId);
+    }
+    return out;
+  }
+  async function gmailHosted(tool, input, opts) {
+    if (isAll()) {
+      if (tool === "search_threads") return gxAllSearch(input, opts, hostedOne);
+      if (tool === "list_drafts") {
+        const rs = await Promise.allSettled(allAccts().map((A) => hostedOne(tool, input, opts, A)));
+        const ok = rs.filter((r) => r.status === "fulfilled"); if (!ok.length) throw rs[0].reason;
+        return { drafts: [].concat(...ok.map((r) => (r.value && r.value.drafts) || [])) };
+      }
+      if (tool === "list_labels") {
+        const rs = await Promise.allSettled(allAccts().map((A) => hostedLabelsOf(A, opts)));
+        const ok = rs.filter((r) => r.status === "fulfilled"); if (!ok.length) throw rs[0].reason;
+        const by = new Map();
+        ok.forEach((r) => r.value.forEach((l) => { const user = String(l.labelType || "").toUpperCase() === "USER"; const k = user ? "u:" + String(l.name).toLowerCase() : "s:" + l.labelId; if (!by.has(k)) by.set(k, { labelId: user ? "gxname:" + l.name : l.labelId, name: l.name, labelType: user ? "USER" : "SYSTEM" }); }));
+        return { labels: [...by.values()] };
+      }
+      if (tool === "create_label") {
+        const A = curAcct(); await hostedOne("create_label", { displayName: input.displayName }, opts, A); if (A) hostedLabelCache[A.id] = null;
+        return { labelId: "gxname:" + input.displayName, name: input.displayName };
+      }
+      if (tool === "list_filters") {
+        const rs = await Promise.allSettled(allAccts().map((A) => hostedOne(tool, input, opts, A)));
+        const ok = rs.filter((r) => r.status === "fulfilled"); if (!ok.length) throw rs[0].reason;
+        return { filters: [].concat(...ok.map((r) => (r.value && r.value.filters) || [])) };
+      }
+    }
+    if (/^(list_send_as|send_message|create_draft|update_draft|delete_draft|create_filter|delete_filter|list_filters)$/.test(tool) && input.acct && GX.accounts.some((a) => a.id === input.acct)) return hostedOne(tool, input, opts, GX.accounts.find((a) => a.id === input.acct));
+    if (tool === "list_send_as" || tool === "list_filters") return hostedOne(tool, input, opts, gxAcctFor(input));
+    if (tool === "get_thread" && isAll() && GX.accounts.length > 1) {
+      const first = gxAcctFor(input);
+      try { return await hostedOne(tool, input, opts, first); }
+      catch (e) {
+        if (!isNotFound(e)) throw e;
+        for (const A of allAccts()) { if (!first || A.id === first.id) continue; try { const r = await hostedOne(tool, input, opts, A); gxOwner["t:" + input.threadId] = A.id; return r; } catch { /* not there either */ } }
+        throw e;
+      }
+    }
+    const A = gxAcctFor(input);
+    if (isAll() && (tool === "label_thread" || tool === "unlabel_thread")) {
+      const ids = await hostedLabelIds(A, input.labelIds, tool === "label_thread", opts);
+      if (!ids.length) return {};
+      return hostedOne(tool, Object.assign({}, input, { labelIds: ids }), opts, A);
+    }
+    return hostedOne(tool, input, opts, A);
+  }
   const invalGmail = (tool) => {
     if (!state.mcp) return Promise.resolve();
-    if (GX) { gxLabelCache = {}; return state.mcp.invalidate(GX_SERVER); }
+    if (GX) { gxLabelCache = {}; hostedLabelCache = {}; return state.mcp.invalidate(GX_SERVER); }
     return tool ? state.mcp.invalidate(GMAIL, tool) : state.mcp.invalidate(GMAIL);
   };
   function showBanner(text, cls) { const b = $("banner"); b.hidden = !text; b.textContent = text || ""; b.className = "banner " + (cls || ""); }
@@ -2797,9 +3006,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     try {
       const subj = /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || "");
       const to = isOwn(last) ? counterpart(last) : [emailOf(last.sender)];
-      // Composio's draft tool has no From, so a draft from another account is made in that account, as a new email.
-      if (state.from && !state.from.isPrimary) { note("A draft can't be saved from an alias here, only sent. Send it, or pick " + ((fromOpts || []).find((o) => o.acct === state.from.acct && o.isPrimary) || { email: "the account's own address" }).email + " to save a draft.", "err"); return; }
-      const p = state.from ? await call(GMAIL, "create_draft", Object.assign(fromRecipients(last), { subject: subj, body: body, includeSignature: featOn("signature") && sigOn(), acct: state.from.acct }), { cache: false }) : await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+      // Composio's draft tool has no From. A draft from another account is made in that account, as a new email.
+      // A same-account alias on the hosted server keeps the thread (replyToMessageId). The draft itself is still the account's address; Send from the alias uses fromEmail.
+      const stay = state.from && fromStaysInThread(state.from, homeFrom());
+      if (state.from && !state.from.isPrimary && !stay) { note("A draft can't be saved from an alias here, only sent. Send it, or pick " + ((fromOpts || []).find((o) => o.acct === state.from.acct && o.isPrimary) || { email: "the account's own address" }).email + " to save a draft.", "err"); return; }
+      const p = state.from && !stay ? await call(GMAIL, "create_draft", Object.assign(fromRecipients(last), { subject: subj, body: body, includeSignature: featOn("signature") && sigOn(), acct: state.from.acct }), { cache: false }) : await call(GMAIL, "create_draft", Object.assign({ replyToMessageId: last.id, to: to, subject: subj, body: body, includeSignature: featOn("signature") && sigOn() }, stay ? { acct: state.from.acct } : {}, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       recordDraftOutcome(state.selectedId, body, to[0]);
       note("Saved to Gmail drafts.", "ok");
       if (p && p.viewUrl) { const a = document.createElement("a"); a.href = p.viewUrl; a.target = "_blank"; a.rel = "noopener"; a.textContent = "Open draft"; $("composeNote").append(" ", a); }
@@ -2814,7 +3025,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const own = isOwn(last); const to = own ? counterpart(last) : [emailOf(last.sender)];
       if (state.from) {
         const r = fromRecipients(last); if (!r.to.length) throw { code: "tool_error", message: "there's no one to send this to" };
-        await call(GMAIL, "send_message", Object.assign(r, { subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, includeSignature: featOn("signature") && sigOn(), fromEmail: state.from.email, acct: state.from.acct }, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
+        const stay = fromStaysInThread(state.from, homeFrom());
+        await call(GMAIL, "send_message", Object.assign(r, { subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, includeSignature: featOn("signature") && sigOn(), fromEmail: state.from.email, acct: state.from.acct }, stay ? { replyToMessageId: last.id } : {}, state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
       } else if (own) {
         if (!to.length) throw { code: "tool_error", message: "there's no one to follow up with on this thread" };
         await call(GMAIL, "send_message", Object.assign({ to: to, subject: /^re:/i.test(last.subject || "") ? last.subject : "Re: " + (last.subject || ""), body: body, replyToMessageId: last.id, includeSignature: featOn("signature") && sigOn() }, rcptExtras(last), state.attachments.length ? { attachments: attPayload() } : {}), { cache: false });
@@ -3305,7 +3517,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (state.readOnly) { note(mcpCopy({ code: "read_only" }), "err"); return; }
     const own = isOwn(last);
     const who = (own ? counterpart(last).map((a) => a).join(", ") : (nameOf(last.sender) || "the sender") + ($("replyAll").checked ? " and everyone on the thread" : "")) + rcptSummary();
-    const verb = (own ? "Send this follow-up" : "Send this reply") + (state.from ? " from " + state.from.email + ", as a new email," : "") + " to ";
+    const stay = state.from && fromStaysInThread(state.from, homeFrom());
+    const verb = (own ? "Send this follow-up" : "Send this reply") + (state.from ? " from " + state.from.email + (stay ? ", still in this thread," : ", as a new email,") : "") + " to ";
     const box = $("confirmBox"), out = $("checkOut"); box.hidden = false; box.className = "confirmbox"; $("useFix").hidden = true;
     if (!featOn("precheck")) { out.innerHTML = ""; $("confirmText").textContent = verb + who + "?"; $("confirmSend").textContent = "Yes, send it"; showThenPlan(++checkRun); return; }
     const run = ++checkRun; showThenPlan(run);
@@ -3389,8 +3602,8 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   function saveRules(r) { ls.set("cm.rules", JSON.stringify(r)); }
   const autoRulesOn = () => ls.get("cm.autoRules") !== "0";
-  const opName = (r) => r.op === "move" ? "move to " + (r.labelName || "?") : r.op === "archive" ? "archive" : r.op === "star" ? "star" : "mark read";
-  const pastTense = (op, labelName) => op === "move" ? "moved" : op === "archive" ? "archived" : op === "star" ? "starred" : "marked read";
+  const opName = (r) => r.op === "move" ? "move to " + (r.labelName || "?") : r.op === "archive" ? "archive" : r.op === "star" ? "star" : r.op === "skip" ? "skip the inbox" : "mark read";
+  const pastTense = (op, labelName) => op === "move" ? "moved" : op === "archive" ? "archived" : op === "star" ? "starred" : op === "skip" ? "skipped" : "marked read";
   const ruleFromMatch = (rule, addr) => { const f = String(rule.from || "").toLowerCase(); if (!f || !addr) return false; return f.includes("@") ? addr === f : (addr.endsWith("@" + f) || addr.endsWith("." + f)); };
 
   // what you do by hand becomes evidence for rule suggestions
@@ -3431,6 +3644,31 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     else if (ev.target.closest("[data-dismisssug]")) { ev.preventDefault(); dismissSuggestion(state.ruleSuggestion); state.ruleSuggestion = null; const t = document.querySelector(".toast"); if (t) t.remove(); }
   });
 
+  async function openFilters() {
+    if (!filterAccts().length) return;
+    let filters = [];
+    try { const p = await call(GMAIL, "list_filters", {}, { cache: false }); filters = (p && p.filters) || []; }
+    catch (e) { openModal("Filters", '<p class="note err">' + esc(mcpCopy(e, GMAIL)) + '</p>'); return; }
+    const skip = (f) => f.action && (f.action.skipInbox || (f.action.removeLabelIds || []).includes("INBOX"));
+    openModal("Filters",
+      '<p class="note">Gmail filters on ' + esc(GX_SERVER) + '. Skip the inbox keeps future mail out of the inbox. It does not move mail that is already there.</p>'
+      + '<div class="mlist">' + (filters.length ? filters.map((f) => '<div class="mitem"><span></span><span class="t">' + esc((f.criteria && f.criteria.from) || f.id) + '</span><button type="button" class="btn sm ghost" data-delf="' + esc(f.id) + '" data-facc="' + esc(f.account || "") + '">Delete</button><span class="d">' + (skip(f) ? "skips the inbox" : "filter") + '</span></div>').join("") : '<div class="mitem"><span></span><span class="d">No filters yet.</span></div>') + '</div>'
+      + '<h3>Skip the inbox</h3><div class="mrow">' + filtMenu("filtAcct") + '<input type="text" id="filtFrom" placeholder="From this address" data-focus><button type="button" class="btn" id="filtAdd">Create filter</button></div><span class="note" id="filtNote"></span>');
+    $("filtAdd").addEventListener("click", async () => {
+      const from = $("filtFrom").value.trim().toLowerCase();
+      if (!from || !from.includes("@")) { $("filtNote").textContent = "Enter the sender's email address."; return; }
+      const A = pickFilt("filtAcct");
+      if (!A) { $("filtNote").textContent = "This account cannot skip the inbox."; return; }
+      $("filtAdd").disabled = true;
+      try { await call(GMAIL, "create_filter", { criteria: { from: from }, action: { skipInbox: true }, acct: A && A.id }, { cache: false }); openFilters(); }
+      catch (e) { $("filtNote").textContent = mcpCopy(e, GMAIL); $("filtAdd").disabled = false; }
+    });
+    $("modalBody").querySelectorAll("[data-delf]").forEach((b) => b.addEventListener("click", async () => {
+      b.disabled = true;
+      try { await call(GMAIL, "delete_filter", { filterId: b.dataset.delf, acct: b.dataset.facc || undefined }, { cache: false }); openFilters(); }
+      catch (e) { toast(esc(mcpCopy(e, GMAIL)), "err", 6000); b.disabled = false; }
+    }));
+  }
   async function openRules() {
     const rules = loadRules();
     let labels = []; try { labels = await loadLabels(); } catch {}
@@ -3444,18 +3682,37 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div class="mrow"><button type="button" class="btn" id="ruleSuggest">Suggest rules from my history</button><span class="note" id="sugNote"></span></div></div>'
       + '<h3>Add a rule</h3>'
       + '<input type="text" id="ruleText" placeholder="When an email is… e.g. a receipt, invoice or payment confirmation" data-focus>'
-      + '<div class="mrow"><select id="ruleOp" style="width:auto"><option value="move">Move to folder</option><option value="archive">Archive</option><option value="star">Star</option><option value="read">Mark read</option></select>'
+      + '<div class="mrow"><select id="ruleOp" style="width:auto"><option value="move">Move to folder</option><option value="archive">Archive</option><option value="star">Star</option><option value="read">Mark read</option>' + (filterAccts().length ? '<option value="skip">Skip the inbox</option>' : '') + '</select>'
       + '<select id="ruleFolder" style="flex:1;width:auto;min-width:0">' + labels.filter((l) => !isCbLabel(l.name)).map((l) => '<option value="' + esc(l.labelId) + '">' + esc(l.name) + '</option>').join("") + '</select>'
+      + (filterAccts().length ? filtMenu("ruleAcct") + '<input type="text" id="ruleFrom" placeholder="From this address" hidden style="flex:1;min-width:0">' : '')
       + '<button type="button" class="btn" id="ruleAdd">Add rule</button></div>'
       + '<span class="note" id="ruleAddNote">' + (labels.length ? "" : "No folders yet. Make one from More, Move first, or pick another action.") + '</span>'
       + '<div class="mrow"><button type="button" class="btn primary" id="ruleRun"' + (rules.length && state.threads.length ? "" : " disabled") + '>Run rules on the ' + state.threads.length + ' threads in the list</button><span class="note" id="ruleNote"></span></div>');
-    const syncOp = () => { $("ruleFolder").style.display = $("ruleOp").value === "move" ? "" : "none"; };
+    const syncOp = () => {
+      const op = $("ruleOp").value;
+      $("ruleFolder").style.display = op === "move" ? "" : "none";
+      const rf = $("ruleFrom"); if (rf) rf.hidden = op !== "skip";
+      const n = $("ruleAddNote");
+      if (op === "skip" && n) n.textContent = "This creates a Gmail filter. Future mail from that address skips the inbox. Mail already there stays until you move it.";
+      else if (n && /skips the inbox/.test(n.textContent)) n.textContent = labels.length ? "" : "No folders yet. Make one from More, Move first, or pick another action.";
+    };
     $("ruleOp").addEventListener("change", syncOp); syncOp();
     $("autoRules").addEventListener("change", () => ls.set("cm.autoRules", $("autoRules").checked ? "1" : "0"));
-    $("ruleAdd").addEventListener("click", () => {
+    $("ruleAdd").addEventListener("click", async () => {
       const text = $("ruleText").value.trim(); const op = $("ruleOp").value; const sel = $("ruleFolder");
       if (!text) { $("ruleAddNote").textContent = "Describe which emails the rule is for."; return; }
       if (op === "move" && !sel.value) { $("ruleAddNote").textContent = "Pick a folder."; return; }
+      if (op === "skip") {
+        const from = ($("ruleFrom") && $("ruleFrom").value || "").trim().toLowerCase();
+        if (!from || !from.includes("@")) { $("ruleAddNote").textContent = "Skip the inbox needs the sender's email address."; return; }
+        const A = pickFilt("ruleAcct");
+        if (!A) { $("ruleAddNote").textContent = "This account cannot skip the inbox."; $("ruleAdd").disabled = false; return; }
+        $("ruleAdd").disabled = true;
+        try { await call(GMAIL, "create_filter", { criteria: { from: from }, action: { skipInbox: true }, acct: A && A.id }, { cache: false }); }
+        catch (e) { $("ruleAddNote").textContent = mcpCopy(e, GMAIL); $("ruleAdd").disabled = false; return; }
+        const r = loadRules(); r.push({ id: Date.now().toString(36), text: text, op: "skip", from: from, labelId: null, labelName: null });
+        saveRules(r); openRules(); return;
+      }
       const r = loadRules(); r.push({ id: Date.now().toString(36), text: text, op: op, labelId: op === "move" ? sel.value : null, labelName: op === "move" ? sel.options[sel.selectedIndex].text : null });
       saveRules(r); openRules();
     });
@@ -3516,7 +3773,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const props = []; const hit = new Set();
     pool.forEach((t) => {
       const m = (t.messages && t.messages[0]) || {}; if (isOwn(m)) return; const addr = emailOf(m.sender).toLowerCase();
-      const rule = rules.find((r) => r.from && ruleFromMatch(r, addr)); if (!rule) return;
+      const rule = rules.find((r) => r.op !== "skip" && r.from && ruleFromMatch(r, addr)); if (!rule) return;
       const l = rule.op === "move" ? labelFor(rule) : null; if (rule.op === "move" && !l) return;
       props.push(mkProp(t, rule.op, l, "rule: " + rule.text, "rule")); hit.add(t.id);
     });
@@ -3792,6 +4049,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const sel = $("acctSel"); if (sel) sel.value = String(acctIdx);
     resetMailbox(); renderAcctChips(); loadThreads(false);
     toast("Now showing " + esc(i < 0 ? "All inboxes" : acctName(GX.accounts[i])) + ".", "ok", 2500);
+    syncFilterUi();
   }
   // The chips over the list in All inboxes: tap one to leave that account out, tap again to bring it back.
   function renderAcctChips() {
@@ -3805,17 +4063,31 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     allOff = on ? allOff.filter((x) => x !== id) : allOff.concat(id);
     ls.set("cm.allOff", JSON.stringify(allOff));
     if (isAll()) { resetMailbox(); renderAcctChips(); loadThreads(false); }
+    syncFilterUi();
     return true;
   }
   $("acctChips").addEventListener("click", (ev) => { const b = ev.target.closest("[data-acctchip]"); if (b) setInAll(b.dataset.acctchip, b.getAttribute("aria-pressed") !== "true"); });
+  // https, or http only for loopback. Anything else, including javascript:, is no link.
+  function connectLink(publicUrl) {
+    let parsed;
+    try { parsed = new URL(String(publicUrl || "")); }
+    catch { return ""; }
+    const host = parsed.hostname;
+    const local = host === "localhost" || host === "127.0.0.1";
+    if (parsed.protocol !== "https:" && !(parsed.protocol === "http:" && local)) return "";
+    return String(publicUrl).replace(/\/+$/, "") + "/connect";
+  }
   // Settings → Accounts: a color per account (saved in this browser; Copy for Claude carries it into your copy).
-  function openAccounts() {
+  async function openAccounts() {
     if (!GX) return;
     const sw = (a) => [""].concat(Object.keys(ACC_COLORS)).map((k) => { const on = k ? acctColorName(a) === k : !acctColor(a); return '<button type="button" class="swatch' + (k ? "" : " none") + (on ? " on" : "") + '" data-sw="' + esc(a.id) + '" data-c="' + k + '" aria-pressed="' + on + '" title="' + (k || "No color") + '" aria-label="' + (k || "No color") + '"' + (k ? ' style="--acc:' + ACC_COLORS[k] + '"' : "") + '></button>'; }).join("");
     const rows = GX.accounts.map((a) => '<div class="acctrow"><div class="an"><strong>' + esc(acctName(a)) + '</strong>' + (a.email && a.label ? '<span class="note">' + esc(a.email) + '</span>' : "") + '</div>'
       + '<div class="swatches" role="group" aria-label="Color for ' + esc(acctName(a)) + '">' + sw(a) + '</div>'
       + (MULTI ? '<label class="ainc"><input type="checkbox" data-inc="' + esc(a.id) + '"' + (allOff.includes(a.id) ? "" : " checked") + '> Show in All inboxes</label>' : "") + '</div>').join("");
-    openModal("Accounts", '<p class="note">' + (MULTI ? "In All inboxes, each account's rows are tinted with its color, so you can tell them apart at a glance. " : "") + 'Saved in this browser. To make it permanent in your copy, use Copy for Claude under Settings → Voice and ask Claude to run chatterbuilt-mail-improve.</p>' + rows
+    const standalone = !!(window.__cbmStandalone && GX_HOSTED);
+    const add = standalone ? '<p class="mrow"><a class="btn" id="addAcct" href="/connect">Add an account</a></p>' : "";
+    delete modalBack.dataset.addSettled;
+    openModal("Accounts", '<p class="note">' + (MULTI ? "In All inboxes, each account's rows are tinted with its color, so you can tell them apart at a glance. " : "") + 'Saved in this browser. To make it permanent in your copy, use Copy for Claude under Settings → Voice and ask Claude to run chatterbuilt-mail-improve.</p>' + add + rows
       + '<div class="mrow"><button class="btn ghost" id="acReset" type="button">Use my copy\'s colors</button></div>');
     const body = $("modalBody");
     body.querySelectorAll("[data-sw]").forEach((b) => b.addEventListener("click", () => {
@@ -3824,6 +4096,19 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     }));
     body.querySelectorAll("[data-inc]").forEach((cb) => cb.addEventListener("change", () => { if (!setInAll(cb.dataset.inc, cb.checked)) cb.checked = true; }));
     $("acReset").addEventListener("click", () => { acctColorPref = {}; ls.del("cm.acctColors"); renderList(); renderAcctChips(); openAccounts(); });
+    const settle = () => { modalBack.dataset.addSettled = "1"; };
+    if (!GX_HOSTED) { settle(); return; }
+    let info = null;
+    try { info = await call(GMAIL, "server_info", {}, { cache: false }); }
+    catch { settle(); return; }
+    if (!standalone && !modalBack.hidden && $("modalTitle").textContent === "Accounts" && !$("addAcct")) {
+      const href = connectLink(info && info.publicUrl);
+      if (href) {
+        const note = $("modalBody").querySelector("p.note");
+        if (note) note.insertAdjacentHTML("afterend", '<p class="mrow"><a class="btn" id="addAcct" href="' + esc(href) + '">Add an account</a></p>');
+      }
+    }
+    settle();
   }
 
   // ---------- command palette + keys ----------
@@ -3935,7 +4220,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   let gcWarm = false;
   function googleBook(C) {
     const A = GX ? curAcct() : null; const acct = (A && A.contacts) || C.account || "";
-    const server = C.server || GX_SERVER || "Composio", tool = "COMPOSIO_MULTI_EXECUTE_TOOL";
+    const server = C.server || (GX_COMPOSIO ? GX_SERVER : "Composio"), tool = "COMPOSIO_MULTI_EXECUTE_TOOL";
     const ex = (slug, args) => ({ tools: [Object.assign({ tool_slug: slug, arguments: args }, acct ? { account: acct } : {})], sync_response_to_workbench: false, current_step: "CHATTERBUILT_MAIL", thought: "Chatterbuilt Mail: " + slug.toLowerCase().replace(/_/g, " ") });
     const search = async (q) => {
       if (!gcWarm) { gcWarm = true; try { await call(server, tool, ex("GOOGLECONTACTS_SEARCH_CONTACTS", { query: "", page_size: 1 }), { cache: false, read: true }); } catch {} } // Google asks for a warm-up search first
@@ -5215,10 +5500,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   const sigPreview = () => '<div class="sigview"></div>';
   const acctEmailOf = (id) => { const A = GX && GX.accounts.find((a) => a.id === id); return (A && A.email) || CONFIG.ownEmail || OWN || ""; };
   // ---------- From: the address a reply goes from ----------
-  // Through Composio the reply box can send from any address on any connected account: each account's own address and
-  // the aliases set up in Gmail under "Send mail as" (read with GMAIL_LIST_SEND_AS). The thread's own address sends a
-  // normal reply in the thread. Any other address sends it as a new email ("Re: …") from there, because no tool can reply
-  // inside a thread from another account or alias. The Gmail connector sends from its one account, so there's no picker.
+  // The reply box can send from any address on any connected account: each account's own address and the aliases set
+  // up in Gmail under "Send mail as". The thread's own address sends a normal reply in the thread. Through Composio,
+  // any other address sends a new email ("Re: …"), because no Composio tool can reply inside a thread from another
+  // account or alias. On the hosted server, a same-account alias stays in the thread (send_message with fromEmail and
+  // replyToMessageId). A different account is still a new email. The Gmail connector sends from its one account, so
+  // there's no picker.
+  function fromStaysInThread(from, home) { return !!(GX_HOSTED && from && home && from.acct === home.acct); }
   state.from = null; let fromOpts = null;
   async function loadFromOpts() {
     if (!GX) return [];
@@ -5247,7 +5535,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function pickFrom() {
     const v = $("fromSel").value.split("|"); const o = (fromOpts || []).find((x) => x.acct === v[0] && x.email === v[1]); const home = homeFrom();
     state.from = o && home && (o.acct !== home.acct || o.email !== home.email) ? o : null;
-    $("fromNote").textContent = state.from ? "Goes out as a new email from " + state.from.email + ", not inside this thread: Gmail can't reply in a thread from another " + (state.from.acct !== home.acct ? "account." : "address.") : "";
+    $("fromNote").textContent = !state.from ? "" : fromStaysInThread(state.from, home) ? "Goes out from " + state.from.email + ", still inside this thread." : "Goes out as a new email from " + state.from.email + ", not inside this thread: Gmail can't reply in a thread from another " + (state.from.acct !== home.acct ? "account." : "address.");
     if (!$("sigBox").hidden) { $("sigBox").hidden = true; peekSig(); }
   }
   // Who a reply from another address goes to: what Reply or Reply all would pick, plus your Cc and Bcc.
@@ -5308,7 +5596,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (!metas.length && !(full.attachmentIds || []).length) return;
     const html = full.htmlBody || "", cids = cidsIn(html), spacers = cidSpacers(html);
     try {
-      if (GX) {
+      if (GX_COMPOSIO) {
         c.files = metas.map((a) => { const cid = String(a.cid || "").toLowerCase(); return { origin: "draft", name: a.filename || "attachment", type: a.mimeType || "application/octet-stream", size: +a.size || 0, attId: a.id, msgId: full.messageId || full.id, cid: cid, inline: !!cid && cids.has(cid), spacer: !!cid && spacers.has(cid) }; });
         return;
       }
@@ -5354,11 +5642,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   function draftAttPayload(c) {
     const keep = c.files.filter((f) => !f.spacer || !f.inline); const list = [], map = {};
     keep.forEach((f) => {
-      if (GX) { if (f.inline) return; list.push(f.origin === "new" ? { filename: f.name, mimeType: f.type, content: f.b64 } : { filename: f.name, mimeType: f.type, attId: f.attId, msgId: f.msgId }); return; }
+      if (GX_COMPOSIO) { if (f.inline) return; list.push(f.origin === "new" ? { filename: f.name, mimeType: f.type, content: f.b64 } : { filename: f.name, mimeType: f.type, attId: f.attId, msgId: f.msgId }); return; }
       if (f.inline) map[f.cid] = list.length;
       list.push(Object.assign({ filename: f.name, mimeType: f.type, content: f.b64 }, f.inline ? { inline: true } : {}));
     });
-    const gone = new Set(c.files.filter((f) => f.inline && (GX || f.spacer)).map((f) => f.cid));
+    const gone = new Set(c.files.filter((f) => f.inline && (GX_COMPOSIO || f.spacer)).map((f) => f.cid));
     const html = (h) => {
       if (!c.files.some((f) => f.inline)) return h;
       const box = document.createElement("div"); box.innerHTML = h;
@@ -5610,7 +5898,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       + '<div class="rte" id="dEditor" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Draft text" data-placeholder="Write your message…"></div>'
       + '<div id="dSigBox"></div><div id="dQuoteBox"></div><p class="note rtnote" id="dSheetNote" hidden>Pictures show as boxes here; the email keeps the real ones.</p>'
       + '<div class="dfiles" id="dFiles" aria-live="polite"></div><input type="file" id="dFileIn" multiple hidden></div>'
-      + (GX && (full.inReplyTo || c.lostThread) ? '<p class="note warnline" id="dThreadWarn">' + (c.lostThread ? "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation." : "Heads up: Composio can't keep a reply's threading headers when it saves a draft. Gmail keeps it in your thread either way, but if you save here, their mail app may show it as a new conversation. To keep it threaded for them, make your edits in Gmail (Send from here is fine as long as you haven't saved).") + '</p>' : "")
+      + (GX_COMPOSIO && (full.inReplyTo || c.lostThread) ? '<p class="note warnline" id="dThreadWarn">' + (c.lostThread ? "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation." : "Heads up: Composio can't keep a reply's threading headers when it saves a draft. Gmail keeps it in your thread either way, but if you save here, their mail app may show it as a new conversation. To keep it threaded for them, make your edits in Gmail (Send from here is fine as long as you haven't saved).") + '</p>' : "")
       + '<div class="dprompt" id="dPrompt"><div class="dpromptrow"><textarea id="dRevise" rows="1" placeholder="' + D_PROMPT_HINT + '" aria-label="What to change"></textarea><button type="button" class="btn sm primary" id="dReviseGo">Revise</button><button type="button" class="btn sm ghost" id="dUndo" disabled>Undo</button></div>'
       + '<div class="mrow dquick"><span class="note">Quick:</span>' + ["Shorter", "Warmer", "More direct", "Polish"].map((r) => '<button type="button" class="btn sm ghost" data-drev="' + r + '">' + r + '</button>').join("") + '<span class="dselchip" id="dSelOnly" hidden>Selected text only<button type="button" class="dselx" id="dSelClear" aria-label="Revise the whole draft instead">×</button></span></div></div>'
       + '<div class="dcheck"><div class="dchead"><span>Before you send</span><button type="button" class="btn sm primary" id="dAutoCheck">Check it for me</button></div><p class="note dhow">Claude reads the draft against the message it answers, what your systems know about this person and your writing rules. It ticks what passes and says what to fix. It never changes the draft.</p>'
@@ -5687,7 +5975,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     if (c.filesErr) { dNote("Couldn't read this draft's attachments (" + c.filesErr + "), so saving here would drop them. Edit it in Gmail, or reopen it to try again.", "err"); return false; }
     // Through Composio a picture inside the email (a logo in the signature) can't go back in its place, so it asks first.
     const pics = c.files.filter((f) => f.inline && !f.spacer);
-    if (GX && pics.length && !c.picsOk) { dNote("Saving through Composio drops the " + (pics.length === 1 ? "picture" : pics.length + " pictures") + " inside this email (" + pics.map((f) => f.name).join(", ") + "). Files stay attached.", "err"); const n = $("dNote"); if (n) { n.insertAdjacentHTML("beforeend", ' <button type="button" class="btn sm" id="dPicsOk">Save without them</button>'); $("dPicsOk").addEventListener("click", () => { c.picsOk = true; saveDraftEdit(false); }); } return false; }
+    if (GX_COMPOSIO && pics.length && !c.picsOk) { dNote("Saving through Composio drops the " + (pics.length === 1 ? "picture" : pics.length + " pictures") + " inside this email (" + pics.map((f) => f.name).join(", ") + "). Files stay attached.", "err"); const n = $("dNote"); if (n) { n.insertAdjacentHTML("beforeend", ' <button type="button" class="btn sm" id="dPicsOk">Save without them</button>'); $("dPicsOk").addEventListener("click", () => { c.picsOk = true; saveDraftEdit(false); }); } return false; }
     const to = dAddrs("dto"), cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); if (!to.length) { dNote("Add at least one person on To.", "err"); return false; }
     const att = draftAttPayload(c);
     const html = att.html(rteTrim(rteClean($("dEditor").innerHTML)) + (state.dSig ? "<br><br>" + state.dSig : "") + (state.dQuote || "")); const text = htmlToText(html);
@@ -5696,11 +5984,11 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       // Gmail keeps a field's old value when it's sent empty, so an emptied Cc or Bcc has to be cleared in Gmail.
       await call(GMAIL, "update_draft", Object.assign({ draftId: d.id }, draftAcct(d), { to: to, subject: $("dSubj").value.trim() || full.subject || "", body: text, htmlBody: html, threadId: d.threadId }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}, att.list.length ? { attachments: att.list } : {}), { cache: false });
       // Through Composio the saved draft is a new message, so the files' ids change: read them again for the next save.
-      if (GX && c.files.length) { c.filesP = refreshDraftFiles(c); c.filesP.then(() => { if (state.dCur === c) renderDraftFiles(c); }, () => {}); }
+      if (GX_COMPOSIO && c.files.length) { c.filesP = refreshDraftFiles(c); c.filesP.then(() => { if (state.dCur === c) renderDraftFiles(c); }, () => {}); }
       state.dDirty = false; d._meta = null; (state.draftsAll || []).forEach((x) => { if (x.id === d.id) x._meta = null; }); full.htmlBody = html; full.plaintextBody = text; full.subject = $("dSubj").value.trim() || full.subject;
       // Composio's GMAIL_UPDATE_DRAFT rewrites the message without its In-Reply-To and References headers. Gmail still files
       // it in your thread, but their mail app may show it as a new conversation.
-      if (GX && full.inReplyTo) { c.lostThread = true; full.inReplyTo = ""; }
+      if (GX_COMPOSIO && full.inReplyTo) { c.lostThread = true; full.inReplyTo = ""; }
       if (c.lostThread) { const w = $("dThreadWarn"); if (w) w.textContent = "Saved through Composio, so this reply no longer carries its threading headers. Gmail keeps it in your thread; their mail app may show it as a new conversation."; }
       dNote(quiet ? "" : "Saved to Gmail.", "ok"); if (quiet) toast("Saved your changes to the draft to " + esc(to.join(", ")) + ".", "ok", 4000);
       draftMeta(d).then(renderDrafts).catch(() => {});
@@ -5713,8 +6001,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const to = dAddrs("dto"); if (!to.length) { dNote("Add at least one person on To.", "err"); return; }
     const cc = dAddrs("dcc"), bcc = dAddrs("dbcc"); const ticks = state.dTicks[state.dSel] || {}; const open = DRAFT_CHECKS.filter(([k]) => !(ticks[k] && ticks[k].on)).length;
     const F = GX && state.dCur && state.dFrom[state.dCur.d.id];
-    if (F && state.dCur.files && state.dCur.files.length) { dNote("This draft has files, and they can't go along to another account yet. Send it from its own address, or remove the files first.", "err"); return; }
-    $("dConfirmText").textContent = "Send this" + (F ? " from " + F.email : "") + " to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (F ? " It goes out as a new email" + (state.dCur.d.threadId ? ", not inside the thread" : "") + ", and this draft is then deleted." : "") + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
+    const stay = F && draftStays(state.dCur);
+    if (F && state.dCur.files && state.dCur.files.length && !stay) { dNote("This draft has files, and they can't go along to another account yet. Send it from its own address, or remove the files first.", "err"); return; }
+    $("dConfirmText").textContent = "Send this" + (F ? " from " + F.email : "") + " to " + to.join(", ") + (cc.length ? ", cc " + cc.join(", ") : "") + (bcc.length ? ", bcc " + bcc.join(", ") : "") + "?" + (F ? (stay ? " It stays inside this thread, and this draft is then deleted." : " It goes out as a new email" + (state.dCur.d.threadId ? ", not inside the thread" : "") + ", and this draft is then deleted.") : "") + (open ? " " + open + " checklist item" + (open === 1 ? " isn't" : "s aren't") + " ticked." : "") + (state.dCur && state.dCur.lostThread ? " Saving through Composio dropped its threading headers, so it may arrive as a new conversation." : "");
     state.dConfirmAct = "send"; $("dConfirmGo").textContent = "Yes, send it"; $("dConfirmGo").classList.remove("dangerbtn");
     $("dConfirm").hidden = false; state.dConfirmAt = performance.now(); $("dConfirmGo").focus();
   }
@@ -5782,6 +6071,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // signature stays behind; the other address's Gmail signature goes on instead. Files don't travel yet.
   state.dFrom = {};
   function dHomeFrom(d) { const A = acctById(d.acct) || ownerOf("d", d.id) || homeAcct(); const l = (fromOpts || []).filter((o) => A && o.acct === A.id); return l.find((o) => o.isDefault) || l.find((o) => o.isPrimary) || l[0] || null; }
+  // A real message on the draft's thread, never the draft itself. The hosted server uses it as replyToMessageId.
+  function draftReplyTarget(c) {
+    const ms = (c.thread && c.thread.messages) || [];
+    const real = ms.filter((m) => m && m.id && m.id !== (c.full && c.full.id) && m.id !== c.d.id && !(m.labelIds || []).includes("DRAFT"));
+    return real.length ? real[real.length - 1].id : null;
+  }
+  function draftStays(c) { const F = c && state.dFrom[c.d.id]; return !!(F && fromStaysInThread(F, dHomeFrom(c.d)) && draftReplyTarget(c)); }
   const acctLabel = (id) => { const A = acctById(id); return (A && (A.label || A.email)) || id; };
   async function dFromSetup(c) {
     if (!GX || !c) return; let l; try { l = await loadFromOpts(); } catch { return; }
@@ -5793,8 +6089,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   }
   function dFromNote(c) {
     const n = $("dFromNote"); if (!n) return; const F = state.dFrom[c.d.id]; const home = dHomeFrom(c.d);
-    n.className = "note"; n.textContent = !F ? "" : "Goes out as a new email from " + F.email + (c.d.threadId ? ", not inside the thread" : "") + ", then this draft is deleted from " + acctLabel(home ? home.acct : c.d.acct) + "." + (c.files && c.files.length ? " Its files can't go along to another account yet." : "");
-    if (F && c.files && c.files.length) n.className = "note err";
+    const stay = F && draftStays(c);
+    n.className = "note"; n.textContent = !F ? "" : stay ? "Goes out from " + F.email + ", still inside this thread." + (c.files && c.files.length ? " Its files go with it." : "") : "Goes out as a new email from " + F.email + (c.d.threadId ? ", not inside the thread" : "") + ", then this draft is deleted from " + acctLabel(home ? home.acct : c.d.acct) + "." + (c.files && c.files.length ? " Its files can't go along to another account yet." : "");
+    if (F && c.files && c.files.length && !stay) n.className = "note err";
   }
   function dPickFrom() {
     const c = state.dCur; if (!c) return; const v = $("dFromSel").value.split("|"); const o = (fromOpts || []).find((x) => x.acct === v[0] && x.email === v[1]); const home = dHomeFrom(c.d);
@@ -5805,10 +6102,13 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   async function sendDraftFrom(c) {
     const { d } = c; const F = state.dFrom[d.id]; const home = dHomeFrom(d);
     const to = dAddrs("dto"), cc = dAddrs("dcc"), bcc = dAddrs("dbcc");
-    const html = rteTrim(rteClean($("dEditor").innerHTML)) + (state.dQuote || ""); const subject = $("dSubj").value.trim() || c.full.subject || "";
+    const subject = $("dSubj").value.trim() || c.full.subject || "";
+    const target = draftReplyTarget(c); const stay = fromStaysInThread(F, home) && !!target;
+    let html = rteTrim(rteClean($("dEditor").innerHTML)) + (state.dQuote || ""); let attachments = null;
+    if (stay && c.files && c.files.length) { try { await c.filesP; } catch {} const att = draftAttPayload(c); html = att.html(html); if (att.list.length) attachments = att.list; }
     dLock("sending"); dNote("Sending from " + F.email + "…");
     try {
-      try { await call(GMAIL, "send_message", Object.assign({ to: to, subject: subject, body: htmlToText(html), htmlBody: html, includeSignature: !!state.dSig && featOn("signature"), fromEmail: F.email, acct: F.acct }, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}), { cache: false }); }
+      try { await call(GMAIL, "send_message", Object.assign({ to: to, subject: subject, body: htmlToText(html), htmlBody: html, includeSignature: !!state.dSig && featOn("signature"), fromEmail: F.email, acct: F.acct }, stay ? { replyToMessageId: target } : {}, cc.length ? { cc: cc } : {}, bcc.length ? { bcc: bcc } : {}, attachments ? { attachments: attachments } : {}), { cache: false }); }
       catch (e) { const amb = e && (e.code === "server_unavailable" || e.code === "upstream_error"); dNote(mcpCopy(e, GMAIL) + (amb ? " Check the Sent folder of " + F.email + " before sending again." : ""), "err"); return; }
       // Sent. The draft it came from goes, so it isn't sent twice. If that fails, it says so; a write is never retried.
       let left = false;
@@ -6155,7 +6455,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   // and saves it as a Gmail draft in the thread; the draft shows here (Load it), ready to edit and send.
   $("chatCopyBtn").addEventListener("click", () => {
     const t = state.thread; if (!t) return; const ms = t.messages || []; const last = ms[ms.length - 1] || {}; const A = GX ? curAcct() : null;
-    const txt = "Help me reply to this email, then save the reply as a Gmail draft in the same thread" + (A ? " (Gmail through Composio, account " + A.id + ")" : "") + ".\n"
+    const txt = "Help me reply to this email, then save the reply as a Gmail draft in the same thread" + (A ? " (Gmail through " + (GX_HOSTED ? GX_SERVER : "Composio") + ", account " + A.id + ")" : "") + ".\n"
       + "Subject: " + (last.subject || "(no subject)") + "\nFrom: " + (last.sender || "") + "\nAccount: " + (curEmail() || "") + "\nThread id: " + (t.id || state.selectedId) + "\nIn Gmail: " + (t.viewUrl || "");
     const done = () => toast("Copied. Paste it into Claude chat. When Claude saves the draft, it shows on this thread: Load it, then Send.", "ok", 8000);
     try { navigator.clipboard.writeText(txt).then(done, () => openModal("Work on it in chat", '<p class="note">Copy this into Claude chat:</p><textarea class="copybox" readonly>' + esc(txt) + '</textarea>')); } catch { openModal("Work on it in chat", '<p class="note">Copy this into Claude chat:</p><textarea class="copybox" readonly>' + esc(txt) + '</textarea>'); }
@@ -6231,6 +6531,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("voiceBtn").addEventListener("click", () => openVoice(false));
   $("skillsBtn").addEventListener("click", () => openSkills(false));
   $("acctBtn").addEventListener("click", openAccounts);
+  $("filtersBtn").addEventListener("click", openFilters);
   $("speedBtn").addEventListener("click", () => { closeMenus(); openSpeed(); });
   $("roToggle").addEventListener("click", toggleRO);
   $("paletteBtn").addEventListener("click", openPalette);
@@ -6252,6 +6553,7 @@ body.drafts-mode #triageBtn { visibility: hidden; }
   $("docsLink").href = CONFIG.repoUrl || "https://github.com/mrhinkle/chatterbuilt-mail";
   if (curEmail()) $("acct").textContent = curEmail();
   if (GX) $("acctBtn").hidden = false;
+  syncFilterUi();
   if (MULTI) {
     const sel = document.createElement("select"); sel.id = "acctSel"; sel.className = "acctsel"; sel.setAttribute("aria-label", "Email account"); sel.title = "Switch email account";
     { const o = document.createElement("option"); o.value = "-1"; o.textContent = "All inboxes · " + GX.accounts.length + " accounts"; sel.append(o); }
@@ -6272,6 +6574,15 @@ body.drafts-mode #triageBtn { visibility: hidden; }
     const mcp = window.claude && window.claude.use ? await claude.use("mcp") : null;
     state.mcp = mcp;
     { try { sampleFn = window.claude && window.claude.use ? await claude.use("sample") : null; } catch { sampleFn = null; } }
+    if (window.__cbmStandalone) {
+      if (!sampleFn) {
+        document.documentElement.classList.add("no-sample");
+        document.querySelectorAll('[data-proxy="sumBtn"]').forEach((el) => el.classList.add("feat-off"));
+      } else {
+        const sum = document.getElementById("sumBtn"); if (sum) sum.hidden = false;
+      }
+      applyFeatures();
+    }
     if (!mcp) {
       setStatus("no connector access", "err");
       list.innerHTML = '<div class="empty"><h2>Open this in claude.ai</h2><p>This page reads your Gmail (and files tasks and contacts, if configured) through the connectors on your claude.ai account. Outside claude.ai it has no way to reach them.</p></div>';
@@ -6287,7 +6598,9 @@ body.drafts-mode #triageBtn { visibility: hidden; }
       const TA = taskAdapter(), CA = contactAdapter();
       const need = new Set([].concat(CONFIG.models.length ? [ROUTER] : [], TA ? [TA.server] : [], CA ? [CA.server] : [], voiceSrc() ? [NOTION] : [], CONFIG.calendar ? [CAL] : [], CONFIG.clay ? [CLAY] : [], CONFIG.enrich && CONFIG.enrich.server ? [CONFIG.enrich.server] : [], CONFIG.slack ? [SLACK] : [], (CONFIG.context || []).map((x) => x.server), (CONFIG.actions || []).map((x) => x.server)));
       const missing = [...need].filter((n) => !by[n] || by[n].authStatus === "needs_reauth");
-      if (missing.length) toast("Not connected: " + esc(missing.join(", ")) + ". Add or reconnect in claude.ai Settings → Connectors. Reading mail still works.", "err", 9000);
+      if (missing.length && window.__cbmStandalone) toast(esc(missing.join(", ")) + " isn't available outside Claude. Only this mailbox is connected here.", "", 9000);
+      else if (missing.length) toast("Not connected: " + esc(missing.join(", ")) + ". Add or reconnect in claude.ai Settings → Connectors. Reading mail still works.", "err", 9000);
+      await learnAccountCaps();
     } catch (e) { /* first real call reports precisely */ }
     setStatus("connected", "live");
     loadThreads(false); renderToday();

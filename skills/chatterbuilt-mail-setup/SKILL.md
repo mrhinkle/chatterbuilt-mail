@@ -22,7 +22,7 @@ Use what you find to fill CONFIG. Ask only about real gaps. Treat the memory fil
 
 Chatterbuilt Mail works with whatever the user already has: claude.ai's native connectors, MCP servers that come with their Claude plugins, and Composio if they use it. Look first, then ask.
 
-1. **Gmail is required:** claude.ai's Gmail connector (or Gmail through Composio, if they use Composio and want several accounts; see 1b). If there's neither, tell the user to add Gmail in claude.ai Settings, Connectors, and stop.
+1. **Gmail is required:** claude.ai's Gmail connector, Gmail through Composio (see 1b), or a Chatterbuilt Mail server (see 1c). If there's none of those, tell the user to add Gmail in claude.ai Settings, Connectors, and stop.
 2. **List what's connected.** Use the `ListConnectors` tool if this session has it; otherwise read the connector names from the tools you have (`mcp__<Name>__…`). Count a connector only if it's connected and its tools are loaded here. MCP servers from the user's Claude plugins count too: remote ones appear as connectors; a local one (stdio, from a plugin's `.mcp.json`) can be declared as `host:<name>`, but tell the user it only answers when the page is open in the Claude desktop app with that plugin running.
 3. **Is Composio one of them?** Only if it is, look at what it reaches (Composio's connection status or tool search lists the apps connected inside it). If they don't use Composio, don't mention it.
 4. **Sort what you found by feature,** and show it as a short table: Calendar (open times), Tasks, Contacts, Context (meeting notes, notes, pipeline or CRM, newsletter lists, memory), Route (hand-offs such as Slack), More context (web search), Other models (OpenRouter). For each feature, list the native connectors or plugin servers they have and, if they use Composio, the apps it adds. Leave out features with nothing available.
@@ -47,6 +47,19 @@ For anything else they chose to run through Composio (context, tasks, contacts, 
 - check that each app has an active connection in Composio and tell the user which to connect if not;
 - say plainly that `COMPOSIO_MULTI_EXECUTE_TOOL` can run any action on their connected apps, and offer native connectors for writes if they'd rather keep the page's permissions narrow.
 
+## 1c. Chatterbuilt Mail server (only if they have one)
+
+Ask whether they have a Chatterbuilt Mail server. If they don't, skip this and keep Gmail on the claude.ai connector or on Composio. Don't set `via` to both.
+
+If they do:
+
+- Call `list_accounts` on that connector. Use the accounts it returns. Don't invent ids.
+- Ask which accounts to include, a short label for each (the server's label is the default), and a color if they want one (`blue`, `red`, `green`, `amber`, `purple`, `teal`, `pink`, `gray` or a `#hex`).
+- Set `CONFIG.gmail = { via: "chatterbuilt", server: "<the connector's display name>", accounts: [{ id, email, label, color }, ...] }`. `server` defaults to `"Chatterbuilt Mail"` when that is the connector's name. Put the account they use most first. With two or more, the page opens on All inboxes; ask whether to open there or on the first account (`start: "first"`).
+- One read-only `search_threads` with `pageSize: 1` and that account confirms the server answers. Don't send, move, label or create a filter as a test.
+- Tell them this path keeps what Composio cannot: attachments on a reply, a same-account alias that stays in the thread, drafts that keep their threading headers, and Gmail filters (Settings → Filters, and a rule's Skip the inbox action). A different account is still a new email.
+- Do not also set `via: "composio"`. Do not declare `sync_now` on the artifact.
+
 ## 2. Collect the basics (AskUserQuestion, skip what memory answered)
 
 On a first install ask only for who they are and their voice (or offer to learn it from their sent mail), in one AskUserQuestion. Everything else below has a safe default or waits until they ask for that feature.
@@ -61,7 +74,7 @@ On a first install ask only for who they are and their voice (or offer to learn 
 - **Calendar:** whether to offer open times (`calendar: true`, needs Google Calendar), and their working hours (`workHours`).
 - **Copy targets:** other addresses for one-click "copy to account" (`copyTargets`).
 - **Follow-up window:** days before sent mail counts as waiting (`waitingDays`, default 3).
-- **Rules:** any standing rules from memory go in `mailRules` (`{ text, op, labelName }` or `{ text, from, op }`; `op` is move, archive, star or read).
+- **Rules:** any standing rules from memory go in `mailRules` (`{ text, op, labelName }` or `{ text, from, op }`; `op` is move, archive, star or read). On the hosted server, `op: "skip"` with `from` set to an email address also creates a Gmail filter that skips the inbox for future mail.
 - **Snippets:** text they paste often (event basics, a booking link) goes in `snippets` as `{ name, text }`. `{{firstName}}` and `{{myName}}` are filled in.
 - **Label prefix:** `labelPrefix` (default `CB`) names the Gmail labels for snooze, remind-me and morning-run drafts. Change it only if `CB/` clashes with labels they already have.
 
@@ -139,6 +152,7 @@ Declare capabilities from CONFIG, and only what's used:
 |---|---|---|
 | `gmail` is not set | `Gmail` | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft` |
 | `gmail.via` is `"composio"` | `Composio` (or `gmail.server`) | `COMPOSIO_MULTI_EXECUTE_TOOL`, `COMPOSIO_REMOTE_BASH_TOOL` (reads replies too large for Composio to send inline), `COMPOSIO_REMOTE_WORKBENCH` (uploads a file attached to a draft) |
+| `gmail.via` is `"chatterbuilt"` | `gmail.server`, or `Chatterbuilt Mail` when `server` is omitted | `search_threads`, `get_thread`, `get_message`, `create_draft`, `reply`, `send_message`, `label_thread`, `unlabel_thread`, `list_labels`, `create_label`, `forward`, `list_drafts`, `get_draft`, `update_draft`, `delete_draft`, `list_send_as`, `create_filter`, `list_filters`, `delete_filter` |
 
 Through Composio the page also reads each account's send-as addresses and HTML signatures with `GMAIL_LIST_SEND_AS` (read-only, through `COMPOSIO_MULTI_EXECUTE_TOOL`, so nothing new to declare). It feeds the reply box's **From** menu and the signature preview and **Insert signature**. With the Gmail connector the signature comes from the user's newest signed sent message (`search_threads`, `get_thread`), and there's no From menu.
 | `tasks` is set | its `server` | its `tool` |
@@ -171,7 +185,7 @@ One or two sentences: what the page is, and what to try first (open a thread, pr
 
 Don't commit anything unless the user owns the repo and it's private (check `git remote get-url origin` against their GitHub login, and `gh repo view --json visibility`). Then commit `my/config.js` and `my/chatterbuilt-mail.html` with `git add -f` (they're git-ignored). Anywhere else, including a clone of mrhinkle/chatterbuilt-mail or a public fork, leave them uncommitted and don't report it as a problem: the published artifact holds the CONFIG, and "Changing it later" reads it from there. If they'd like their settings versioned, offer to make them a private repo of their own.
 
-After the hand-over, list what they can add when they want it, one line each: open times from Google Calendar, tasks, contacts in their address book, enrichment, context from their other apps, a Slack message and custom Route actions, More context, several Gmail accounts (Composio). Mention the `contact-cleanup` skill for tidying the address book they already have.
+After the hand-over, list what they can add when they want it, one line each: open times from Google Calendar, tasks, contacts in their address book, enrichment, context from their other apps, a Slack message and custom Route actions, More context, several Gmail accounts (Composio, or a Chatterbuilt Mail server). Mention the `contact-cleanup` skill for tidying the address book they already have.
 
 ## 8. Offer the morning run
 
